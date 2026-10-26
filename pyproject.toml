@@ -1,0 +1,20 @@
+[project]
+name = "pop-level1-reconstruction"
+version = "0.1.0"
+description = "Prince of Persia (1989) Level 1 mechanics reconstruction with a machine-playable interface"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+play = ["pygame>=2.6,<3"]
+model = ["anthropic>=0.84,<1"]
+
+[dependency-groups]
+dev = ["pytest>=8,<9"]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = [".", "tests"]
