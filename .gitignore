@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Secrets
+.env
+.env.*
+
+# Original level data: fetched and decoded locally, not redistributed
+# (see docs/GAME_SPEC.md §9)
+data/levels/
+vendor/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
