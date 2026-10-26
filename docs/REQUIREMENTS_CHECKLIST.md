@@ -3,7 +3,7 @@
 Maps every rubric check in `docs/MIDTERM_GUIDELINES.md` to deliverables,
 tests, and evidence. Status values: **done** (evidence exists and is
 linked), **partial**, **todo**, **at risk** (todo and likely to slip).
-Only mark **done** with a link to evidence. Updated: 2026-10-26 (engine + interface). "Passing locally" is not CI evidence; CI is not set up yet.
+Only mark **done** with a link to evidence. Updated: 2026-10-26 (session 02: baseline, model player, evaluator, dev CI). Dev CI is green in the personal repo; the course workflow has not run in the course repo yet, so 3c is not done.
 
 ## Rubric checks
 
@@ -13,14 +13,14 @@ Only mark **done** with a link to evidence. Updated: 2026-10-26 (engine + interf
 | 1b | Scope and exclusions explicit; adaptations explained | `docs/GAME_SPEC.md` §1, §10; README scope | Reviewer; playtest finds no unexplained change | `docs/GAME_SPEC.md` | partial — scope approved (Level 1 mechanics, authored rooms); README scope statement todo |
 | 1c | Sources credited; reuse terms checked and stated | README "Sources and terms"; `CLAUDE.md` source-use rules | Reviewer; instructor ruling on level data | `CLAUDE.md`, `docs/GAME_SPEC.md` §9 | partial — decision: no original data/assets committed; README terms section todo |
 | 2a | Complete core loop to a clear ending, no crash/dead end | Engine + `play.py`; S3 escape completable | `tests/test_situations.py::test_scripted_route_wins_within_limits` (all 6 situations) | `traces/dev/S3-scripted-route-100.jsonl` | partial — engine episode wins; Pygame frontend and human playthrough todo |
-| 2b | Model player picks and submits actions via interface; no repo tools/hidden state; fallbacks labeled | `agents/model_player.py`, `pop/runner.py` | `tests/test_model_player.py` (fake provider); audit B5, D3 | `traces/*.jsonl` | todo |
+| 2b | Model player picks and submits actions via interface; no repo tools/hidden state; fallbacks labeled | `agents/model_player.py`, `pop/runner.py` | `tests/test_model_player.py` (fake provider); audit B5, D3 | `traces/*.jsonl` | partial — player, fallback labels and tests (fake provider) done; no live model episode yet |
 | 2c | Observation per role; legal list leaks nothing; leakage test | `pop/observation.py`, `pop/interface.py` | `tests/test_leakage.py` (8 tests) | audit reports | partial — tests pass locally; no audit yet |
 | 3a | Fresh clone runs setup/play/eval from README in project folder | README commands; `pyproject.toml`, `uv.lock` | Fresh-clone dry run recorded in EVALUATION.md | EVALUATION.md | todo |
 | 3b | Runner owns state; step, call, timeout limits; terminal reasons | `pop/runner.py`, `pop/interface.py` | `tests/test_runner.py`, `tests/test_interface.py` | traces show `reason` | partial — enforced and tested with fake players; no live model yet |
-| 3c | CI: invariants, legal/illegal, terminal outcome, observed regression, limits; green | `ci/midterm-saadsatter.yml` → course `.github/workflows/midterm-saadsatter.yml` | the five test groups below | course PR checks tab | todo — course workflow must run in course repo |
+| 3c | CI: invariants, legal/illegal, terminal outcome, observed regression, limits; green | `ci/midterm-saadsatter.yml` → course `.github/workflows/midterm-saadsatter.yml` | the five test groups below | course PR checks tab | partial — dev CI green (run 40277726045, 108 tests); `ci/midterm-saadsatter.yml` written and statically tested; not yet run in `game-dev-f26` |
 | 3d | Implementation agent, reusable skill, independent review, each with artifact + session link | `CLAUDE.md`, `.claude/skills/game-rules-audit/SKILL.md`, `.claude/agents/rules-reviewer.md`, `review.md`, `docs/audits/` | Skill invoked in 2 separate sessions; reviewer run in a session that did not build | AGENT-TEAM.md links | partial — configs exist; no sessions run yet |
 | 4a | Choices named with the alternative they beat | GAME_SPEC §9–10, RULE_SOURCE_MAP design rows, README "Design choices" | Reviewer check 1 | `docs/RULE_SOURCE_MAP.md` R-D01..R-D12 | partial |
-| 4b | Credible baseline; suite can separate players; result interpreted | `agents/baseline.py`; suite in `docs/EVALUATION_SUITE.md` | Baseline completes ≥1 situation; results table | EVALUATION.md | todo |
+| 4b | Credible baseline; suite can separate players; result interpreted | `agents/baseline.py`; suite in `docs/EVALUATION_SUITE.md` | Baseline completes ≥1 situation; results table | EVALUATION.md | partial — baseline wins 12/12 on the final suite (ceiling effect noted); no model results yet |
 | 5a | Suite declared before tuning; held-out cases; same cases; outcomes, invalid actions, limits, latency, tokens, dated cost; failures | `EVALUATION.md`, `evaluate.py`, `traces/` | `evaluate.py` writes all fields; suite commit precedes first prompt-tuning commit | git history + EVALUATION.md | partial — suite declared in `docs/EVALUATION_SUITE.md` (freeze commit = first commit); results todo |
 | 5b | Agent-team log and limitations in student's voice; decisions named; peer notes used | `AGENT-TEAM.md` (student-authored), EVALUATION.md limitations | Student writes; not the agent | AGENT-TEAM.md | todo — student-owned |
 | 5c | 3–5 min recording, agent playing without manual moves, limits stated | Recording link in README and PR | — | README | todo — student-owned |
@@ -43,10 +43,10 @@ Only mark **done** with a link to evidence. Updated: 2026-10-26 (engine + interf
 | Item | Status |
 | --- | --- |
 | Engine runs behind the five operations | done locally — `pop/interface.py`, 83 tests |
-| Baseline completes an episode | todo |
-| Model player completes ≥1 live episode with a trace | todo |
-| First comparison table | todo |
-| CI green on deterministic checks | todo |
+| Baseline completes an episode | done — `traces/eval/20261026T060347Z-*`, EVALUATION.md |
+| Model player completes ≥1 live episode with a trace | todo — implemented; not run (no credentials in session 02) |
+| First comparison table | partial — EVALUATION.md has baseline rows; model rows empty |
+| CI green on deterministic checks | partial — dev workflow green: https://github.com/SaadSatter/princeofpersia_reconstruction/actions/runs/40277726045 ; course workflow not yet run |
 
 ## Submission — November 7, 11:59 p.m.
 
