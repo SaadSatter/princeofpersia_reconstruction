@@ -64,7 +64,8 @@ evaluate.py               suite runner, writes traces/ and results JSON
 tools/
   decode_levels.py        local reference only: decode original LEVELn
                           (from a local clone) to ASCII; never committed output
-  fetch_assets.py         local only: original images into git-ignored vendor/
+  bundle_assets.py        maintainers: rebuild assets/original/ from pinned SDLPoP
+assets/original/          MANIFEST.tsv here; the 207 original images only on the course branch
 tests/                    pytest, deterministic, no network, no keys
 traces/                   committed evaluation traces (JSONL)
 docs/                     spec, checklist, map, plan, guidelines
@@ -96,18 +97,26 @@ Rules for the architecture:
   Persia** (Ubisoft franchise).
 - **Do not port or copy the 6502 assembly.** Read it to verify rules, then
   write original Python. Cite file and line in `docs/RULE_SOURCE_MAP.md`.
-- **Original art (student decision 2026-10-26, R-D02):** the frontend may
-  draw the original DOS sprites and tiles, **loaded at run time from a local,
-  git-ignored copy** fetched by `tools/fetch_assets.py` (SDLPoP `data/` at a
-  pinned commit, into `vendor/SDLPoP/`). Never commit, copy into the course
-  repository, or redistribute any original image, sound or font. The
-  frontend must still run without them (placeholder geometry drawn in code,
-  `--placeholder`). Do not copy SDLPoP's GPL code or its frame/tile tables;
-  piece choices and offsets are our own (`docs/ASSETS.md`). No sound.
+- **Original art (student decisions 2026-10-26, R-D02):** the frontend
+  draws the original DOS sprites and tiles from `assets/original/`. The 207
+  images are committed **only on the private course branch**
+  (`saadsatter/midterm`, PR #57), force-added at sync; this **public**
+  development repository tracks only `MANIFEST.tsv` and must never contain
+  the PNGs (`.gitignore`; `test_tracked_images_are_the_bundle_or_nothing`).
+  Provenance and the permission basis: `docs/ASSET_PROVENANCE.md` (do not
+  describe Mechner's README or SDLPoP's GPL as a license for the artwork).
+  Bundle only images the game draws, exactly as listed in the manifest;
+  never add other original files (sound, fonts, palettes, `.DAT` archives,
+  level files, unused images) or anything from `vendor/`. The game never
+  downloads assets at run time. It must still run without them
+  (placeholder geometry drawn in code, `--placeholder`).
+  Do not copy SDLPoP's GPL code or its frame/tile tables; piece choices and
+  offsets are our own (`docs/ASSETS.md`). No sound.
 - **Level data (student decision 2026-10-26):** original level files may be
   fetched and decoded **locally for reference only** (`tools/` writes to the
-  git-ignored `vendor/` and `data/levels/`). Never commit original binaries,
-  decoded original layouts, or original assets. The playable rooms are our
+  git-ignored `vendor/` and `data/levels/`). Never commit original binaries
+  or decoded original layouts; the only committed original assets are the
+  images in `assets/original/` on the course branch (above). The playable rooms are our
   own layouts in `pop/situations.py`, documented in
   `docs/EVALUATION_SUITE.md`.
 - **Scope:** Level 1 mechanics only. Do not implement Levels 2–14. Sword,

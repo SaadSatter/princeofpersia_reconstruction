@@ -3,9 +3,8 @@
 Working directory: the project folder.
 
     uv sync --extra play
-    uv run python tools/fetch_assets.py           # optional, once: original art (local only)
-    uv run python play.py S3                      # play with the keyboard
-    uv run python play.py S3 --placeholder        # force placeholder art
+    uv run python play.py S3                      # play with the keyboard (bundled original art)
+    uv run python play.py S3 --placeholder        # placeholder shapes instead
     uv run python play.py S1 --watch baseline     # watch the baseline play
     uv run python play.py S1 --watch model-history --live   # watch the model (paid calls)
     uv run python play.py --replay traces/eval/20261026T060347Z-baseline-S3-100.jsonl
@@ -284,7 +283,7 @@ def main(argv: list[str] | None = None) -> int:
     current: Shown | None = None
     status = ("original art" if renderer.original else
               "placeholder art" + ("" if args.placeholder else
-                                   " (run tools/fetch_assets.py for the original)"))
+                                   " (bundled images missing)"))
     message = ""
     replay_i = 0
     watch_done = None

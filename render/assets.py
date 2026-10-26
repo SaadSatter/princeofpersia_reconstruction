@@ -1,8 +1,9 @@
-"""Find the local copy of the original images (pure; no pygame).
+"""Find the bundled original images (pure; no pygame).
 
-The images are never in the repository. `tools/fetch_assets.py` puts them in
-the git-ignored `vendor/SDLPoP/data/`; `POP_ASSETS` may point elsewhere.
-Without them the frontend draws placeholder shapes (R-D02, docs/ASSETS.md).
+The images the frontend draws are committed in `assets/original/` (student
+decision, docs/ASSET_PROVENANCE.md); nothing is downloaded at run time.
+`POP_ASSETS` may point at another folder with the same layout. If any
+required image is missing the frontend draws placeholder shapes (R-D02).
 """
 
 from __future__ import annotations
@@ -13,10 +14,11 @@ from pathlib import Path
 from . import anim
 
 PROJECT = Path(__file__).resolve().parent.parent
-DEFAULT_DIR = PROJECT / "vendor" / "SDLPoP" / "data"
+DEFAULT_DIR = PROJECT / "assets" / "original"
+MANIFEST = DEFAULT_DIR / "MANIFEST.tsv"
 
 # Our own piece choices from the DOS image set (identified by eye; docs/ASSETS.md).
-KID_HEARTS = {"full": 617, "empty": 618, "splat": 619}
+KID_HEARTS = {"full": 617, "empty": 618}
 DUNGEON = {
     "floor": 241, "floor_right": 242, "base": 243,
     "loose": 269, "loose_shake": 270, "loose_right": 271, "loose_right_shake": 272,
@@ -28,7 +30,7 @@ DUNGEON = {
     "spikes_low": 328, "spikes_out": 331,
     "exit_left": 214, "exit_right": 216, "exit_top_left": 215, "exit_top_right": 217,
     "exit_panel": 300, "exit_stairs": 344,
-    "torch_bracket": 346, "window": 326,
+    "torch_bracket": 346,
     "decor": (244, 245, 324, 325),
 }
 # Kid frame -> DOS image. The DOS image set is not in frame order; these

@@ -11,9 +11,28 @@ __pycache__/
 .env.*
 
 # Original level data: fetched and decoded locally, not redistributed
-# (see docs/GAME_SPEC.md §9)
+# (see docs/GAME_SPEC.md §9). vendor/ also holds the full SDLPoP checkout
+# used only to rebuild assets/original/ (tools/bundle_assets.py); only the
+# images listed in assets/original/MANIFEST.tsv are tracked.
 data/levels/
 vendor/
+
+# Original artwork (207 PNGs) is bundled only on the private course branch
+# (saadsatter/midterm, PR #57), where it is force-added. This public
+# repository tracks only assets/original/MANIFEST.tsv. Rebuild the images
+# locally with tools/bundle_assets.py. See docs/ASSET_PROVENANCE.md.
+assets/original/*/
+!assets/original/MANIFEST.tsv
+
+# Local session transcripts and scratch files: never committed
+*conversation*.txt
+*Conversation*.txt
+*conversaiton*.txt
+
+# Generated screenshots and recordings
+*.mp4
+*.mov
+screenshots/
 
 # OS / editor
 .DS_Store

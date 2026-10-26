@@ -1,63 +1,29 @@
-# Original art: sources, local setup, restrictions
+# Original art: how the frontend uses it
 
-Student decision 2026-10-26 (rule R-D02, `CLAUDE.md` "Source-use
-restrictions"): the frontend may draw the original Prince of Persia sprites
-and dungeon tiles **from a local copy only**. Nothing in this repository is
-original art; the game runs without it (placeholder mode).
+The frontend draws 207 original Prince of Persia (DOS) images from
+`assets/original/`. They are bundled **only in the private course
+submission** (PR #57); this public development repository has only their
+manifest. Their source, attribution, permission basis and inventory are in
+**`docs/ASSET_PROVENANCE.md`**. This file explains how the screen and the
+animations are built from them.
 
-## Restrictions
-
-- The images are the original DOS game's graphics (© Jordan Mechner /
-  Broderbund; the franchise is Ubisoft's). Nobody has granted us rights to
-  redistribute them.
-- SDLPoP is GPLv3, but that license covers its **program code**. Its README
-  states no terms for the game data in `data/`.
-- historicalsource/princeofpersia: Mechner permits study and modification of
-  the source but grants **no rights in Prince of Persia** (its README).
-- Therefore: never commit, copy into the course repository, attach, or
-  otherwise redistribute any original image, sound or font. `vendor/` is
-  git-ignored, and `tests/test_frontend.py::test_no_original_images_are_tracked`
-  fails if a `.png`/`.pal`/`.dat`/`.bmp` file or anything under `vendor/` is tracked.
-- **Recordings:** showing original art in a shared recording is a form of
-  publication. Ask the instructor first, or record with `--placeholder`.
+- In the course submission, no setup and no network: `uv sync --extra play`,
+  then `uv run python play.py S3` (working directory: the project folder).
+- In the public development repository the same command draws placeholder
+  shapes; a maintainer can rebuild the images locally (git-ignored) with
+  `uv run python tools/bundle_assets.py`.
+- `--placeholder` draws simple shapes instead; the same happens if any
+  required image is missing (the status line says so).
+- `POP_ASSETS=<dir>` points the frontend at another folder with the same
+  layout (`KID/`, `VDUNGEON/`, `PRINCE/`).
+- Maintainers rebuild or verify the bundle with `tools/bundle_assets.py`
+  (`--check` needs no network).
 - We do not copy SDLPoP's GPL code or tables. One fact was read from its
   frame table (`src/seg006.c`, `frame_table_kid`): which DOS image shows each
   original frame. We store it as 11 range shifts for the frames we use
   (`render/assets.py` `FRAME_SHIFTS`) and checked each animation by eye.
-
-## Where the assets are
-
-| Asset | Source | Format | Used |
-| --- | --- | --- | --- |
-| Kid: all poses (219 images) | SDLPoP `data/KID/res401–619.png` | PNG, palette, transparent | yes |
-| Hearts (full / empty) | SDLPoP `data/KID/res617.png`, `res618.png` | PNG | yes |
-| Dungeon pieces (floors, edges, gate, spikes, plates, loose floor, rubble, pillars, exit door, stairs, torch bracket, brick decor) | SDLPoP `data/VDUNGEON/res214–351.png` | PNG pieces | yes |
-| Dungeon wall blocks | SDLPoP `data/VDUNGEON/res360–377.png` | PNG pieces | yes |
-| Torch flames, potion, bubbles | SDLPoP `data/PRINCE/res151–172.png` | PNG | yes |
-| Guards, sword, palace tiles, other levels | SDLPoP `data/GUARD*`, `VPALACE`, … | PNG | no (out of scope) |
-| Sound, music | SDLPoP `*.DAT`, `data/music` | DAT / OGG | no |
-| Apple II images | historicalsource `01 POP Source/Images/IMG.CHTAB*`, `IMG.BGTAB*` | packed hi-res shape tables; would need a custom decoder | no (SDLPoP has the same frames as PNG) |
-| Animation sequences (which frames, in which order) | historicalsource `01 POP Source/Source/SEQTABLE.S` | 6502 data tables | read for frame numbers; cited in `render/anim.py` |
-
-Nothing needs extraction or conversion: SDLPoP ships the DOS images as PNG.
-
-## Local setup
-
-From the project folder:
-
-```
-uv sync --extra play
-uv run python tools/fetch_assets.py
-uv run python play.py S3
-```
-
-`tools/fetch_assets.py` sparse-fetches `data/KID`, `data/VDUNGEON` and
-`data/PRINCE` from https://github.com/NagyD/SDLPoP at commit
-`3c5add5fb7f83d4ceb542823ab66d00146c4271b` (2025-12-24) into
-`vendor/SDLPoP/data/` and deletes the git metadata. `POP_ASSETS=<dir>`
-points the frontend at another copy with the same layout. If any image the
-frontend uses is missing, it falls back to placeholder shapes and says so in
-the status line. `--placeholder` forces placeholder mode.
+- Apple II images (historicalsource `IMG.CHTAB*`, `IMG.BGTAB*`, packed
+  hi-res shape tables) are not used; SDLPoP has the same frames as PNG.
 
 ## How the screen is built (our choices)
 

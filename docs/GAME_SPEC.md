@@ -39,7 +39,7 @@ game clock, restart.
 | Ledge grab after a short jump or while falling | Needs the original's continuous motion; jumps land on fixed blocks (R-D01). |
 | Jumping up to knock down a loose floor above | Not needed for the authored rooms; noted as an omission. |
 | Loose-floor shaking when landing nearby | Simplified; only stepping on a loose floor triggers it (R-D14). |
-| Committed original art; sound | Original sprites and tiles are drawn only from a local, git-ignored copy and never committed; placeholder shapes otherwise. No sound (R-D02, `docs/ASSETS.md`). |
+| Unused original assets; sound | Only the 207 original images the frontend draws are bundled, in the course submission only (`assets/original/`, `docs/ASSET_PROVENANCE.md`); no sound, music, fonts or other original files (R-D02). |
 | Potions other than heal | Level 1 potions all have the same spec value (R-A03). |
 
 ## 2. World model
@@ -182,9 +182,10 @@ animation clip of the step's frames at 12 frames/s (R-D26).
 
 It draws only what the observation contains (the current room, its gates,
 exits, spikes, loose floors and plates, and the kid), so a human sees what
-an agent sees. With a local copy of the original images it uses the
-original sprites and tiles; otherwise placeholder shapes (R-D02,
-`docs/ASSETS.md`).
+an agent sees. It uses the original sprites and tiles in
+`assets/original/` (bundled in the course submission); `--placeholder`, or
+missing images as in the public development repository, draws placeholder
+shapes instead (R-D02, `docs/ASSETS.md`).
 
 Two more modes show an agent playing, with no manual move selection:
 `--watch baseline` (or a model player with `--live`, tuning situations

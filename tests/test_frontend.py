@@ -189,16 +189,66 @@ def test_render_reads_observations_only():
                 assert not name.startswith(FORBIDDEN_FOR_RENDER), (path.name, name)
 
 
-def test_no_original_images_are_tracked():
-    """R-D02: original art stays local (vendor/ is git-ignored)."""
+def _bundle_tool():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("bundle_assets",
+                                                  ROOT / "tools" / "bundle_assets.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def _has_bundle() -> bool:
+    return any(assets.DEFAULT_DIR.glob("*/*.png"))
+
+
+def test_bundled_images_match_the_manifest():
+    """On the course branch, assets/original holds exactly the 207 images the
+    game draws, unchanged from the pinned SDLPoP commit (MANIFEST.tsv). The
+    public development repository carries only the manifest. No network."""
+    if not _has_bundle():
+        pytest.skip("images not bundled here (public development repository)")
+    assert _bundle_tool().check() == []
+
+
+def test_manifest_lists_exactly_the_images_the_game_draws():
+    listed = {line.split("\t")[0] for line in assets.MANIFEST.read_text().splitlines()[1:]}
+    required = {p.relative_to(assets.DEFAULT_DIR).as_posix()
+                for p in assets.required_files(assets.DEFAULT_DIR)}
+    assert listed == required and len(listed) == 207
+
+
+def test_tracked_images_are_the_bundle_or_nothing():
+    """Course branch: exactly the manifest's images. Public development
+    repository: no original images at all. Never anything from vendor/."""
     import subprocess
     try:
-        out = subprocess.run(["git", "ls-files"], cwd=ROOT, capture_output=True, text=True,
-                             check=True).stdout.split()
+        out = subprocess.run(["git", "ls-files", "--", "."], cwd=ROOT, capture_output=True,
+                             text=True, check=True).stdout.splitlines()
     except (OSError, subprocess.CalledProcessError):
         pytest.skip("not a git checkout")
-    assert not [f for f in out if f.lower().endswith((".png", ".pal", ".dat", ".bmp"))]
+    images = {f for f in out if f.lower().endswith((".png", ".pal", ".dat", ".bmp", ".gif"))}
+    listed = {"assets/original/" + line.split("\t")[0]
+              for line in assets.MANIFEST.read_text().splitlines()[1:]}
+    assert images in (set(), listed)
     assert not [f for f in out if f.startswith("vendor/")]
+
+
+def test_bundled_art_is_the_default(monkeypatch):
+    """Original art by default when bundled; placeholder art otherwise."""
+    monkeypatch.delenv("POP_ASSETS", raising=False)
+    expected = assets.DEFAULT_DIR if _bundle_tool().check() == [] else None
+    assert assets.asset_dir() == expected
+    assert assets.DEFAULT_DIR == ROOT / "assets" / "original"
+
+
+def test_every_bundled_piece_is_drawn():
+    """No unused artwork: each named dungeon piece is referenced by the drawing code."""
+    code = (ROOT / "render" / "layout.py").read_text() + (ROOT / "render" / "draw.py").read_text()
+    mains = {"floor", "base", "loose", "loose_shake", "rubble", "pillar", "gate", "spike_floor",
+             "plate_up", "plate_down", "plate_base"}               # chosen by name in layout._tile
+    for name in assets.DUNGEON:
+        assert name in mains or f'"{name}"' in code, name
 
 
 def test_window_draws_in_placeholder_mode(tmp_path):
@@ -207,4 +257,18 @@ def test_window_draws_in_placeholder_mode(tmp_path):
     shot = tmp_path / "shot.png"
     assert play.main(["S2", "--placeholder", "--screenshot", str(shot),
                       "--keys", "RIGHT,RIGHT"]) == 0
+    assert shot.stat().st_size > 0
+
+
+def test_window_draws_with_the_bundled_original_art(tmp_path):
+    pygame = pytest.importorskip("pygame")
+    if not _has_bundle():
+        pytest.skip("images not bundled here (public development repository)")
+    os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
+    from render import draw
+    pygame.init()
+    pygame.display.set_mode((10, 10))
+    assert draw.Renderer(original=True).original          # bundled images found, no download
+    shot = tmp_path / "shot.png"
+    assert play.main(["S3", "--screenshot", str(shot), "--keys", "RIGHT,RIGHT,RIGHT"]) == 0
     assert shot.stat().st_size > 0

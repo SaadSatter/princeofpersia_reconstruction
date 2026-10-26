@@ -18,7 +18,7 @@ initial live model; Gap/Trap/Escape suite plus three held-out variations
 | 6 | Model player + one genuine live episode (`agents/model_player.py`) | |
 | 7 | First comparison table (`evaluate.py`, `EVALUATION.md`) | |
 | 8 | Deterministic tests and green CI (dev workflow + `ci/midterm-saadsatter.yml`) | |
-| 9 | Keyboard Pygame frontend (`play.py`) — required for the finished game. Session 06: original art from a local copy (R-D02, `docs/ASSETS.md`), placeholder fallback, `--watch` and `--replay` | |
+| 9 | Keyboard Pygame frontend (`play.py`) — required for the finished game. Session 06: original art, placeholder fallback, `--watch` and `--replay`. Session 07: original art bundled in `assets/original/` on the course branch only (R-D02, `docs/ASSET_PROVENANCE.md`) | |
 
 Tests run after each component. Small commits, one component each.
 
