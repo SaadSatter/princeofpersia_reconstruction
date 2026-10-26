@@ -1,0 +1,44 @@
+# Course workflow. At transfer, copy this file to
+#   game-dev-f26/.github/workflows/midterm-saadsatter.yml
+# It touches only midterms/saadsatter/, needs no secrets, and runs only
+# deterministic checks (rubric check 3c).
+name: midterm-saadsatter
+
+on:
+  pull_request:
+    paths:
+      - 'midterms/saadsatter/**'
+      - '.github/workflows/midterm-saadsatter.yml'
+  push:
+    paths:
+      - 'midterms/saadsatter/**'
+      - '.github/workflows/midterm-saadsatter.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deterministic:
+    name: saadsatter deterministic checks (Python ${{ matrix.python }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.12']
+    defaults:
+      run:
+        working-directory: midterms/saadsatter
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python }}
+          working-directory: midterms/saadsatter
+      - name: Install from the folder's lockfile
+        run: uv sync --frozen
+      - name: Deterministic tests (rules, legal/illegal actions, terminal outcomes, regression, limits)
+        run: uv run --frozen pytest -q
