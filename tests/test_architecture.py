@@ -13,7 +13,8 @@ def test_engine_never_imports_pygame():
 
 AGENTS = POP.parent / "agents"
 FORBIDDEN_FOR_PLAYERS = ("pop.engine", "pop.situations", "pop.mechanics", "pop.physics",
-                         "pop.interface", "pop.observation", "solutions", "evaluate")
+                         "pop.interface", "pop.observation", "pop.levels", "pop.levelfile",
+                         "solutions", "level_fixture", "evaluate")
 
 
 def test_players_cannot_import_the_engine_situations_or_solutions():

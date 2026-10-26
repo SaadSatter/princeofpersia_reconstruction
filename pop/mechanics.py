@@ -74,7 +74,7 @@ class Exit:
 
 class Mechanics:
     def __init__(self, geom: Geometry, plate_links: dict[Cell, tuple[Cell, ...]],
-                 exits_open: bool):
+                 exits_open: bool, gates_open: tuple[Cell, ...] = ()):
         self.geom = geom
         self.links = dict(plate_links)
         self.gates: dict[Cell, Gate] = {}
@@ -87,7 +87,8 @@ class Mechanics:
                 for c, sym in enumerate(row):
                     cell = (room, r, c)
                     if sym == T.GATE:
-                        self.gates[cell] = Gate()
+                        # Open at load: fully up and idle until a plate acts on it (R-C29).
+                        self.gates[cell] = Gate(pos=GATE_MAX if cell in gates_open else 0)
                     elif sym == T.EXIT_LEFT:
                         self.exits[cell] = Exit(pos=GATE_MAX if exits_open else 0,
                                                 opening=exits_open)
@@ -114,6 +115,11 @@ class Mechanics:
     def touch_loose(self, cell: Cell) -> None:
         if self.geom.tile(cell) == T.LOOSE and cell not in self.loose:
             self.loose[cell] = 0
+
+    def press_once(self, cell: Cell) -> None:
+        """A press by the game itself, not the kid (Level 1 start, R-C30)."""
+        if cell in self.plates:
+            self._press(cell)
 
     def _press(self, cell: Cell) -> None:
         self.plates[cell] = PLATE_POP

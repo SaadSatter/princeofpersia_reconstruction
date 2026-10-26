@@ -172,7 +172,8 @@ def test_play_refuses_unsafe_watch_options(argv):
 
 
 FORBIDDEN_FOR_RENDER = ("pop.engine", "pop.mechanics", "pop.situations", "pop.interface",
-                        "pop.runner", "pop.observation", "agents", "evaluate", "play")
+                        "pop.runner", "pop.observation", "pop.levels", "pop.levelfile",
+                        "agents", "evaluate", "play")
 
 
 def test_render_reads_observations_only():

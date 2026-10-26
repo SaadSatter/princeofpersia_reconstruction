@@ -43,6 +43,7 @@ class Kid:
     hp: int = 3                      # R-C19
     max_hp: int = 3
     hang_ledge: Cell | None = None
+    sword: bool = False              # Level 1 only (R-C21)
     fall_timer: int = 0
     fall_rows: int = 0
     fall_from_hang: bool = False
@@ -58,12 +59,37 @@ class Game:
         self.seed = seed
         self.rng = random.Random(seed)  # unused until combat exists; kept for determinism
         self.geom = Geometry(situation.rooms, situation.links)
-        self.mech = Mechanics(self.geom, situation.plate_links, situation.exits_open)
+        self.mech = Mechanics(self.geom, situation.plate_links, situation.exits_open,
+                              situation.gates_open)
         room, row, col, facing = situation.start
         self.kid = Kid(room, row, col, facing)
         self.frames = 0
         self.terminal: str | None = None
         self._result: dict = {}
+        self.intro: dict | None = None
+        if situation.start_falling or situation.start_presses:
+            self._intro()
+
+    def _intro(self) -> None:
+        """Level 1 entry (R-C30, Source/SUBS.S:1540-1550): plates pressed at load
+        (slamming the gate behind the kid), then he drops in. The player has no
+        control until he lands, so these frames pass before the first
+        observation; they are reported in `intro` for the frontend."""
+        self._result = {"effect": None, "frames": 0, "fell_rows": 0, "hp_change": 0}
+        for cell in self.situation.start_presses:
+            self.mech.press_once(cell)
+        frames = 0
+        if self.situation.start_falling:
+            self._start_fall(from_hang=False)
+            while self.kid.posture == "falling" and self.terminal is None and frames < 48:
+                self._tick()
+                frames += 1
+        self._result["frames"] = frames
+        self.intro = dict(self._result)
+        self._result = {}
+
+    def rule(self, name: str) -> bool:
+        return name in self.situation.rules
 
     # --- helpers -------------------------------------------------------
     def blocks(self, where: Cell | str) -> bool:
@@ -288,7 +314,14 @@ class Game:
             if self.terminal is None:
                 self._enter(above_ahead, "climb")
             return
-        self._result["effect"] = "none"
+        above_tile = self.geom.tile(above) if isinstance(above, tuple) else None
+        if self.rule("ceiling_loose") and above_tile == T.LOOSE:
+            # Hopping up touches the ceiling and knocks a loose floor down
+            # (R-C31, Source/CTRL.S:2000-2005).
+            self.mech.touch_loose(above)
+            self._result["effect"] = "bumped_ceiling"
+        else:
+            self._result["effect"] = "none"
         yield from self._frames(P.JUMP_IN_PLACE)
 
     def _down(self):
@@ -299,6 +332,13 @@ class Game:
             self._result["effect"] = "dropped"
             return
             yield  # pragma: no cover  (makes this a generator)
+        if self.rule("sword") and self.geom.tile(k.cell) == T.SWORD:   # R-C21
+            self._result["effect"] = "took_sword"
+            yield from self._frames(P.PICKUP_SWORD)
+            if self.terminal is None:
+                self.geom.set_tile(k.cell, T.FLOOR)
+                k.sword = True
+            return
         if self.geom.tile(k.cell) == T.POTION:      # R-C16 type 1 (R-A03)
             self._result["effect"] = "drank"
             yield from self._frames(P.DRINK)

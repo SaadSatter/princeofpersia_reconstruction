@@ -44,6 +44,9 @@ tree is copied into `game-dev-f26/midterms/saadsatter/` unchanged. Therefore:
 pop/                      package (headless; never imports pygame)
   tiles.py                tile ids and properties (from BGDATA.S ids)
   situations.py           our authored rooms + the frozen suite situations
+  levelfile.py            pure reader for the original level-file format
+  levels.py               L1 = original Level 1, built at run time from the
+                          local file (outside the suite; docs/LEVEL1.md)
   physics.py              fixed-step kinematics, gravity, collision, landing
   mechanics.py            gates, plates, loose floors, spikes, potions
   engine.py               authoritative GameState and step(frame) transitions
@@ -62,8 +65,9 @@ agents/
   providers.py            anthropic / openai / vertex adapters
 evaluate.py               suite runner, writes traces/ and results JSON
 tools/
-  decode_levels.py        local reference only: decode original LEVELn
-                          (from a local clone) to ASCII; never committed output
+  fetch_level1.py         maintainers: fetch + SHA-check the original Level 1
+                          into git-ignored vendor/levels/; --show prints ASCII
+  solve_level1.py         maintainers: reachability search on L1 (terminal only)
   bundle_assets.py        maintainers: rebuild assets/original/ from pinned SDLPoP
 assets/original/          MANIFEST.tsv here; the 207 original images only on the course branch
 tests/                    pytest, deterministic, no network, no keys
@@ -112,13 +116,17 @@ Rules for the architecture:
   (placeholder geometry drawn in code, `--placeholder`).
   Do not copy SDLPoP's GPL code or its frame/tile tables; piece choices and
   offsets are our own (`docs/ASSETS.md`). No sound.
-- **Level data (student decision 2026-10-26):** original level files may be
-  fetched and decoded **locally for reference only** (`tools/` writes to the
-  git-ignored `vendor/` and `data/levels/`). Never commit original binaries
-  or decoded original layouts; the only committed original assets are the
-  images in `assets/original/` on the course branch (above). The playable rooms are our
-  own layouts in `pop/situations.py`, documented in
-  `docs/EVALUATION_SUITE.md`.
+- **Level data (student decisions 2026-10-26, D1 of session 08):** the
+  original Level 1 file is fetched **locally** by `tools/fetch_level1.py`
+  (pinned source, SHA-256 checked) into the git-ignored `vendor/levels/`,
+  and the separate scenario `L1` (`pop/levels.py`) reads it at run time.
+  Never commit original level binaries or decoded original layouts, in
+  either repository, in any form (tests, docs, traces, fixtures); the only
+  committed original assets are the images in `assets/original/` on the
+  course branch (above). CI tests use level files we author
+  (`tests/level_fixture.py`). The frozen suite's rooms are our own layouts
+  in `pop/situations.py`, documented in `docs/EVALUATION_SUITE.md`. `L1` is
+  never part of the suite.
 - **Scope:** Level 1 mechanics only. Do not implement Levels 2–14. Sword,
   guards and combat are deferred; do not add `STRIKE`/`BLOCK`/`ADVANCE`/
   `RETREAT` until combat is approved.

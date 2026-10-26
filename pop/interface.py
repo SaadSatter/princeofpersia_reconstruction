@@ -13,8 +13,9 @@ runner (pop/runner.py) passes them copies of observe() and legal_actions().
 from __future__ import annotations
 
 from . import observation
+from . import levels
 from .engine import ACTIONS, Game
-from .situations import SITUATIONS
+from .situations import Situation
 
 PLAYER_ID = "kid"
 MAX_CONSECUTIVE_INVALID = 5          # R-D12
@@ -28,10 +29,12 @@ EPISODE_OVER = "episode is over"
 
 
 class Episode:
-    def __init__(self, situation_id: str, max_actions=SITUATION_DEFAULT,
+    def __init__(self, situation_id: str | Situation, max_actions=SITUATION_DEFAULT,
                  max_consecutive_invalid: int = MAX_CONSECUTIVE_INVALID):
-        """max_actions: an int, None for no limit (human play), or the default."""
-        self.situation = SITUATIONS[situation_id]
+        """situation_id: a suite id, "L1" (pop/levels.py), or a Situation (tests).
+        max_actions: an int, None for no limit (human play), or the default."""
+        self.situation = (situation_id if isinstance(situation_id, Situation)
+                          else levels.get(situation_id))
         self.max_actions = (self.situation.max_actions if max_actions is SITUATION_DEFAULT
                             else max_actions)
         self.max_consecutive_invalid = max_consecutive_invalid
@@ -45,7 +48,9 @@ class Episode:
         self.invalid_actions = 0
         self._consecutive_invalid = 0
         self._limit_reason: str | None = None
-        self._last_result: dict | None = None
+        # Level 1 enters with a drop the player watches but does not control
+        # (R-C30); for the frozen suite `intro` is None, as before.
+        self._last_result: dict | None = self._game.intro
         return self.observe(PLAYER_ID)
 
     # 2 ---------------------------------------------------------------

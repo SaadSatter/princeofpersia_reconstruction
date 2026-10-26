@@ -21,6 +21,7 @@ HANG_DOWN = 6
 HANG_UP = 8
 CROUCH = 4
 DRINK = 8
+PICKUP_SWORD = 12  # original pickupsword+resheathe is 22 frames; capped at MAX_FRAMES (R-D28)
 STAIRS = 12
 WAIT = 6
 FALL_PER_ROW = 4   # R-D16
