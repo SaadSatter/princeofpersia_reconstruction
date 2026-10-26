@@ -1,10 +1,10 @@
 # Evaluation — preliminary (2026-10-26)
 
-**Status: preliminary.** Baseline results are real. **One live model
-episode has been run, on the tuning suite only** (S1, seed 0, 2026-10-26
-18:01 UTC; see "Live tuning episode" below). It is a single development
-trial, not a final-suite result, so the final-suite model rows below are
-still empty. An earlier live attempt (16:26 UTC) failed before reaching the
+**Status: preliminary.** Baseline results are real. **Two live model
+development trials have been run, on the tuning suite only** (S1, seed 0,
+2026-10-26 at 06:16 and 18:01 UTC; see "Live development trials" below).
+Both died on spikes after 4 actions. They are not final-suite results, so
+the final-suite model rows below are still empty. An earlier live attempt (16:26 UTC) failed before reaching the
 API and is recorded separately as a failed attempt. This file will be updated with
 live results, and the limitations paragraph must be written by the student.
 
@@ -67,27 +67,48 @@ Run `20261026T060347Z` (UTC), game version `0.1.0+3c4c210`, command (project fol
 | model-history | S1–S3, H1–H3 | 0 | — | **not run** | — | — | — | — | — | — | — | — |
 | model-obs-only | S1–S3 | 0 | — | **not run** | — | — | — | — | — | — | — | — |
 
-### Live tuning episode: model-history, S1, seed 0
+### Live development trials (tuning suite only)
 
-Run `20261026T180142Z`, game version `0.1.0+c23ebf7`, model returned
-`claude-haiku-4-5-20251001`, provider `anthropic`, price dated 2026-10-26.
-Command (project folder):
+Two separate live trials of the same case: model-history on S1, seed 0.
+These are **development trials on the tuning suite**. They are not
+final-suite results and include no held-out case (H1–H3). Both were run by
+the student, who confirmed the provenance of trial 1 on 2026-10-26. The
+command (project folder) was the same both times:
 `uv run python evaluate.py --suite tuning --players model-history --situations S1 --seeds 0 --live --out traces/live`.
 
-| Player | Situation | Trials (seeds) | Wins | Terminal reasons | Mean actions | Invalid | Calls | Failed calls | Fallbacks | Latency mean / max (ms) | Tokens in / out | Est. cost (USD) |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| model-history | S1 | 1 (0) | 0/1 | died:spikes 1 | 4.0 | 0 | 4 | 0 | 0 | 3010.4 / 3526.4 | 4485 / 940 | 0.0092 |
+| Trial | Run (UTC) | Game version | Model returned | Price date in trace | Wins | Terminal reason | Actions | Invalid | Calls | Failed calls | Fallbacks | Latency mean / max (ms) | Tokens in / out | Est. cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | `20261026T061626Z` | `0.1.0+06ff044` | `claude-haiku-4-5-20251001` | 2026-10-06 | 0/1 | died:spikes | 4 | 0 | 4 | 0 | 0 | 3159.1 / 3821.0 | 4485 / 956 | 0.0093 |
+| 2 | `20261026T180142Z` | `0.1.0+c23ebf7` | `claude-haiku-4-5-20251001` | 2026-10-26 | 0/1 | died:spikes | 4 | 0 | 4 | 0 | 0 | 3010.4 / 3526.4 | 4485 / 940 | 0.0092 |
 
-What the trace shows: the model chose `RIGHT` four times, and all four were
-accepted as model decisions (no fallback, no late reply). The fourth run
-took the prince off the floor at row 1, col 4 into the gap at col 5, and he
-fell onto the spikes below (`died:spikes`, 20 frames). In its last reply the
-model named the spikes at row 2, col 5 and said it would avoid them, then
-chose `RIGHT` again. Each reply was a paragraph of analysis followed by the
-JSON object, although the prompt asks for JSON only. The parser found the
-action every time, and the analysis accounts for most of the 940 output
-tokens. One trial on one tuning situation: this shows that the model player
-works end to end, not how well it plays.
+Both trials together: 0/2 wins, 8 calls, 0 failed, 8,970 / 1,896 tokens,
+$0.0185 (sum of the per-trial estimates, $0.009265 + $0.009185).
+
+What the traces show:
+- **Same play in both trials.** The model chose `RIGHT` four times, and all
+  four were accepted as model decisions (no fallback, no timeout). The
+  fourth run took the prince off the floor at row 1, col 4 into the gap at
+  col 5, and he fell onto the spikes below (`died:spikes`, 20 frames). In
+  trial 2's last reply the model named the spikes at row 2, col 5 and said
+  it would avoid them, then chose `RIGHT` again.
+- **Same prompts.** Input tokens per call are identical in both trials
+  (1007, 1102, 1160, 1216). The situation and seed repeat deterministically
+  (GAME_SPEC §7), and the session-03 change kept the prompt text the same.
+  Output tokens differ (956 vs 940), so the replies' wording varied while
+  the actions did not.
+- **Reply format.** Each reply was a paragraph of analysis followed by the
+  JSON object, although the prompt asks for JSON only. The parser found the
+  action every time; the analysis is most of the output tokens.
+- **Differences between the runs.** Trial 1 ran on `06ff044`, before the
+  session-03 fixes. Its trace has no `late_replies` field, and its price is
+  stamped with the earlier date, 2026-10-06. The rate is the same ($1 / $5
+  per MTok, re-verified on 2026-10-26), and recomputing from its tokens
+  gives the recorded $0.009265. The session-03 timeout fix changes nothing
+  here: no call timed out (max latency 3.8 s against 20 s).
+
+Two trials of one tuning situation show that the model player works end to
+end and fails this case the same way twice. They do not measure how well it
+plays the suite.
 
 ### Failed live attempt (not a model result)
 
@@ -131,9 +152,10 @@ results and do not weaken the baseline (audit note N1).
   (12 files), `traces/eval/20261026T060347Z-results.json`,
   `traces/eval/20261026T060347Z-table.md`.
 - Scripted route (not a player): `traces/dev/S3-scripted-route-100.jsonl`.
-- Live tuning episode (model-history, S1, seed 0):
-  `traces/live/20261026T180142Z-model-history-S1-0.jsonl`, `-results.json`,
-  `-table.md`. Final-suite model traces: none yet.
+- Live development trials (model-history, S1, seed 0), each with
+  `-results.json` and `-table.md` beside it:
+  trial 1 `traces/live/20261026T061626Z-model-history-S1-0.jsonl`,
+  trial 2 `traces/live/20261026T180142Z-model-history-S1-0.jsonl`. Final-suite model traces: none yet.
 - Failed live attempt (40 provider failures, no gameplay):
   `traces/live/20261026T162629Z-model-history-S1-0.jsonl`, `-results.json`,
   `-table.md`, written before the R-D25 fix, so they have no `error_kind`
@@ -180,8 +202,8 @@ uv run python evaluate.py --suite final --players model-history,model-obs-only -
 
 ## Limitations
 
-*To be written by the student.* Facts to consider: only one live model
-episode so far (tuning S1, died on spikes after 4 actions); one earlier
+*To be written by the student.* Facts to consider: only two live model
+trials so far, both tuning S1 seed 0, both died on spikes after 4 actions; one earlier
 attempt failed on a missing or empty API key (40/40 calls);
 seeds do not vary episodes; the baseline wins every case (ceiling effect);
 the baseline's rules model is hand-coded; six small authored situations, two

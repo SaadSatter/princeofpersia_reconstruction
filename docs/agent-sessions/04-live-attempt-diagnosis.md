@@ -56,5 +56,19 @@ attempt offline. The category test failed with `KeyError: 'error_kind'`.
 - Audit finding: `tools/smoke_provider.py` calls the provider outside the
   runner (CLAUDE.md conflict). Student decision needed.
 - Independent review of R-D25 (`rules-reviewer`).
-- The pre-existing `traces/live/20261026T061626Z-*` files: still uncommitted;
-  origin unconfirmed.
+- ~~The pre-existing `traces/live/20261026T061626Z-*` files.~~ The student
+  confirmed running them; they are committed as live development trial 1.
+
+## Live trials after the fix
+
+- 18:01 UTC: the student ran the S1 episode with a working key. Trial 2:
+  4 calls, 0 failed, `died:spikes` after 4 actions, $0.0092. The one-call
+  smoke test was not run.
+- The student confirmed running the 06:16 UTC trial (trial 1), whose
+  provenance had been open since session 03. Both trials are recorded
+  separately in `EVALUATION.md` as tuning-suite development trials. The
+  16:26 UTC failed attempt stays separate.
+- In the message that launched trial 2, the API key was pasted in plain
+  text. The student was told to revoke it. It does not appear in any
+  committed file (scanned before each commit).
+

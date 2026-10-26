@@ -1,0 +1,75 @@
+{
+  "run_utc": "20261026T061626Z",
+  "suite": "tuning",
+  "game_version": "0.1.0+06ff044",
+  "players": [
+    "model-history"
+  ],
+  "episodes": [
+    {
+      "situation": "S1",
+      "seed": 0,
+      "player": "model-history",
+      "game_version": "0.1.0+06ff044",
+      "started_unix": 1792995388.678,
+      "outcome": {
+        "status": "terminal",
+        "reason": "died:spikes",
+        "score": 0,
+        "actions": 4,
+        "invalid_actions": 0,
+        "frames": 20
+      },
+      "model_calls": 4,
+      "failed_calls": 0,
+      "fallbacks": 0,
+      "usage": {
+        "tokens_in": 4485,
+        "tokens_out": 956,
+        "cost_usd": 0.009265
+      },
+      "latency_ms": {
+        "mean": 3159.1,
+        "max": 3821.0
+      },
+      "limits": {
+        "max_actions": 40,
+        "max_calls": 40,
+        "call_timeout_s": 20.0,
+        "max_consecutive_invalid": 5
+      },
+      "suite": "tuning",
+      "run_utc": "20261026T061626Z",
+      "provider": "anthropic",
+      "price_date": "2026-10-06",
+      "model_ids_returned": [
+        "claude-haiku-4-5-20251001"
+      ],
+      "trace_file": "traces/live/20261026T061626Z-model-history-S1-0.jsonl"
+    }
+  ],
+  "summary": [
+    {
+      "player": "model-history",
+      "situation": "S1",
+      "trials": 1,
+      "seeds": [
+        0
+      ],
+      "wins": 0,
+      "reasons": {
+        "died:spikes": 1
+      },
+      "mean_actions": 4.0,
+      "invalid": 0,
+      "calls": 4,
+      "failed_calls": 0,
+      "fallbacks": 0,
+      "latency_mean_ms": 3159.1,
+      "latency_max_ms": 3821.0,
+      "tokens_in": 4485,
+      "tokens_out": 956,
+      "cost_usd": 0.0093
+    }
+  ]
+}

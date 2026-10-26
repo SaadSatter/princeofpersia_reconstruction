@@ -91,5 +91,15 @@ development workflow; the course workflow has still not run in `game-dev-f26`.
 
 - Live S1 episode (needs the student's key; commands in the session reply).
 - Independent review of R-D23/R-D24 (`rules-reviewer`, separate session).
-- Decision on the pre-existing `traces/live/` files.
+- ~~Decision on the pre-existing `traces/live/` files.~~ Resolved; see below.
 - `EVALUATION.md` limitations paragraph: the student's to write.
+
+## Provenance update (2026-10-26, later in the same CLI session)
+
+The student confirmed in writing: "I confirm that I personally initiated the
+earlier live evaluation at `traces/live/20261026T061626Z-*`." On that
+confirmation the three files were checked again: model
+`claude-haiku-4-5-20251001`, 4 actions all `RIGHT` from the model, 0 failed
+calls, 4485 / 956 tokens, $0.009265 (recomputed), `died:spikes`, and no keys
+or personal information. They were then committed unchanged and reported in
+`EVALUATION.md` as live development trial 1. This session did not run them.
