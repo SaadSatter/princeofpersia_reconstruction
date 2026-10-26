@@ -39,7 +39,7 @@ game clock, restart.
 | Ledge grab after a short jump or while falling | Needs the original's continuous motion; jumps land on fixed blocks (R-D01). |
 | Jumping up to knock down a loose floor above | Not needed for the authored rooms; noted as an omission. |
 | Loose-floor shaking when landing nearby | Simplified; only stepping on a loose floor triggers it (R-D14). |
-| Original animation frames, art, sound | Not ported; placeholder shapes (R-D02). |
+| Committed original art; sound | Original sprites and tiles are drawn only from a local, git-ignored copy and never committed; placeholder shapes otherwise. No sound (R-D02, `docs/ASSETS.md`). |
 | Potions other than heal | Level 1 potions all have the same spec value (R-A03). |
 
 ## 2. World model
@@ -174,10 +174,24 @@ level data, solution routes, and the evaluator's records. Plate kinds
 
 ## 9. Human frontend
 
-`play.py` (Pygame, placeholder shapes) maps keys to the same actions:
+`play.py` (Pygame) maps keys to the same actions:
 ←/→ run or turn, Shift+←/→ careful step, ↑ up, ↓ down, ↑+←/→ standing
 jump, Shift+↑+←/→ running jump, Space wait, R restart, Esc quit. Each key
-press runs the same engine macro, shown at 12 frames/s.
+press runs the same engine macro through the five operations, shown as one
+animation clip of the step's frames at 12 frames/s (R-D26).
+
+It draws only what the observation contains (the current room, its gates,
+exits, spikes, loose floors and plates, and the kid), so a human sees what
+an agent sees. With a local copy of the original images it uses the
+original sprites and tiles; otherwise placeholder shapes (R-D02,
+`docs/ASSETS.md`).
+
+Two more modes show an agent playing, with no manual move selection:
+`--watch baseline` (or a model player with `--live`, tuning situations
+only) runs the real episode runner and animates each submitted step,
+labeled with its source (`baseline`, `model`, or `fallback`);
+`--replay <trace.jsonl>` re-runs a saved trace's actions through the same
+engine and checks every step against the recorded position.
 
 ## 10. Adaptations
 

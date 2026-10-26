@@ -222,3 +222,37 @@ def test_error_text_in_traces_never_contains_a_key():
     res = run_episode(ModelPlayer(fake), "S1", seed=0, limits=Limits(max_calls=1))
     assert leaked not in json.dumps(res)
     assert "[redacted]" in res["trace"][0]["error"]
+
+
+def test_regression_wall_side_face_hid_a_one_cell_pit():
+    """Student playtest, session 06 (S3 room 2, original art): a wall's shaded
+    side face was drawn 25 px into the next cell and covered most of the
+    one-cell spike pit at x 64-96, so the kid seemed to fall into the wall.
+
+    Every piece must sit in its own cell's column, except the floor
+    surface's right-hand part (perspective; its front edge stays on the cell
+    boundary). Checked on the layout plan, so no pygame or images needed."""
+    from pop.situations import SITUATIONS
+    from render.layout import OVERHANG, room_pieces
+
+    for sit in SITUATIONS.values():
+        for room, rows in sit.rooms.items():
+            ctx = dict(room=f"{sit.id}:{room}", tick=1, gates={}, exits={},
+                       sprung={(r, c) for r in range(3) for c in range(10)},
+                       shaking=set(), pressed=set())
+            for pc in room_pieces(list(rows), ctx):
+                r, c = pc.cell
+                col = pc.x // 32
+                if pc.name in OVERHANG:
+                    assert col == c + 1, (sit.id, room, pc)
+                    assert rows[r][col] != "#", (sit.id, room, pc)   # never over a wall
+                else:
+                    assert col == c, (sit.id, room, pc)
+            # A pit cell is drawn only by its own pieces and the floor overhang.
+            for r, line in enumerate(rows):
+                for c, t in enumerate(line):
+                    if t == "." and c > 0 and line[c - 1] == "#":
+                        inside = [pc for pc in room_pieces(list(rows), ctx)
+                                  if pc.x // 32 == c and pc.cell[0] == r]
+                        assert all(pc.cell == (r, c) or pc.name in OVERHANG
+                                   for pc in inside), (sit.id, room, r, c)

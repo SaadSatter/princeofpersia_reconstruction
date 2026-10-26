@@ -50,9 +50,12 @@ pop/                      package (headless; never imports pygame)
   interface.py            the five operations (Episode class)
   observation.py          what a player may see (current room only + HUD)
   runner.py               episode runner: limits, timeouts, traces
-render/                   pygame-only code
-  draw.py                 placeholder primitives, no original art
-play.py                   human frontend (keyboard -> same engine)
+render/                   frontend code; reads observations only
+  anim.py                 pure: engine step -> animation clip (no pygame)
+  assets.py               pure: locate the local original images
+  layout.py               pure: which tile piece goes where (one cell each)
+  draw.py                 pygame drawing: original art if present, else placeholders
+play.py                   pygame frontend: human keys, --watch, --replay
 agents/
   baseline.py             heuristic player (observation-only)
   model_player.py         LLM player with provider adapters
@@ -61,6 +64,7 @@ evaluate.py               suite runner, writes traces/ and results JSON
 tools/
   decode_levels.py        local reference only: decode original LEVELn
                           (from a local clone) to ASCII; never committed output
+  fetch_assets.py         local only: original images into git-ignored vendor/
 tests/                    pytest, deterministic, no network, no keys
 traces/                   committed evaluation traces (JSONL)
 docs/                     spec, checklist, map, plan, guidelines
@@ -92,8 +96,14 @@ Rules for the architecture:
   Persia** (Ubisoft franchise).
 - **Do not port or copy the 6502 assembly.** Read it to verify rules, then
   write original Python. Cite file and line in `docs/RULE_SOURCE_MAP.md`.
-- **Do not copy original images, sound, or fonts.** All art is original
-  placeholder geometry drawn in code.
+- **Original art (student decision 2026-10-26, R-D02):** the frontend may
+  draw the original DOS sprites and tiles, **loaded at run time from a local,
+  git-ignored copy** fetched by `tools/fetch_assets.py` (SDLPoP `data/` at a
+  pinned commit, into `vendor/SDLPoP/`). Never commit, copy into the course
+  repository, or redistribute any original image, sound or font. The
+  frontend must still run without them (placeholder geometry drawn in code,
+  `--placeholder`). Do not copy SDLPoP's GPL code or its frame/tile tables;
+  piece choices and offsets are our own (`docs/ASSETS.md`). No sound.
 - **Level data (student decision 2026-10-26):** original level files may be
   fetched and decoded **locally for reference only** (`tools/` writes to the
   git-ignored `vendor/` and `data/levels/`). Never commit original binaries,
