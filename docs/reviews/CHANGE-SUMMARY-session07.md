@@ -4,7 +4,7 @@ For `.claude/agents/rules-reviewer.md`. Written by the implementation agent;
 not a review.
 
 **Trigger.** Student decisions (2026-10-26): include the original artwork in
-the course submission, after the student confirmed permission; then,
+the course submission; then,
 "course-PR-only": the 207 images go only into the private course branch
 (`saadsatter/midterm`, PR #57); the public development repository keeps only
 the manifest. Cite Mechner's repository; do not call its README or SDLPoP's
@@ -32,9 +32,8 @@ results and traces, prompts, the baseline.
    R-D02, `GAME_SPEC.md`, plan.
 
 **Things to check.**
-- The provenance doc separates the student's (unverified) permission
-  confirmation from independently verified written evidence (source
-  READMEs only), quotes Mechner's README exactly, and does not present it
+- The provenance doc states only the written terms (the source
+  READMEs), quotes Mechner's README exactly, and does not present it
   or SDLPoP's GPL as a license for the artwork.
 - The public repository never tracks a PNG; the course branch tracks exactly
   the manifest's 207 (`test_tracked_images_are_the_bundle_or_nothing`).

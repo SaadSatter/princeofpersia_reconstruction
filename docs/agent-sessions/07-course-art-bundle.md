@@ -54,3 +54,9 @@ Student instruction (2026-10-26): drop the request for written evidence of
 who confirmed the permission, when and how. Removed from
 `docs/ASSET_PROVENANCE.md`; the separation between the student's
 confirmation and the verified source terms is unchanged.
+
+Student instruction (2026-10-26): remove the student's personal permission
+confirmation from the provenance documentation and keep only the written
+terms. Removed from `docs/ASSET_PROVENANCE.md`, R-D02, the session 07
+change summary and the PR #57 description. This record keeps the student's
+instructions as given, as session evidence.

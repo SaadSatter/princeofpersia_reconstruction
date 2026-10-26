@@ -81,22 +81,12 @@ its README likewise grants no rights in Prince of Persia.
 No source we found grants a license to redistribute the DOS artwork. The
 artwork remains the property of its rights holders.
 
-## Permission basis for including the artwork
+## Written terms
 
-Two different things, kept separate:
-
-1. **The student's permission confirmation** (not independently verified):
-   on 2026-10-26 (session 07) the student stated: "We have confirmed that
-   permissions for including the original Prince of Persia artwork in our
-   educational reconstruction's GitHub submission are satisfactory," and
-   directed that the 207 images be included in the private course
-   submission only, with attribution and the manifest, and kept out of the
-   public development repository.
-2. **Independently verified written evidence:** only the source READMEs
-   quoted above (checked by the implementation agent on 2026-10-26). They
-   welcome study of the Apple II source and expressly grant no Prince of
-   Persia rights. **They do not establish a right to redistribute the DOS
-   artwork.**
+The written terms are the source READMEs quoted above (checked on
+2026-10-26). They welcome study of the Apple II source and expressly grant
+no Prince of Persia rights. **They do not establish a right to redistribute
+the DOS artwork**, and this document does not claim one.
 
 **Our use:** noncommercial and educational: a course submission
 (Columbia COMS E6998, Fall 2026) in a private course repository. No claim of
