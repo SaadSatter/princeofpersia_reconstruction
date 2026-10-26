@@ -256,3 +256,42 @@ def test_regression_wall_side_face_hid_a_one_cell_pit():
                                   if pc.x // 32 == c and pc.cell[0] == r]
                         assert all(pc.cell == (r, c) or pc.name in OVERHANG
                                    for pc in inside), (sit.id, room, r, c)
+
+
+def test_regression_loose_ledge_fell_during_climb_crashed():
+    """Observed 2026-10-26 (session 08, a search over S3's legal actions): the
+    kid hangs from a loose floor, presses UP, and the floor falls during the
+    8-frame climb. `Game._up` then called `_enter(None)` and `Episode.step`
+    raised TypeError, which would have crashed an evaluation run. Fix: if the
+    ledge falls during the climb, the kid simply falls (R-C14)."""
+    from pop.interface import Episode
+    ep = Episode("S3")
+    ep.reset(0)
+    for a in ("RUN_JUMP_RIGHT", "WAIT", "RIGHT", "JUMP_RIGHT", "RUN_JUMP_RIGHT", "DOWN"):
+        assert ep.step("kid", a)["accepted"]
+    assert ep.observe("kid")["kid"]["posture"] == "hanging"
+    result = ep.step("kid", "UP")                    # raised TypeError before the fix
+    assert result["accepted"]
+    assert result["effect"] in ("fell", "landed", "hurt", "died")
+    assert result["effect"] != "climbed"
+    kid = ep.observe("kid")["kid"]
+    assert kid["row"] == 2                           # below the fallen ledge, not on it
+    while ep.outcome()["status"] != "terminal" and ep.observe("kid")["kid"]["posture"] == "falling":
+        ep.step("kid", "WAIT")
+    assert ep.observe("kid")["kid"]["posture"] in ("standing", "dead")
+
+
+def test_regression_kid_hung_from_a_loose_floor_that_had_fallen():
+    """Observed 2026-10-26 (session 08, same search as above): standing on a
+    loose floor in S3, the kid starts climbing down (DOWN, 6 frames) and the
+    floor falls meanwhile. The macro still finished as "hanging", from a cell
+    that was now empty air. Fix: if he is already falling, the climb-down
+    stops and he falls (R-C14)."""
+    from pop.interface import Episode
+    ep = Episode("S3")
+    ep.reset(0)
+    for a in ("RUN_JUMP_RIGHT", "WAIT", "RIGHT", "JUMP_RIGHT", "RUN_JUMP_RIGHT", "WAIT"):
+        assert ep.step("kid", a)["accepted"]
+    result = ep.step("kid", "DOWN")
+    assert result["effect"] != "hanging"             # was "hanging" before the fix
+    assert ep.observe("kid")["kid"]["posture"] != "hanging"

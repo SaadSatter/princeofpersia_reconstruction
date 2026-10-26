@@ -264,7 +264,9 @@ class Game:
         if k.posture == "hanging":
             self._result["effect"] = "climbed"
             yield from self._frames(P.HANG_UP)
-            if self.terminal is None:
+            # A loose ledge can fall during the climb (R-C14): the kid is then
+            # already falling and has no ledge to climb onto.
+            if self.terminal is None and k.posture == "hanging":
                 ledge, k.hang_ledge, k.posture = k.hang_ledge, None, "standing"
                 self._enter(ledge, "climb")
             return
@@ -311,7 +313,8 @@ class Game:
                 and not self.geom.supported(target)):
             self._result["effect"] = "hanging"
             yield from self._frames(P.HANG_DOWN)
-            if self.terminal is None:
+            # The loose floor he stands on can fall meanwhile (R-C14): he falls.
+            if self.terminal is None and k.posture == "standing":
                 k.hang_ledge = k.cell
                 self._set_pos(target)
                 k.facing = -k.facing                 # turns to face the ledge
