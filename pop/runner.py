@@ -31,6 +31,8 @@ FALLBACK_ACTION = "WAIT"
 class Decision:
     action: object
     meta: dict = field(default_factory=dict)   # tokens, raw text, model id, ...
+    # Set when the player made a call but produced no usable action (R-D22).
+    fallback_reason: str | None = None
 
 
 @dataclass
@@ -98,6 +100,11 @@ def run_episode(player, situation_id: str, seed: int, limits: Limits | None = No
             else:
                 action = value
             source = player.source
+            if isinstance(value, Decision) and value.fallback_reason is not None:
+                failed_calls += 1                      # R-D22
+                fallbacks += 1
+                error = value.fallback_reason
+                action, source = FALLBACK_ACTION, "fallback"
 
         result = ep.step(PLAYER_ID, action)
         after = result["observation"]
@@ -116,6 +123,10 @@ def run_episode(player, situation_id: str, seed: int, limits: Limits | None = No
         })
 
     out = ep.outcome()
+    latencies = [r["latency_ms"] for r in trace] or [0.0]
+    usage = {"tokens_in": sum(r["meta"].get("tokens_in", 0) for r in trace),
+             "tokens_out": sum(r["meta"].get("tokens_out", 0) for r in trace),
+             "cost_usd": round(sum(r["meta"].get("cost_usd", 0.0) for r in trace), 6)}
     return {
         "situation": situation_id,
         "seed": seed,
@@ -126,6 +137,9 @@ def run_episode(player, situation_id: str, seed: int, limits: Limits | None = No
         "model_calls": calls,
         "failed_calls": failed_calls,
         "fallbacks": fallbacks,
+        "usage": usage,
+        "latency_ms": {"mean": round(sum(latencies) / len(latencies), 1),
+                       "max": max(latencies)},
         "limits": {"max_actions": ep.max_actions, "max_calls": max_calls,
                    "call_timeout_s": limits.call_timeout_s,
                    "max_consecutive_invalid": limits.max_consecutive_invalid},

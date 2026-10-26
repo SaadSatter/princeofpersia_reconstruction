@@ -97,3 +97,33 @@ def test_trace_file_round_trip(tmp_path):
     lines = [json.loads(x) for x in path.read_text().splitlines()]
     assert lines[0]["type"] == "episode" and lines[0]["outcome"]["reason"] == "won"
     assert len(lines) == 1 + len(res["trace"])
+
+
+def test_unparseable_reply_is_a_labeled_fallback_that_keeps_its_metadata():
+    """R-D22: a reply with no usable action is a failed call; its tokens stay."""
+    def garbled(self, o, la):
+        return Decision(None, {"tokens_in": 100, "tokens_out": 7, "cost_usd": 0.001,
+                               "raw": "I think I will go right!"},
+                        fallback_reason="unparseable reply")
+    res = run_episode(FakeModel(garbled), "S1", seed=0, limits=Limits(max_calls=2))
+    assert res["fallbacks"] == 2 and res["failed_calls"] == 2
+    step = res["trace"][0]
+    assert step["source"] == "fallback" and step["action"] == "WAIT" and step["accepted"]
+    assert step["error"] == "unparseable reply"
+    assert step["meta"]["raw"] == "I think I will go right!"
+    assert res["usage"] == {"tokens_in": 200, "tokens_out": 14, "cost_usd": 0.002}
+
+
+def test_parseable_but_illegal_model_action_is_submitted_and_counted_invalid():
+    """R-D22: only unparseable replies fall back; illegal choices are the model's."""
+    res = run_episode(FakeModel(lambda s, o, la: Decision("FLY", {"tokens_in": 1})),
+                      "S1", seed=0, limits=Limits(max_calls=2))
+    assert res["fallbacks"] == 0
+    assert [r["source"] for r in res["trace"]] == ["model", "model"]
+    assert res["outcome"]["invalid_actions"] == 2
+
+
+def test_runner_reports_latency_summary():
+    res = run_episode(ScriptedPlayer(SOLUTIONS["S1"]), "S1", seed=0)
+    assert set(res["latency_ms"]) == {"mean", "max"}
+    assert res["usage"] == {"tokens_in": 0, "tokens_out": 0, "cost_usd": 0.0}
