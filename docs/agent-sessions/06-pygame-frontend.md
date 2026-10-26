@@ -62,3 +62,15 @@ See `docs/reviews/CHANGE-SUMMARY-session06.md` for the file list and
 - Decide whether the recording uses original art (ask the instructor) or
   `--placeholder`.
 - Commit, and sync the course PR branch with the new files (no images).
+
+## Commits, PR update and CI
+
+| Item | Value |
+| --- | --- |
+| Personal repo commit | `4831829` on `main` |
+| Dev CI for `4831829` | success, 167 passed and 2 skipped on Python 3.11 and 3.12 (pygame and the SDK extra are not installed in CI): https://github.com/SaadSatter/princeofpersia_reconstruction/actions/runs/40401147460 |
+| Course PR | https://github.com/columbia-university-ai-games/game-dev-f26/pull/57 (still draft); branch `saadsatter/midterm` |
+| Course branch commit | `dd22bec`: `midterms/saadsatter/` replaced by the tree at `4831829`; workflow file unchanged; no image files in the diff |
+| Course workflow `midterm-saadsatter` for `dd22bec` | success on pull_request (run 40401207869) and push (run 40401204307), 167 passed and 2 skipped on each Python version: https://github.com/columbia-university-ai-games/game-dev-f26/actions/runs/40401207869 |
+| Course `Minigame submission boundaries` | still fails, same cause as session 05: rejects the required `.github/workflows/midterm-saadsatter.yml` (run 40401204441). Needs a course maintainer. |
+| PR description | updated: frontend, asset note (images not in the PR), placeholder commands |
