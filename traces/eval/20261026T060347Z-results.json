@@ -1,0 +1,582 @@
+{
+  "run_utc": "20261026T060347Z",
+  "suite": "final",
+  "game_version": "0.1.0+3c4c210",
+  "players": [
+    "baseline"
+  ],
+  "episodes": [
+    {
+      "situation": "S1",
+      "seed": 100,
+      "player": "baseline-explorer",
+      "game_version": "0.1.0+3c4c210",
+      "started_unix": 1792994627.821,
+      "outcome": {
+        "status": "terminal",
+        "reason": "won",
+        "score": 1,
+        "actions": 8,
+        "invalid_actions": 0,
+        "frames": 64
+      },
+      "model_calls": 0,
+      "failed_calls": 0,
+      "fallbacks": 0,
+      "usage": {
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "cost_usd": 0.0
+      },
+      "latency_ms": {
+        "mean": 0.3,
+        "max": 0.6
+      },
+      "limits": {
+        "max_actions": 40,
+        "max_calls": 40,
+        "call_timeout_s": 20.0,
+        "max_consecutive_invalid": 5
+      },
+      "suite": "final",
+      "run_utc": "20261026T060347Z",
+      "trace_file": "traces/eval/20261026T060347Z-baseline-S1-100.jsonl"
+    },
+    {
+      "situation": "S1",
+      "seed": 101,
+      "player": "baseline-explorer",
+      "game_version": "0.1.0+3c4c210",
+      "started_unix": 1792994627.825,
+      "outcome": {
+        "status": "terminal",
+        "reason": "won",
+        "score": 1,
+        "actions": 8,
+        "invalid_actions": 0,
+        "frames": 64
+      },
+      "model_calls": 0,
+      "failed_calls": 0,
+      "fallbacks": 0,
+      "usage": {
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "cost_usd": 0.0
+      },
+      "latency_ms": {
+        "mean": 0.3,
+        "max": 0.5
+      },
+      "limits": {
+        "max_actions": 40,
+        "max_calls": 40,
+        "call_timeout_s": 20.0,
+        "max_consecutive_invalid": 5
+      },
+      "suite": "final",
+      "run_utc": "20261026T060347Z",
+      "trace_file": "traces/eval/20261026T060347Z-baseline-S1-101.jsonl"
+    },
+    {
+      "situation": "S2",
+      "seed": 100,
+      "player": "baseline-explorer",
+      "game_version": "0.1.0+3c4c210",
+      "started_unix": 1792994627.829,
+      "outcome": {
+        "status": "terminal",
+        "reason": "won",
+        "score": 1,
+        "actions": 13,
+        "invalid_actions": 0,
+        "frames": 84
+      },
+      "model_calls": 0,
+      "failed_calls": 0,
+      "fallbacks": 0,
+      "usage": {
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "cost_usd": 0.0
+      },
+      "latency_ms": {
+        "mean": 0.3,
+        "max": 0.5
+      },
+      "limits": {
+        "max_actions": 50,
+        "max_calls": 50,
+        "call_timeout_s": 20.0,
+        "max_consecutive_invalid": 5
+      },
+      "suite": "final",
+      "run_utc": "20261026T060347Z",
+      "trace_file": "traces/eval/20261026T060347Z-baseline-S2-100.jsonl"
+    },
+    {
+      "situation": "S2",
+      "seed": 101,
+      "player": "baseline-explorer",
+      "game_version": "0.1.0+3c4c210",
+      "started_unix": 1792994627.834,
+      "outcome": {
+        "status": "terminal",
+        "reason": "won",
+        "score": 1,
+        "actions": 13,
+        "invalid_actions": 0,
+        "frames": 84
+      },
+      "model_calls": 0,
+      "failed_calls": 0,
+      "fallbacks": 0,
+      "usage": {
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "cost_usd": 0.0
+      },
+      "latency_ms": {
+        "mean": 0.3,
+        "max": 0.5
+      },
+      "limits": {
+        "max_actions": 50,
+        "max_calls": 50,
+        "call_timeout_s": 20.0,
+        "max_consecutive_invalid": 5
+      },
+      "suite": "final",
+      "run_utc": "20261026T060347Z",
+      "trace_file": "traces/eval/20261026T060347Z-baseline-S2-101.jsonl"
+    },
+    {
+      "situation": "S3",
+      "seed": 100,
+      "player": "baseline-explorer",
+      "game_version": "0.1.0+3c4c210",
+      "started_unix": 1792994627.839,
+      "outcome": {
+        "status": "terminal",
+        "reason": "won",
+        "score": 1,
+        "actions": 28,
+        "invalid_actions": 0,
+        "frames": 196
+      },
+      "model_calls": 0,
+      "failed_calls": 0,
+      "fallbacks": 0,
+      "usage": {
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "cost_usd": 0.0
+      },
+      "latency_ms": {
+        "mean": 0.2,
+        "max": 0.5
+      },
+      "limits": {
+        "max_actions": 80,
+        "max_calls": 80,
+        "call_timeout_s": 20.0,
+        "max_consecutive_invalid": 5
+      },
+      "suite": "final",
+      "run_utc": "20261026T060347Z",
+      "trace_file": "traces/eval/20261026T060347Z-baseline-S3-100.jsonl"
+    },
+    {
+      "situation": "S3",
+      "seed": 101,
+      "player": "baseline-explorer",
+      "game_version": "0.1.0+3c4c210",
+      "started_unix": 1792994627.847,
+      "outcome": {
+        "status": "terminal",
+        "reason": "won",
+        "score": 1,
+        "actions": 28,
+        "invalid_actions": 0,
+        "frames": 196
+      },
+      "model_calls": 0,
+      "failed_calls": 0,
+      "fallbacks": 0,
+      "usage": {
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "cost_usd": 0.0
+      },
+      "latency_ms": {
+        "mean": 0.2,
+        "max": 0.5
+      },
+      "limits": {
+        "max_actions": 80,
+        "max_calls": 80,
+        "call_timeout_s": 20.0,
+        "max_consecutive_invalid": 5
+      },
+      "suite": "final",
+      "run_utc": "20261026T060347Z",
+      "trace_file": "traces/eval/20261026T060347Z-baseline-S3-101.jsonl"
+    },
+    {
+      "situation": "H1",
+      "seed": 100,
+      "player": "baseline-explorer",
+      "game_version": "0.1.0+3c4c210",
+      "started_unix": 1792994627.855,
+      "outcome": {
+        "status": "terminal",
+        "reason": "won",
+        "score": 1,
+        "actions": 9,
+        "invalid_actions": 0,
+        "frames": 60
+      },
+      "model_calls": 0,
+      "failed_calls": 0,
+      "fallbacks": 0,
+      "usage": {
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "cost_usd": 0.0
+      },
+      "latency_ms": {
+        "mean": 0.2,
+        "max": 0.4
+      },
+      "limits": {
+        "max_actions": 40,
+        "max_calls": 40,
+        "call_timeout_s": 20.0,
+        "max_consecutive_invalid": 5
+      },
+      "suite": "final",
+      "run_utc": "20261026T060347Z",
+      "trace_file": "traces/eval/20261026T060347Z-baseline-H1-100.jsonl"
+    },
+    {
+      "situation": "H1",
+      "seed": 101,
+      "player": "baseline-explorer",
+      "game_version": "0.1.0+3c4c210",
+      "started_unix": 1792994627.859,
+      "outcome": {
+        "status": "terminal",
+        "reason": "won",
+        "score": 1,
+        "actions": 9,
+        "invalid_actions": 0,
+        "frames": 60
+      },
+      "model_calls": 0,
+      "failed_calls": 0,
+      "fallbacks": 0,
+      "usage": {
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "cost_usd": 0.0
+      },
+      "latency_ms": {
+        "mean": 0.2,
+        "max": 0.4
+      },
+      "limits": {
+        "max_actions": 40,
+        "max_calls": 40,
+        "call_timeout_s": 20.0,
+        "max_consecutive_invalid": 5
+      },
+      "suite": "final",
+      "run_utc": "20261026T060347Z",
+      "trace_file": "traces/eval/20261026T060347Z-baseline-H1-101.jsonl"
+    },
+    {
+      "situation": "H2",
+      "seed": 100,
+      "player": "baseline-explorer",
+      "game_version": "0.1.0+3c4c210",
+      "started_unix": 1792994627.862,
+      "outcome": {
+        "status": "terminal",
+        "reason": "won",
+        "score": 1,
+        "actions": 11,
+        "invalid_actions": 0,
+        "frames": 84
+      },
+      "model_calls": 0,
+      "failed_calls": 0,
+      "fallbacks": 0,
+      "usage": {
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "cost_usd": 0.0
+      },
+      "latency_ms": {
+        "mean": 0.2,
+        "max": 0.4
+      },
+      "limits": {
+        "max_actions": 50,
+        "max_calls": 50,
+        "call_timeout_s": 20.0,
+        "max_consecutive_invalid": 5
+      },
+      "suite": "final",
+      "run_utc": "20261026T060347Z",
+      "trace_file": "traces/eval/20261026T060347Z-baseline-H2-100.jsonl"
+    },
+    {
+      "situation": "H2",
+      "seed": 101,
+      "player": "baseline-explorer",
+      "game_version": "0.1.0+3c4c210",
+      "started_unix": 1792994627.865,
+      "outcome": {
+        "status": "terminal",
+        "reason": "won",
+        "score": 1,
+        "actions": 11,
+        "invalid_actions": 0,
+        "frames": 84
+      },
+      "model_calls": 0,
+      "failed_calls": 0,
+      "fallbacks": 0,
+      "usage": {
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "cost_usd": 0.0
+      },
+      "latency_ms": {
+        "mean": 0.2,
+        "max": 0.4
+      },
+      "limits": {
+        "max_actions": 50,
+        "max_calls": 50,
+        "call_timeout_s": 20.0,
+        "max_consecutive_invalid": 5
+      },
+      "suite": "final",
+      "run_utc": "20261026T060347Z",
+      "trace_file": "traces/eval/20261026T060347Z-baseline-H2-101.jsonl"
+    },
+    {
+      "situation": "H3",
+      "seed": 100,
+      "player": "baseline-explorer",
+      "game_version": "0.1.0+3c4c210",
+      "started_unix": 1792994627.869,
+      "outcome": {
+        "status": "terminal",
+        "reason": "won",
+        "score": 1,
+        "actions": 26,
+        "invalid_actions": 0,
+        "frames": 202
+      },
+      "model_calls": 0,
+      "failed_calls": 0,
+      "fallbacks": 0,
+      "usage": {
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "cost_usd": 0.0
+      },
+      "latency_ms": {
+        "mean": 0.2,
+        "max": 0.6
+      },
+      "limits": {
+        "max_actions": 80,
+        "max_calls": 80,
+        "call_timeout_s": 20.0,
+        "max_consecutive_invalid": 5
+      },
+      "suite": "final",
+      "run_utc": "20261026T060347Z",
+      "trace_file": "traces/eval/20261026T060347Z-baseline-H3-100.jsonl"
+    },
+    {
+      "situation": "H3",
+      "seed": 101,
+      "player": "baseline-explorer",
+      "game_version": "0.1.0+3c4c210",
+      "started_unix": 1792994627.876,
+      "outcome": {
+        "status": "terminal",
+        "reason": "won",
+        "score": 1,
+        "actions": 26,
+        "invalid_actions": 0,
+        "frames": 202
+      },
+      "model_calls": 0,
+      "failed_calls": 0,
+      "fallbacks": 0,
+      "usage": {
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "cost_usd": 0.0
+      },
+      "latency_ms": {
+        "mean": 0.2,
+        "max": 0.5
+      },
+      "limits": {
+        "max_actions": 80,
+        "max_calls": 80,
+        "call_timeout_s": 20.0,
+        "max_consecutive_invalid": 5
+      },
+      "suite": "final",
+      "run_utc": "20261026T060347Z",
+      "trace_file": "traces/eval/20261026T060347Z-baseline-H3-101.jsonl"
+    }
+  ],
+  "summary": [
+    {
+      "player": "baseline-explorer",
+      "situation": "H1",
+      "trials": 2,
+      "seeds": [
+        100,
+        101
+      ],
+      "wins": 2,
+      "reasons": {
+        "won": 2
+      },
+      "mean_actions": 9.0,
+      "invalid": 0,
+      "calls": 0,
+      "failed_calls": 0,
+      "fallbacks": 0,
+      "latency_mean_ms": 0.2,
+      "latency_max_ms": 0.4,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "cost_usd": 0.0
+    },
+    {
+      "player": "baseline-explorer",
+      "situation": "H2",
+      "trials": 2,
+      "seeds": [
+        100,
+        101
+      ],
+      "wins": 2,
+      "reasons": {
+        "won": 2
+      },
+      "mean_actions": 11.0,
+      "invalid": 0,
+      "calls": 0,
+      "failed_calls": 0,
+      "fallbacks": 0,
+      "latency_mean_ms": 0.2,
+      "latency_max_ms": 0.4,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "cost_usd": 0.0
+    },
+    {
+      "player": "baseline-explorer",
+      "situation": "H3",
+      "trials": 2,
+      "seeds": [
+        100,
+        101
+      ],
+      "wins": 2,
+      "reasons": {
+        "won": 2
+      },
+      "mean_actions": 26.0,
+      "invalid": 0,
+      "calls": 0,
+      "failed_calls": 0,
+      "fallbacks": 0,
+      "latency_mean_ms": 0.2,
+      "latency_max_ms": 0.6,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "cost_usd": 0.0
+    },
+    {
+      "player": "baseline-explorer",
+      "situation": "S1",
+      "trials": 2,
+      "seeds": [
+        100,
+        101
+      ],
+      "wins": 2,
+      "reasons": {
+        "won": 2
+      },
+      "mean_actions": 8.0,
+      "invalid": 0,
+      "calls": 0,
+      "failed_calls": 0,
+      "fallbacks": 0,
+      "latency_mean_ms": 0.3,
+      "latency_max_ms": 0.6,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "cost_usd": 0.0
+    },
+    {
+      "player": "baseline-explorer",
+      "situation": "S2",
+      "trials": 2,
+      "seeds": [
+        100,
+        101
+      ],
+      "wins": 2,
+      "reasons": {
+        "won": 2
+      },
+      "mean_actions": 13.0,
+      "invalid": 0,
+      "calls": 0,
+      "failed_calls": 0,
+      "fallbacks": 0,
+      "latency_mean_ms": 0.3,
+      "latency_max_ms": 0.5,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "cost_usd": 0.0
+    },
+    {
+      "player": "baseline-explorer",
+      "situation": "S3",
+      "trials": 2,
+      "seeds": [
+        100,
+        101
+      ],
+      "wins": 2,
+      "reasons": {
+        "won": 2
+      },
+      "mean_actions": 28.0,
+      "invalid": 0,
+      "calls": 0,
+      "failed_calls": 0,
+      "fallbacks": 0,
+      "latency_mean_ms": 0.2,
+      "latency_max_ms": 0.5,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "cost_usd": 0.0
+    }
+  ]
+}
