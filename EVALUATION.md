@@ -107,8 +107,10 @@ uv run python evaluate.py --suite final --players model-history,model-obs-only -
 ## CI evidence
 
 - Development workflow `.github/workflows/ci.yml` (personal repo, Python
-  3.11 and 3.12): green on `e91e9b0`, 108 tests, run
-  https://github.com/SaadSatter/princeofpersia_reconstruction/actions/runs/40277726045.
+  3.11 and 3.12): green on `00f6a85`, 111 passed and 1 skipped (the
+  offline SDK test, which needs the `model` extra), run
+  https://github.com/SaadSatter/princeofpersia_reconstruction/actions/runs/40279874123.
+  Earlier: green on `e91e9b0`, 108 tests, run 40277726045.
   This is **not** the course check 3c.
 - Course workflow `ci/midterm-saadsatter.yml`: not yet run in
   `game-dev-f26`. Checked statically by `tests/test_ci_workflow.py`; its
