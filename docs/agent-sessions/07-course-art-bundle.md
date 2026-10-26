@@ -47,3 +47,10 @@ Commit and CI evidence: see the section below (added after the pushes).
 | Course workflow `midterm-saadsatter` for `24e083b` | success on pull_request (run 40407336405) and push (run 40407328373), 171 passed and 3 skipped on each Python version; one skip fewer than dev CI because `test_bundled_images_match_the_manifest` runs where the images exist: https://github.com/columbia-university-ai-games/game-dev-f26/actions/runs/40407336405 |
 | Course `Minigame submission boundaries` | still fails, same cause as sessions 05–06 (rejects the required workflow file; run 40407332804) |
 | PR #57 | https://github.com/columbia-university-ai-games/game-dev-f26/pull/57: still an open draft, not merged; description updated (bundled art, attribution, permission basis, provenance link, commands) |
+
+## Follow-up
+
+Student instruction (2026-10-26): drop the request for written evidence of
+who confirmed the permission, when and how. Removed from
+`docs/ASSET_PROVENANCE.md`; the separation between the student's
+confirmation and the verified source terms is unchanged.

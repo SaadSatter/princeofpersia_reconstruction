@@ -91,18 +91,12 @@ Two different things, kept separate:
    educational reconstruction's GitHub submission are satisfactory," and
    directed that the 207 images be included in the private course
    submission only, with attribution and the manifest, and kept out of the
-   public development repository. The repository holds no record of who
-   gave that confirmation, when, or in what form.
+   public development repository.
 2. **Independently verified written evidence:** only the source READMEs
    quoted above (checked by the implementation agent on 2026-10-26). They
    welcome study of the Apple II source and expressly grant no Prince of
    Persia rights. **They do not establish a right to redistribute the DOS
    artwork.**
-
-*To be added by the student, if available:* who confirmed the permission
-(for example the instructor, under the assignment's rule that "the
-instructor resolves unclear publication rights before release"), when, in
-what form, and a link or copy.
 
 **Our use:** noncommercial and educational: a course submission
 (Columbia COMS E6998, Fall 2026) in a private course repository. No claim of
