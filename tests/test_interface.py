@@ -106,3 +106,11 @@ def test_reset_restores_the_initial_state():
     ep.step("kid", "RIGHT")
     assert ep.reset(7) == first
     assert ep.outcome()["actions"] == 0
+
+
+def test_human_play_can_run_without_an_action_limit():
+    ep = Episode("S1", max_actions=None)
+    for _ in range(60):                      # more than S1's 40-action limit
+        ep.step("kid", "WAIT")
+    assert ep.outcome()["status"] == "ongoing"
+    assert ep.observe("kid")["actions_left"] is None

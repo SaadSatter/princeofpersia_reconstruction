@@ -21,7 +21,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from . import GAME_VERSION
-from .interface import PLAYER_ID, Episode
+from .interface import PLAYER_ID, SITUATION_DEFAULT, Episode
 
 DEFAULT_CALL_TIMEOUT_S = 20.0
 FALLBACK_ACTION = "WAIT"
@@ -63,7 +63,9 @@ def _call_with_timeout(fn, args, timeout_s):
 
 def run_episode(player, situation_id: str, seed: int, limits: Limits | None = None) -> dict:
     limits = limits or Limits()
-    ep = Episode(situation_id, max_actions=limits.max_actions,
+    ep = Episode(situation_id,
+                 max_actions=(SITUATION_DEFAULT if limits.max_actions is None
+                              else limits.max_actions),
                  max_consecutive_invalid=limits.max_consecutive_invalid)
     ep.reset(seed)
     max_calls = limits.max_calls if limits.max_calls is not None else ep.situation.max_calls

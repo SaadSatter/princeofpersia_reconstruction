@@ -3,7 +3,7 @@
 Maps every rubric check in `docs/MIDTERM_GUIDELINES.md` to deliverables,
 tests, and evidence. Status values: **done** (evidence exists and is
 linked), **partial**, **todo**, **at risk** (todo and likely to slip).
-Only mark **done** with a link to evidence. Updated: 2026-10-26 (after scope approval).
+Only mark **done** with a link to evidence. Updated: 2026-10-26 (engine + interface). "Passing locally" is not CI evidence; CI is not set up yet.
 
 ## Rubric checks
 
@@ -12,11 +12,11 @@ Only mark **done** with a link to evidence. Updated: 2026-10-26 (after scope app
 | 1a | Every rule labeled code/manual/observed/assumed/design with locators | `docs/RULE_SOURCE_MAP.md`, copied/summarized into README | Reviewer check 1; audit F1–F2 | `docs/RULE_SOURCE_MAP.md` | partial — map drafted; no `manual`/`observed` evidence yet; impl column empty |
 | 1b | Scope and exclusions explicit; adaptations explained | `docs/GAME_SPEC.md` §1, §10; README scope | Reviewer; playtest finds no unexplained change | `docs/GAME_SPEC.md` | partial — scope approved (Level 1 mechanics, authored rooms); README scope statement todo |
 | 1c | Sources credited; reuse terms checked and stated | README "Sources and terms"; `CLAUDE.md` source-use rules | Reviewer; instructor ruling on level data | `CLAUDE.md`, `docs/GAME_SPEC.md` §9 | partial — decision: no original data/assets committed; README terms section todo |
-| 2a | Complete core loop to a clear ending, no crash/dead end | Engine + `play.py`; Level 1 completable | `tests/test_episode.py::test_win_path_fixture`; human playthrough of Level 1 | traces/, recording | todo |
+| 2a | Complete core loop to a clear ending, no crash/dead end | Engine + `play.py`; S3 escape completable | `tests/test_situations.py::test_scripted_route_wins_within_limits` (all 6 situations) | `traces/dev/S3-scripted-route-100.jsonl` | partial — engine episode wins; Pygame frontend and human playthrough todo |
 | 2b | Model player picks and submits actions via interface; no repo tools/hidden state; fallbacks labeled | `agents/model_player.py`, `pop/runner.py` | `tests/test_model_player.py` (fake provider); audit B5, D3 | `traces/*.jsonl` | todo |
-| 2c | Observation per role; legal list leaks nothing; leakage test | `pop/observation.py`, `pop/interface.py` | `tests/test_leakage.py`; audit B1–B4 | audit reports | todo |
+| 2c | Observation per role; legal list leaks nothing; leakage test | `pop/observation.py`, `pop/interface.py` | `tests/test_leakage.py` (8 tests) | audit reports | partial — tests pass locally; no audit yet |
 | 3a | Fresh clone runs setup/play/eval from README in project folder | README commands; `pyproject.toml`, `uv.lock` | Fresh-clone dry run recorded in EVALUATION.md | EVALUATION.md | todo |
-| 3b | Runner owns state; step, call, timeout limits; terminal reasons | `pop/runner.py` | `tests/test_limits.py` | traces show `reason` | todo |
+| 3b | Runner owns state; step, call, timeout limits; terminal reasons | `pop/runner.py`, `pop/interface.py` | `tests/test_runner.py`, `tests/test_interface.py` | traces show `reason` | partial — enforced and tested with fake players; no live model yet |
 | 3c | CI: invariants, legal/illegal, terminal outcome, observed regression, limits; green | `ci/midterm-saadsatter.yml` → course `.github/workflows/midterm-saadsatter.yml` | the five test groups below | course PR checks tab | todo — course workflow must run in course repo |
 | 3d | Implementation agent, reusable skill, independent review, each with artifact + session link | `CLAUDE.md`, `.claude/skills/game-rules-audit/SKILL.md`, `.claude/agents/rules-reviewer.md`, `review.md`, `docs/audits/` | Skill invoked in 2 separate sessions; reviewer run in a session that did not build | AGENT-TEAM.md links | partial — configs exist; no sessions run yet |
 | 4a | Choices named with the alternative they beat | GAME_SPEC §9–10, RULE_SOURCE_MAP design rows, README "Design choices" | Reviewer check 1 | `docs/RULE_SOURCE_MAP.md` R-D01..R-D12 | partial |
@@ -29,20 +29,20 @@ Only mark **done** with a link to evidence. Updated: 2026-10-26 (after scope app
 
 | Group | Planned tests | Status |
 | --- | --- | --- |
-| Rule invariants | gravity, wall/gate collision, fall-damage rows, plate→gate links, loose floor fall, spikes | todo |
-| Legal / illegal actions | vocabulary validation, malformed input, refused action leaves state unchanged, terminal refuses | todo |
-| Terminal outcome | win on fixture; death by spikes/fall; `time_up` | todo |
-| Observed regression | `test_regression_<issue>` citing a bug actually seen | todo — needs an observed bug |
-| Episode limits | `step_limit`, `call_limit` (failed calls count), `timeout_limit`, `invalid_limit` | todo |
-| (extra) Determinism | same seed + actions → identical trace | todo |
-| (extra) Leakage | observe/legal_actions per room and posture only | todo |
-| (extra) Architecture | `pop/` never imports pygame | todo |
+| Rule invariants | `tests/test_rules.py` (32 tests) | passing locally |
+| Legal / illegal actions | `tests/test_interface.py` | passing locally |
+| Terminal outcome | `tests/test_situations.py`, `test_interface.py::test_death_is_terminal_with_reason`, `test_rules.py::test_clock_runs_out` | passing locally |
+| Observed regression | `tests/test_regressions.py::test_regression_fall_death_reported_full_hp` | passing locally |
+| Episode limits | `tests/test_runner.py`, `tests/test_interface.py` (`step_limit`, `call_limit`, timeouts, `invalid_limit`) | passing locally |
+| (extra) Determinism | `tests/test_determinism.py` | passing locally |
+| (extra) Leakage | `tests/test_leakage.py` | passing locally |
+| (extra) Architecture | `tests/test_architecture.py` | passing locally |
 
 ## Checkpoint — Session 7, October 26
 
 | Item | Status |
 | --- | --- |
-| Engine runs behind the five operations | todo |
+| Engine runs behind the five operations | done locally — `pop/interface.py`, 83 tests |
 | Baseline completes an episode | todo |
 | Model player completes ≥1 live episode with a trace | todo |
 | First comparison table | todo |

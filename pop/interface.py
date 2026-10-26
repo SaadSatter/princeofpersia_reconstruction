@@ -19,6 +19,8 @@ from .situations import SITUATIONS
 PLAYER_ID = "kid"
 MAX_CONSECUTIVE_INVALID = 5          # R-D12
 
+SITUATION_DEFAULT = object()          # use the situation's declared action limit
+
 INVALID_NOT_TEXT = "action must be a string"
 INVALID_UNKNOWN = "unknown action"
 INVALID_NOT_NOW = "action not legal in the current posture"
@@ -26,10 +28,12 @@ EPISODE_OVER = "episode is over"
 
 
 class Episode:
-    def __init__(self, situation_id: str, max_actions: int | None = None,
+    def __init__(self, situation_id: str, max_actions=SITUATION_DEFAULT,
                  max_consecutive_invalid: int = MAX_CONSECUTIVE_INVALID):
+        """max_actions: an int, None for no limit (human play), or the default."""
         self.situation = SITUATIONS[situation_id]
-        self.max_actions = max_actions if max_actions is not None else self.situation.max_actions
+        self.max_actions = (self.situation.max_actions if max_actions is SITUATION_DEFAULT
+                            else max_actions)
         self.max_consecutive_invalid = max_consecutive_invalid
         self.reset(0)
 
