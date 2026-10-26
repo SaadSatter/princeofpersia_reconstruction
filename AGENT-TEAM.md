@@ -29,11 +29,27 @@
    its output verbatim as `review.md`, with date and commit hash.
 5. Record each session link in the evidence table below.
 
+## Recorded agent evidence (factual, written by the implementation agent)
+
+**Implementation agent, session 01 (2026-10-26).**
+- Responsibilities: configuration and planning docs, headless engine, the
+  five-operation interface, runner limits, deterministic tests.
+- Repository access: read/write in this personal repo; read-only local clones
+  of the course repo and `historicalsource/princeofpersia` for reference; ran
+  `uv run pytest`. No API keys, no model calls, no access to the course repo's
+  remote.
+- Outputs: commits `8295fc0`, `5ee842f`, `e055575`, `8bd8cb1`; 83 tests
+  passing locally (not CI); a scripted-route S3 trace
+  `traces/dev/S3-scripted-route-100.jsonl`.
+- Evidence: [`docs/agent-sessions/01-engine-implementation.md`](docs/agent-sessions/01-engine-implementation.md).
+
+No `game-rules-audit` or `rules-reviewer` session has been run yet.
+
 ## Evidence (Saad fills in)
 
 | Agent | Session / PR link | Date | What it recommended | What I decided and why |
 | --- | --- | --- | --- | --- |
-| Implementation | | | | |
+| Implementation (session 01) | Local session `f42b4688-7186-463a-a14b-f62a55405d4d`, no URL; record: [`docs/agent-sessions/01-engine-implementation.md`](docs/agent-sessions/01-engine-implementation.md) | 2026-10-26 | | |
 | game-rules-audit (session A) | | | | |
 | game-rules-audit (session B) | | | | |
 | rules-reviewer | | | | |
