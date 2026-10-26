@@ -1,8 +1,8 @@
 # Evaluation — preliminary (2026-10-26)
 
 **Status: preliminary.** Baseline results are real. **No live model trial
-has been run yet** (no API credentials were available in the implementation
-session), so the model rows below are empty. This file will be updated with
+is reported yet**: neither implementation session (02, 03) had API
+credentials, so the model rows below are empty. This file will be updated with
 live results, and the limitations paragraph must be written by the student.
 
 ## Declared suite
@@ -39,9 +39,14 @@ disabled (every request is one counted call); SDK timeout 15 s inside the
 runner's 20 s. Same system prompt for every situation. A reply with no
 parseable action becomes `WAIT` labeled `"source": "fallback"` and
 counts as a failed call (R-D22); a parseable but illegal action is submitted
-and counted as invalid. Price used for estimates: $1.00 / $5.00 per million
-input / output tokens, from a price reference dated 2026-10-06
-(`agents/providers.py:PRICE_DATE`); to be re-checked on the run day.
+and counted as invalid. A reply that arrives after the 20 s timeout is
+discarded (it changes neither the episode, the steps nor the player's
+memory); its tokens and cost are logged under `late_replies` (R-D23).
+Price used for estimates: $1.00 / $5.00 per million input / output tokens
+for Claude Haiku 4.5, verified on 2026-10-26 against
+https://platform.claude.com/docs/en/about-claude/pricing
+(`agents/providers.py:PRICE_DATE`, `PRICE_SOURCE`). A model without a known
+price is reported as cost "unknown", never $0 (R-D24).
 
 ## Results
 
@@ -64,10 +69,11 @@ shown to a player) use 12 / 16 / 38 / 11 / 16 / 44 actions for S1 / S2 / S3 /
 H1 / H2 / H3; the baseline found shorter routes in all six.
 
 **Reading this result.** The baseline wins 12/12 with no invalid actions.
-On this suite the model player can at best match it on outcome; the
-comparison can still separate the players on actions used, invalid actions,
-limits hit, and cost. Whether the suite is too easy to separate the players
-on wins is a design question for the student (see the audit note N1).
+On this suite the model player can at best match it on outcome. If both
+players win consistently, this suite cannot distinguish them by win rate;
+the comparison then rests on actions used, invalid actions, fallbacks,
+limits hit, latency and cost. Student decision (2026-10-26): keep these
+results and do not weaken the baseline (audit note N1).
 
 ## Traces
 

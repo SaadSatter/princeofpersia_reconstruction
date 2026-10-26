@@ -16,7 +16,7 @@ Only mark **done** with a link to evidence. Updated: 2026-10-26 (session 02: bas
 | 2b | Model player picks and submits actions via interface; no repo tools/hidden state; fallbacks labeled | `agents/model_player.py`, `pop/runner.py` | `tests/test_model_player.py` (fake provider); audit B5, D3 | `traces/*.jsonl` | partial — player, fallback labels and tests (fake provider) done; no live model episode yet |
 | 2c | Observation per role; legal list leaks nothing; leakage test | `pop/observation.py`, `pop/interface.py` | `tests/test_leakage.py` (8 tests) | audit reports | partial — tests pass locally; no audit yet |
 | 3a | Fresh clone runs setup/play/eval from README in project folder | README commands; `pyproject.toml`, `uv.lock` | Fresh-clone dry run recorded in EVALUATION.md | EVALUATION.md | todo |
-| 3b | Runner owns state; step, call, timeout limits; terminal reasons | `pop/runner.py`, `pop/interface.py` | `tests/test_runner.py`, `tests/test_interface.py` | traces show `reason` | partial — enforced and tested with fake players; no live model yet |
+| 3b | Runner owns state; step, call, timeout limits; terminal reasons | `pop/runner.py`, `pop/interface.py` | `tests/test_runner.py`, `tests/test_interface.py` | traces show `reason` | partial — enforced and tested with fake players; late replies after a timeout discarded (R-D23) and unknown cost reported as null (R-D24), session 03; no live model yet |
 | 3c | CI: invariants, legal/illegal, terminal outcome, observed regression, limits; green | `ci/midterm-saadsatter.yml` → course `.github/workflows/midterm-saadsatter.yml` | the five test groups below | course PR checks tab | partial — dev CI green (run 40277726045, 108 tests); `ci/midterm-saadsatter.yml` written and statically tested; not yet run in `game-dev-f26` |
 | 3d | Implementation agent, reusable skill, independent review, each with artifact + session link | `CLAUDE.md`, `.claude/skills/game-rules-audit/SKILL.md`, `.claude/agents/rules-reviewer.md`, `review.md`, `docs/audits/` | Skill invoked in 2 separate sessions; reviewer run in a session that did not build | AGENT-TEAM.md links | partial — configs exist; no sessions run yet |
 | 4a | Choices named with the alternative they beat | GAME_SPEC §9–10, RULE_SOURCE_MAP design rows, README "Design choices" | Reviewer check 1 | `docs/RULE_SOURCE_MAP.md` R-D01..R-D12 | partial |
@@ -32,7 +32,7 @@ Only mark **done** with a link to evidence. Updated: 2026-10-26 (session 02: bas
 | Rule invariants | `tests/test_rules.py` (32 tests) | passing locally |
 | Legal / illegal actions | `tests/test_interface.py` | passing locally |
 | Terminal outcome | `tests/test_situations.py`, `test_interface.py::test_death_is_terminal_with_reason`, `test_rules.py::test_clock_runs_out` | passing locally |
-| Observed regression | `tests/test_regressions.py::test_regression_fall_death_reported_full_hp` | passing locally |
+| Observed regression | `tests/test_regressions.py`: `test_regression_fall_death_reported_full_hp`, `test_regression_late_reply_after_timeout_rewrote_player_memory`, `test_regression_unknown_model_price_reported_as_free` | passing locally |
 | Episode limits | `tests/test_runner.py`, `tests/test_interface.py` (`step_limit`, `call_limit`, timeouts, `invalid_limit`) | passing locally |
 | (extra) Determinism | `tests/test_determinism.py` | passing locally |
 | (extra) Leakage | `tests/test_leakage.py` | passing locally |

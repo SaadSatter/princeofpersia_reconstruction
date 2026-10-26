@@ -52,3 +52,15 @@
 - Live model behavior: no `ANTHROPIC_API_KEY` in this environment; no live call was made.
 - `play.py` (Pygame frontend): not implemented yet (plan item 9).
 - The course-repo workflow on GitHub: `ci/midterm-saadsatter.yml` has only been checked statically (`tests/test_ci_workflow.py`) and its commands rehearsed locally in a copy at `midterms/saadsatter/`; it has not run in `game-dev-f26`.
+
+## Follow-up status (added 2026-10-26, session 03)
+
+The findings above are unchanged; this section records what happened next.
+
+| Finding | Student decision | Status | Evidence |
+| --- | --- | --- | --- |
+| F-1 late reply can modify memory | Fix (high) | fixed, awaiting independent review | R-D23; `pop/runner.py` `_late_reply`, `ModelPlayer.commit`; `tests/test_regressions.py::test_regression_late_reply_after_timeout_rewrote_player_memory` (failed before, passes after); `AUDIT-2026-10-26-session03-audit-fixes.md` |
+| F-2 unknown price recorded as $0 | Fix (high) | fixed, awaiting independent review | R-D24; `tests/test_regressions.py::test_regression_unknown_model_price_reported_as_free` (failed before, passes after) |
+| N1 baseline 12/12 | Keep results; do not weaken baseline | no change | to be disclosed in EVALUATION.md limitations |
+| N2 price dated 2026-10-06 | Re-verify before live trials | re-verified 2026-10-26, unchanged ($1 / $5 per MTok) | `agents/providers.py` `PRICE_DATE`, `PRICE_SOURCE` |
+| N3, N4 | — | open (documentation) | — |
