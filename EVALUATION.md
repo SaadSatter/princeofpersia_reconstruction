@@ -1,10 +1,11 @@
 # Evaluation — preliminary (2026-10-26)
 
-**Status: preliminary.** Baseline results are real. **No live model
-gameplay is reported yet.** One live attempt (2026-10-26 16:26 UTC) failed
-before reaching the API: every call failed for lack of a usable API key (see
-"Failed live attempt" below). It is not a model result, so the model rows
-below are still empty. This file will be updated with
+**Status: preliminary.** Baseline results are real. **One live model
+episode has been run, on the tuning suite only** (S1, seed 0, 2026-10-26
+18:01 UTC; see "Live tuning episode" below). It is a single development
+trial, not a final-suite result, so the final-suite model rows below are
+still empty. An earlier live attempt (16:26 UTC) failed before reaching the
+API and is recorded separately as a failed attempt. This file will be updated with
 live results, and the limitations paragraph must be written by the student.
 
 ## Declared suite
@@ -66,6 +67,28 @@ Run `20261026T060347Z` (UTC), game version `0.1.0+3c4c210`, command (project fol
 | model-history | S1–S3, H1–H3 | 0 | — | **not run** | — | — | — | — | — | — | — | — |
 | model-obs-only | S1–S3 | 0 | — | **not run** | — | — | — | — | — | — | — | — |
 
+### Live tuning episode: model-history, S1, seed 0
+
+Run `20261026T180142Z`, game version `0.1.0+c23ebf7`, model returned
+`claude-haiku-4-5-20251001`, provider `anthropic`, price dated 2026-10-26.
+Command (project folder):
+`uv run python evaluate.py --suite tuning --players model-history --situations S1 --seeds 0 --live --out traces/live`.
+
+| Player | Situation | Trials (seeds) | Wins | Terminal reasons | Mean actions | Invalid | Calls | Failed calls | Fallbacks | Latency mean / max (ms) | Tokens in / out | Est. cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| model-history | S1 | 1 (0) | 0/1 | died:spikes 1 | 4.0 | 0 | 4 | 0 | 0 | 3010.4 / 3526.4 | 4485 / 940 | 0.0092 |
+
+What the trace shows: the model chose `RIGHT` four times, and all four were
+accepted as model decisions (no fallback, no late reply). The fourth run
+took the prince off the floor at row 1, col 4 into the gap at col 5, and he
+fell onto the spikes below (`died:spikes`, 20 frames). In its last reply the
+model named the spikes at row 2, col 5 and said it would avoid them, then
+chose `RIGHT` again. Each reply was a paragraph of analysis followed by the
+JSON object, although the prompt asks for JSON only. The parser found the
+action every time, and the analysis accounts for most of the 940 output
+tokens. One trial on one tuning situation: this shows that the model player
+works end to end, not how well it plays.
+
 ### Failed live attempt (not a model result)
 
 Run `20261026T162629Z`, game version `0.1.0+b2a6e2a`, command (project folder):
@@ -108,7 +131,9 @@ results and do not weaken the baseline (audit note N1).
   (12 files), `traces/eval/20261026T060347Z-results.json`,
   `traces/eval/20261026T060347Z-table.md`.
 - Scripted route (not a player): `traces/dev/S3-scripted-route-100.jsonl`.
-- Model gameplay traces: none yet.
+- Live tuning episode (model-history, S1, seed 0):
+  `traces/live/20261026T180142Z-model-history-S1-0.jsonl`, `-results.json`,
+  `-table.md`. Final-suite model traces: none yet.
 - Failed live attempt (40 provider failures, no gameplay):
   `traces/live/20261026T162629Z-model-history-S1-0.jsonl`, `-results.json`,
   `-table.md`, written before the R-D25 fix, so they have no `error_kind`
@@ -155,8 +180,9 @@ uv run python evaluate.py --suite final --players model-history,model-obs-only -
 
 ## Limitations
 
-*To be written by the student.* Facts to consider: no live model gameplay yet
-(one live attempt failed on a missing or empty API key, 40/40 calls);
+*To be written by the student.* Facts to consider: only one live model
+episode so far (tuning S1, died on spikes after 4 actions); one earlier
+attempt failed on a missing or empty API key (40/40 calls);
 seeds do not vary episodes; the baseline wins every case (ceiling effect);
 the baseline's rules model is hand-coded; six small authored situations, two
 trials each; cost price not re-verified on a run day; no peer playtest yet.
