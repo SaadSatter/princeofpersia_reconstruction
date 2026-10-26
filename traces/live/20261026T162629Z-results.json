@@ -1,0 +1,75 @@
+{
+  "run_utc": "20261026T162629Z",
+  "suite": "tuning",
+  "game_version": "0.1.0+b2a6e2a",
+  "players": [
+    "model-history"
+  ],
+  "episodes": [
+    {
+      "situation": "S1",
+      "seed": 0,
+      "player": "model-history",
+      "game_version": "0.1.0+b2a6e2a",
+      "started_unix": 1793031992.284,
+      "outcome": {
+        "status": "terminal",
+        "reason": "step_limit",
+        "score": 0,
+        "actions": 40,
+        "invalid_actions": 0,
+        "frames": 240
+      },
+      "model_calls": 40,
+      "failed_calls": 40,
+      "fallbacks": 40,
+      "usage": {
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "cost_usd": 0
+      },
+      "late_replies": [],
+      "latency_ms": {
+        "mean": 0.6,
+        "max": 2.8
+      },
+      "limits": {
+        "max_actions": 40,
+        "max_calls": 40,
+        "call_timeout_s": 20.0,
+        "max_consecutive_invalid": 5
+      },
+      "suite": "tuning",
+      "run_utc": "20261026T162629Z",
+      "provider": "anthropic",
+      "price_date": "2026-10-26",
+      "price_source": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "model_ids_returned": [],
+      "trace_file": "traces/live/20261026T162629Z-model-history-S1-0.jsonl"
+    }
+  ],
+  "summary": [
+    {
+      "player": "model-history",
+      "situation": "S1",
+      "trials": 1,
+      "seeds": [
+        0
+      ],
+      "wins": 0,
+      "reasons": {
+        "step_limit": 1
+      },
+      "mean_actions": 40.0,
+      "invalid": 0,
+      "calls": 40,
+      "failed_calls": 40,
+      "fallbacks": 40,
+      "latency_mean_ms": 0.6,
+      "latency_max_ms": 2.8,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "cost_usd": 0
+    }
+  ]
+}
