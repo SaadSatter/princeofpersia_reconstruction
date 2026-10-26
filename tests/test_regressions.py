@@ -295,3 +295,24 @@ def test_regression_kid_hung_from_a_loose_floor_that_had_fallen():
     result = ep.step("kid", "DOWN")
     assert result["effect"] != "hanging"             # was "hanging" before the fix
     assert ep.observe("kid")["kid"]["posture"] != "hanging"
+
+
+def test_regression_bumped_ceiling_revealed_a_loose_floor_in_the_unseen_room_above():
+    """Observed 2026-10-26 (session 08 audit, docs/audits/AUDIT-2026-10-26-session08-level1.md
+    finding 1): in row 0, hopping up under the room above's loose floor returned
+    effect "bumped_ceiling" while nothing in view changed, so the effect told
+    the player about a tile it cannot see. Fix: the effect is "none" unless the
+    knocked floor is in the current room; the floor still falls (R-C31)."""
+    from level_fixture import build
+    from pop import levelfile as LF
+    from pop import levels
+    from pop.interface import Episode
+    rooms = {1: ("_" * 10, "_" * 10, "__L_______"),
+             2: ("__________", "##########", "##########")}
+    data = build(rooms, {1: (0, 0, 0, 2), 2: (0, 0, 1, 0)}, start=(2, 2, 0xFF))
+    ep = Episode(levels.to_situation(LF.parse(data), "fx", special_start=False))
+    ep.reset(0)
+    assert ep.observe("kid")["kid"]["col"] == 2            # room 2 (0,2), under room 1 (2,2)
+    out = ep.step("kid", "UP")
+    assert out["effect"] == "none"                         # was "bumped_ceiling"
+    assert ep._game.mech.loose == {(1, 2, 2): 8}           # still knocked loose

@@ -319,7 +319,9 @@ class Game:
             # Hopping up touches the ceiling and knocks a loose floor down
             # (R-C31, Source/CTRL.S:2000-2005).
             self.mech.touch_loose(above)
-            self._result["effect"] = "bumped_ceiling"
+            # Name the effect only if the floor is in view; a floor in the
+            # room above is not on screen (audit 2026-10-26 session 08, F1).
+            self._result["effect"] = "bumped_ceiling" if above[0] == k.room else "none"
         else:
             self._result["effect"] = "none"
         yield from self._frames(P.JUMP_IN_PLACE)
