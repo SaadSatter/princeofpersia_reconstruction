@@ -65,3 +65,18 @@ Unchanged from the earlier plan: copy this tree into
 fresh-clone check, open one PR. Start project sessions with the working
 directory `midterms/saadsatter/` because the course repo has its own root
 `.claude/agents/rules-reviewer.md`.
+
+## Original Level 1 (`L1`) — session 08
+
+Student decisions D1–D4 of 2026-10-26 (`docs/LEVEL1.md`). `L1` is separate
+from the frozen suite; the suite, its results and traces do not change.
+
+| Phase | Item | Status |
+| --- | --- | --- |
+| P0 | Fix the S3 loose-ledge climb crash (and the related hang-on-air state); replay all committed traces | done, `f9c2c14` |
+| P1 | Level-file reader, local fetch tool (pinned, SHA-256), `L1` registry outside the suite, isolation tests | done, `f23efa9` |
+| P2 | Level 1 rules: gates open at load, entry drop and gate slam, sword pickup, loose floor knocked from below | done, `f23efa9`; audit fix `83892fc` |
+| P3 | Frontend: `play.py L1`, entry clip, sword and skeleton shapes | done, `78422ee` |
+| P4 | Verification and documentation (`docs/LEVEL1.md`, rule map, spec, audit, session log) | done |
+| — | Art milestone (D4): sword, skeleton, pickup and guard images on the course branch only | not started; needs approval |
+| P5 | Guards and simplified combat in `L1` | **stop: waiting for the student's review** |

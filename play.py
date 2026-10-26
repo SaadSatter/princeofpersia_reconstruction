@@ -317,7 +317,8 @@ def main(argv: list[str] | None = None) -> int:
     replay_i = 0
     watch_done = None
     tick = 0
-    frames_left = None if not args.screenshot else 400
+    # Screenshot checks: enough frames for every scripted key (each clip <= 12 frames).
+    frames_left = None if not args.screenshot else 400 + 16 * len(scripted)
 
     def begin(shown: Shown):
         nonlocal clip_poses, clip_i, current, message
