@@ -8,6 +8,7 @@ Working directory: the project folder.
     uv run python play.py S1 --watch baseline     # watch the baseline play
     uv run python play.py S1 --watch model-history --live   # watch the model (paid calls)
     uv run python play.py --replay traces/eval/20261026T060347Z-baseline-S3-100.jsonl
+    uv run python play.py L1                      # original Level 1 (after tools/fetch_level1.py)
 
 Keys: Left/Right run (or turn), Shift+Left/Right careful step, Up climb /
 exit, Down crouch / hang / drop / drink, Up+Left/Right jump,
@@ -30,6 +31,7 @@ import threading
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from pop import levels
 from pop.interface import PLAYER_ID, SITUATION_DEFAULT, Episode
 from pop.situations import SITUATIONS
 from render import anim
@@ -100,6 +102,24 @@ class Driver:
     def reset(self) -> None:
         self.obs = self.ep.reset(self.seed)
         self.anim_state = anim.AnimState()
+
+    def intro(self) -> Shown | None:
+        """The entry the player watched before control began (Level 1 drop, R-D29),
+        rebuilt from the first observation's last_result."""
+        res = self.obs.get("last_result")
+        if not res or not res.get("frames"):
+            return None
+        after = self.obs["kid"]
+        before = dict(after, row=after["row"] - res["fell_rows"], posture="falling")
+        # All of the entry's frames show the drop (stepfall); the landing is
+        # the idle pose that follows. Display only.
+        p0 = anim.stand_point(before["row"], before["col"])
+        p1 = anim.stand_point(after["row"], after["col"])
+        f = 1 if after["facing"] == "right" else -1
+        n = res["frames"]
+        poses = [anim.Pose(fr, *anim.lerp(p0, p1, ((i + 1) / n) ** 2), f, "fall")
+                 for i, fr in enumerate(anim.resample(anim.FALL, n))]
+        return Shown("enter", True, poses, self.obs, self.obs, "game")
 
     def legal(self) -> list[str]:
         return self.ep.legal_actions(PLAYER_ID)
@@ -207,7 +227,8 @@ def start_watch(kind: str, situation: str, seed: int, provider: str, model: str 
 # --- window ------------------------------------------------------------------
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.add_argument("situation", nargs="?", default="S3", choices=sorted(SITUATIONS))
+    ap.add_argument("situation", nargs="?", default="S3",
+                    choices=sorted(SITUATIONS) + list(levels.EXHIBITION_IDS))
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--placeholder", action="store_true", help="draw placeholder shapes")
     ap.add_argument("--scale", type=int, default=3)
@@ -223,6 +244,14 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.watch and args.replay:
         ap.error("choose --watch or --replay, not both")
+    if args.situation in levels.EXHIBITION_IDS and not args.replay:
+        try:
+            levels.get(args.situation)
+        except (levels.LevelDataMissing, levels.LevelDataMismatch) as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 2
+        if args.watch and args.watch.startswith("model"):
+            ap.error("model players are not set up for L1 yet (its tile legend is not in the prompt)")
     if args.watch and args.watch.startswith("model"):
         if not args.live:
             ap.error("model players make paid API calls; pass --live")
@@ -299,6 +328,9 @@ def main(argv: list[str] | None = None) -> int:
         if shown.mismatch:
             message = "REPLAY MISMATCH " + shown.mismatch
 
+    if driver.intro() is not None:
+        begin(driver.intro())
+
     running = True
     while running:
         shift = bool(pygame.key.get_mods() & pygame.KMOD_SHIFT)
@@ -312,6 +344,8 @@ def main(argv: list[str] | None = None) -> int:
                     driver.reset()
                     pending.clear()
                     clip_poses, clip_i, message = [], 0, "restarted"
+                    if driver.intro():
+                        begin(driver.intro())
                 elif ev.key in names and not (args.watch or args.replay):
                     a = action_for(names[ev.key], held, shift)
                     if a:
