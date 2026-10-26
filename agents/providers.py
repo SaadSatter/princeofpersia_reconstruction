@@ -16,11 +16,14 @@ from dataclasses import dataclass
 
 DEFAULT_MODEL = "claude-haiku-4-5"
 
-# USD per million tokens (input, output). Source: Anthropic's published list
-# price for Claude Haiku 4.5, as given in the claude-api reference cached
-# 2026-10-06. Re-check https://www.anthropic.com/pricing on the day of a
-# live run and update PRICE_DATE if it changed.
-PRICE_DATE = "2026-10-06"
+# USD per million tokens (input, output), base rates, no caching or batch.
+# Verified 2026-10-26 against https://platform.claude.com/docs/en/about-claude/pricing
+# ("Claude Haiku 4.5 | $1 / MTok ... | $5 / MTok"). Earlier value came from a
+# reference cached 2026-10-06 and was the same. Re-check before each live
+# trial day and update PRICE_DATE. A model missing here has unknown cost
+# (None), never $0.
+PRICE_DATE = "2026-10-26"
+PRICE_SOURCE = "https://platform.claude.com/docs/en/about-claude/pricing"
 PRICES = {"claude-haiku-4-5": (1.00, 5.00)}
 
 

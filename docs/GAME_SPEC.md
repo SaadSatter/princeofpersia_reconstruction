@@ -151,7 +151,10 @@ frame counter; RNG (seeded, unused until combat); terminal flag and reason.
 - **Runner limits:** max actions and max model calls per situation (suite
   file), per-call timeout 20 s, 5 consecutive invalid actions. Failed or
   timed-out calls count as calls and produce a `WAIT` labeled
-  `source: "fallback"`.
+  `source: "fallback"`. A reply that arrives after its timeout is discarded:
+  it changes neither the episode, the trace's steps, nor the player's memory;
+  only its tokens and cost are logged (`late_replies`). A call whose model
+  has no known price has cost `null` ("unknown"), never $0.
 - **Restart:** `reset(seed)` (runner); `R` key (human).
 
 ## 8. Observation (what a human sees on screen)

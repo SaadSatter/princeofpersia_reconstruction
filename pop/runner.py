@@ -5,10 +5,17 @@ A player is any object with:
     source: str          # "baseline", "model", "scripted", ...
     uses_model: bool     # if True, every decide() call counts as a model call
     decide(observation: dict, legal_actions: list[str]) -> str | Decision
+    commit(observation, action, source, error)   # optional memory hook
 
 The runner gives the player copies only, times each decision, counts model
 calls (failed ones included), substitutes a WAIT labeled "fallback" when a
 decision fails or times out, and records a trace.
+
+A timed-out decision thread cannot be killed, so its reply may still arrive.
+The runner never reads it into the episode or the trace; it only logs the
+reply's tokens and cost under `late_replies` (they are billed). A player that
+keeps memory must write it only in `commit`, which the runner calls in its
+own thread after each step with what was actually submitted (audit F-1).
 """
 
 from __future__ import annotations
@@ -44,7 +51,10 @@ class Limits:
 
 
 def _call_with_timeout(fn, args, timeout_s):
-    """Run fn(*args) in a daemon thread. Returns (value, error_string)."""
+    """Run fn(*args) in a daemon thread. Returns (value, error_string, late).
+
+    On timeout `late` is (thread, box): the box may fill in later and is
+    only ever read for usage accounting."""
     box: dict = {}
 
     def target():
@@ -57,10 +67,37 @@ def _call_with_timeout(fn, args, timeout_s):
     thread.start()
     thread.join(timeout_s)
     if thread.is_alive():
-        return None, "timeout"
+        return None, "timeout", (thread, box)
     if "error" in box:
-        return None, box["error"]
-    return box.get("value"), None
+        return None, box["error"], None
+    return box.get("value"), None, None
+
+
+def _late_reply(i: int, late) -> dict:
+    """Usage of an abandoned call, read once at the end of the episode.
+
+    arrived: a reply came back (billed; its meta has tokens and cost).
+    failed:  the call raised (treated like any failed call: no usage).
+    pending: still running, so its cost is unknown (None), never $0."""
+    thread, box = late
+    if thread.is_alive():
+        return {"i": i, "status": "pending", "tokens_in": 0, "tokens_out": 0,
+                "cost_usd": None}
+    if "value" not in box:
+        return {"i": i, "status": "failed", "tokens_in": 0, "tokens_out": 0,
+                "cost_usd": 0.0}
+    value = box["value"]
+    meta = value.meta if isinstance(value, Decision) else {}
+    return {"i": i, "status": "arrived", "tokens_in": meta.get("tokens_in", 0),
+            "tokens_out": meta.get("tokens_out", 0), "cost_usd": meta.get("cost_usd", 0.0)}
+
+
+def _sum_cost(metas: list[dict]) -> float | None:
+    """Total cost, or None if any call's price is unknown (audit F-2)."""
+    costs = [m["cost_usd"] for m in metas if "cost_usd" in m]
+    if any(c is None for c in costs):
+        return None
+    return round(sum(costs), 6)
 
 
 def run_episode(player, situation_id: str, seed: int, limits: Limits | None = None) -> dict:
@@ -73,6 +110,7 @@ def run_episode(player, situation_id: str, seed: int, limits: Limits | None = No
     max_calls = limits.max_calls if limits.max_calls is not None else ep.situation.max_calls
     calls = failed_calls = fallbacks = 0
     trace: list[dict] = []
+    abandoned: list[tuple[int, tuple]] = []      # (step index, (thread, box))
     started = time.time()
 
     while ep.outcome()["status"] == "ongoing":
@@ -84,8 +122,11 @@ def run_episode(player, situation_id: str, seed: int, limits: Limits | None = No
         legal = ep.legal_actions(PLAYER_ID)
 
         t0 = time.perf_counter()
-        value, error = _call_with_timeout(player.decide, (copy.deepcopy(obs), list(legal)),
-                                          limits.call_timeout_s)
+        value, error, late = _call_with_timeout(player.decide,
+                                                (copy.deepcopy(obs), list(legal)),
+                                                limits.call_timeout_s)
+        if late is not None:
+            abandoned.append((len(trace), late))
         latency_ms = round(1000 * (time.perf_counter() - t0), 1)
         if player.uses_model:
             calls += 1                                 # failed calls count too
@@ -107,6 +148,9 @@ def run_episode(player, situation_id: str, seed: int, limits: Limits | None = No
                 action, source = FALLBACK_ACTION, "fallback"
 
         result = ep.step(PLAYER_ID, action)
+        if hasattr(player, "commit"):
+            player.commit(copy.deepcopy(obs), action if isinstance(action, str) else repr(action),
+                          source, error)
         after = result["observation"]
         trace.append({
             "i": len(trace),
@@ -124,9 +168,12 @@ def run_episode(player, situation_id: str, seed: int, limits: Limits | None = No
 
     out = ep.outcome()
     latencies = [r["latency_ms"] for r in trace] or [0.0]
-    usage = {"tokens_in": sum(r["meta"].get("tokens_in", 0) for r in trace),
-             "tokens_out": sum(r["meta"].get("tokens_out", 0) for r in trace),
-             "cost_usd": round(sum(r["meta"].get("cost_usd", 0.0) for r in trace), 6)}
+    # Late replies are read once, here, after the episode is over.
+    late_replies = [_late_reply(i, late) for i, late in abandoned]
+    metas = [r["meta"] for r in trace] + late_replies
+    usage = {"tokens_in": sum(m.get("tokens_in", 0) for m in metas),
+             "tokens_out": sum(m.get("tokens_out", 0) for m in metas),
+             "cost_usd": _sum_cost(metas)}
     return {
         "situation": situation_id,
         "seed": seed,
@@ -138,6 +185,7 @@ def run_episode(player, situation_id: str, seed: int, limits: Limits | None = No
         "failed_calls": failed_calls,
         "fallbacks": fallbacks,
         "usage": usage,
+        "late_replies": late_replies,
         "latency_ms": {"mean": round(sum(latencies) / len(latencies), 1),
                        "max": max(latencies)},
         "limits": {"max_actions": ep.max_actions, "max_calls": max_calls,

@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import re
+import threading
 
 from pop.runner import Decision
 from pop.tiles import LEGEND
@@ -85,6 +86,11 @@ def _parse(text: str) -> str | None:
 
 
 class ModelPlayer:
+    """Memory is written only by commit(), which the runner calls in its own
+    thread after each step. decide() reads a snapshot and writes nothing, so a
+    reply that arrives after the runner's timeout cannot change what the
+    player remembers (audit F-1, 2026-10-26)."""
+
     source = "model"
     uses_model = True
 
@@ -97,22 +103,51 @@ class ModelPlayer:
         self.system = build_system_prompt()
         self.steps: list[dict] = []           # own past steps (bounded when shown)
         self.seen: dict[str, dict] = {}       # room label -> last view of that room
-        self._pending: str | None = None
+        self._pending: str | None = None      # last submitted action, awaiting its result
+        self._lock = threading.Lock()
 
     # ------------------------------------------------------------------
-    def build_user_prompt(self, obs: dict, legal: list[str]) -> str:
+    def _memory_after(self, obs: dict) -> tuple[list[dict], dict[str, dict]]:
+        """Copies of (steps, seen) as they will be once `obs` is committed."""
+        with self._lock:
+            steps = list(self.steps)
+            seen = dict(self.seen)
+            pending = self._pending
+        if pending is not None:
+            k = obs["kid"]
+            steps.append({"action": pending, "result": obs["last_result"],
+                          "room": obs["room"], "row": k["row"], "col": k["col"],
+                          "facing": k["facing"]})
+        seen[obs["room"]] = {"tiles": list(obs["tiles"]), "edges": dict(obs["edges"])}
+        return steps, seen
+
+    def commit(self, observation: dict, action: str, source: str, error: str | None) -> None:
+        """Runner hook: record what was actually submitted for `observation`."""
+        steps, seen = self._memory_after(observation)
+        if source == "fallback":
+            label = "WAIT (fallback)" if error == "unparseable reply" else "WAIT (failed call)"
+        else:
+            label = action
+        with self._lock:
+            self.steps, self.seen, self._pending = steps, seen, label
+
+    def build_user_prompt(self, obs: dict, legal: list[str],
+                          steps: list[dict] | None = None,
+                          seen: dict[str, dict] | None = None) -> str:
+        if steps is None or seen is None:
+            steps, seen = self._memory_after(obs)
         kid = obs["kid"]
         parts = []
         if self.variant == "history":
-            others = {k: v for k, v in self.seen.items() if k != obs["room"]}
+            others = {k: v for k, v in seen.items() if k != obs["room"]}
             if others:
                 parts.append("Rooms you have seen before (as you last saw them):")
                 for label, view in others.items():
                     parts.append(f"{label} (edges {view['edges']})\n{render_room(view['tiles'])}")
-            if self.steps:
-                parts.append(f"Your last {min(HISTORY_STEPS, len(self.steps))} actions "
+            if steps:
+                parts.append(f"Your last {min(HISTORY_STEPS, len(steps))} actions "
                              "(oldest first):")
-                for s in self.steps[-HISTORY_STEPS:]:
+                for s in steps[-HISTORY_STEPS:]:
                     parts.append(f"- {s['action']} -> {s['result']}; then in {s['room']} "
                                  f"row {s['row']} col {s['col']} facing {s['facing']}")
         parts.append(f"Current room: {obs['room']}  edges: {json.dumps(obs['edges'])}")
@@ -127,28 +162,17 @@ class ModelPlayer:
         parts.append("Legal actions now: " + ", ".join(legal))
         return "\n\n".join(parts)
 
-    def _remember(self, obs: dict) -> None:
-        if self._pending is not None:
-            k = obs["kid"]
-            self.steps.append({"action": self._pending, "result": obs["last_result"],
-                               "room": obs["room"], "row": k["row"], "col": k["col"],
-                               "facing": k["facing"]})
-            self._pending = None
-        self.seen[obs["room"]] = {"tiles": list(obs["tiles"]), "edges": dict(obs["edges"])}
-
     # ------------------------------------------------------------------
     def decide(self, observation: dict, legal_actions: list[str]) -> Decision:
-        self._remember(observation)
         user = self.build_user_prompt(observation, legal_actions)
-        self._pending = "WAIT (failed call)"  # replaced below if the call returns
         c = self.provider.complete(self.system, user)
         action = _parse(c.text)
+        cost = estimate_cost(c.model, c.tokens_in, c.tokens_out)
         meta = {"provider": self.provider.name, "model": c.model, "variant": self.variant,
                 "tokens_in": c.tokens_in, "tokens_out": c.tokens_out,
-                "cost_usd": estimate_cost(c.model, c.tokens_in, c.tokens_out) or 0.0,
-                "cost_known": estimate_cost(c.model, c.tokens_in, c.tokens_out) is not None,
+                "cost_usd": cost,                  # None = price unknown, never 0 (audit F-2)
+                "cost_known": cost is not None,
                 "request_id": c.request_id, "raw": c.text, "parsed_action": action}
-        self._pending = action if action is not None else "WAIT (fallback)"
         if action is None:
             return Decision(None, meta, fallback_reason="unparseable reply")
         return Decision(action, meta)

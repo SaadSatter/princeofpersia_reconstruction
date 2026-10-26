@@ -59,6 +59,13 @@ def make_player(kind: str, provider_name: str, model: str | None):
     return ModelPlayer(make_provider(provider_name, model), variant=kind.removeprefix("model-"))
 
 
+def _sum_cost(costs: list[float | None]) -> float | None:
+    """Unknown (None) if any episode's cost is unknown; never shown as $0 (audit F-2)."""
+    if any(c is None for c in costs):
+        return None
+    return round(sum(costs), 4)
+
+
 def summarize(episodes: list[dict]) -> list[dict]:
     groups: dict[tuple, list[dict]] = defaultdict(list)
     for e in episodes:
@@ -83,7 +90,7 @@ def summarize(episodes: list[dict]) -> list[dict]:
             "latency_max_ms": max(e["latency_ms"]["max"] for e in eps),
             "tokens_in": sum(e["usage"]["tokens_in"] for e in eps),
             "tokens_out": sum(e["usage"]["tokens_out"] for e in eps),
-            "cost_usd": round(sum(e["usage"]["cost_usd"] for e in eps), 4),
+            "cost_usd": _sum_cost([e["usage"]["cost_usd"] for e in eps]),
         })
     return rows
 
@@ -100,7 +107,8 @@ def table_md(rows: list[dict]) -> str:
             f"{r['wins']}/{r['trials']} | {reasons} | {r['mean_actions']} | {r['invalid']} | "
             f"{r['calls']} | {r['failed_calls']} | {r['fallbacks']} | "
             f"{r['latency_mean_ms']} / {r['latency_max_ms']} | "
-            f"{r['tokens_in']} / {r['tokens_out']} | {r['cost_usd']:.4f} |")
+            f"{r['tokens_in']} / {r['tokens_out']} | "
+            f"{'unknown' if r['cost_usd'] is None else format(r['cost_usd'], '.4f')} |")
     return "\n".join(lines) + "\n"
 
 
@@ -152,9 +160,10 @@ def main(argv: list[str] | None = None) -> int:
                 res["suite"] = args.suite
                 res["run_utc"] = stamp
                 if kind.startswith("model"):
-                    from agents.providers import PRICE_DATE
+                    from agents.providers import PRICE_DATE, PRICE_SOURCE
                     res["provider"] = args.provider
                     res["price_date"] = PRICE_DATE
+                    res["price_source"] = PRICE_SOURCE
                     models = {r["meta"].get("model") for r in res["trace"] if r["meta"].get("model")}
                     res["model_ids_returned"] = sorted(models)
                 path = out / f"{stamp}-{kind}-{sid}-{seed}.jsonl"
