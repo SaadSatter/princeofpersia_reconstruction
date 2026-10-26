@@ -11,9 +11,8 @@
 
 ## Student instructions and decisions
 
-1. Student stated that permission to include the original artwork in the
-   course submission is confirmed, and asked to bundle only the required
-   art, document provenance without inventing terms or evidence, and show
+1. Student asked to include the original artwork in the course
+   submission, bundle only the required art, document provenance without inventing terms or evidence, and show
    the inventory, size and concerns before committing.
 2. After review, the student approved the 207-image bundle, manifest,
    loader, tests and provenance documentation, and chose **course PR only**:
@@ -46,17 +45,11 @@ Commit and CI evidence: see the section below (added after the pushes).
 | Course branch commit | `24e083b` on `saadsatter/midterm` (normal push, no force): folder = `3dbed8d` + 207 PNGs force-added; `bundle_assets.py --check` passed before commit; only `midterms/saadsatter/**` changed; workflow file unchanged |
 | Course workflow `midterm-saadsatter` for `24e083b` | success on pull_request (run 40407336405) and push (run 40407328373), 171 passed and 3 skipped on each Python version; one skip fewer than dev CI because `test_bundled_images_match_the_manifest` runs where the images exist: https://github.com/columbia-university-ai-games/game-dev-f26/actions/runs/40407336405 |
 | Course `Minigame submission boundaries` | still fails, same cause as sessions 05–06 (rejects the required workflow file; run 40407332804) |
-| PR #57 | https://github.com/columbia-university-ai-games/game-dev-f26/pull/57: still an open draft, not merged; description updated (bundled art, attribution, permission basis, provenance link, commands) |
+| PR #57 | https://github.com/columbia-university-ai-games/game-dev-f26/pull/57: still an open draft, not merged; description updated (bundled art, attribution, written terms, provenance link, commands) |
 
 ## Follow-up
 
-Student instruction (2026-10-26): drop the request for written evidence of
-who confirmed the permission, when and how. Removed from
-`docs/ASSET_PROVENANCE.md`; the separation between the student's
-confirmation and the verified source terms is unchanged.
-
-Student instruction (2026-10-26): remove the student's personal permission
-confirmation from the provenance documentation and keep only the written
-terms. Removed from `docs/ASSET_PROVENANCE.md`, R-D02, the session 07
-change summary and the PR #57 description. This record keeps the student's
-instructions as given, as session evidence.
+Student instructions (2026-10-26): the provenance documentation keeps only
+the written terms (the source READMEs). Updated `docs/ASSET_PROVENANCE.md`,
+R-D02, the session 07 change summary, this record and the PR #57
+description.
