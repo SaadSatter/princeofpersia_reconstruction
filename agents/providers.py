@@ -43,10 +43,59 @@ def estimate_cost(model: str, tokens_in: int, tokens_out: int) -> float | None:
     return None
 
 
+class ProviderConfigError(RuntimeError):
+    """A setup problem found before any model call. Nothing was sent or counted."""
+
+
+def check_credentials(provider: str) -> None:
+    """Fail before the first call if the credential cannot work.
+
+    The anthropic SDK accepts a missing or empty key when the client is built
+    and fails only inside each request, so a bad setup used to look like an
+    episode of failed calls (first live attempt, 2026-10-26). Messages name
+    the variable, never its value."""
+    if provider == "anthropic":
+        key = os.environ.get("ANTHROPIC_API_KEY")
+        if key is None:
+            raise ProviderConfigError("ANTHROPIC_API_KEY is not set in this process. "
+                                      "Export it in the same shell that runs evaluate.py.")
+        if not key.strip():
+            raise ProviderConfigError("ANTHROPIC_API_KEY is set but empty. "
+                                      "Set it again, then re-run.")
+        if key != key.strip():
+            raise ProviderConfigError("ANTHROPIC_API_KEY has leading or trailing whitespace "
+                                      "(for example a newline). Remove it, then re-run.")
+    elif provider == "vertex" and not os.environ.get("GOOGLE_CLOUD_PROJECT", "").strip():
+        raise ProviderConfigError("GOOGLE_CLOUD_PROJECT is not set (needed for Vertex AI).")
+
+
+# HTTP status -> failed-call kind (platform.claude.com API errors page).
+_STATUS_KINDS = {400: "bad_request", 401: "auth_rejected", 403: "permission_denied",
+                 404: "model_not_found", 413: "request_too_large", 429: "rate_limited",
+                 529: "overloaded"}
+
+
+def classify_error(exc: BaseException) -> str:
+    """A short, safe category for a failed call; it never contains the message."""
+    if isinstance(exc, ProviderConfigError) or (
+            isinstance(exc, TypeError) and "authentication method" in str(exc)):
+        return "auth_missing"           # the SDK's error for a missing or empty key
+    status = getattr(exc, "status_code", None)
+    if isinstance(status, int):
+        return _STATUS_KINDS.get(status) or ("server_error" if status >= 500 else f"http_{status}")
+    name = type(exc).__name__           # SDK: APITimeoutError subclasses APIConnectionError
+    if "Timeout" in name:
+        return "provider_timeout"
+    if "Connection" in name:
+        return "connection_error"
+    return "other"
+
+
 class AnthropicProvider:
     name = "anthropic"
 
     def __init__(self, model: str, timeout_s: float = 15.0, max_tokens: int = 400):
+        check_credentials(self.name)
         import anthropic  # lazy: only needed for live runs
 
         self.model = model

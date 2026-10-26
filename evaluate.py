@@ -144,6 +144,15 @@ def main(argv: list[str] | None = None) -> int:
         if p.startswith("model") and not args.live:
             ap.error("model players make paid API calls; pass --live to run them")
 
+    if any(p.startswith("model") for p in players):
+        # Before any episode: a missing key must stop the run, not become
+        # 40 counted failed calls (first live attempt, 2026-10-26; R-D25).
+        from agents.providers import ProviderConfigError, check_credentials
+        try:
+            check_credentials(args.provider)
+        except ProviderConfigError as exc:
+            ap.exit(2, f"evaluate.py: error: {exc} No episode was run.\n")
+
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     version = game_version()
@@ -175,6 +184,12 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"{kind:15} {sid} seed {seed}: {o['reason']:14} actions {o['actions']:3} "
                       f"invalid {o['invalid_actions']} calls {res['model_calls']} "
                       f"fallbacks {res['fallbacks']}  -> {path}")
+                if res["failed_call_kinds"]:
+                    kinds = ", ".join(f"{k} {n}" for k, n in res["failed_call_kinds"].items())
+                    print(f"    failed calls by kind: {kinds}")
+                    if res["model_calls"] and res["failed_calls"] == res["model_calls"]:
+                        print("    WARNING: every model call failed; this episode is not "
+                              "evidence of model gameplay.")
 
     rows = summarize(episodes)
     (out / f"{stamp}-results.json").write_text(json.dumps(

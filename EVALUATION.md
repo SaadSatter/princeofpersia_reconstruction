@@ -1,8 +1,10 @@
 # Evaluation — preliminary (2026-10-26)
 
-**Status: preliminary.** Baseline results are real. **No live model trial
-is reported yet**: neither implementation session (02, 03) had API
-credentials, so the model rows below are empty. This file will be updated with
+**Status: preliminary.** Baseline results are real. **No live model
+gameplay is reported yet.** One live attempt (2026-10-26 16:26 UTC) failed
+before reaching the API: every call failed for lack of a usable API key (see
+"Failed live attempt" below). It is not a model result, so the model rows
+below are still empty. This file will be updated with
 live results, and the limitations paragraph must be written by the student.
 
 ## Declared suite
@@ -64,6 +66,31 @@ Run `20261026T060347Z` (UTC), game version `0.1.0+3c4c210`, command (project fol
 | model-history | S1–S3, H1–H3 | 0 | — | **not run** | — | — | — | — | — | — | — | — |
 | model-obs-only | S1–S3 | 0 | — | **not run** | — | — | — | — | — | — | — | — |
 
+### Failed live attempt (not a model result)
+
+Run `20261026T162629Z`, game version `0.1.0+b2a6e2a`, command (project folder):
+`uv run python evaluate.py --suite tuning --players model-history --situations S1 --seeds 0 --live --out traces/live`.
+
+| Field | Recorded value |
+| --- | --- |
+| Actions / outcome | 40, `step_limit` (score 0) |
+| Model calls / failed / fallbacks | 40 / 40 / 40, every action a `WAIT` labeled `source: "fallback"` |
+| Error on all 40 steps | `TypeError: "Could not resolve authentication method. Expected one of api_key, auth_token, or credentials to be set. ..."` (raised by the `anthropic` SDK 0.125.0) |
+| Tokens in / out, cost | 0 / 0, $0 (no request was sent) |
+| Latency mean / max | 0.6 / 2.8 ms (no network round trip) |
+| Model ids returned | none |
+
+**Cause.** The SDK raises this error when `ANTHROPIC_API_KEY` is unset or
+empty in the Python process. It still builds the client and fails inside
+each request, before anything is sent (reproduced offline:
+`tests/test_provider_sdk.py::test_sdk_no_key_error_is_classified_and_the_adapter_now_stops_first`).
+The trace cannot show whether the key was unset or empty. The runner then
+treated each failure as an ordinary failed call. **Fix (R-D25):** a live run
+now checks the credential before the first episode and stops with exit code 2
+and no trace. Failed calls also carry an `error_kind`, here `auth_missing`.
+This attempt says nothing about the model's play. It is kept as a record of
+a setup failure.
+
 For reference, the hand-written test routes (`tests/solutions.py`, never
 shown to a player) use 12 / 16 / 38 / 11 / 16 / 44 actions for S1 / S2 / S3 /
 H1 / H2 / H3; the baseline found shorter routes in all six.
@@ -81,12 +108,16 @@ results and do not weaken the baseline (audit note N1).
   (12 files), `traces/eval/20261026T060347Z-results.json`,
   `traces/eval/20261026T060347Z-table.md`.
 - Scripted route (not a player): `traces/dev/S3-scripted-route-100.jsonl`.
-- Model traces: none yet.
+- Model gameplay traces: none yet.
+- Failed live attempt (40 provider failures, no gameplay):
+  `traces/live/20261026T162629Z-model-history-S1-0.jsonl`, `-results.json`,
+  `-table.md`, written before the R-D25 fix, so they have no `error_kind`
+  field. See `traces/live/README.md`.
 
 Each trace is JSONL: one `episode` header (situation, seed, player, game
 version, outcome and reason, calls, failed calls, fallbacks, usage, latency,
-limits), then one `step` line per action (action, source, accepted, error,
-effect, frames, latency, model metadata including raw reply and parsed action).
+limits, `failed_call_kinds`), then one `step` line per action (action, source, accepted, error,
+`error_kind` for failed calls, effect, frames, latency, model metadata including raw reply and parsed action).
 
 ## How to run a live model episode
 
@@ -94,9 +125,14 @@ From the project folder, with an Anthropic API key in the environment:
 
 ```
 uv sync --extra model
-export ANTHROPIC_API_KEY=...            # never commit it
+export ANTHROPIC_API_KEY=...            # never commit it; type it, don't paste it with other lines
+uv run python tools/smoke_provider.py --check-only                # no network
+uv run python tools/smoke_provider.py --live --out traces/live    # exactly one tiny paid call
 uv run python evaluate.py --suite tuning --players model-history --situations S1 --seeds 0 --live --out traces/live
 ```
+
+`evaluate.py --live` stops before any episode if the key is unset, empty, or
+padded with whitespace.
 
 The final model trials are:
 
@@ -119,7 +155,8 @@ uv run python evaluate.py --suite final --players model-history,model-obs-only -
 
 ## Limitations
 
-*To be written by the student.* Facts to consider: no live model trial yet;
+*To be written by the student.* Facts to consider: no live model gameplay yet
+(one live attempt failed on a missing or empty API key, 40/40 calls);
 seeds do not vary episodes; the baseline wins every case (ceiling effect);
 the baseline's rules model is hand-coded; six small authored situations, two
 trials each; cost price not re-verified on a run day; no peer playtest yet.

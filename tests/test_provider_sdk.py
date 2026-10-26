@@ -13,7 +13,8 @@ import pytest
 anthropic = pytest.importorskip("anthropic")
 httpx = pytest.importorskip("httpx")
 
-from agents.providers import AnthropicProvider  # noqa: E402
+from agents.providers import (AnthropicProvider, ProviderConfigError,  # noqa: E402
+                              classify_error)
 
 REPLY = {
     "id": "msg_test", "type": "message", "role": "assistant",
@@ -71,3 +72,30 @@ def test_adapter_does_not_retry_a_failed_request(monkeypatch):
     with pytest.raises(anthropic.APIStatusError):
         p.complete("s", "u")
     assert len(seen) == 1            # one counted call is one HTTP request
+
+
+def test_sdk_no_key_error_is_classified_and_the_adapter_now_stops_first(monkeypatch):
+    """The SDK's own behaviour behind the 2026-10-26 failed live attempt: with
+    an empty key the client builds, and the request raises TypeError without
+    sending anything. The adapter now refuses to build instead."""
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "")
+    seen = []
+    client = anthropic.Anthropic(max_retries=0, http_client=httpx.Client(
+        transport=httpx.MockTransport(lambda r: seen.append(r) or httpx.Response(200, json=REPLY))))
+    with pytest.raises(TypeError) as exc:
+        client.messages.create(model="claude-haiku-4-5", max_tokens=1,
+                               messages=[{"role": "user", "content": "x"}])
+    assert seen == [] and classify_error(exc.value) == "auth_missing"
+    with pytest.raises(ProviderConfigError):
+        AnthropicProvider(model="claude-haiku-4-5")
+
+
+@pytest.mark.parametrize("status,kind", [(401, "auth_rejected"), (404, "model_not_found"),
+                                         (429, "rate_limited"), (529, "overloaded")])
+def test_sdk_status_errors_get_their_kind(monkeypatch, status, kind):
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key-not-real")
+    p = _Offline(lambda r: httpx.Response(status, json={"type": "error", "error": {
+        "type": "x", "message": "m"}}), model="claude-haiku-4-5")
+    with pytest.raises(anthropic.APIStatusError) as exc:
+        p.complete("s", "u")
+    assert classify_error(exc.value) == kind

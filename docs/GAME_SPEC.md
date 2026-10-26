@@ -154,7 +154,10 @@ frame counter; RNG (seeded, unused until combat); terminal flag and reason.
   `source: "fallback"`. A reply that arrives after its timeout is discarded:
   it changes neither the episode, the trace's steps, nor the player's memory;
   only its tokens and cost are logged (`late_replies`). A call whose model
-  has no known price has cost `null` ("unknown"), never $0.
+  has no known price has cost `null` ("unknown"), never $0. A live run whose
+  credential is missing or blank stops before the first episode. Each failed
+  call is recorded with a safe `error_kind`, and secrets are redacted from
+  error text (R-D25).
 - **Restart:** `reset(seed)` (runner); `R` key (human).
 
 ## 8. Observation (what a human sees on screen)

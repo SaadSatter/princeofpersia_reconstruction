@@ -26,6 +26,8 @@ def test_regression_fall_death_reported_full_hp():
 import json
 import threading
 
+import pytest
+
 import evaluate
 from agents.model_player import ModelPlayer
 from agents.providers import Completion, FakeProvider
@@ -135,3 +137,88 @@ def test_late_reply_still_pending_at_episode_end_has_unknown_cost():
     assert res["late_replies"] == [{"i": 0, "status": "pending", "tokens_in": 0,
                                     "tokens_out": 0, "cost_usd": None}]
     assert res["usage"]["cost_usd"] is None
+
+
+# ---------------------------------------------------------------------------
+# First live attempt, 2026-10-26 (traces/live/20261026T162629Z-model-history-S1-0.jsonl):
+# all 40 calls failed with the same SDK error and nothing reached the API.
+
+SDK_NO_KEY = ('Could not resolve authentication method. Expected one of api_key, auth_token, '
+              'or credentials to be set. Or for one of the `X-Api-Key` or `Authorization` '
+              'headers to be explicitly omitted')
+LIVE_S1 = ["--suite", "tuning", "--players", "model-history", "--situations", "S1",
+           "--seeds", "0", "--live"]
+
+
+@pytest.mark.parametrize("value", [None, ""])
+def test_regression_missing_api_key_became_40_fallback_waits(value, monkeypatch, tmp_path):
+    """Observed 2026-10-26 16:26 UTC: `evaluate.py --live` ran S1 with
+    ANTHROPIC_API_KEY unset or empty in the Python process. The SDK client was
+    built anyway, and every `messages.create` raised `TypeError: Could not
+    resolve authentication method` before any HTTP request. The runner logged
+    40 failed calls, 40 WAIT fallbacks and 0 tokens, which looks like an episode.
+    Fix: check the credential before any episode starts. A missing or blank
+    key stops the run with an error, so no trace is written and no call is counted."""
+    if value is None:
+        monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    else:
+        monkeypatch.setenv("ANTHROPIC_API_KEY", value)
+    with pytest.raises(SystemExit) as exc:
+        evaluate.main(LIVE_S1 + ["--out", str(tmp_path)])
+    assert exc.value.code == 2
+    assert list(tmp_path.glob("*.jsonl")) == []
+
+
+def test_blank_or_padded_key_is_rejected_without_revealing_it(monkeypatch):
+    from agents.providers import ProviderConfigError, check_credentials
+    for bad in ["   ", "\n", " sk-ant-FAKE-padded\n"]:
+        monkeypatch.setenv("ANTHROPIC_API_KEY", bad)
+        with pytest.raises(ProviderConfigError) as exc:
+            check_credentials("anthropic")
+        assert "FAKE" not in str(exc.value)
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-FAKE-well-formed")
+    check_credentials("anthropic")                           # no error, no network
+
+
+def test_regression_failed_calls_had_no_error_category():
+    """Same live attempt: each failed step stored only the raw SDK message, so
+    the cause had to be read off 40 identical strings. Fix: every failed step
+    has a safe `error_kind`, and the episode header counts them."""
+    fake = FakeProvider([TypeError(SDK_NO_KEY)])
+    res = run_episode(ModelPlayer(fake), "S1", seed=0, limits=Limits(max_calls=3))
+    assert [r["error_kind"] for r in res["trace"]] == ["auth_missing"] * 3
+    assert res["failed_call_kinds"] == {"auth_missing": 3}
+
+
+class _StatusError(Exception):
+    def __init__(self, status_code, message="api error"):
+        super().__init__(message)
+        self.status_code = status_code
+
+
+class APITimeoutError(Exception):       # same class name as the SDK's
+    pass
+
+
+def test_failed_call_kinds_cover_provider_errors_timeouts_and_bad_replies():
+    from agents.providers import classify_error
+    cases = {401: "auth_rejected", 403: "permission_denied", 404: "model_not_found",
+             400: "bad_request", 429: "rate_limited", 529: "overloaded", 500: "server_error"}
+    for status, kind in cases.items():
+        assert classify_error(_StatusError(status)) == kind
+    assert classify_error(APITimeoutError("t")) == "provider_timeout"
+    assert classify_error(RuntimeError("?")) == "other"
+    fake = FakeProvider(["no json here", _StatusError(529)])
+    res = run_episode(ModelPlayer(fake), "S1", seed=0, limits=Limits(max_calls=2))
+    assert [r["error_kind"] for r in res["trace"]] == ["unparseable_reply", "overloaded"]
+    ok = run_episode(ModelPlayer(FakeProvider([json.dumps({"action": "WAIT"})])), "S1", seed=0,
+                     limits=Limits(max_calls=1))
+    assert ok["trace"][0]["error_kind"] is None and ok["failed_call_kinds"] == {}
+
+
+def test_error_text_in_traces_never_contains_a_key():
+    leaked = "sk-ant-api03-" + "A1b2" * 20
+    fake = FakeProvider([RuntimeError(f"bad header x-api-key: {leaked}")])
+    res = run_episode(ModelPlayer(fake), "S1", seed=0, limits=Limits(max_calls=1))
+    assert leaked not in json.dumps(res)
+    assert "[redacted]" in res["trace"][0]["error"]

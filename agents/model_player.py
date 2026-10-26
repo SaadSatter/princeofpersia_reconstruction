@@ -19,7 +19,7 @@ import threading
 from pop.runner import Decision
 from pop.tiles import LEGEND
 
-from .providers import estimate_cost
+from .providers import classify_error, estimate_cost
 
 HISTORY_STEPS = 8
 
@@ -165,7 +165,14 @@ class ModelPlayer:
     # ------------------------------------------------------------------
     def decide(self, observation: dict, legal_actions: list[str]) -> Decision:
         user = self.build_user_prompt(observation, legal_actions)
-        c = self.provider.complete(self.system, user)
+        try:
+            c = self.provider.complete(self.system, user)
+        except Exception as exc:
+            try:
+                exc.error_kind = classify_error(exc)   # read by the runner (R-D25)
+            except AttributeError:
+                pass
+            raise
         action = _parse(c.text)
         cost = estimate_cost(c.model, c.tokens_in, c.tokens_out)
         meta = {"provider": self.provider.name, "model": c.model, "variant": self.variant,
@@ -174,5 +181,6 @@ class ModelPlayer:
                 "cost_known": cost is not None,
                 "request_id": c.request_id, "raw": c.text, "parsed_action": action}
         if action is None:
-            return Decision(None, meta, fallback_reason="unparseable reply")
+            return Decision(None, meta, fallback_reason="unparseable reply",
+                            error_kind="unparseable_reply")
         return Decision(action, meta)

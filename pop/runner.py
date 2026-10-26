@@ -11,6 +11,9 @@ The runner gives the player copies only, times each decision, counts model
 calls (failed ones included), substitutes a WAIT labeled "fallback" when a
 decision fails or times out, and records a trace.
 
+Each failed call gets a short `error_kind` (e.g. "auth_missing", "timeout",
+"unparseable_reply") and error text with anything key-shaped redacted.
+
 A timed-out decision thread cannot be killed, so its reply may still arrive.
 The runner never reads it into the episode or the trace; it only logs the
 reply's tokens and cost under `late_replies` (they are billed). A player that
@@ -22,6 +25,7 @@ from __future__ import annotations
 
 import copy
 import json
+import re
 import threading
 import time
 from dataclasses import dataclass, field
@@ -40,6 +44,7 @@ class Decision:
     meta: dict = field(default_factory=dict)   # tokens, raw text, model id, ...
     # Set when the player made a call but produced no usable action (R-D22).
     fallback_reason: str | None = None
+    error_kind: str | None = None              # e.g. "unparseable_reply" (R-D25)
 
 
 @dataclass
@@ -50,27 +55,40 @@ class Limits:
     max_consecutive_invalid: int = 5
 
 
-def _call_with_timeout(fn, args, timeout_s):
-    """Run fn(*args) in a daemon thread. Returns (value, error_string, late).
+# Anything shaped like an API key or bearer token is cut from error text.
+_SECRET = re.compile(r"sk-ant-[A-Za-z0-9_\-]+|(?i:bearer\s+)[A-Za-z0-9._\-]{8,}")
+MAX_ERROR_CHARS = 300
 
-    On timeout `late` is (thread, box): the box may fill in later and is
-    only ever read for usage accounting."""
+
+def safe_error_text(exc: BaseException) -> str:
+    """Error text for traces: secrets redacted, length capped (R-D25)."""
+    text = _SECRET.sub("[redacted]", f"{type(exc).__name__}: {exc}")
+    return text if len(text) <= MAX_ERROR_CHARS else text[:MAX_ERROR_CHARS] + "..."
+
+
+def _call_with_timeout(fn, args, timeout_s):
+    """Run fn(*args) in a daemon thread. Returns (value, error, error_kind, late).
+
+    A player may tag a raised exception with `error_kind`; untagged ones are
+    "player_error". On timeout `late` is (thread, box): the box may fill in
+    later and is only ever read for usage accounting."""
     box: dict = {}
 
     def target():
         try:
             box["value"] = fn(*args)
         except Exception as exc:  # noqa: BLE001 - any player failure is a failed call
-            box["error"] = f"{type(exc).__name__}: {exc}"
+            box["error"] = safe_error_text(exc)
+            box["kind"] = getattr(exc, "error_kind", None) or "player_error"
 
     thread = threading.Thread(target=target, daemon=True)
     thread.start()
     thread.join(timeout_s)
     if thread.is_alive():
-        return None, "timeout", (thread, box)
+        return None, "timeout", "timeout", (thread, box)
     if "error" in box:
-        return None, box["error"], None
-    return box.get("value"), None, None
+        return None, box["error"], box["kind"], None
+    return box.get("value"), None, None, None
 
 
 def _late_reply(i: int, late) -> dict:
@@ -122,7 +140,7 @@ def run_episode(player, situation_id: str, seed: int, limits: Limits | None = No
         legal = ep.legal_actions(PLAYER_ID)
 
         t0 = time.perf_counter()
-        value, error, late = _call_with_timeout(player.decide,
+        value, error, error_kind, late = _call_with_timeout(player.decide,
                                                 (copy.deepcopy(obs), list(legal)),
                                                 limits.call_timeout_s)
         if late is not None:
@@ -145,6 +163,7 @@ def run_episode(player, situation_id: str, seed: int, limits: Limits | None = No
                 failed_calls += 1                      # R-D22
                 fallbacks += 1
                 error = value.fallback_reason
+                error_kind = value.error_kind or "fallback"
                 action, source = FALLBACK_ACTION, "fallback"
 
         result = ep.step(PLAYER_ID, action)
@@ -158,6 +177,7 @@ def run_episode(player, situation_id: str, seed: int, limits: Limits | None = No
             "source": source,
             "accepted": result["accepted"],
             "error": error or result.get("error"),
+            "error_kind": error_kind,                  # failed-call category, or None
             "effect": result.get("effect"),
             "frames": result["frames"],
             "latency_ms": latency_ms,
@@ -167,6 +187,10 @@ def run_episode(player, situation_id: str, seed: int, limits: Limits | None = No
         })
 
     out = ep.outcome()
+    kinds: dict[str, int] = {}
+    for r in trace:
+        if r["error_kind"]:
+            kinds[r["error_kind"]] = kinds.get(r["error_kind"], 0) + 1
     latencies = [r["latency_ms"] for r in trace] or [0.0]
     # Late replies are read once, here, after the episode is over.
     late_replies = [_late_reply(i, late) for i, late in abandoned]
@@ -184,6 +208,7 @@ def run_episode(player, situation_id: str, seed: int, limits: Limits | None = No
         "model_calls": calls,
         "failed_calls": failed_calls,
         "fallbacks": fallbacks,
+        "failed_call_kinds": dict(sorted(kinds.items())),
         "usage": usage,
         "late_replies": late_replies,
         "latency_ms": {"mean": round(sum(latencies) / len(latencies), 1),
