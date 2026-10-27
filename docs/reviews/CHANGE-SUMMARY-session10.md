@@ -30,6 +30,21 @@ gains only a change-log row.
 5. `tools/solve_level1.py`: the search key now includes exit position (it
    pruned waiting for an opening exit).
 
+6. Documentation: `docs/RULE_SOURCE_MAP.md` (R-D33, R-C35; R-C09, R-C29,
+   R-A03 corrected), `docs/GAME_SPEC.md` §5, `docs/EVALUATION_SUITE.md`
+   (change-log row only), `docs/LEVEL1.md`, `docs/REQUIREMENTS_CHECKLIST.md`,
+   `docs/IMPLEMENTATION_PLAN.md`, `docs/agent-sessions/10-level1-stabilization.md`.
+
+**Commits.** `b061194` (movement fix), `e999181` (trace replay), `a2b49ae`
+(rule findings), `04cf17f` (docs, solver), then a documentation-only
+handoff commit. Base for the diff: `8e68e56`.
+
+**Results claimed (verify).** `uv run pytest -q`: 281 passed, 1 skipped
+(with the local Level 1 file); 16/16 traces identical in complete state;
+fresh baseline final suite 12/12 identical; new L1 route won in 87
+actions, 0 invalid, sword, 1 HP; fresh clone without the level file 272
+passed, 10 skipped.
+
 **Please check in particular.**
 - Is `_phase`'s interruption rule right for every caller, and are the
   departure frames reasonable (R-D33 rationale)? Any move still placing the

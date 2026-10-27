@@ -123,12 +123,48 @@ committed files (e.g. compute the route at test time). The student decides.
 
 ## Commits (branch `level1-reconstruction`)
 
-| Commit | Content |
-| --- | --- |
-| `b061194` | Movement resolution `_phase` (R-D33), regression tests, new L1 route |
-| `e999181` | Complete-state trace replay with golden fingerprints |
-| `a2b49ae` | Exit by any plate, gate spec 1/2, required loose floor, assertion fix |
-| (docs commit) | Rule map, spec, suite change log, LEVEL1, checklist, plan, change summary, this log; solver key fix |
+| Commit | Content | Files |
+| --- | --- | --- |
+| `b061194` | Movement resolution `_phase` (R-D33), regression tests, new L1 route | `pop/engine.py`, `pop/physics.py`, `tests/consistency.py`, `tests/test_level1_original.py`, `tests/test_regressions.py` |
+| `e999181` | Complete-state trace replay with golden fingerprints | `tests/data/trace_states.json`, `tests/test_trace_replay.py`, `tests/trace_state.py` |
+| `a2b49ae` | Exit by any plate, gate spec 1/2, required loose floor, assertion fix | `pop/levels.py`, `pop/mechanics.py`, `tests/test_level1.py`, `tests/test_levelfile.py`, `tests/test_rules.py` |
+| `04cf17f` | Documentation; solver search-key fix | `docs/EVALUATION_SUITE.md` (change-log row only), `docs/GAME_SPEC.md`, `docs/IMPLEMENTATION_PLAN.md`, `docs/LEVEL1.md`, `docs/REQUIREMENTS_CHECKLIST.md`, `docs/RULE_SOURCE_MAP.md`, `docs/agent-sessions/10-level1-stabilization.md`, `docs/reviews/CHANGE-SUMMARY-session10.md`, `tools/solve_level1.py` |
+| (handoff commit) | This log and the change summary completed for the handoff (documentation only) | `docs/agent-sessions/10-level1-stabilization.md`, `docs/reviews/CHANGE-SUMMARY-session10.md` |
+
+Not committed, by design: original level files (`vendor/levels/`, git-ignored),
+reference sources (`vendor/ref-levels/`), bundled art (`assets/original/*/`,
+course branch only), scratch scripts and screenshots (session scratchpad,
+outside the repository), local transcripts, API keys (none used).
+
+## Remaining fidelity limitations (Level 1)
+
+From `docs/LEVEL1.md` (approximated / missing tables, each with its rule row):
+
+- **Guards and combat** (rooms 3 and 21) are not implemented (P5). Until then
+  the sword is not needed: the shortest win is 20 actions through rooms
+  1, 2, 3, 9.
+- Whole-block movement with fixed jump landings (3 / 5 blocks, R-D01); no
+  ledge grab mid-jump or mid-fall; no running momentum or skids.
+- Fall damage by rows fallen (R-D03), constant fall speed (R-D16), hang
+  drop one row less (R-D17).
+- A loose floor lands instantly on the first support below (R-D14); landing
+  wiggles not shown (R-D30); the move departure frames are our choice
+  (R-D33).
+- Spike trigger range (R-D19), drop-plate slam speed, gate bar height
+  (R-A04 `assumed`), sword pickup 12 frames instead of 22 (R-D28), entry
+  played inside `reset` (R-D29).
+- A gate closing on a kid inside its cell is not modeled.
+- Sword and skeleton drawn as code shapes until the art milestone (D4).
+- No observed play of an original build: nothing is labeled `observed`.
+
+## Independent review report
+
+The `rules-reviewer` report on session 08's work, whose findings this
+session resolves, is **not in this repository**: none under `docs/reviews/`
+or elsewhere in the project, and none found in nearby folders. This session
+worked from the student's summary of it. To make check 3d inspectable, the
+student should save that report as `docs/reviews/REVIEW-session08-level1.md`
+(the agent did not reconstruct or paraphrase it into a review file).
 
 ## Not done
 
