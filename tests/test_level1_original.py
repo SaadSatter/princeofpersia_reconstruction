@@ -69,17 +69,36 @@ def test_two_guards_in_the_file(L1):
     assert len(lvl.guards) == 2 and {g.program for g in lvl.guards} == {0}
 
 
-# Found by tools/solve_level1.py on 2026-10-26 (session 08): start -> sword in
-# room 15 -> back to the exit in room 9. No guard yet (phase P5).
-SWORD_ROUTE = """JUMP_RIGHT RIGHT RIGHT RIGHT JUMP_RIGHT WAIT LEFT JUMP_LEFT RUN_JUMP_LEFT UP LEFT LEFT RUN_JUMP_LEFT WAIT STEP_LEFT UP JUMP_LEFT LEFT JUMP_LEFT LEFT RIGHT RIGHT RUN_JUMP_RIGHT LEFT RUN_JUMP_LEFT RUN_JUMP_LEFT UP RUN_JUMP_LEFT RUN_JUMP_LEFT WAIT LEFT RUN_JUMP_LEFT WAIT STEP_LEFT JUMP_LEFT UP LEFT RUN_JUMP_LEFT RUN_JUMP_LEFT LEFT RUN_JUMP_LEFT WAIT DOWN LEFT RIGHT JUMP_RIGHT UP RUN_JUMP_RIGHT JUMP_RIGHT UP JUMP_RIGHT JUMP_RIGHT RIGHT RUN_JUMP_RIGHT RUN_JUMP_RIGHT RIGHT UP WAIT WAIT WAIT JUMP_RIGHT RUN_JUMP_RIGHT WAIT RUN_JUMP_RIGHT UP WAIT STEP_RIGHT JUMP_RIGHT JUMP_RIGHT JUMP_RIGHT JUMP_RIGHT RUN_JUMP_RIGHT RIGHT RUN_JUMP_RIGHT RUN_JUMP_RIGHT RUN_JUMP_RIGHT RUN_JUMP_RIGHT RIGHT LEFT UP RIGHT RIGHT JUMP_RIGHT RUN_JUMP_RIGHT LEFT RUN_JUMP_LEFT UP""".split()
+# Found by tools/solve_level1.py on 2026-10-26 (session 10), after the
+# loose-floor movement fix (R-D33): start -> sword in room 15 -> exit in
+# room 9. No guard yet (phase P5). The session-08 route is invalid: its 5th
+# action jumped off a loose floor at room 1 (2,6) and relied on the kid being
+# left "falling" on solid floor at (2,8).
+SWORD_ROUTE = """JUMP_RIGHT RIGHT RIGHT RIGHT LEFT WAIT WAIT LEFT RUN_JUMP_LEFT UP LEFT LEFT RUN_JUMP_LEFT WAIT STEP_LEFT UP JUMP_LEFT LEFT JUMP_LEFT LEFT RIGHT RIGHT RUN_JUMP_RIGHT LEFT RUN_JUMP_LEFT JUMP_LEFT UP RUN_JUMP_LEFT RUN_JUMP_LEFT WAIT LEFT RUN_JUMP_LEFT WAIT STEP_LEFT JUMP_LEFT UP LEFT RUN_JUMP_LEFT RUN_JUMP_LEFT LEFT RUN_JUMP_LEFT WAIT DOWN LEFT RIGHT JUMP_RIGHT UP RUN_JUMP_RIGHT JUMP_RIGHT UP JUMP_RIGHT JUMP_RIGHT RIGHT RUN_JUMP_RIGHT RUN_JUMP_RIGHT RIGHT UP WAIT WAIT WAIT JUMP_RIGHT RUN_JUMP_RIGHT WAIT RUN_JUMP_RIGHT UP WAIT STEP_RIGHT JUMP_RIGHT JUMP_RIGHT JUMP_RIGHT JUMP_RIGHT RUN_JUMP_RIGHT RIGHT RUN_JUMP_RIGHT RUN_JUMP_RIGHT RUN_JUMP_RIGHT RUN_JUMP_RIGHT RIGHT LEFT UP RIGHT RIGHT JUMP_RIGHT RUN_JUMP_RIGHT LEFT RUN_JUMP_LEFT UP""".split()
 
 
-def test_sword_route_completes_level1():
+def test_sword_route_completes_level1_consistently_at_every_frame():
+    from consistency import problems
     ep = Episode("L1")
     ep.reset(0)
-    for a in SWORD_ROUTE:
-        assert ep.step("kid", a)["accepted"], a
-    assert ep.observe("kid")["kid"]["sword"] is True
+    game, bad = ep._game, []
+    original_tick = game._tick
+
+    def checked_tick():
+        original_tick()
+        if not game._airborne:                    # mid-move after leaving his floor
+            bad.extend((game.frames, p) for p in problems(game))
+    game._tick = checked_tick
+    took_sword_at = None
+    for i, a in enumerate(SWORD_ROUTE):
+        res = ep.step("kid", a)
+        assert res["accepted"], (i, a)
+        if res["effect"] == "took_sword":
+            took_sword_at = (i, game.kid.room)
+    assert bad == []
+    assert took_sword_at is not None and took_sword_at[1] == 15
+    kid = ep.observe("kid")["kid"]
     out = ep.outcome()
-    assert out["reason"] == "won" and out["actions"] == 87 and out["invalid_actions"] == 0
+    assert (out["reason"], out["actions"], out["invalid_actions"], out["frames"]) == ("won", 87, 0, 790)
+    assert kid["sword"] is True and kid["hp"] == 1 and game.kid.room == 9
     assert out["actions"] <= levels.LEVEL1_LIMITS

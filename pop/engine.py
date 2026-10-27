@@ -66,6 +66,7 @@ class Game:
         self.frames = 0
         self.terminal: str | None = None
         self._result: dict = {}
+        self._airborne = False        # kid has left his floor mid-move (see _phase)
         self.intro: dict | None = None
         if situation.start_falling or situation.start_presses:
             self._intro()
@@ -137,12 +138,15 @@ class Game:
         for _, loose_cell, landed in events:
             if not alive:
                 break
-            if k.posture == "standing" and k.cell == loose_cell:
+            # A kid who has already left his floor mid-move (`_airborne`) is
+            # no longer standing on it or under it (R-D33).
+            if k.posture == "standing" and k.cell == loose_cell and not self._airborne:
                 self._start_fall(from_hang=False)
             elif k.posture == "hanging" and k.hang_ledge == loose_cell:
                 k.hang_ledge = None
                 self._start_fall(from_hang=True)
-            elif landed is not None and k.cell == landed and k.posture == "standing":
+            elif (landed is not None and k.cell == landed and k.posture == "standing"
+                  and not self._airborne):
                 self._hurt(1, "died:crushed")         # R-C14 crush
         if k.posture == "falling":
             k.fall_timer += 1
@@ -212,6 +216,40 @@ class Game:
             self._tick()
             yield
 
+    def _phase(self, n: int, depart: int | None = None):
+        """Run the `n` frames of a movement, then tell the caller whether it may
+        complete (use as `ok = yield from self._phase(...)`).
+
+        Shared resolution for every move that ends somewhere other than where
+        it began (R-D33). The kid keeps his footing, or his hold on a ledge,
+        until frame `depart` (None: throughout). If the world takes that
+        support away first (a loose floor falls, R-C14) the move is
+        interrupted: he is already falling from where he actually is, and the
+        caller must not place him at the destination it planned. From
+        `depart` on he is in motion, so the floor he left no longer affects
+        him; the caller then places him and `_enter` checks support on
+        arrival.
+
+        Regression (session 10): the macros used to run their frames and then
+        place the kid at the planned cell without this check, leaving him
+        "falling" on solid ground or falling into a wall
+        (tests/test_regressions.py, loose-floor movement tests)."""
+        k = self.kid
+        before = (k.posture, k.cell, k.hang_ledge)
+        try:
+            for i in range(n):
+                if depart is not None and i == depart:
+                    self._airborne = True
+                self._tick()
+                yield
+                if self.terminal is not None:
+                    return False
+                if (k.posture, k.cell, k.hang_ledge) != before:
+                    return False                     # interrupted: he is falling
+            return True
+        finally:
+            self._airborne = False
+
     # --- macros --------------------------------------------------------
     def _directional(self, d: int, kind: str):
         k = self.kid
@@ -236,8 +274,7 @@ class Game:
             yield from self._frames(P.BUMP)
             return
         self._result["effect"] = "moved"
-        yield from self._frames(P.RUN)
-        if self.terminal is None:
+        if (yield from self._phase(P.RUN, P.RUN_DEPART)):
             self._enter(target, "run")
 
     def _step(self):
@@ -251,25 +288,23 @@ class Game:
             yield from self._frames(P.BUMP)
             return
         self._result["effect"] = "moved"
-        yield from self._frames(P.STEP)
-        if self.terminal is None:
+        if (yield from self._phase(P.STEP, P.STEP_DEPART)):
             self._enter(target, "step")
 
     def _jump(self, running: bool):
         k = self.kid
-        span, flight = P.JUMP_SPAN, P.JUMP
+        span, flight, depart = P.JUMP_SPAN, P.JUMP, P.JUMP_DEPART
         if running:
             first = self.ahead()
             if self.blocks(first) or not self.geom.supported(first):
                 yield from self._run()               # no run-up: behaves as LEFT/RIGHT
                 return
-            yield from self._frames(P.RUN)
-            if self.terminal is not None:
+            if not (yield from self._phase(P.RUN, P.RUN_DEPART)):
                 return
             self._enter(first, "run")
             if k.posture != "standing" or self.terminal is not None:
                 return
-            span, flight = P.RUN_JUMP_SPAN, P.RUN_JUMP_FLIGHT
+            span, flight, depart = P.RUN_JUMP_SPAN, P.RUN_JUMP_FLIGHT, 0   # takes off running
         target = None
         for i in range(1, span + 1):
             cell = self.ahead(i)
@@ -281,18 +316,15 @@ class Game:
             yield from self._frames(P.JUMP_IN_PLACE)
             return
         self._result["effect"] = "jumped"
-        yield from self._frames(flight)
-        if self.terminal is None:
+        if (yield from self._phase(flight, depart)):
             self._enter(target, "jump")
 
     def _up(self):
         k = self.kid
         if k.posture == "hanging":
             self._result["effect"] = "climbed"
-            yield from self._frames(P.HANG_UP)
-            # A loose ledge can fall during the climb (R-C14): the kid is then
-            # already falling and has no ledge to climb onto.
-            if self.terminal is None and k.posture == "hanging":
+            # Holds the ledge throughout: if it falls, he falls (R-C14).
+            if (yield from self._phase(P.HANG_UP)):
                 ledge, k.hang_ledge, k.posture = k.hang_ledge, None, "standing"
                 self._enter(ledge, "climb")
             return
@@ -310,8 +342,7 @@ class Game:
                 and isinstance(above_ahead, tuple) and not self.blocks(above_ahead)
                 and self.geom.supported(above_ahead)):
             self._result["effect"] = "climbed"       # R-C12 (simplified)
-            yield from self._frames(P.CLIMB_UP)
-            if self.terminal is None:
+            if (yield from self._phase(P.CLIMB_UP, P.CLIMB_DEPART)):
                 self._enter(above_ahead, "climb")
             return
         above_tile = self.geom.tile(above) if isinstance(above, tuple) else None
@@ -336,15 +367,13 @@ class Game:
             yield  # pragma: no cover  (makes this a generator)
         if self.rule("sword") and self.geom.tile(k.cell) == T.SWORD:   # R-C21
             self._result["effect"] = "took_sword"
-            yield from self._frames(P.PICKUP_SWORD)
-            if self.terminal is None:
+            if (yield from self._phase(P.PICKUP_SWORD)):
                 self.geom.set_tile(k.cell, T.FLOOR)
                 k.sword = True
             return
         if self.geom.tile(k.cell) == T.POTION:      # R-C16 type 1 (R-A03)
             self._result["effect"] = "drank"
-            yield from self._frames(P.DRINK)
-            if self.terminal is None:
+            if (yield from self._phase(P.DRINK)):
                 self.geom.set_tile(k.cell, T.FLOOR)
                 if k.hp < k.max_hp:
                     k.hp += 1
@@ -354,9 +383,8 @@ class Game:
         if (isinstance(target, tuple) and not self.blocks(target)
                 and not self.geom.supported(target)):
             self._result["effect"] = "hanging"
-            yield from self._frames(P.HANG_DOWN)
-            # The loose floor he stands on can fall meanwhile (R-C14): he falls.
-            if self.terminal is None and k.posture == "standing":
+            # Stands on the ledge throughout: if it falls, he falls (R-C14).
+            if (yield from self._phase(P.HANG_DOWN)):
                 k.hang_ledge = k.cell
                 self._set_pos(target)
                 k.facing = -k.facing                 # turns to face the ledge

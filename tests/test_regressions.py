@@ -316,3 +316,70 @@ def test_regression_bumped_ceiling_revealed_a_loose_floor_in_the_unseen_room_abo
     out = ep.step("kid", "UP")
     assert out["effect"] == "none"                         # was "bumped_ceiling"
     assert ep._game.mech.loose == {(1, 2, 2): 8}           # still knocked loose
+
+
+# ---------------------------------------------------------------------------
+# Session 10: loose floor falling during a move (independent rules review).
+# Observed: the move macros planned their destination, ran their frames, and
+# then placed the kid there without checking that the floor under him had
+# not fallen meanwhile. He ended up "falling" on solid ground, or fell on
+# into a wall. Fix: shared movement resolution, Game._phase (R-D33).
+
+from consistency import assert_consistent  # noqa: E402
+
+# A loose floor at (1,1) with floor below it at (2,1); open air above it at
+# (0,1) and a floor at (0,2) to climb onto.
+_LOOSE_ROOM = {1: ("#._______#",
+                   "_L________",
+                   "__________")}
+
+
+def _on_loose(timer: int, facing: int = +1) -> Game:
+    """Kid standing on the loose floor at (1,1), already triggered `timer` frames ago."""
+    s = Situation(id="fixture", rooms=_LOOSE_ROOM, links={1: (0, 0, 0, 0)},
+                  start=(1, 1, 1, facing))
+    g = Game(s)
+    g.mech.loose[(1, 1, 1)] = timer
+    return g
+
+
+@pytest.mark.parametrize("action", ["RIGHT", "STEP_RIGHT", "JUMP_RIGHT", "RUN_JUMP_RIGHT", "UP"])
+def test_regression_move_off_a_loose_floor_that_falls_before_he_leaves(action):
+    """Observed 2026-10-26 (session 10): with the floor falling 2 frames into
+    the move, the kid was placed at the planned destination while falling
+    (RIGHT -> (2,2) via a fall from (1,2); STEP/JUMP similar; UP climbed onto
+    (0,2) while falling). Now the move is interrupted: he falls from where he
+    stood, onto (2,1)."""
+    g = _on_loose(timer=8)
+    g.perform(action)
+    assert_consistent(g, action)
+    assert g.kid.cell == (1, 2, 1) and g.kid.posture == "standing"
+    assert g.geom.tile((1, 1, 1)) == "."
+
+
+@pytest.mark.parametrize("action, cell", [("RIGHT", (1, 1, 2)), ("STEP_RIGHT", (1, 1, 2)),
+                                          ("JUMP_RIGHT", (1, 1, 4)),
+                                          ("RUN_JUMP_RIGHT", (1, 1, 6))])
+def test_regression_floor_falling_after_he_has_left_does_not_pull_him_back(action, cell):
+    """Same defect, other half: when the floor fell after the kid had already
+    left it, he was treated as standing on it. Now the move completes."""
+    timer = {"RIGHT": 7, "STEP_RIGHT": 4, "JUMP_RIGHT": 2, "RUN_JUMP_RIGHT": 7}[action]
+    g = _on_loose(timer=timer)
+    g.perform(action)
+    assert_consistent(g, action)
+    assert g.kid.cell == cell and g.kid.posture == "standing"
+
+
+@pytest.mark.parametrize("sequence", [
+    "RUN_JUMP_RIGHT WAIT RIGHT JUMP_RIGHT RUN_JUMP_RIGHT JUMP_RIGHT",   # was: falling while supported
+    "RUN_JUMP_RIGHT WAIT RIGHT JUMP_RIGHT RUN_JUMP_RIGHT LEFT STEP_LEFT",  # was: inside a wall
+])
+def test_regression_s3_loose_floor_move_left_kid_in_an_impossible_state(sequence):
+    """Observed 2026-10-26 (session 10, search over S3's legal actions with the
+    session-08 engine): these exact sequences ended with the kid falling while
+    standing on solid ground, and inside a wall."""
+    from pop.situations import SITUATIONS
+    g = Game(SITUATIONS["S3"])
+    for a in sequence.split():
+        g.perform(a)
+        assert_consistent(g, a)
