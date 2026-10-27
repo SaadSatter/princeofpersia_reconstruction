@@ -145,3 +145,4 @@ output tokens, estimated cost (prices dated on the run day).
 | Date | Change | Reason |
 | --- | --- | --- |
 | 2026-10-26 | Initial declaration | — |
+| 2026-10-26 (session 10) | **No change to any situation, seed, limit, prompt or recorded result.** Engine correction R-D33 (`docs/RULE_SOURCE_MAP.md`): a loose floor falling during a move no longer leaves the kid falling on solid ground or inside a wall. Reachable in S1, S3, H1, H3 (not S2, H2), but never in any recorded episode: all 16 committed traces replay with identical complete state against the engines that recorded them (`tests/test_trace_replay.py`). Also R-C09: any plate kind opens a linked exit; no suite situation links a drop plate to an exit. | Independent rules review of session 08; physically impossible states must not be reachable by a player. |

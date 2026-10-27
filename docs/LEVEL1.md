@@ -1,8 +1,10 @@
 # L1 — the original Level 1 (reconstruction status)
 
-Status on 2026-10-26 (session 08): phases P0–P4 done on the local branch
-`level1-reconstruction`; **P5 (guards and combat) not started**, waiting
-for the student's review. Nothing from this work has been synced to course
+Status on 2026-10-26: phases P0–P4 done (session 08); post-review
+stabilization done (session 10: movement resolution fix R-D33, review
+findings, new verified route). All on the local branch
+`level1-reconstruction`. **P5 (guards and combat) not started**, waiting for
+the student's approval. Nothing from this work has been synced to course
 PR #57.
 
 ## Student decisions (2026-10-26)
@@ -71,12 +73,14 @@ why the data is never committed (R-D13).
 | Room layout, tile types, room links (including one-way links) | R-C01–R-C05, R-C32, R-C34 |
 | Start in room 1, block 0, facing right; drop-in entry; the gate behind him slams shut | R-C06, R-C30 |
 | A gate open at load (room 5) stays open until a plate acts on it | R-C29 |
-| Raise and drop plates, including plates with two targets and plates acting on another room | R-C05, R-C09 |
+| Raise and drop plates, including plates with two targets and plates acting on another room; any plate kind opens a linked exit (corrected in session 10) | R-C05, R-C09 |
 | Gate timing (rise 4, hold 50, lower 1), exit opening 4 per cycle and never closing | R-C08, R-C09 |
 | Exit in room 9, opened by the plate on the upper-left ledge; `UP` on the open exit wins | R-C17 |
 | Loose floors break when stood on, landed on or hung from, and when hit from below by a hop | R-C14, R-C31 |
 | Spikes in pits; landing or running onto sprung spikes kills | R-C13, R-C15 |
-| Four potions, all heal +1 | R-C16, R-A03 |
+| Four potions, all heal +1 (stored type, shifted at load) | R-C16, R-A03 |
+| Gate and loose-floor state set at load (gate spec 1 up, 2 down; loose floors reset) | R-C29 |
+| "Required" loose floors never break (none in Level 1; the reader refuses one) | R-C35 |
 | Sword pickup (`DOWN` on it) | R-C21 |
 | 3 HP, 60-minute clock | R-C19, R-C24 |
 
@@ -89,6 +93,7 @@ why the data is never committed (R-D13).
 | Accelerating fall | 4 frames per row | R-D16 |
 | A hanging drop starts lower | Counts one row less | R-D17 |
 | A loose floor falls as an object | Lands instantly on the first support below, 10 frames after it is triggered | R-D14 |
+| The floor under the feet is tested every frame of a move | Each move has a departure frame: a floor falling before it interrupts the move (he falls from where he stands); after it, he is in motion (run 2/4, step 4/8, standing jump 6/12, running jump at once, climb 4/12) | R-D33 |
 | Landings wiggle nearby loose floors (cosmetic) | Not shown | R-D30 |
 | Spike proximity trigger | Same row, within one block | R-D19 |
 | Drop-plate gate slam (accelerating) | 63 per frame | R-C08 note |
@@ -109,21 +114,25 @@ why the data is never committed (R-D13).
 | Sound, title, cutscenes, going on to Level 2 | Out of scope; leaving through the exit ends the episode as a win |
 | A model player on L1 | Its prompt legend lacks `S` and `k`; `play.py` refuses it (audit note 3) |
 
-## Verification (session 08, 2026-10-26)
+## Verification (session 10, 2026-10-26, after the stabilization)
 
 | Check | Result |
 | --- | --- |
 | Data: pinned SHA-256 and size; Apple II vs DOS layouts | match; identical (`tools/fetch_level1.py --check`) |
-| `uv run pytest -q` (with the local file) | 251 passed, 1 skipped |
-| Fresh clone of the branch, `UV_OFFLINE=1`, no level file, no pygame | 242 passed, 10 skipped (6 original-file tests skip by design); `play.py L1` prints the setup instructions |
-| Committed traces replay (`tests/test_trace_replay.py`) | 16 of 16 identical |
-| Fresh baseline run of the final suite vs `traces/eval/` | 12 of 12 traces identical (timing fields aside) |
+| `uv run pytest -q` (with the local file) | 281 passed, 1 skipped |
+| Loose-floor movement regression tests (`tests/test_regressions.py`) | 25 passed (14 of them on loose-floor movement); 9 of the 10 new movement cases fail on the session-08 engine |
+| Fresh clone of the branch, `UV_OFFLINE=1`, no level file, no pygame | 272 passed, 10 skipped (6 original-file tests skip by design); `play.py L1` prints the setup instructions |
+| Committed traces (`tests/test_trace_replay.py`) | 16 of 16 identical, including the **complete state** after reset and every step (292 states) against the engines that recorded them |
+| Fresh baseline run of the final suite vs `traces/eval/` | 12 of 12 wins; traces identical (timing fields aside) |
 | Frozen definitions, first observations, model prompt | hashes unchanged (`tests/test_frozen_suite.py`) |
-| L1 completion, engine: `tools/solve_level1.py` route start → sword (room 15) → exit (room 9) | won in 87 actions, 798 frames, 0 invalid, ends at 1 HP (`test_level1_original.py::test_sword_route_completes_level1`) |
-| L1 completion, frontend: `play.py L1` driving the same 87 actions headlessly with the original art | "ESCAPED! (actions 87, invalid 0)" |
-| Shortest win without the guard | 28 actions via rooms 1 → 2 → 3 → 9: what a missing guard allows |
-| Baseline on L1 (exhibition, seeds 100 and 101, not committed) | `step_limit` at 600 actions, never left room 1. It was written for the authored suite and is not tuned for L1 (tuning it would change the frozen suite's baseline). |
-| Rules audit | `docs/audits/AUDIT-2026-10-26-session08-level1.md` (skill run in this session, so not independent) |
+| Search over all six suite scenarios for impossible states (in wall, falling while supported, standing on air, hanging from nothing) and crashes | none (before the fix: S1, S3, H1, H3) |
+| L1 sword route, engine (`test_level1_original.py::test_sword_route_completes_level1_consistently_at_every_frame`) | won; 87 actions, 0 invalid, 790 frames; sword taken in room 15; 1 HP left; consistent at every frame |
+| L1 sword route, frontend: `play.py L1 --keys <route>` headless, original art | "ESCAPED! (actions 87, invalid 0)" |
+| Session-08 route on the fixed engine | invalid: its 5th action jumped off the loose floor at room 1 (2,6) and depended on the kid being left "falling" on solid floor; by action 23 he is falling and `LEFT` is refused |
+| Shortest win without the guard (rooms 1, 2, 3, 9 only) | 20 actions, 2 HP: what the missing guard allows until P5 |
+| Baseline on L1 (exhibition, seeds 100 and 101, not committed) | `step_limit` at 600 actions, never leaves room 1 (unchanged by the fix). It was written for the authored suite and is not tuned for L1. |
+| Rules audit (session 08) | `docs/audits/AUDIT-2026-10-26-session08-level1.md` |
+| Independent rules review (of session 08's work) | findings received from the student; resolutions in `docs/agent-sessions/10-level1-stabilization.md` |
 
 ## Comparison with the original game
 
@@ -149,7 +158,8 @@ no rule here is labeled `observed`. Owner: the student. Suggested checks in
 SDLPoP (or another original build), with notes of build, room and date:
 
 - [ ] Room 1: after the entry, is the slammed gate at room 5 (0,9) closed before control returns?
-- [ ] Each jump on the 87-action route (`tools/solve_level1.py`): does the original allow it from the same block, and land on the same block?
+- [ ] Departure frames (R-D33): standing on a loose floor that is about to fall, how late can a run, step, jump or climb start and still get away?
+- [ ] Each jump on the 87-action route (`tests/test_level1_original.py` `SWORD_ROUTE`): does the original allow it from the same block, and land on the same block?
 - [ ] Rooms 6/12/14 (row 0): when you hop under the loose floor of the room above, does it visibly shake on screen? (This decides audit finding 1.)
 - [ ] Fall damage at each drop on the route: is the HP loss the same?
 - [ ] Gate timing: can you reach each gate in time from its plate, as our route does?

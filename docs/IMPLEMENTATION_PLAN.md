@@ -78,5 +78,6 @@ from the frozen suite; the suite, its results and traces do not change.
 | P2 | Level 1 rules: gates open at load, entry drop and gate slam, sword pickup, loose floor knocked from below | done, `f23efa9`; audit fix `83892fc` |
 | P3 | Frontend: `play.py L1`, entry clip, sword and skeleton shapes | done, `78422ee` |
 | P4 | Verification and documentation (`docs/LEVEL1.md`, rule map, spec, audit, session log) | done |
+| S | Post-review stabilization (session 10): shared movement resolution R-D33, full-state trace replay, exit by any plate, gate spec and required-bit rules, new verified route | done, `b061194`, `e999181`, `a2b49ae` + docs |
 | — | Art milestone (D4): sword, skeleton, pickup and guard images on the course branch only | not started; needs approval |
 | P5 | Guards and simplified combat in `L1` | **stop: waiting for the student's review** |

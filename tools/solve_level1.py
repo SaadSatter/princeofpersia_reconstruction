@@ -34,7 +34,7 @@ def key(g):
     return (k.cell, k.facing, k.posture, k.hp, k.sword,
             tuple(tuple(r) for room in sorted(g.geom.grid) for r in g.geom.grid[room]),
             tuple((x.state, x.pos // 12, x.hold // 10) for _, x in sorted(g.mech.gates.items())),
-            tuple(e.opening for _, e in sorted(g.mech.exits.items())),
+            tuple((e.opening, e.pos // 12) for _, e in sorted(g.mech.exits.items())),
             tuple(sorted(g.mech.loose)))
 
 

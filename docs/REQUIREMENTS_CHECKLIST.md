@@ -3,7 +3,7 @@
 Maps every rubric check in `docs/MIDTERM_GUIDELINES.md` to deliverables,
 tests, and evidence. Status values: **done** (evidence exists and is
 linked), **partial**, **todo**, **at risk** (todo and likely to slip).
-Only mark **done** with a link to evidence. Updated: 2026-10-26 (session 02: baseline, model player, evaluator, dev CI). Dev CI is green in the personal repo; the course workflow has not run in the course repo yet, so 3c is not done.
+Only mark **done** with a link to evidence. Updated: 2026-10-26 (session 02: baseline, model player, evaluator, dev CI; session 10: Level 1 reconstruction and stabilization, see the section at the end — on the local branch `level1-reconstruction`, not yet in dev CI or the course PR). Dev CI is green in the personal repo; the course workflow has not run in the course repo yet, so 3c is not done.
 
 ## Rubric checks
 
@@ -32,7 +32,7 @@ Only mark **done** with a link to evidence. Updated: 2026-10-26 (session 02: bas
 | Rule invariants | `tests/test_rules.py` (32 tests) | passing locally |
 | Legal / illegal actions | `tests/test_interface.py` | passing locally |
 | Terminal outcome | `tests/test_situations.py`, `test_interface.py::test_death_is_terminal_with_reason`, `test_rules.py::test_clock_runs_out` | passing locally |
-| Observed regression | `tests/test_regressions.py`: `test_regression_fall_death_reported_full_hp`, `test_regression_late_reply_after_timeout_rewrote_player_memory`, `test_regression_unknown_model_price_reported_as_free` | passing locally |
+| Observed regression | `tests/test_regressions.py`: `test_regression_fall_death_reported_full_hp`, `test_regression_late_reply_after_timeout_rewrote_player_memory`, `test_regression_unknown_model_price_reported_as_free`; sessions 08 and 10 (branch `level1-reconstruction`): `test_regression_loose_ledge_fell_during_climb_crashed`, `test_regression_kid_hung_from_a_loose_floor_that_had_fallen`, `test_regression_bumped_ceiling_revealed_a_loose_floor_in_the_unseen_room_above`, `test_regression_move_off_a_loose_floor_that_falls_before_he_leaves` (5 moves), `test_regression_floor_falling_after_he_has_left_does_not_pull_him_back` (4 moves), `test_regression_s3_loose_floor_move_left_kid_in_an_impossible_state` (2 S3 sequences) | passing locally (25 regression tests on the branch) |
 | Episode limits | `tests/test_runner.py`, `tests/test_interface.py` (`step_limit`, `call_limit`, timeouts, `invalid_limit`) | passing locally |
 | (extra) Determinism | `tests/test_determinism.py` | passing locally |
 | (extra) Leakage | `tests/test_leakage.py` | passing locally |
@@ -63,3 +63,19 @@ Only mark **done** with a link to evidence. Updated: 2026-10-26 (session 02: bas
 | PR description: login, title, links to README, EVALUATION, AGENT-TEAM, peer notes, recording | PR | todo |
 | PR URL submitted on CourseWorks | CourseWorks | todo |
 | No secrets, playtester personal data, caches, or large generated files | repo | todo — `.gitignore` in place |
+
+## Level 1 reconstruction and stabilization (sessions 08 and 10)
+
+Branch `level1-reconstruction`, local only; not in dev CI or course PR #57
+yet (student instruction). Details: `docs/LEVEL1.md`.
+
+| Item | Rubric | Evidence | Status |
+| --- | --- | --- | --- |
+| `L1` (original Level 1) playable from a local file, outside the suite | 1b, 2a | `docs/LEVEL1.md`; `tests/test_level1.py`; `tests/test_level1_original.py` (local only) | done locally — sword-to-exit route won in 87 actions; guards and combat (P5) not started |
+| Frozen suite and recorded results unchanged | 5a | `tests/test_frozen_suite.py`; `tests/test_trace_replay.py` (complete state, 16 traces, 292 states vs the recording engines); fresh baseline run 12/12 identical | done locally |
+| New rule rows with locators (R-C29–R-C35, R-D27–R-D33); R-C06, R-C09, R-A03 corrected | 1a | `docs/RULE_SOURCE_MAP.md` | done; no `observed` evidence (SDLPoP checklist in `docs/LEVEL1.md`, student-owned) |
+| L1 leakage: current room only; effect leak fixed | 2c | `tests/test_level1.py::test_observation_shows_only_the_current_room`; audit `docs/audits/AUDIT-2026-10-26-session08-level1.md` | done locally |
+| Rules audit skill run | 3d | `docs/audits/AUDIT-2026-10-26-session08-level1.md` (same session as the build, so not the independent review) | done |
+| Independent review of session 08's work | 3d | Run by the student with `rules-reviewer`; findings and resolutions summarized in `docs/agent-sessions/10-level1-stabilization.md` | partial — **the review's own report is not committed in this repository**; commit it (e.g. `docs/reviews/`) to make it inspectable |
+| Original level data never committed | 1c | `tests/test_level1.py::test_no_original_level_file_is_tracked_by_git`; layout-data review in the session 10 log | done; decision on the listed descriptive facts pending (session 10 log) |
+
