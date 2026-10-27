@@ -130,8 +130,10 @@ class Mechanics:
                     self.gates[target].raise_()
                 else:
                     self.gates[target].slam()
-            elif target in self.exits and kind == T.RAISE_PLATE:
-                self.exits[target].opening = True  # exits never close (MOVER.S:562-571)
+            elif target in self.exits:
+                # Any plate kind opens a linked exit; exits never close
+                # (`openexit`, Source/MOVER.S:546-569, R-C09).
+                self.exits[target].opening = True
 
     # --- per frame -----------------------------------------------------
     def tick(self, pressing: Cell | None, near: set[Cell]) -> list[tuple]:

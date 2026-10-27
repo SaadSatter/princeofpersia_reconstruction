@@ -171,4 +171,10 @@ def test_observation_shows_only_the_current_room():
                     assert row not in text
     for word in ("link", "rooms", "plate_links", "gates_open", "guard", "start_", "sha256", "LEVEL1"):
         assert word not in text
-    assert ep.legal_actions("kid") == list(ep.legal_actions("kid"))
+    # Legal actions depend on posture only (R-D06): L1 gives exactly the same
+    # list as a suite scenario in the same posture, so it hints at nothing.
+    suite = Episode("S1")
+    suite.reset(0)
+    assert obs["kid"]["posture"] == suite.observe("kid")["kid"]["posture"] == "standing"
+    assert ep.legal_actions("kid") == suite.legal_actions("kid")
+    assert len(ep.legal_actions("kid")) == 11

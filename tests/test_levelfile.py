@@ -85,3 +85,26 @@ def test_non_heal_potion_is_refused():
                  specs={(1, 0, 9): 2})
     with pytest.raises(LF.LevelFormatError, match="potion type 2"):
         levels.to_situation(LF.parse(data), "x", special_start=False)
+
+
+def test_gate_spec_1_is_up_and_2_is_down_others_refused():
+    """Source/FRAMEADV.S:2217-2234 (GETINITOBJ): 1 = gate up, 2 = gate down,
+    via a two-entry table; any other value is outside the original table."""
+    from level_fixture import MINI_DOOR_LINKS, MINI_LINKS, MINI_ROOMS, MINI_SPECS
+    for spec, expect in ((1, ((5, 0, 9),)), (2, ())):
+        specs = dict(MINI_SPECS, **{}) | {(5, 0, 9): spec}
+        s = levels.to_situation(LF.parse(build(MINI_ROOMS, MINI_LINKS, specs, MINI_DOOR_LINKS)), "x")
+        assert s.gates_open == expect
+    specs = dict(MINI_SPECS) | {(5, 0, 9): 3}
+    with pytest.raises(LF.LevelFormatError, match="gate spec 3"):
+        levels.to_situation(LF.parse(build(MINI_ROOMS, MINI_LINKS, specs, MINI_DOOR_LINKS)), "x")
+
+
+def test_required_loose_floor_is_refused_not_made_breakable():
+    """A loose floor with the "required" bit never breaks (Source/MOVER.S:394-397,
+    the only use of `reqmask` in the source). Level 1 has none, so the reader
+    refuses one rather than simulating it as an ordinary loose floor."""
+    data = bytearray(mini_level())
+    data[1 * 30 + 0 * 10 + 2] = LF.LOOSE | LF.REQUIRED     # room 2 (0,2)
+    with pytest.raises(LF.LevelFormatError, match="required loose floor"):
+        levels.to_situation(LF.parse(bytes(data)), "x")

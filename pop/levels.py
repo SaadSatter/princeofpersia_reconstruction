@@ -99,8 +99,14 @@ def to_situation(level: LF.Level, sid: str, *, max_actions: int = LEVEL1_LIMITS,
                 if tid not in _SYMBOL:
                     raise LF.LevelFormatError(f"room {r} block {block}: tile id {tid} not supported")
                 spec = level.specs[r][block]
-                if tid == LF.GATE and spec == 1:          # R-C29
-                    gates_open.append((r, row, col))
+                if tid == LF.GATE:                        # R-C29: 1 = up, 2 = down
+                    if spec not in (1, 2):
+                        raise LF.LevelFormatError(f"room {r} block {block}: gate spec {spec}")
+                    if spec == 1:
+                        gates_open.append((r, row, col))
+                if tid == LF.LOOSE and level.required(r, block):
+                    # Never breaks (Source/MOVER.S:394-397); unused in Level 1 (R-C35).
+                    raise LF.LevelFormatError(f"room {r} block {block}: required loose floor")
                 if tid == LF.FLASK and spec != 1:         # R-A03: Level 1 potions heal
                     raise LF.LevelFormatError(f"room {r} block {block}: potion type {spec}")
                 if tid in (LF.PRESSPLATE, LF.UPRESSPLATE):
