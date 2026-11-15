@@ -14,6 +14,17 @@ Every statement below carries one of three labels, as reader Section 5.2 asks:
 
 Nothing here is **[Verified]** by a player yet. No playtest of this concept has been run.
 
+### Decisions confirmed by Saad (2026-11-15)
+
+The agent drafted these decisions. Saad confirmed them on 2026-11-15:
+
+| Decision | Confirmed value | Still open |
+|---|---|---|
+| Working title | *Shadow Masque* | — |
+| Trap types | Loose floor and gate plate (Section 5.2) | OQ-6: limit per rival, re-arm time |
+| Health rule | A sword hit costs 1 health; 0 health is death | OQ-1: starting health; trap and fall damage |
+| AI decision cadence | One macro-action about every 4 s per AI seat | OQ-9 / CQ-3: whether it plays well, checked at the first playtest |
+
 ---
 
 ## 1. The X
