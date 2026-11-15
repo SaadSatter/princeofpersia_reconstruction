@@ -4,8 +4,8 @@ Working title: *Shadow Masque*. A two-player versus game built on this repositor
 
 | G1 item | Link |
 |---|---|
-| Recording | [Add the unlisted YouTube or Google Drive link] |
-| Deck | [Add the shared deck link] |
+| Recording | [G1 pitch recording (Google Drive)](https://drive.google.com/file/d/1iioIm1JEEDA7lVOisP4arZPk8TZJlA5_/view?usp=sharing) |
+| Deck | [G1 pitch deck (Google Slides)](https://docs.google.com/presentation/d/1uY0srRtRv9uPN3S5nRifjzna6CjPEKrSMPiYuEDhRrA/edit?usp=sharing) |
 | Initial GDD | [`GDD.md`](GDD.md) |
 | Initial Configuration Document, with role coverage | [`CONFIGURATION.md`](CONFIGURATION.md) |
 | Initial Project Plan, with gate dates and Initial Risk Register | [`PROJECT_PLAN.md`](PROJECT_PLAN.md) |
