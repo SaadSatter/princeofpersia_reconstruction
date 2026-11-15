@@ -11,8 +11,9 @@ From the course syllabus (weeks 9–13 and finals).
 
 | Date | Gate or event | Due |
 |---|---|---|
-| Sun 15 Nov 2026, 11:59 p.m. | G1 post | Recording, deck, Initial GDD and Configuration Document, this plan and Risk Register; silent-playtester notes on three assigned midterm recordings |
+| Sun 15 Nov 2026, 11:59 p.m. | G1 post | Recording, deck, Initial GDD and Configuration Document, this plan and Risk Register |
 | Mon 16 Nov 2026 (week 9) | **G1 Concept** review | — |
+| Week 9, after the G1 post | Silent-playtester notes | Notes on three assigned midterm recordings (Saad) |
 | Tue 17 Nov 2026 | G1 decision (Approve or Hold) | — |
 | Thu 19 Nov 2026, 11:59 p.m. | Braintrust | Two replies in the G1 discussion |
 | Mon 23 Nov 2026 (week 10) | Working session; **checkpoint**; graded G1 feedback | Deployed model call, isolated session state and forced-timeout fallback, in class or by recording |
