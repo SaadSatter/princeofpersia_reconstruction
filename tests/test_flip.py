@@ -188,3 +188,86 @@ def test_a_flip_turns_once_around_and_rises_over_the_head():
     assert max(lift) >= 12 and lift[0] == 0 and lift[-1] == 0          # higher arc, same ends
     assert [p.x for p in flip] == [p.x for p in plain]
     assert not any(math.isnan(p.spin) for p in flip)
+
+
+# --- a hop turned into a flip (Saad, 2026-11-17) ------------------------------
+def hop_then(ep, action, after=2):
+    assert ep.step("A", "UP")["accepted"]
+    run(ep, after)
+    assert me(ep, "A")["motion"]["effect"] == "none"          # hopping straight up
+    assert ep.step("A", action)["accepted"]
+    run(ep, 1)
+    return me(ep, "A")["motion"]
+
+
+def test_a_direction_during_a_hop_turns_it_into_a_flip():
+    for action in ("JUMP_RIGHT", "RIGHT"):                    # Up still held, or let go
+        ep = episode((2, 0, 1, +1), (3, 2, 7, -1))
+        motion = hop_then(ep, action)
+        assert motion["effect"] == "flipped" and motion["to"] == [0, 4]
+        run(ep, P.JUMP)
+        assert (me(ep, "A")["col"], me(ep, "A")["posture"]) == (4, "standing")
+
+
+def test_a_hop_flips_whichever_way_is_pointed():
+    ep = episode((2, 0, 5, +1), (3, 2, 7, -1))
+    motion = hop_then(ep, "LEFT")
+    assert motion["effect"] == "flipped" and motion["to"] == [0, 2]
+    assert me(ep, "A")["facing"] == "left"
+    run(ep, P.JUMP)
+    assert me(ep, "A")["col"] == 2
+
+
+def test_a_hop_flip_passes_over_someone():
+    ep = episode((2, 0, 3, +1), (2, 0, 4, -1))
+    motion = hop_then(ep, "RIGHT")
+    assert motion["effect"] == "flipped" and motion["to"] == [0, 6]
+
+
+def test_a_direction_after_the_hop_lands_is_an_ordinary_move():
+    ep = episode((2, 0, 1, +1), (3, 2, 7, -1))
+    ep.step("A", "UP")
+    run(ep, P.JUMP_IN_PLACE + 1)
+    assert me(ep, "A")["motion"] is None
+    ep.step("A", "RIGHT")
+    run(ep, 1)
+    assert me(ep, "A")["motion"]["effect"] == "moved"
+
+
+def test_jumping_up_to_a_ledge_is_not_turned_into_a_flip():
+    """Room 1: open air above (row 1, cols 1-2), so UP at row 2 col 2 climbs."""
+    ep = episode((1, 2, 2, +1), (3, 2, 7, -1))
+    ep.step("A", "UP")
+    run(ep, 2)
+    assert me(ep, "A")["motion"]["effect"] == "climbed"
+    ep.step("A", "RIGHT")
+    run(ep, 1)
+    assert me(ep, "A")["motion"]["effect"] == "climbed"
+
+
+# --- the keyboard (play.py, local versus test) --------------------------------
+def test_jumping_out_of_a_run_is_a_running_jump_without_shift():
+    """Saad's playtest, 2026-11-17: Up + direction while running did a standing
+    jump (only Shift + Up + direction gave a running jump), so a flip never
+    happened from a run. Jumping out of a run in that direction is a running
+    jump; from a standstill it stays a standing jump."""
+    import play
+    held = {"right", "up"}
+    assert play.versus_input(held, False, running="right") == "RUN_JUMP_RIGHT"
+    assert play.versus_input(held, False) == "JUMP_RIGHT"
+    assert play.versus_input(held, False, running="left") == "JUMP_RIGHT"   # turning back
+    assert play.versus_input(held, True) == "RUN_JUMP_RIGHT"                # Shift still works
+    assert play.versus_input({"right"}, False, running="right") == "RIGHT"
+
+
+def test_running_direction_comes_from_the_seats_own_motion():
+    import play
+    ep = episode((2, 0, 1, +1), (3, 2, 7, -1))
+    assert play.running_dir(me(ep, "A")) is None
+    ep.step("A", "RIGHT")
+    run(ep, 1)
+    assert play.running_dir(me(ep, "A")) == "right"
+    ep2 = episode((2, 0, 1, +1), (3, 2, 7, -1))
+    ep2.step("A", "STEP_RIGHT")
+    run(ep2, 1)
+    assert play.running_dir(me(ep2, "A")) is None                          # a careful step

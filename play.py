@@ -85,12 +85,26 @@ VERSUS_KEYS = {
 }
 
 
-def versus_input(held: set[str], shift: bool, armed: bool = False) -> str | None:
+def running_dir(me: dict) -> str | None:
+    """"left"/"right" while this seat's own rival is mid-run (a run's motion in
+    its own observation), else None. A careful step is not a run."""
+    from pop import physics as P
+    m = me.get("motion")
+    if m and m["effect"] == "moved" and m["frames"] == P.RUN:
+        return me["facing"]
+    return None
+
+
+def versus_input(held: set[str], shift: bool, armed: bool = False,
+                 running: str | None = None) -> str | None:
     """The action a held key set asks for this frame (left/right/up/down/attack/draw).
     Re-sent every frame while held; the duel starts it when the rival is free.
     Swordplay keys (VERSUS_SPEC 2.3): attack = lunge, with Up a throw, with Down
     a sweep (and in the air a dive kick, chosen by the caller when KICK is legal);
-    while the sword is drawn, Up/Down change stance."""
+    while the sword is drawn, Up/Down change stance. Up + direction out of a run
+    in that direction (`running`, see running_dir) is a running jump, as in the
+    original game; from a standstill it is a standing jump unless Shift is held
+    (Saad's playtest, 2026-11-17: a run never turned into a flip, R-V22)."""
     if "take" in held:
         return "TAKE"                                     # a downed guard's uniform (R-V17)
     if "draw" in held:
@@ -103,7 +117,8 @@ def versus_input(held: set[str], shift: bool, armed: bool = False) -> str | None
         return "LUNGE"
     horiz = next((d for d in ("left", "right") if d in held), None)
     if horiz and "up" in held:
-        return f"RUN_JUMP_{horiz.upper()}" if shift else f"JUMP_{horiz.upper()}"
+        run_jump = shift or running == horiz
+        return f"RUN_JUMP_{horiz.upper()}" if run_jump else f"JUMP_{horiz.upper()}"
     if horiz:
         return f"STEP_{horiz.upper()}" if shift else horiz.upper()
     if "up" in held:
@@ -212,7 +227,8 @@ def versus_main(args) -> int:
             held = {k for code, (s_, k) in names.items() if s_ == seat and pressed[code]}
             shift = bool(mods & (pygame.KMOD_LSHIFT if seat == "A" else pygame.KMOD_RSHIFT))
             legal = ep.legal_actions(seat)
-            act = versus_input(held, shift, armed=ep.observe(seat)["me"]["armed"])
+            mine = ep.observe(seat)["me"]
+            act = versus_input(held, shift, armed=mine["armed"], running=running_dir(mine))
             if act == "LUNGE" and "KICK" in legal:
                 act = "KICK"                                  # attack in the air: dive kick
             if act and act in legal:

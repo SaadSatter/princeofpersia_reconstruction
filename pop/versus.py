@@ -81,6 +81,9 @@ JUMPS = ("jumped", "flipped")          # a flip is a jump over someone (R-V22)
 VERSUS_ACTIONS = ("DRAW", "SHEATHE", "STANCE_UP", "STANCE_DOWN", "LUNGE", "THROW",
                   "KICK", "SWEEP", "TAKE")
 BREAKS_DISGUISE = ("DRAW", "LUNGE", "THROW", "KICK", "SWEEP")  # R-V21
+DIRECTIONAL = {d: (d, "STEP_" + d, "JUMP_" + d, "RUN_JUMP_" + d) for d in ("LEFT", "RIGHT")}
+HOPS = ("none", "bumped_ceiling")      # UP on open floor: a hop straight up (pop/engine.py _up)
+HOP_FLIPS = {"_HOP_FLIP_LEFT": -1, "_HOP_FLIP_RIGHT": +1}       # R-V22, started by the duel
 
 
 class Rival(Game):
@@ -104,6 +107,7 @@ class Rival(Game):
         self._airborne = False
         self.plan: dict | None = None
         self.plan_from = 0                 # move frame the current plan started at
+        self._hop_flip = False             # a hop being turned into a flip (R-V22)
         self.intro = None
         # Swordplay state (VERSUS_SPEC 3).
         self.sword = "sheathed"            # "drawn", "sheathed" or "none" (disarmed / thrown)
@@ -140,9 +144,22 @@ class Rival(Game):
 
     def _jump_look(self, running: bool, vaulted: bool) -> str:
         """R-V22: a jump over someone is a flip, and so is every running jump
-        (Saad, 2026-11-17: over holes and spikes too). A standing jump over
-        nobody stays a plain jump."""
-        return "flipped" if running or vaulted else "jumped"
+        (Saad, 2026-11-17: over holes and spikes too) and a hop turned into a
+        jump. A standing jump over nobody stays a plain jump."""
+        return "flipped" if running or vaulted or self._hop_flip else "jumped"
+
+    def _flip_from_hop(self, d: int):
+        """R-V22 (Saad, 2026-11-17): a direction pointed while hopping straight up
+        turns the hop into a standing jump that way, always a flip. The rival
+        faces the pointed way first (no separate turn)."""
+        self._result = {"effect": None, "frames": 0, "fell_rows": 0, "hp_change": 0}
+        self.plan = None
+        self.kid.facing = d
+        self._hop_flip = True
+        try:
+            yield from self._jump(running=False)
+        finally:
+            self._hop_flip = False
 
     def _plan(self, *args, **kwargs) -> None:
         """Also note the move frame the plan starts at: a running jump plans its
@@ -175,6 +192,8 @@ class Rival(Game):
         return None
     # --- swordplay macros (per-frame generators, like the inherited ones) ---
     def _versus_macro(self, action: str):
+        if action in HOP_FLIPS:                             # internal: never a seat's input
+            return self._flip_from_hop(HOP_FLIPS[action])
         if action in VERSUS_ACTIONS or (action == "DOWN" and self.sword == "none"
                                         and self.kid.cell in self.duel.swords):
             self._result = {"effect": None, "frames": 0, "fell_rows": 0, "hp_change": 0}
@@ -289,6 +308,7 @@ class Duel:
         self.rivals = {seat: Rival(self, seat, starts[seat]) for seat in SEATS}
         self._moves: dict[str, object] = {seat: None for seat in SEATS}
         self._move_frame: dict[str, int] = {seat: 0 for seat in SEATS}
+        self._move_action: dict[str, str | None] = {seat: None for seat in SEATS}
         self.pending: dict[str, str | None] = {seat: None for seat in SEATS}
         self.last_result: dict[str, dict | None] = {seat: None for seat in SEATS}
         self.terminal: str | None = None
@@ -488,6 +508,14 @@ class Duel:
                 return
             r._tick()
             return
+        d = self._hop_turn(seat) if gen is not None else None
+        if d is not None:                    # R-V22: a direction turns the hop into a flip
+            self.pending[seat] = None
+            self.cancel(seat)
+            if self._start(seat, "_HOP_FLIP_" + d):
+                return
+            r._tick()
+            return
         if gen is not None:
             try:
                 next(gen)
@@ -502,9 +530,19 @@ class Duel:
             return
         r._tick()                            # free this frame: the world still acts on it
 
+    def _hop_turn(self, seat: str) -> str | None:
+        """"LEFT"/"RIGHT" if this rival is hopping straight up (an UP move that
+        is not a climb) and its pending input points a direction (R-V22)."""
+        act, r = self.pending[seat], self.rivals[seat]
+        if (act is None or self._move_action[seat] != "UP"
+                or (r.plan or {}).get("effect") not in HOPS):
+            return None
+        return next((d for d in ("LEFT", "RIGHT") if act in DIRECTIONAL[d]), None)
+
     def _start(self, seat: str, action: str) -> bool:
         """Start a move and run its first frame; False if it had no frames."""
         r = self.rivals[seat]
+        self._move_action[seat] = action
         gen = r._versus_macro(action)
         self._moves[seat], self._move_frame[seat] = gen, 0
         try:
