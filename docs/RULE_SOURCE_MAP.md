@@ -132,18 +132,18 @@ rule gets its failing test first.
 | ID | Rule | Label | Locator | Impl / test |
 | --- | --- | --- | --- | --- |
 | R-V00 | Two rivals in one game on real-time ticks: the world advances once per frame (12 per second), then each rival's move one frame; a seat's input starts a move only when its rival is free, and a newer pending input replaces an older one. Rivals cannot pass through each other; two that run into one cell in the same frame both stay out. A move's arrival is applied at the start of the next frame (same lag for both rivals). | `design` | VERSUS_SPEC §2; Saad 2026-11-17 (CQ-1 timing) | `pop/versus.py:Duel.tick`; `tests/test_versus.py` |
-| R-V01 | 3 hearts; a stab, thrown-sword hit, guard's stab, sprung trap or damaging fall costs 1; 0 is death. | `design` | VERSUS_SPEC §3; OQ-1 (Saad 2026-11-15, kept 2026-11-17) | Stage 2 |
-| R-V02 | Stances high, mid, low; a new rival starts sheathed and draws to mid in 3 frames. | `design` | VERSUS_SPEC §3 | Stage 2 |
-| R-V03 | A stance change takes effect after 2 frames, even during the opponent's attack. | `design` | VERSUS_SPEC §3 | Stage 2 |
-| R-V04 | Lunge: 2 windup + 2 active + 4 recovery frames; hits the cell ahead, same row, facing. | `design` | VERSUS_SPEC §3 | Stage 2 |
-| R-V05 | Block: same stance as the attacker at the active frame, armed and facing: no hit; attacker pushed back 1 cell if free. | `design` | VERSUS_SPEC §3 | Stage 2 |
-| R-V06 | Hit: 1 heart, defender pushed back 1 cell, 12 frames invulnerable. | `design` | VERSUS_SPEC §3 | Stage 2 |
-| R-V07 | Disarm: a stance change landing into the attacker's height during the attacker's 2 windup frames knocks the attacker's sword 1–2 cells behind them. | `design` | VERSUS_SPEC §3 | Stage 2 |
-| R-V08 | Sword throw: flies along the row 2 cells per frame, hits the first rival or guard (1 heart), deflected by the thrower's stance, stops at walls, closed gates and room edges; thrower unarmed. | `design` | VERSUS_SPEC §3 | Stage 2 |
-| R-V09 | Unarmed: no lunge, throw or block; can kick and sweep; DOWN on a sword's cell picks it up in 6 frames. | `design` | VERSUS_SPEC §3 | Stage 2 |
-| R-V10 | Dive kick: KICK in a jump's airborne frames lands 1 cell ahead; blocked by a high stance; a hit disarms and knocks down 10 frames, no heart. | `design` | VERSUS_SPEC §3 | Stage 2 |
-| R-V11 | Sweep: 6 frames from a crouch, hits the cell ahead; avoided by a low stance or being airborne; knockdown 10 frames, no heart. | `design` | VERSUS_SPEC §3 | Stage 2 |
-| R-V12 | Knocked down: cannot act; a lunge on a knocked-down rival always hits. | `design` | VERSUS_SPEC §3 | Stage 2 |
+| R-V01 | 3 hearts; a stab, thrown-sword hit, guard's stab, sprung trap or damaging fall costs 1; 0 is death. | `design` | VERSUS_SPEC §3; OQ-1 (Saad 2026-11-15, kept 2026-11-17) | `pop/versus.py:Duel._hit` (falls: inherited `Game._land`); `tests/test_swordplay.py` |
+| R-V02 | Stances high, mid, low; a new rival starts sheathed and draws to mid in 3 frames. | `design` | VERSUS_SPEC §3 | `pop/versus.py` (Rival macros, `Duel._contacts`); `tests/test_swordplay.py` |
+| R-V03 | A stance change takes effect after 2 frames, even during the opponent's attack. | `design` | VERSUS_SPEC §3 | `pop/versus.py` (Rival macros, `Duel._contacts`); `tests/test_swordplay.py` |
+| R-V04 | Lunge: 2 windup + 2 active + 4 recovery frames; hits the cell ahead, same row, facing. | `design` | VERSUS_SPEC §3 | `pop/versus.py` (Rival macros, `Duel._contacts`); `tests/test_swordplay.py` |
+| R-V05 | Block: same stance as the attacker at the active frame, armed and facing: no hit; attacker pushed back 1 cell if free. | `design` | VERSUS_SPEC §3 | `pop/versus.py` (Rival macros, `Duel._contacts`); `tests/test_swordplay.py` |
+| R-V06 | Hit: 1 heart, defender pushed back 1 cell, 12 frames invulnerable. | `design` | VERSUS_SPEC §3 | `pop/versus.py` (Rival macros, `Duel._contacts`); `tests/test_swordplay.py` |
+| R-V07 | Disarm: a stance change landing into the attacker's height during the attacker's 2 windup frames knocks the attacker's sword 1–2 cells behind them. | `design` | VERSUS_SPEC §3 | `pop/versus.py` (Rival macros, `Duel._contacts`); `tests/test_swordplay.py` |
+| R-V08 | Sword throw: flies along the row 2 cells per frame, hits the first rival or guard (1 heart), deflected by the thrower's stance, stops at walls, closed gates and room edges; thrower unarmed. | `design` | VERSUS_SPEC §3 | `pop/versus.py` (Rival macros, `Duel._contacts`); `tests/test_swordplay.py` |
+| R-V09 | Unarmed: no lunge, throw or block; can kick and sweep; DOWN on a sword's cell picks it up in 6 frames. | `design` | VERSUS_SPEC §3 | `pop/versus.py` (Rival macros, `Duel._contacts`); `tests/test_swordplay.py` |
+| R-V10 | Dive kick: KICK in a jump's airborne frames lands 1 cell ahead; blocked by a high stance; a hit disarms and knocks down 10 frames, no heart. | `design` | VERSUS_SPEC §3 | `pop/versus.py` (Rival macros, `Duel._contacts`); `tests/test_swordplay.py` |
+| R-V11 | Sweep: 6 frames from a crouch, hits the cell ahead; avoided by a low stance or being airborne; knockdown 10 frames, no heart. | `design` | VERSUS_SPEC §3 | `pop/versus.py` (Rival macros, `Duel._contacts`); `tests/test_swordplay.py` |
+| R-V12 | Knocked down: cannot act; a lunge on a knocked-down rival always hits. | `design` | VERSUS_SPEC §3 | `pop/versus.py` (Rival macros, `Duel._contacts`); `tests/test_swordplay.py` |
 | R-V13 | Guard patrol: walks its post's cells at step speed, pausing 12 frames at each end. | `design` | VERSUS_SPEC §4 | Stage 3 |
 | R-V14 | Guard sight: same room and row, in front, within 5 cells, no wall or closed gate between. | `design` | VERSUS_SPEC §4 | Stage 3 |
 | R-V15 | Guard attack: on seeing an undisguised rival, draws, advances, copies the rival's stance after 6 frames, lunges at most every 16 frames. | `design` | VERSUS_SPEC §4 | Stage 3 |
