@@ -37,6 +37,7 @@ from . import observation
 from . import physics as P
 from . import tiles as T
 from .engine import ACTIONS, LEGAL_BY_POSTURE, Game, Kid
+from .guards import SIGHT_CELLS, Guard, blocked_between
 from .mechanics import Mechanics
 from .physics import Cell, Geometry
 from .situations import Situation
@@ -110,11 +111,13 @@ class Rival(Game):
         self._react(self.duel.events)
 
     def blocks(self, where: Cell | str) -> bool:
-        """Walls and gates, as before, and the other rival standing there:
-        rivals cannot pass through each other (VERSUS_SPEC 3)."""
+        """Walls and gates, as before, the other rival standing there, and a
+        standing guard: rivals cannot pass through either (VERSUS_SPEC 3); a
+        downed guard can be crossed."""
         if super().blocks(where):
             return True
-        return isinstance(where, tuple) and self.duel.standing_at(where, other_than=self.seat)
+        return isinstance(where, tuple) and (self.duel.standing_at(where, other_than=self.seat)
+                                             or self.duel.guard_at(where) is not None)
 
     @property
     def alive(self) -> bool:
@@ -209,9 +212,11 @@ class Rival(Game):
 
 class Duel:
     def __init__(self, situation: Situation, starts: dict[str, tuple[int, int, int, int]],
-                 seed: int = 0, time_limit_frames: int = P.GAME_FRAMES):
+                 seed: int = 0, time_limit_frames: int = P.GAME_FRAMES,
+                 guard_posts: dict | None = None):
         """time_limit_frames: OQ-3 (duel length) is open; the default is the
-        inherited 60-minute clock (R-C24) until Saad sets it."""
+        inherited 60-minute clock (R-C24) until Saad sets it.
+        guard_posts: name -> (room, row, (c0, c1)[, facing]) (pop/arena.py)."""
         self.situation = situation
         self.seed = seed
         self.rng = random.Random(seed)
@@ -227,6 +232,8 @@ class Duel:
         self.pending: dict[str, str | None] = {seat: None for seat in SEATS}
         self.last_result: dict[str, dict | None] = {seat: None for seat in SEATS}
         self.terminal: str | None = None
+        self.guards = {name: Guard.at_post(name, post)
+                       for name, post in sorted((guard_posts or {}).items())}
         self.swords: list[Cell] = []            # dropped swords (R-V07, R-V08)
         self.flying: list[dict] = []            # thrown swords in flight (R-V08)
 
@@ -234,6 +241,40 @@ class Duel:
     def standing_at(self, cell: Cell, other_than: str) -> bool:
         return any(r.kid.cell == cell and r.kid.posture == "standing"
                    for seat, r in self.rivals.items() if seat != other_than)
+
+    def guard_at(self, cell: Cell) -> Guard | None:
+        """A standing (not downed) guard in `cell`."""
+        for g in self.guards.values():
+            if g.cell == cell and not g.downed:
+                return g
+        return None
+
+    def cell_free_for_guard(self, g: Guard, cell: Cell) -> bool:
+        return (isinstance(cell, tuple) and cell[0] == g.room and 0 <= cell[2] < 10
+                and self.geom.tile(cell) != T.WALL and not self.mech.gate_bars(cell)
+                and self.geom.supported(cell)
+                and not any(r.kid.cell == cell and r.alive for r in self.rivals.values())
+                and all(o is g or o.downed or o.cell != cell for o in self.guards.values()))
+
+    def guard_sees(self, g: Guard) -> str | None:
+        """R-V14: the nearest rival in the guard's room and row, in front, within
+        5 cells, with no wall or closed gate between."""
+        best = None
+        for seat in sorted(self.rivals):
+            r = self.rivals[seat]
+            k = r.kid
+            if not r.alive or k.room != g.room or k.row != g.row or k.posture == "hanging":
+                continue
+            d = (k.col - g.col) * g.facing
+            if not 1 <= d <= SIGHT_CELLS or blocked_between(self.geom, self.mech, g.cell, k.cell):
+                continue
+            if not self.guard_ignores(g, r) and (best is None or d < best[0]):
+                best = (d, seat)
+        return best[1] if best else None
+
+    def guard_ignores(self, g: Guard, r: "Rival") -> bool:
+        """Stage 4: a disguised rival whose suspicion is not full (R-V18)."""
+        return False
 
     def busy(self, seat: str) -> bool:
         return self._moves[seat] is not None
@@ -291,9 +332,9 @@ class Duel:
         if self.terminal is not None:
             return
         self.frames += 1
-        for r in self.rivals.values():
-            r.invulnerable = max(0, r.invulnerable - 1)
-            r.knocked_down = max(0, r.knocked_down - 1)
+        for body in [*self.rivals.values(), *self.guards.values()]:
+            body.invulnerable = max(0, body.invulnerable - 1)
+            body.knocked_down = max(0, body.knocked_down - 1)
         alive = [r for r in self.rivals.values() if r.alive]
         pressing = sorted({c for r in alive if (c := r._pressing()) is not None})
         near: set[Cell] = set()
@@ -301,6 +342,10 @@ class Duel:
             near |= r._near_cells()
         first = pressing[0] if pressing else None
         self.events = self.mech.tick(first, near, frozenset(pressing[1:]))
+        for _, fell, landed in self.events:               # R-V16: a trap downs a guard
+            for g in self.guards.values():
+                if not g.downed and g.cell in (fell, landed):
+                    g.knock_out()
         before = {seat: r.kid.cell for seat, r in self.rivals.items()}
         for seat in SEATS:
             self._advance(seat)
@@ -312,6 +357,8 @@ class Duel:
                     r.stance, r.stance_change, r.stance_landed = target, None, self.frames
                 else:
                     r.stance_change = (target, left - 1)
+        for g in self.guards.values():                      # R-V13 to R-V15
+            g.update(self)
         self._fly_swords()
         self._contacts()
         self._check_end()
@@ -437,8 +484,8 @@ class Duel:
             self.flying.append(sword)
 
     def _sword_meets(self, sword: dict) -> bool:
-        """A flying sword reaching a rival: deflected by the thrower's stance, else a hit.
-        True if it stopped there."""
+        """A flying sword reaching a rival or a standing guard: deflected by the
+        thrower's stance, else a hit (a guard is downed, R-V16). True if it stopped."""
         for seat, r in self.rivals.items():
             if seat == sword["owner"] or not r.alive or r.kid.cell != sword["cell"]:
                 continue
@@ -447,11 +494,22 @@ class Duel:
             if (rest := self._settle(sword["cell"])) is not None:
                 self.swords.append(rest)
             return True
+        g = self.guard_at(sword["cell"])
+        if g is not None:
+            if not (g.armed and g.stance == sword["height"] and g.facing == -sword["dir"]):
+                g.knock_out()
+            if (rest := self._settle(sword["cell"])) is not None:
+                self.swords.append(rest)
+            return True
         return False
 
     def _fly_swords(self) -> None:
         still = []
         for sword in self.flying:
+            # A body that arrived in the sword's cell this frame meets it here: a
+            # sword and a walker swapping cells must not pass through each other.
+            if self._sword_meets(sword):
+                continue
             stopped = False
             for _ in range(THROW_SPEED):
                 nxt = self.geom.offset(sword["cell"], 0, sword["dir"])
@@ -479,24 +537,38 @@ class Duel:
         if r.alive:
             self._push(r, d)
 
+    def _body_at(self, cell, exclude) -> object | None:
+        for r in self.rivals.values():
+            if r is not exclude and r.alive and r.kid.cell == cell:
+                return r
+        g = self.guard_at(cell)
+        return g if g is not exclude else None
+
+    @staticmethod
+    def _facing(body) -> int:
+        return body.kid.facing if isinstance(body, Rival) else body.facing
+
     def _contacts(self) -> None:
         """Every attack's effect this frame, decided on the frame's end state for
-        both rivals first, then applied (no seat-order advantage)."""
+        every attacker first, then applied (no seat-order advantage). Rivals and
+        guards attack and defend by the same rules (R-V04 to R-V12)."""
         effects = []
-        for seat, att in self.rivals.items():
+        attackers = [r for r in self.rivals.values() if r.alive and r.attack]
+        attackers += [g for g in self.guards.values() if not g.downed and g.attack]
+        for att in attackers:
             a = att.attack
-            if not a or a["resolved"] or not att.alive:
+            if a["resolved"]:
                 continue
-            base = a.get("land", att.kid.cell)
-            target = self.geom.offset(base, 0, att.kid.facing)
-            other = self.rivals["B" if seat == "A" else "A"]
-            if not (other.alive and other.kid.cell == target):
+            here = att.kid.cell if isinstance(att, Rival) else att.cell
+            target = self.geom.offset(a.get("land", here), 0, self._facing(att))
+            other = self._body_at(target, att)
+            if other is None:
                 continue
-            facing_me = other.kid.facing == -att.kid.facing
+            facing_me = self._facing(other) == -self._facing(att)
             if a["kind"] == "lunge" and a["phase"] == "windup":
-                if (other.armed and facing_me and other.stance == a["height"]
-                        and other.stance_landed == self.frames):
-                    effects.append(("disarm", att, other))           # R-V07
+                if (isinstance(att, Rival) and other.armed and facing_me
+                        and other.stance == a["height"] and other.stance_landed == self.frames):
+                    effects.append(("disarm", att, other))           # R-V07 (guards cannot be disarmed)
             elif a["kind"] == "lunge" and a["phase"] == "active":
                 if other.knocked_down:
                     effects.append(("hit", att, other))              # R-V12
@@ -521,17 +593,29 @@ class Duel:
                 self.cancel(att.seat)
                 self.drop_sword(att, behind=True)
             elif kind == "block":
-                self._push(att, -att.kid.facing)
+                self._push_back(att)
             elif kind == "hit":
-                self._hit(other, att.kid.facing, "died:stabbed")
-            elif kind == "kicked":
-                self.cancel(other.seat)
-                if other.sword == "drawn":
-                    self.drop_sword(other, behind=True)
+                if isinstance(other, Rival):
+                    reason = "died:guard" if isinstance(att, Guard) else "died:stabbed"
+                    self._hit(other, self._facing(att), reason)
+                else:
+                    other.knock_out()                                # R-V16
+            elif kind in ("kicked", "swept"):
+                if isinstance(other, Rival):
+                    self.cancel(other.seat)
+                    if kind == "kicked" and other.sword == "drawn":
+                        self.drop_sword(other, behind=True)
+                else:
+                    other.action = other.attack = None
                 other.knocked_down = KNOCKDOWN_FRAMES
-            elif kind == "swept":
-                self.cancel(other.seat)
-                other.knocked_down = KNOCKDOWN_FRAMES
+
+    def _push_back(self, body) -> None:
+        if isinstance(body, Rival):
+            self._push(body, -body.kid.facing)
+        else:
+            dest = (body.room, body.row, body.col - body.facing)
+            if self.cell_free_for_guard(body, dest):
+                body.col = dest[2]
 
     def _check_end(self) -> None:
         dead = [seat for seat, r in self.rivals.items() if r.kid.posture == "dead"]
@@ -553,6 +637,7 @@ class Duel:
                               "invulnerable": r.invulnerable, "knocked_down": r.knocked_down,
                               "busy": self.busy(seat), "move_frame": self._move_frame[seat]}
                        for seat, r in self.rivals.items()},
+            "guards": {n: g.snapshot() for n, g in self.guards.items()},
             "swords": list(self.swords),
             "flying": [dict(s) for s in self.flying],
             "pending": dict(self.pending),
@@ -592,6 +677,20 @@ def observe(duel: Duel, seat: str) -> dict:
                         "posture": "knocked_down" if r.knocked_down else r.kid.posture,
                         "stance": r.stance, "armed": r.armed,
                         "motion": _motion_view(duel, other, room)})
+    for g in duel.guards.values():
+        if g.room != room:
+            continue
+        m = g.motion()
+        figures.append({"kind": "guard", "row": g.row, "col": g.col,
+                        "facing": "right" if g.facing > 0 else "left",
+                        "posture": "downed" if g.downed else
+                        "knocked_down" if g.knocked_down else "standing",
+                        "stance": g.stance, "armed": g.armed,
+                        "motion": None if m is None else {
+                            "effect": m["effect"], "frame": m["frame"], "frames": m["frames"],
+                            "to": [m["to"][1], m["to"][2]] if m["to"][0] == room else None,
+                            "to_posture": m["posture"],
+                            "to_facing": "right" if m["facing"] > 0 else "left"}})
     obs["figures"] = sorted(figures, key=lambda f: (f["row"], f["col"], f["kind"]))
     obs["swords"] = sorted(
         [{"row": c[1], "col": c[2], "flying": False} for c in duel.swords if c[0] == room]
@@ -607,16 +706,19 @@ class VersusEpisode:
     and server only. Seats never receive the Duel."""
 
     def __init__(self, situation: Situation, starts: dict[str, tuple[int, int, int, int]],
-                 seed: int = 0, time_limit_frames: int = P.GAME_FRAMES):
+                 seed: int = 0, time_limit_frames: int = P.GAME_FRAMES,
+                 guard_posts: dict | None = None):
         self._situation = situation
         self._starts = dict(starts)
         self._time_limit = time_limit_frames
+        self._guard_posts = dict(guard_posts or {})
         self.reset(seed)
 
     # 1
     def reset(self, seed: int) -> None:
         self.seed = seed
-        self._duel = Duel(self._situation, self._starts, seed, self._time_limit)
+        self._duel = Duel(self._situation, self._starts, seed, self._time_limit,
+                          self._guard_posts)
         self.inputs = {seat: 0 for seat in SEATS}
         self.invalid = {seat: 0 for seat in SEATS}
         self.log: list[tuple[int, str, str]] = []      # (frame, seat, action): the trace
@@ -673,4 +775,5 @@ def _check_seat(seat: str) -> None:
 def arena_episode(seed: int = 0, time_limit_frames: int = P.GAME_FRAMES) -> VersusEpisode:
     """The six-room arena (pop/arena.py) with both rivals at their starts."""
     from . import arena
-    return VersusEpisode(arena.situation("A"), arena.STARTS, seed, time_limit_frames)
+    return VersusEpisode(arena.situation("A"), arena.STARTS, seed, time_limit_frames,
+                         arena.GUARD_POSTS)

@@ -113,3 +113,31 @@ def pose(view: dict, room: str, cache: dict | None = None, key: object = None) -
             cache.clear() if len(cache) > 64 else None
             cache[sig] = poses
     return poses[max(0, min(len(poses), m["frame"]) - 1)]
+
+
+def guard_sprite(view: dict, counts: dict[str, int]) -> Sprite:
+    """A guard figure (or anything observed as one) drawn from the guard strips:
+    walking between cells, turning, drawing, the three stances, lunges at the
+    stance's height, knocked down and downed."""
+    f = 1 if view["facing"] == "right" else -1
+    x, y = stand_point(view["row"], view["col"])
+    if view["posture"] == "downed":
+        return Sprite("downed", counts["downed"] - 1, x, y, f)
+    if view["posture"] == "knocked_down":
+        return Sprite("downed", min(3, counts["downed"] - 1), x, y, f)
+    m = view.get("motion")
+    if m:
+        if m["effect"] == "lunge":
+            strip = f"lunge_{view.get('stance') or 'mid'}"
+            return Sprite(strip, _strip_index(m["frame"], m["frames"], counts[strip]), x, y, f)
+        if m["effect"] == "moved":
+            if m["to"] is not None:
+                tx, ty = stand_point(*m["to"])
+                t = min(1.0, m["frame"] / max(1, m["frames"]))
+                x, y = x + (tx - x) * t, y + (ty - y) * t
+            return Sprite("walk", _strip_index(m["frame"], m["frames"], counts["walk"]), x, y, f)
+        if m["effect"] == "drew":
+            return Sprite("stance_mid", 0, x, y, f)
+    if view.get("armed") and view.get("stance"):
+        return Sprite(f"stance_{view['stance']}", 0, x, y, f)
+    return Sprite("stand", 0, x, y, f)

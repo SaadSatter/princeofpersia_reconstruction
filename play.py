@@ -144,6 +144,17 @@ def versus_main(args) -> int:
 
     counts = ({k: v["n"] for k, v in renderer.dungeon.meta["rival"].items()}
               if renderer.dungeon else {})
+    guard_counts = ({k: v["n"] for k, v in renderer.dungeon.meta["guard"].items()}
+                    if renderer.dungeon else {})
+
+    def draw_guard(s, view):
+        if renderer.dungeon:
+            spr = versus_view.guard_sprite(view, guard_counts)
+            renderer.dungeon.blit_actor(s, "guard", spr.strip, spr.index, spr.x, spr.y, spr.facing)
+        else:
+            from render.anim import stand_point
+            x, y = stand_point(view["row"], view["col"])
+            pygame.draw.rect(s, (90, 110, 70), (x - 4, y - 30, 9, 30))
 
     def draw_actor(s, view, room, seat_colour, cache_key, cache):
         spr = versus_view.sprite(view, counts) if renderer.dungeon else None
@@ -198,6 +209,8 @@ def versus_main(args) -> int:
             for j, fig in enumerate(obs["figures"]):
                 if fig["kind"] == "rival":
                     draw_actor(panel, fig, obs["room"], colours[other[seat]], ("fig", j), caches[seat])
+                else:
+                    draw_guard(panel, fig)
             draw_actor(panel, obs["me"], obs["room"], colours[seat], "me", caches[seat])
             renderer.draw_hud(panel, obs)
             x = i * (panel_w + gap)

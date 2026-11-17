@@ -252,3 +252,18 @@ def test_swordplay_is_drawn_from_our_strips():
     assert spr.strip == "lunge_high" and spr.index == 3
     assert versus_view.sprite(dict(base, posture="knocked_down"), counts).strip == "death"
     assert versus_view.sprite(dict(base, armed=False, stance=None), counts) is None
+
+
+def test_guards_are_drawn_from_the_guard_strips():
+    from render import versus_view
+    counts = {"downed": 8, "walk": 8, "stand": 1, "stance_mid": 6, "stance_high": 6,
+              "lunge_high": 8}
+    base = {"row": 2, "col": 3, "facing": "left", "posture": "standing", "armed": False,
+            "stance": None, "motion": None}
+    assert versus_view.guard_sprite(base, counts).strip == "stand"
+    walking = dict(base, motion={"effect": "moved", "frame": 4, "frames": 8, "to": [2, 2],
+                                 "to_posture": "standing", "to_facing": "left"})
+    spr = versus_view.guard_sprite(walking, counts)
+    assert spr.strip == "walk" and 2 * 32 + 16 < spr.x < 3 * 32 + 16
+    assert versus_view.guard_sprite(dict(base, posture="downed"), counts).index == 7
+    assert versus_view.guard_sprite(dict(base, armed=True, stance="high"), counts).strip == "stance_high"
