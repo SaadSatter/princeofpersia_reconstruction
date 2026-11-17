@@ -40,6 +40,7 @@ WALL_TINT = (95, 95, 115)
 PILLAR_TINT = (150, 150, 165)
 HEART, HEART_DK = (200, 40, 40), (90, 20, 24)
 SOLID = T.HAS_FLOOR | {T.WALL}
+SPIN_PIVOT = 16      # a flip turns about this point above the feet: a 32 px body's middle
 
 
 def ready(img: pygame.Surface) -> pygame.Surface:
@@ -182,16 +183,25 @@ class DungeonArt:
         return self._frames[key]
 
     def blit_actor(self, s, who: str, strip: str, i: int, x: float, y: float, facing: int,
-                   colour: str = "indigo") -> None:
+                   colour: str = "indigo", spin: float = 0.0) -> None:
         """Feet-anchored strips put their anchor on (x, y); ledge-anchored ones put
-        their ledge corner on (x, y)."""
+        their ledge corner on (x, y). spin: degrees turned forward about the
+        body's middle (a flip, R-V22)."""
         m = self.meta[who][strip]
         flip = facing < 0
         im = self.frame(who, strip, i, flip, colour)
         ax = m["x"]
         if flip:
             ax = m["w"] - ax if m["type"] == "ledge" else m["w"] - 1 - ax
-        s.blit(im, (round(x - ax), round(y - m["y"])))
+        if spin % 360 == 0:
+            s.blit(im, (round(x - ax), round(y - m["y"])))
+            return
+        # Forward is clockwise when facing right; pygame turns counter-clockwise.
+        pivot = pygame.math.Vector2(ax, m["y"] - SPIN_PIVOT)          # in the frame
+        turned = pygame.transform.rotate(im, -spin * facing)
+        offset = (pivot - pygame.math.Vector2(im.get_size()) / 2).rotate(spin * facing)
+        centre = pygame.math.Vector2(x, y - SPIN_PIVOT) - offset
+        s.blit(turned, turned.get_rect(center=(round(centre.x), round(centre.y))))
 
     def draw_kid(self, s, pose: Pose, colour: str = "indigo", who: str = "rival") -> None:
         """Draw a pose with the rival's strips, or with the guard's (who="guard"):
@@ -204,7 +214,7 @@ class DungeonArt:
             lx, ly = pose.ledge if pose.ledge else (pose.x + 7 * pose.facing, pose.y - HANG_DROP)
             self.blit_actor(s, who, strip, i, lx, ly, pose.facing, colour)
         else:
-            self.blit_actor(s, who, strip, i, pose.x, pose.y, pose.facing, colour)
+            self.blit_actor(s, who, strip, i, pose.x, pose.y, pose.facing, colour, pose.spin)
 
     def draw_hearts(self, s, x0: int, y0: int, hp: int, max_hp: int) -> None:
         shape = (".##.##.", "#######", "#######", ".#####.", "..###..", "...#...")

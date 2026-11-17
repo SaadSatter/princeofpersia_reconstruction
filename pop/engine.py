@@ -100,6 +100,17 @@ class Game:
             return where != P.BOTTOM
         return self.geom.tile(where) == T.WALL or self.mech.gate_bars(where)
 
+    def _can_vault(self, where: Cell | str) -> bool:
+        """True if a jump may fly over `where` although it cannot move into it.
+        Single-player: never (only walls and gates block). The versus rival
+        overrides it to flip over a body (VERSUS_SPEC R-V22)."""
+        return False
+
+    def _jump_look(self, running: bool, vaulted: bool) -> str:
+        """How a jump looks (its planned effect, display only). Single-player:
+        always a jump; the versus rival flips (VERSUS_SPEC R-V22)."""
+        return "jumped"
+
     def ahead(self, n: int = 1) -> Cell | str:
         return self.geom.offset(self.kid.cell, 0, self.kid.facing * n)
 
@@ -332,19 +343,22 @@ class Game:
             if k.posture != "standing" or self.terminal is not None:
                 return
             span, flight, depart = P.RUN_JUMP_SPAN, P.RUN_JUMP_FLIGHT, 0   # takes off running
-        target = None
+        target, passed, vaulted = None, False, False
         for i in range(1, span + 1):
             cell = self.ahead(i)
             if self.blocks(cell):
-                break
-            target = cell
+                if not self._can_vault(cell):
+                    break
+                passed = True                        # fly over it, never land on it
+                continue
+            target, vaulted = cell, passed
         if target is None:
             self._result["effect"] = "bumped"
             self._plan("bumped", P.JUMP_IN_PLACE)
             yield from self._frames(P.JUMP_IN_PLACE)
             return
         self._result["effect"] = "jumped"
-        self._plan("jumped", flight, target)
+        self._plan(self._jump_look(running, vaulted), flight, target)
         if (yield from self._phase(flight, depart)):
             self._enter(target, "jump")
 

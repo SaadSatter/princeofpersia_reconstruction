@@ -10,7 +10,8 @@ picture keeps up with the duel's real-time ticks.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+import math
+from dataclasses import dataclass, replace
 
 from pop import physics as P
 
@@ -45,7 +46,7 @@ def action_for(motion: dict, posture: str, facing: str) -> str:
         return _dir(motion["to_facing"])
     if e == "moved":
         return "STEP_" + d if n == P.STEP else d
-    if e == "jumped":
+    if e in ("jumped", "flipped"):
         return "JUMP_" + d
     if e in ("bumped", "edge"):
         return "JUMP_" + d if n == P.JUMP_IN_PLACE else d
@@ -110,10 +111,29 @@ def pose(view: dict, room: str, cache: dict | None = None, key: object = None) -
         step = Step(action=action, before=before, after=after, before_room=room,
                     after_room=room, effect=m["effect"], frames=m["frames"])
         poses = clip(step, AnimState())
+        if m["effect"] == "flipped":
+            poses = flip(poses)
         if cache is not None:
             cache.clear() if len(cache) > 64 else None
             cache[sig] = poses
     return poses[max(0, min(len(poses), m["frame"]) - 1)]
+
+
+FLIP_LIFT = 22          # px the flip's arc rises above an ordinary jump: over a head
+
+
+def flip(poses: list[Pose]) -> list[Pose]:
+    """A jump turned into one forward somersault over someone (R-V22): the same
+    clip and ends, a higher arc, and one full turn while airborne. The airborne
+    part follows the standing jump's ease in render/anim.py (take-off at 20%,
+    landing at 85%)."""
+    out = []
+    k = len(poses)
+    for i, p in enumerate(poses):
+        u = min(1.0, max(0.0, ((i + 1) / k - 0.2) / 0.65))
+        lift = 0.0 if u in (0.0, 1.0) else FLIP_LIFT * math.sin(math.pi * u)
+        out.append(replace(p, y=p.y - lift, spin=360.0 * u))
+    return out
 
 
 GUARD_LOOK = ("lunge", "drew", "sheathed", "turned")       # guard-only clips

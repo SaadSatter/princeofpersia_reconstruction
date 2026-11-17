@@ -76,7 +76,8 @@ SUSPICION_MAX = 100                   # R-V19
 SUSPICION_RUN, SUSPICION_LEAP, SUSPICION_LINGER = 4, 6, 1     # per frame, R-V19
 LINGER_AFTER = 24                     # "over 2 s" within 1 cell, R-V19
 SUSPICION_FALL = 2                    # per frame, R-V20
-LEAPS = ("jumped", "climbed", "hanging", "dropped")            # jumping or climbing
+LEAPS = ("jumped", "flipped", "climbed", "hanging", "dropped")  # jumping or climbing
+JUMPS = ("jumped", "flipped")          # a flip is a jump over someone (R-V22)
 VERSUS_ACTIONS = ("DRAW", "SHEATHE", "STANCE_UP", "STANCE_DOWN", "LUNGE", "THROW",
                   "KICK", "SWEEP", "TAKE")
 BREAKS_DISGUISE = ("DRAW", "LUNGE", "THROW", "KICK", "SWEEP")  # R-V21
@@ -102,6 +103,7 @@ class Rival(Game):
         self._result = {"effect": None, "frames": 0, "fell_rows": 0, "hp_change": 0}
         self._airborne = False
         self.plan: dict | None = None
+        self.plan_from = 0                 # move frame the current plan started at
         self.intro = None
         # Swordplay state (VERSUS_SPEC 3).
         self.sword = "sheathed"            # "drawn", "sheathed" or "none" (disarmed / thrown)
@@ -127,6 +129,26 @@ class Rival(Game):
             return True
         return isinstance(where, tuple) and (self.duel.standing_at(where, other_than=self.seat)
                                              or self.duel.guard_at(where) is not None)
+
+    def _can_vault(self, where: Cell | str) -> bool:
+        """R-V22 (Saad, 2026-11-17): a jump flies over the other rival or a standing
+        guard, never over a wall or closed gate. Only a body in this rival's own
+        room: one in the next room is out of sight, and flipping over it would
+        reveal it, so it still stops the jump as before."""
+        return (isinstance(where, tuple) and where[0] == self.kid.room
+                and not Game.blocks(self, where))
+
+    def _jump_look(self, running: bool, vaulted: bool) -> str:
+        """R-V22: a jump over someone is a flip, and so is every running jump
+        (Saad, 2026-11-17: over holes and spikes too). A standing jump over
+        nobody stays a plain jump."""
+        return "flipped" if running or vaulted else "jumped"
+
+    def _plan(self, *args, **kwargs) -> None:
+        """Also note the move frame the plan starts at: a running jump plans its
+        flight after the run-up, and the flight's motion counts from take-off."""
+        super()._plan(*args, **kwargs)
+        self.plan_from = self.duel._move_frame[self.seat]
 
     @property
     def alive(self) -> bool:
@@ -293,7 +315,15 @@ class Duel:
                 and self.geom.tile(cell) != T.WALL and not self.mech.gate_bars(cell)
                 and self.geom.supported(cell)
                 and not any(r.kid.cell == cell and r.alive for r in self.rivals.values())
+                and cell not in self.landings()
                 and all(o is g or o.downed or o.cell != cell for o in self.guards.values()))
+
+    def landings(self) -> set[Cell]:
+        """Cells rivals in mid-jump will land in. A jumper keeps its cell until it
+        lands, so a guard must not step into its landing cell meanwhile (R-V22:
+        a flip ends right beside the guard it passed)."""
+        return {r.plan["to"] for seat, r in self.rivals.items()
+                if self.busy(seat) and r.plan and r.plan["effect"] in JUMPS}
 
     def guard_sees(self, g: Guard) -> str | None:
         """R-V14: the nearest rival in the guard's room and row, in front, within
@@ -361,11 +391,11 @@ class Duel:
         r = self.rivals[seat]
         if not self.busy(seat) or r.plan is None:
             return None
-        return {**r.plan, "frame": self._move_frame[seat]}
+        return {**r.plan, "frame": self._move_frame[seat] - r.plan_from}
 
     def airborne_jump(self, seat: str) -> bool:
         r = self.rivals[seat]
-        return self.busy(seat) and r._airborne and (r.plan or {}).get("effect") == "jumped"
+        return self.busy(seat) and r._airborne and (r.plan or {}).get("effect") in JUMPS
 
     def legal_actions(self, seat: str) -> tuple[str, ...]:
         if self.terminal is not None:
