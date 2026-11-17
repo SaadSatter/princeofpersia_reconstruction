@@ -1,6 +1,6 @@
 ---
 name: game-rules-audit
-description: Audit the Prince of Persia reconstruction's player interface, hidden-state leakage, legal-action enforcement, episode limits, and consistency between the human game and the agent simulation. Use after any change to pop/interface.py, pop/observation.py, pop/runner.py, agents/, or the rule map, and before a checkpoint or submission. Produces a dated audit report; does not change code.
+description: Audit the Prince of Persia reconstruction and Shadow Masque's player interface, hidden-state leakage (including disguise identity and trap ownership between two seats), the online server-to-client boundary, legal-action enforcement, episode limits, and consistency between the human game and the agent simulation. Use after any change to pop/interface.py, pop/observation.py, pop/runner.py, server/, web/, agents/, or the rule map, and before a checkpoint, gate or submission. Produces a dated audit report; does not change code.
 ---
 
 # game-rules-audit
@@ -17,7 +17,9 @@ step after the student decides.
 2. `docs/GAME_SPEC.md` §4 (actions), §7 (limits), §8 (observation).
 3. `docs/RULE_SOURCE_MAP.md`.
 4. `docs/REQUIREMENTS_CHECKLIST.md`.
-5. The code: `pop/interface.py`, `pop/observation.py`, `pop/runner.py`,
+5. Final project: `AGENTS.md`, `docs/final/GDD.md` §5 and §7,
+   `docs/final/CONFIGURATION.md` Part A, `docs/final/REQUIREMENTS_CHECKLIST.md`.
+6. The code: `server/` and `web/` if present, `pop/interface.py`, `pop/observation.py`, `pop/runner.py`,
    `pop/engine.py`, `play.py`, `agents/baseline.py`,
    `agents/model_player.py`, `agents/providers.py`, `evaluate.py`, `tests/`.
 
@@ -84,6 +86,40 @@ with the evidence (file:line, command, or output excerpt).
   the map row agree.
 - F2 No label promoted (e.g., `assumed` → `code`) without a new locator.
 
+### G. Two seats (final project)
+- G1 Every operation takes a seat id; an unknown seat, or a seat acting for
+  the other, is rejected and changes no state.
+- G2 Disguise identity: with the other rival disguised, list every field of
+  this seat's observation. The rival must be indistinguishable from a guard
+  in ids, names, ordering, counts and any per-figure value. Propose a test
+  that swaps the rival with a real guard and compares observations.
+- G3 Trap ownership: a tile rigged by the other rival is identical, in this
+  seat's observation and legal actions, to an unrigged tile. Tiles this
+  seat rigged may be marked.
+- G4 Isolation: each seat has its own history, model session and trace
+  record; no prompt includes the other seat's observation or actions.
+- G5 Simultaneity: both seats' inputs for a frame are applied in a fixed,
+  documented order that does not favour a seat id; same seed and inputs give
+  the same trace.
+- G6 Per-seat limits: model-call limits, timeouts and fallbacks are counted
+  per seat, labelled with the seat.
+
+### H. Online server boundary (final project)
+- H1 Only the server constructs or steps the `GameState`; `web/` contains
+  no rules, and nothing in `web/` reads level or arena data.
+- H2 Every outgoing message is built from one seat's observation. Read the
+  serializer; flag any field not in the observation (full state, other
+  seat, layout, RNG, guard scripts, trap owners), even if the page ignores it.
+- H3 Incoming messages are input intents only, validated as actions;
+  malformed messages are refused and counted, never crash the server.
+- H4 The AI seat runs server-side through the runner with the same
+  observation as a browser seat.
+- H5 No API key, `.env` value or original sprite path is served to clients.
+- H6 Disconnect and reconnect end or resume the duel with a stated terminal
+  reason (GDD OQ-13).
+- H7 Server tests run without network access beyond localhost and without
+  keys.
+
 ## Commands you may run (read-only)
 
 ```
@@ -91,6 +127,7 @@ uv run pytest -q
 uv run pytest -q -k "leak or legal or limit or determin"
 grep -rn "import pygame" pop/
 grep -rn "pop.engine\|pop.levels\|GameState\|open(" agents/
+grep -rn "GameState\|pop.levels\|vendor/\|assets/original" web/
 ```
 
 Do not run live model trials. Do not set or read API keys.
@@ -101,7 +138,8 @@ Do not run live model trials. Do not set or read API keys.
    with:
    - header: date, git commit (`git rev-parse --short HEAD`), auditor
      session label, files read;
-   - a table of checks A1–F2 with result and evidence;
+   - a table of checks A1–H7 with result and evidence (G and H are
+     NOT IMPLEMENTED until two seats and the server exist);
    - findings, most severe first, one per line:
      `[blocking | should fix | note] file:line — problem — evidence`;
    - "Not checked" list with reasons.

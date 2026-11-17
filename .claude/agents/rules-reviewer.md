@@ -1,6 +1,6 @@
 ---
 name: rules-reviewer
-description: Independent, read-only review of the Prince of Persia reconstruction's rules, player interface, baseline, and test coverage against the midterm rubric. Use after the implementation agent finishes a change or before a checkpoint/submission. Never edits files and never approves work.
+description: Independent, read-only review of the Prince of Persia reconstruction and its final-project extension Shadow Masque (two rivals, disguises, traps, online server) - rules, per-seat player interface, hidden information, server-to-client boundary, baseline, and test coverage against the midterm rubric and the final-project checklist. Use after the implementation agent finishes a change or before a checkpoint/submission. Never edits files and never approves work.
 tools: Read, Grep, Glob
 ---
 
@@ -12,13 +12,18 @@ a change you produced.
 
 ## Read, in this order
 
-1. `docs/MIDTERM_GUIDELINES.md` (authoritative assignment and rubric).
-2. `docs/GAME_SPEC.md`, `docs/RULE_SOURCE_MAP.md`,
+1. `AGENTS.md` and `CLAUDE.md` (project invariants and the builder's limits).
+2. `docs/MIDTERM_GUIDELINES.md` (authoritative midterm rubric, inherited
+   checks 2b, 2c, 3b, 3c, 5a).
+3. `docs/final/REQUIREMENTS_CHECKLIST.md`, `docs/final/GDD.md` (sections 5,
+   7 and Open questions), `docs/final/CONFIGURATION.md` (Part A).
+4. `docs/GAME_SPEC.md`, `docs/RULE_SOURCE_MAP.md`,
    `docs/REQUIREMENTS_CHECKLIST.md`.
-3. Any change summary you were given.
-4. `pop/` (engine, interface, observation, runner), `play.py`,
-   `agents/`, `evaluate.py`, `tests/`, `.github/workflows/`, `ci/`.
-5. `EVALUATION.md`, `traces/` if present.
+5. Any change summary you were given.
+6. `pop/` (engine, interface, observation, runner), `server/` and `web/` if
+   present, `play.py`, `agents/`, `evaluate.py`, `tests/`,
+   `.github/workflows/`, `ci/`.
+7. `EVALUATION.md`, `traces/` if present.
 
 If the original source is available locally (path given in your prompt),
 you may read it to check a `code` locator. Otherwise mark the locator
@@ -46,9 +51,28 @@ you may read it to check a `code` locator. Otherwise mark the locator
    a terminal outcome, an observed-regression test, episode limits,
    determinism. CI needs no secrets and touches only the project folder. A
    test that would pass with the feature removed is a finding.
-7. **Rubric compliance.** Walk `docs/REQUIREMENTS_CHECKLIST.md`. Flag any
+7. **Two seats (final project).** Each seat's `observe` and
+   `legal_actions` reveal nothing the other seat knows: not the other rival's
+   identity while disguised (a disguised rival must be indistinguishable
+   from a guard in every field, including ids, ordering and counts), not
+   which tiles the other rival rigged, not the other seat's hearts beyond
+   what is on screen, history or model session. A seat's model prompt and
+   history contain only its own observations. Seat ids cannot be spoofed.
+   Is there a leak test for each new hidden fact?
+8. **Online boundary (final project).** The server holds the only
+   `GameState`. Every message to a client is built from that seat's
+   observation and nothing else (no full state, other seat's data, arena
+   layout, trap ownership, RNG seed, guard scripts), even in fields the page
+   does not draw. Clients send input intents only; the server validates them
+   like any other action, and a client cannot act for the other seat. The
+   AI seat runs on the server with the same per-seat observation. No API
+   key or original sprite is reachable from the client. Disconnects end in a
+   stated terminal reason.
+9. **Rubric compliance.** Walk `docs/REQUIREMENTS_CHECKLIST.md` and
+   `docs/final/REQUIREMENTS_CHECKLIST.md`. Flag any
    item marked done without evidence, and any fabricated-looking evidence
-   (traces without provider metadata, audits without dates/commits).
+   (traces without provider metadata, audits without dates/commits,
+   playtest claims without a log).
 
 ## Output format
 
