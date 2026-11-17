@@ -79,9 +79,9 @@ def held_repeat(held: set[str], shift: bool) -> str | None:
 # own seat's observation. Real play is one player per screen (online, GDD).
 VERSUS_KEYS = {
     "A": {"left": "a", "right": "d", "up": "w", "down": "s", "attack": "f", "draw": "g",
-          "shift": "lshift"},
+          "take": "t", "shift": "lshift"},
     "B": {"left": "left", "right": "right", "up": "up", "down": "down", "attack": ".",
-          "draw": "/", "shift": "rshift"},
+          "draw": "/", "take": "'", "shift": "rshift"},
 }
 
 
@@ -91,6 +91,8 @@ def versus_input(held: set[str], shift: bool, armed: bool = False) -> str | None
     Swordplay keys (VERSUS_SPEC 2.3): attack = lunge, with Up a throw, with Down
     a sweep (and in the air a dive kick, chosen by the caller when KICK is legal);
     while the sword is drawn, Up/Down change stance."""
+    if "take" in held:
+        return "TAKE"                                     # a downed guard's uniform (R-V17)
     if "draw" in held:
         return "SHEATHE" if armed else "DRAW"
     if "attack" in held:
@@ -168,6 +170,20 @@ def versus_main(args) -> int:
         else:
             renderer.draw_kid(s, p)
 
+    def draw_meter(s, entry):
+        """A guard's suspicion of this seat (R-V19): an eye and a bar above its head,
+        amber below 70, red above. Only the suspected seat has these entries."""
+        from render.anim import stand_point
+        x, y = (round(v) for v in stand_point(entry["row"], entry["col"]))
+        y -= 36
+        col = (230, 170, 40) if entry["level"] < 70 else (220, 50, 40)
+        pygame.draw.rect(s, (14, 15, 20), (x - 9, y - 1, 18, 5))
+        pygame.draw.rect(s, (60, 60, 70), (x - 8, y, 16, 3))
+        pygame.draw.rect(s, col, (x - 8, y, round(16 * entry["level"] / 100), 3))
+        for dx, dy in ((-2, -4), (-1, -5), (0, -5), (1, -5), (2, -4), (-1, -3), (0, -3), (1, -3)):
+            s.set_at((x + dx, y + dy), (235, 230, 215))
+        s.set_at((x, y - 4), (14, 15, 20))
+
     def draw_swords(s, swords):
         """Dropped swords lie on the floor; a thrown one flies at chest height."""
         from render.anim import stand_point
@@ -211,11 +227,17 @@ def versus_main(args) -> int:
                     draw_actor(panel, fig, obs["room"], colours[other[seat]], ("fig", j), caches[seat])
                 else:
                     draw_guard(panel, fig)
-            draw_actor(panel, obs["me"], obs["room"], colours[seat], "me", caches[seat])
+            if obs["me"]["disguised"]:
+                draw_guard(panel, obs["me"])                  # in a guard's uniform (R-V18)
+            else:
+                draw_actor(panel, obs["me"], obs["room"], colours[seat], "me", caches[seat])
+            for entry in obs["suspicion"]:
+                draw_meter(panel, entry)
             renderer.draw_hud(panel, obs)
             x = i * (panel_w + gap)
             window.blit(pygame.transform.scale(panel, (panel_w, panel_h)), (x, 0))
-            label = f"rival {seat} ({colours[seat]})  hearts {obs['me']['hp']}"
+            label = (f"rival {seat} ({colours[seat]})  hearts {obs['me']['hp']}"
+                     + ("  DISGUISED" if obs["me"]["disguised"] else ""))
             window.blit(font.render(label, True, (200, 200, 200)), (x + 6, panel_h + 2))
         out = ep.outcome()
         if out["status"] == "terminal":

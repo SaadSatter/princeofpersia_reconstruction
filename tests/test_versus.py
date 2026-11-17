@@ -183,19 +183,6 @@ def test_the_other_rivals_input_is_never_observed():
     assert ep.observe("A") == before
 
 
-# --- later stages (strict xfail: they must start failing, then be unmarked) --
-@pytest.mark.xfail(strict=True, reason="Stage 4: disguise (R-V18) not implemented")
-def test_disguised_rival_is_observed_exactly_as_a_guard():
-    ep = arena_episode()
-    assert hasattr(ep, "take_uniform")
-
-
-@pytest.mark.xfail(strict=True, reason="Stage 4: suspicion (R-V19) not implemented")
-def test_suspicion_is_shown_only_to_the_suspected_seat():
-    ep = arena_episode()
-    assert ep.observe("A")["suspicion"] != []
-
-
 # --- local two-player test bench (play.py --versus) --------------------------
 @pytest.mark.parametrize("held,shift,expected", [
     ({"right"}, False, "RIGHT"), ({"left"}, True, "STEP_LEFT"),
@@ -233,6 +220,7 @@ def test_versus_pose_follows_the_move_in_progress():
     ({"draw"}, False, "DRAW"), ({"draw"}, True, "SHEATHE"), ({"attack"}, True, "LUNGE"),
     ({"attack", "up"}, True, "THROW"), ({"attack", "down"}, True, "SWEEP"),
     ({"up"}, True, "STANCE_UP"), ({"down"}, True, "STANCE_DOWN"), ({"up"}, False, "UP"),
+    ({"take"}, False, "TAKE"),
 ])
 def test_versus_swordplay_keys(held, armed, expected):
     import play

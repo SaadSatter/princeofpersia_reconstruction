@@ -29,7 +29,8 @@ class Sprite:
 
 
 COMBAT_STRIPS = {"lunge": None, "throw": "throw", "dive_kick": "dive_kick",
-                 "sweep": "sweep", "took_sword": "take", "drew": "stance_mid"}
+                 "sweep": "sweep", "took_sword": "take", "took_uniform": "take",
+                 "drew": "stance_mid"}
 
 
 def _dir(facing: str) -> str:

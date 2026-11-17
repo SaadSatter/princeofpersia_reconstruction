@@ -70,8 +70,16 @@ PICKUP_FRAMES = 6                     # R-V09
 KICK_FRAMES = 4                       # implementation choice: active on its last 2 frames (R-V10)
 SWEEP_FRAMES = 6                      # R-V11; active on frames 3-4 (implementation choice)
 KNOCKDOWN_FRAMES = 10                 # R-V10, R-V11
+# Disguise and suspicion (VERSUS_SPEC 5, approved 2026-11-17).
+TAKE_FRAMES = 12                      # R-V17
+SUSPICION_MAX = 100                   # R-V19
+SUSPICION_RUN, SUSPICION_LEAP, SUSPICION_LINGER = 4, 6, 1     # per frame, R-V19
+LINGER_AFTER = 24                     # "over 2 s" within 1 cell, R-V19
+SUSPICION_FALL = 2                    # per frame, R-V20
+LEAPS = ("jumped", "climbed", "hanging", "dropped")            # jumping or climbing
 VERSUS_ACTIONS = ("DRAW", "SHEATHE", "STANCE_UP", "STANCE_DOWN", "LUNGE", "THROW",
-                  "KICK", "SWEEP")
+                  "KICK", "SWEEP", "TAKE")
+BREAKS_DISGUISE = ("DRAW", "LUNGE", "THROW", "KICK", "SWEEP")  # R-V21
 
 
 class Rival(Game):
@@ -103,7 +111,8 @@ class Rival(Game):
         self.attack: dict | None = None    # the attack in progress and its phase this frame
         self.invulnerable = 0              # R-V06
         self.knocked_down = 0              # R-V12
-        self.disguised = False
+        self.disguised = False             # R-V17 to R-V21
+        self.still = 0                     # frames standing still (R-V19 lingering)
 
     def _tick(self) -> None:
         """This rival's part of the frame the duel has already advanced."""
@@ -127,15 +136,28 @@ class Rival(Game):
     def armed(self) -> bool:
         return self.sword == "drawn"
 
+    def _hurt(self, amount: int, reason: str) -> None:
+        super()._hurt(amount, reason)
+        self.disguised = False                              # R-V21: losing a heart
+
+    def uniform_ahead(self):
+        """A downed guard still in uniform in the cell ahead (R-V17), or None."""
+        ahead = self.ahead()
+        for g in self.duel.guards.values():
+            if g.downed and g.uniform and g.cell == ahead:
+                return g
+        return None
     # --- swordplay macros (per-frame generators, like the inherited ones) ---
     def _versus_macro(self, action: str):
         if action in VERSUS_ACTIONS or (action == "DOWN" and self.sword == "none"
                                         and self.kid.cell in self.duel.swords):
             self._result = {"effect": None, "frames": 0, "fell_rows": 0, "hp_change": 0}
             self.plan = None
+            if action in BREAKS_DISGUISE:
+                self.disguised = False                      # R-V21: drawing or any attack
             return {"DRAW": self._draw, "SHEATHE": self._sheathe, "LUNGE": self._lunge,
                     "THROW": self._throw, "KICK": self._kick, "SWEEP": self._sweep,
-                    "DOWN": self._pickup}[action]()
+                    "DOWN": self._pickup, "TAKE": self._take}[action]()
         return self._macro(action)
 
     def _draw(self):
@@ -202,6 +224,18 @@ class Rival(Game):
             self._airborne = False
         self._enter(land, "jump")
 
+    def _take(self):                                        # R-V17
+        g = self.uniform_ahead()
+        self._result["effect"] = "took_uniform"
+        self._plan("took_uniform", TAKE_FRAMES)
+        yield from self._frames(TAKE_FRAMES)
+        if g is not None and g.uniform and g.downed:
+            g.uniform = False
+            self.disguised = True
+            if self.sword == "drawn":
+                self.sword = "sheathed"                     # under the uniform
+            self.stance, self.stance_change = None, None
+
     def _pickup(self):                                      # R-V09
         self._result["effect"] = "took_sword"
         self._plan("took_sword", PICKUP_FRAMES)
@@ -235,6 +269,7 @@ class Duel:
         self.guards = {name: Guard.at_post(name, post)
                        for name, post in sorted((guard_posts or {}).items())}
         self.swords: list[Cell] = []            # dropped swords (R-V07, R-V08)
+        self.suspicion: dict[tuple[str, str], int] = {}   # (guard, seat) -> 0..100
         self.flying: list[dict] = []            # thrown swords in flight (R-V08)
 
     # --- queries ------------------------------------------------------
@@ -273,8 +308,46 @@ class Duel:
         return best[1] if best else None
 
     def guard_ignores(self, g: Guard, r: "Rival") -> bool:
-        """Stage 4: a disguised rival whose suspicion is not full (R-V18)."""
-        return False
+        """R-V18: a disguised rival is ignored until this guard's suspicion is full."""
+        return r.disguised and self.suspicion.get((g.name, r.seat), 0) < SUSPICION_MAX
+
+    def in_sight(self, g: Guard, r: "Rival") -> bool:
+        """R-V14 sight, disguise or not (suspicion grows only in sight)."""
+        k = r.kid
+        if g.downed or not r.alive or k.room != g.room or k.row != g.row:
+            return False
+        d = (k.col - g.col) * g.facing
+        return 1 <= d <= SIGHT_CELLS and not blocked_between(self.geom, self.mech, g.cell, k.cell)
+
+    def _suspect(self) -> None:
+        """R-V19 to R-V21: each guard's meter for each disguised rival."""
+        for seat, r in self.rivals.items():
+            m = self.motion(seat)
+            r.still = r.still + 1 if m is None else 0
+            if not r.disguised:
+                continue
+            for name, g in self.guards.items():
+                key = (name, seat)
+                level = self.suspicion.get(key, 0)
+                if self.in_sight(g, r):
+                    near = abs(r.kid.col - g.col) <= 1
+                    if m is None:
+                        delta = (SUSPICION_LINGER if r.still > LINGER_AFTER else 0) if near \
+                            else -SUSPICION_FALL
+                    elif m["effect"] == "moved" and m["frames"] == P.RUN:
+                        delta = SUSPICION_RUN
+                    elif m["effect"] in LEAPS:
+                        delta = SUSPICION_LEAP
+                    elif m["effect"] == "moved":
+                        delta = -SUSPICION_FALL                 # walking (a careful step)
+                    else:
+                        delta = 0
+                else:
+                    delta = -SUSPICION_FALL
+                level = max(0, min(SUSPICION_MAX, level + delta))
+                self.suspicion[key] = level
+                if level >= SUSPICION_MAX:
+                    r.disguised = False                         # R-V21: found out
 
     def busy(self, seat: str) -> bool:
         return self._moves[seat] is not None
@@ -311,6 +384,8 @@ class Duel:
             elif r.sword == "sheathed":
                 acts.append("DRAW")
             acts.append("SWEEP")
+            if not r.disguised and r.uniform_ahead() is not None:
+                acts.append("TAKE")
         if self.airborne_jump(seat):
             acts.append("KICK")
         return tuple(acts)
@@ -359,6 +434,7 @@ class Duel:
                     r.stance_change = (target, left - 1)
         for g in self.guards.values():                      # R-V13 to R-V15
             g.update(self)
+        self._suspect()
         self._fly_swords()
         self._contacts()
         self._check_end()
@@ -638,6 +714,8 @@ class Duel:
                               "busy": self.busy(seat), "move_frame": self._move_frame[seat]}
                        for seat, r in self.rivals.items()},
             "guards": {n: g.snapshot() for n, g in self.guards.items()},
+            "disguised": {seat: r.disguised for seat, r in self.rivals.items()},
+            "suspicion": {f"{g}:{seat}": v for (g, seat), v in sorted(self.suspicion.items())},
             "swords": list(self.swords),
             "flying": [dict(s) for s in self.flying],
             "pending": dict(self.pending),
@@ -672,7 +750,10 @@ def observe(duel: Duel, seat: str) -> dict:
     for other, r in duel.rivals.items():
         if other == seat or r.kid.room != room:
             continue
-        figures.append({"kind": "rival", "row": r.kid.row, "col": r.kid.col,
+        # R-V18: a disguised rival is observed exactly as a guard (same kind and
+        # fields; sheathed, so stance None and armed False, like a patrolling guard).
+        figures.append({"kind": "guard" if r.disguised else "rival",
+                        "row": r.kid.row, "col": r.kid.col,
                         "facing": "right" if r.kid.facing > 0 else "left",
                         "posture": "knocked_down" if r.knocked_down else r.kid.posture,
                         "stance": r.stance, "armed": r.armed,
@@ -697,7 +778,11 @@ def observe(duel: Duel, seat: str) -> dict:
         + [{"row": f["cell"][1], "col": f["cell"][2], "flying": True}
            for f in duel.flying if f["cell"][0] == room],
         key=lambda s: (s["row"], s["col"], s["flying"]))
-    obs["suspicion"] = []
+    # R-V19: each guard's meter for THIS rival only, for guards in its room.
+    obs["suspicion"] = [{"row": g.row, "col": g.col, "level": lvl}
+                        for (name, s), lvl in sorted(duel.suspicion.items())
+                        if s == seat and lvl > 0 and (g := duel.guards[name]).room == room
+                        and not g.downed]
     return obs
 
 
