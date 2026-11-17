@@ -27,6 +27,9 @@ The agent drafted these decisions. Saad confirmed them on 2026-11-15:
 | AI decision cadence | One macro-action about every 4 s per AI seat | OQ-9 / CQ-3: whether it plays well, checked at the first playtest |
 | Play context (2026-11-16) | **Online**, each rival on their own screen. Replaces local split screen, because on a shared screen each player can see the other's half | OQ-10 hosting, OQ-11 browser client, OQ-12 latency |
 | Art (2026-11-16, OQ-8) | Our own **medieval stone dungeon** art, made with PixelLab plus hand-drawn frames; 32 px rivals and guards; pillars in the background; frameless iron portcullis gates. Committed in `assets/generated/` ([`ART_PROVENANCE.md`](ART_PROVENANCE.md)). Saad's reading of PixelLab's terms (30 Oct 2026): outputs may be published in the public repository | Second rival is the first recoloured crimson (same frames, same size) |
+| Swordplay (2026-11-17) | *Nidhogg*-style: high/mid/low stances, block by matching height, disarm; lunge, sword throw, dive kick and sweep all in the first playable. **3 hearts kept**: a clean hit costs 1 heart. Rules and proposed numbers: [`VERSUS_SPEC.md`](VERSUS_SPEC.md) | Numbers await Saad's approval |
+| Two-seat timing (2026-11-17, CQ-1) | Real-time ticks: one shared game advanced 12 frames per second; both rivals' moves overlap | Observation schema and key map in [`VERSUS_SPEC.md`](VERSUS_SPEC.md) await approval |
+| Disguise and guards (2026-11-17, OQ-2, OQ-5) | One clean hit or a trap downs a guard for good; DOWN beside it takes the uniform; running, jumping, climbing, a drawn sword or striking near a guard raise its suspicion, walking lowers it; full suspicion breaks the disguise; each meter is shown only to the suspected rival. The suspicion meter stays in scope | Rates in [`VERSUS_SPEC.md`](VERSUS_SPEC.md) await approval |
 | Arena size (2026-11-16, OQ-4) | **Six rooms** in a 3 x 2 loop, our own layouts ([`pop/arena.py`](../../pop/arena.py)); see Section 5.2 | Guard routes and two-seat starts wait for the two-seat engine (CQ-1) |
 
 ---
@@ -91,7 +94,7 @@ The headless, deterministic engine in `pop/` is the base: fixed-step kinematics,
 | **Arena** | Six rooms of our own layouts (no original level data), `pop/arena.py`: West Cells, Gatehouse, East Tower above Barracks, Undercroft, Pit Hall, linked in a loop with a shaft from the Gatehouse to the Undercroft. Rivals start in the West Cells and East Tower (mirror images). Each middle room has an open gate between two drop plates (the gate-plate trap spots); Barracks and Pit Hall each hold a guard post. Every row of every room is reachable from both starts in the real engine (`tools/check_arena.py`) | Decided 2026-11-16 (OQ-4) |
 | **Second player** | Two prince-type characters in one `GameState`, stepped in the same frame | — |
 | **Sword** | `STRIKE` and `BLOCK`, close range. Each rival has 3 hearts. Each stab, trap or damaging fall costs 1 heart; 0 hearts is death. | — |
-| **Disguise** | Interact with a downed guard to take the uniform. While disguised and walking, guards ignore you. Running, climbing, drawing the sword or striking breaks the disguise. | OQ-2 exact break conditions |
+| **Disguise** | Interact (DOWN) with a downed guard to take the uniform. While disguised, guards ignore you until their suspicion of you is full. Running, jumping or climbing near a guard raises its suspicion; walking lowers it. Drawing the sword, striking or full suspicion breaks the disguise (decided 2026-11-17) | Rates and extra break conditions proposed in [`VERSUS_SPEC.md`](VERSUS_SPEC.md) |
 | **Guards** | Scripted, not AI. Fixed patrol routes. Attack any undisguised rival in view, or a disguised one who breaks the disguise rules. Hostile to both rivals equally. | OQ-5 how guards are downed |
 | **Suspicion** | Per-rival meter shown on that rival's HUD; rises when acting oddly near a guard | Cut candidate (yes/no rule) |
 | **Traps** | Two types: **loose floor** (rig a floor tile so it drops whoever steps on it next) and **gate plate** (rig a plate to slam a gate). Traps hurt everyone, including the rival who set them; a sprung trap costs 1 heart. Each rival can set 4 traps. A rigged tile looks normal to everyone else. | OQ-6 re-arm time |
@@ -159,10 +162,10 @@ Guard and disguise art: one PixelLab guard; a disguised rival is drawn with the 
 | ID | Question | Who decides | Needed by |
 |---|---|---|---|
 | OQ-1 | **Decided 2026-11-15:** 3 hearts; 1 heart per stab, trap or damaging fall | Saad (Design Lead) | Greybox duel |
-| OQ-2 | Exactly which actions break a disguise | Saad | Greybox duel |
+| OQ-2 | **Decided 2026-11-17:** drawing the sword, striking, or full suspicion break the disguise; running, jumping and climbing near a guard raise suspicion. Proposed additions (stance change, losing a heart) await approval ([`VERSUS_SPEC.md`](VERSUS_SPEC.md) R-V21) | Saad | Greybox duel |
 | OQ-3 | Duel time limit (5 min assumed) | Saad | First playtest |
 | OQ-4 | **Decided 2026-11-16:** six rooms (`pop/arena.py`) | Saad | Before G2 |
-| OQ-5 | How a guard is downed so its uniform can be taken | Saad | Combat work |
+| OQ-5 | **Decided 2026-11-17:** one clean hit or a trap; the guard stays down (R-V16) | Saad | Combat work |
 | OQ-6 | Trap re-arm time (limit of 4 per rival is decided) | Saad | Trap work |
 | OQ-7 | Key map (one per player, each on their own keyboard) | Saad | Browser client work |
 | OQ-8 | **Decided 2026-11-16:** our own PixelLab-generated medieval dungeon art (`assets/generated/`, [`ART_PROVENANCE.md`](ART_PROVENANCE.md)) | Saad (IP) | Before the server is reachable by anyone outside the course |

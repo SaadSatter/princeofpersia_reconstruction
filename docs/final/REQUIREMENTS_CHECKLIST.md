@@ -76,6 +76,16 @@ Saad, 2026-11-16:
   clash; redistribution unclear).
 - OQ-4: a six-room arena, `pop/arena.py`.
 
+Saad, 2026-11-17 ([`VERSUS_SPEC.md`](VERSUS_SPEC.md), draft awaiting approval
+of its numbers):
+
+- Swordplay in the style of *Nidhogg* (stances, matched-height blocks,
+  disarms); lunge, sword throw, dive kick and sweep in the first playable;
+  3 hearts kept.
+- CQ-1 timing: real-time ticks, 12 frames per second, both seats overlap.
+- OQ-2 and OQ-5: guards downed for good by one clean hit or a trap; DOWN
+  takes the uniform; suspicion meter kept, shown only to the suspected rival.
+
 Pending: engine choice recommendation in
 [`ENGINE_DECISION.md`](ENGINE_DECISION.md) (stay on Python/Pygame).
 
@@ -83,8 +93,7 @@ Pending: engine choice recommendation in
 
 | ID | Blocks | Needed by |
 | --- | --- | --- |
-| OQ-2 | Disguise rules and their leak tests | Wed 18 Nov |
-| OQ-5 | Taking a uniform from a downed guard | Wed 18 Nov |
+| VERSUS_SPEC | Approval of the proposed numbers, observation fields and key map in `VERSUS_SPEC.md` | Wed 18 Nov |
 | OQ-11 | Browser client technology | Sun 22 Nov |
 | OQ-7 | Key map | Sun 22 Nov |
 | OQ-10 | Hosting | Thu 26 Nov |
