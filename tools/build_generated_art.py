@@ -59,7 +59,13 @@ RIVAL_STRIPS = {"stand": None, "run": "run", "step": "step", "jump": "jump", "le
                 "lunge_high": "lunge-high-2", "lunge_mid": "lunge-mid-2", "lunge_low": "lunge-low-2",
                 "throw": "sword-throw", "dive_kick": "dive-kick", "sweep": "sweep",
                 "take": "take-uniform"}
+# The guard also carries the rival's movement strips under the same names, so a
+# disguised rival (drawn as a guard, VERSUS_SPEC R-V18) can run, jump and climb
+# with the same clips as the rival (render/genart.frame_for). step, death and
+# drink reuse the walk, downed and standing frames.
 GUARD_STRIPS = {"stand": None, "walk": "patrol-walk-2", "stance": "guard-stance",
+                "run": "run", "step": "patrol-walk-2", "jump": "jump", "leap": "leap",
+                "crouch": "crouch", "death": "downed", "drink": None,
                 "strike": "strike", "hit": "hit", "downed": "downed",
                 "stance_high": "stance-high-2", "stance_mid": "stance-mid-3", "stance_low": "stance-low-3",
                 "lunge_high": "lunge-high-2", "lunge_mid": "lunge-mid-2", "lunge_low": "lunge-low-2"}
@@ -155,6 +161,10 @@ def build(raw: Path) -> None:
     strip("rival", "climb", climb,
           "hand-built in tools/build_generated_art.py from the rival rotation + PixelLab animation climb-skel",
           anchor={"type": "ledge", "x": AX, "y": AY})
+    gclimb = guard_climb_frames(pygame, frames_of(guard_dir, None)[0], frames_of(guard_dir, "climb-skel"))
+    strip("guard", "climb", gclimb,
+          "hand-built in tools/build_generated_art.py from the guard rotation + PixelLab animation climb-skel",
+          anchor={"type": "ledge", "x": AX, "y": AY})
 
     (OUT / "sprites.json").write_text(json.dumps(sprites, indent=1, sort_keys=True) + "\n")
     files["sprites.json"] = (OUT / "sprites.json", "tools/build_generated_art.py")
@@ -196,6 +206,82 @@ def add_blade(pygame, frame):
         if i < 13:
             f.set_at((hx + i, hy + 1 - lift), STEEL)
     return f
+
+
+def guard_climb_frames(pygame, base, skel):
+    """The guard's hang, pull and press, hand-built like the rival's (PixelLab's
+    skeleton hang draws no raised arms at 32 px). The guard's cloak and sword
+    make it impractical to cut into head/torso/legs, so the whole standing
+    guard is the body, with its diagonal blade erased (it hangs by both hands)
+    and two raised arms drawn in its own mail-sleeve colours. Then crouch,
+    rise and stand on the ledge from its PixelLab climb (frames 4, 5, 7)."""
+    OUTLINE = (0, 0, 0, 255)
+    MAIL, MAIL_DK, GLOVE = (140, 150, 171, 255), (86, 95, 119, 255), (40, 42, 59, 255)
+    body = base.copy()
+    for y in range(20, body.get_height()):              # the blade runs down-right from the fist
+        for x in range(19, body.get_width()):
+            body.set_at((x, y), (0, 0, 0, 0))
+    bb = body.get_bounding_rect()
+    feet_x0 = 15                                       # boots at cols 12-18 of the rotation
+    shoulder0 = (17, 13)                               # front shoulder in the rotation
+
+    def place(c, feet_x, feet_y, lean=0):
+        """Blit the body with its feet at (feet_x, feet_y); `lean` shears the upper
+        body forward (rows above the hips move further)."""
+        ox, oy = feet_x - feet_x0, feet_y - (bb.bottom - 1)
+        hips = 20
+        for y in range(bb.top, bb.bottom):
+            dx = round(lean * (hips - y) / (hips - bb.top)) if y < hips else 0
+            c.blit(body, (ox + dx, oy + y), area=pygame.Rect(0, y, body.get_width(), 1))
+        return (ox + shoulder0[0] + lean, oy + shoulder0[1])
+
+    def limb(c, pts, color):
+        def thick(offsets, col):
+            for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+                n = max(abs(x1 - x0), abs(y1 - y0), 1)
+                for i in range(n + 1):
+                    x = round(x0 + (x1 - x0) * i / n); y = round(y0 + (y1 - y0) * i / n)
+                    for dx, dy in offsets:
+                        if col != OUTLINE or c.get_at((x + dx, y + dy)).a == 0:
+                            c.set_at((x + dx, y + dy), col)
+        thick([(dx, dy) for dx in (-1, 0, 1, 2) for dy in (-1, 0, 1)], OUTLINE)
+        thick([(0, 0), (1, 0)], color)
+
+    def fist(c, x, y):
+        for dx in (-1, 0, 1, 2):
+            for dy in (-1, 0, 1, 2):
+                if c.get_at((x + dx, y + dy)).a == 0:
+                    c.set_at((x + dx, y + dy), OUTLINE)
+        for dx in (0, 1):
+            for dy in (0, 1):
+                c.set_at((x + dx, y + dy), GLOVE)
+
+    new = lambda: pygame.Surface((CW, CH), pygame.SRCALPHA)
+    out = []
+    hx, hy = AX - 2, AY + 1
+    f = new()                                          # hang: feet HANG_DROP below the surface
+    sh = place(f, AX - 7, AY + HANG_DROP)
+    limb(f, [(sh[0] - 3, sh[1]), (hx - 1, hy + 2)], MAIL_DK)
+    limb(f, [sh, (hx, hy + 2)], MAIL)
+    fist(f, hx - 1, hy); fist(f, hx, hy)
+    out.append(f)
+    f = new(); feet_y = AY + HANG_DROP - 10            # pull: elbows bent back
+    sh = place(f, AX - 7, feet_y)
+    limb(f, [(sh[0] - 3, sh[1]), (sh[0] - 6, sh[1] + 3), (hx - 1, hy + 2)], MAIL_DK)
+    limb(f, [sh, (sh[0] - 3, sh[1] + 4), (hx, hy + 2)], MAIL)
+    fist(f, hx - 1, hy); fist(f, hx, hy)
+    out.append(f)
+    f = new(); feet_y = AY + 12                        # press: chest over the ledge
+    sh = place(f, AX - 7, feet_y, lean=6)
+    px, py = sh[0] + 3, AY - 2
+    limb(f, [(sh[0] - 2, sh[1]), (px - 1, py)], MAIL_DK)
+    limb(f, [sh, (px, py)], MAIL)
+    out.append(f)
+    for i, x_to in ((4, AX + 9), (5, AX + 13), (7, AX + 16)):
+        img = skel[i]; b2 = img.get_bounding_rect()
+        f = new(); f.blit(img, (x_to - (b2.x + b2.w // 2), AY - b2.bottom))
+        out.append(f)
+    return out
 
 
 def climb_frames(pygame, base, skel):

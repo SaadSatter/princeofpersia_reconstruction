@@ -116,22 +116,29 @@ def pose(view: dict, room: str, cache: dict | None = None, key: object = None) -
     return poses[max(0, min(len(poses), m["frame"]) - 1)]
 
 
-def guard_sprite(view: dict, counts: dict[str, int]) -> Sprite:
+GUARD_LOOK = ("lunge", "drew", "sheathed", "turned")       # guard-only clips
+
+
+def guard_sprite(view: dict, counts: dict[str, int]) -> Sprite | None:
     """A guard figure (or anything observed as one) drawn from the guard strips:
-    walking between cells, turning, drawing, the three stances, lunges at the
-    stance's height, knocked down and downed."""
+    patrol walking (a careful step's pace), turning, drawing, the three stances,
+    lunges at the stance's height, knocked down and downed. Returns None for
+    any other move (running, jumping, climbing, hanging, falling): the caller
+    draws those with `pose` and the guard's movement strips, as for a rival."""
     f = 1 if view["facing"] == "right" else -1
     x, y = stand_point(view["row"], view["col"])
     if view["posture"] == "downed":
         return Sprite("downed", counts["downed"] - 1, x, y, f)
     if view["posture"] == "knocked_down":
         return Sprite("downed", min(3, counts["downed"] - 1), x, y, f)
+    if view["posture"] in ("hanging", "falling"):
+        return None
     m = view.get("motion")
     if m:
         if m["effect"] == "lunge":
             strip = f"lunge_{view.get('stance') or 'mid'}"
             return Sprite(strip, _strip_index(m["frame"], m["frames"], counts[strip]), x, y, f)
-        if m["effect"] == "moved":
+        if m["effect"] == "moved" and m["frames"] == P.STEP:
             if m["to"] is not None:
                 tx, ty = stand_point(*m["to"])
                 t = min(1.0, m["frame"] / max(1, m["frames"]))
@@ -139,6 +146,8 @@ def guard_sprite(view: dict, counts: dict[str, int]) -> Sprite:
             return Sprite("walk", _strip_index(m["frame"], m["frames"], counts["walk"]), x, y, f)
         if m["effect"] == "drew":
             return Sprite("stance_mid", 0, x, y, f)
+        if m["effect"] not in GUARD_LOOK:
+            return None                                   # run, jump, climb...: like a rival
     if view.get("armed") and view.get("stance"):
         return Sprite(f"stance_{view['stance']}", 0, x, y, f)
     return Sprite("stand", 0, x, y, f)

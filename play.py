@@ -149,9 +149,15 @@ def versus_main(args) -> int:
     guard_counts = ({k: v["n"] for k, v in renderer.dungeon.meta["guard"].items()}
                     if renderer.dungeon else {})
 
-    def draw_guard(s, view):
+    def draw_guard(s, view, room="", cache=None, key=None):
+        """Anything observed as a guard: guard looks from guard_sprite; any other
+        move (run, jump, climb, hang) with the rival's clips on the guard strips."""
         if renderer.dungeon:
             spr = versus_view.guard_sprite(view, guard_counts)
+            if spr is None:
+                p = versus_view.pose(view, room, cache, key)
+                renderer.dungeon.draw_kid(s, p, who="guard")
+                return
             renderer.dungeon.blit_actor(s, "guard", spr.strip, spr.index, spr.x, spr.y, spr.facing)
         else:
             from render.anim import stand_point
@@ -226,9 +232,9 @@ def versus_main(args) -> int:
                 if fig["kind"] == "rival":
                     draw_actor(panel, fig, obs["room"], colours[other[seat]], ("fig", j), caches[seat])
                 else:
-                    draw_guard(panel, fig)
+                    draw_guard(panel, fig, obs["room"], caches[seat], ("guard", j))
             if obs["me"]["disguised"]:
-                draw_guard(panel, obs["me"])                  # in a guard's uniform (R-V18)
+                draw_guard(panel, obs["me"], obs["room"], caches[seat], "me")   # in uniform (R-V18)
             else:
                 draw_actor(panel, obs["me"], obs["room"], colours[seat], "me", caches[seat])
             for entry in obs["suspicion"]:

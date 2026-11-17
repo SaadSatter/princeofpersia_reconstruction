@@ -1,5 +1,32 @@
 {
  "guard": {
+  "climb": {
+   "file": "guard/climb.png",
+   "h": 80,
+   "n": 6,
+   "type": "ledge",
+   "w": 56,
+   "x": 20,
+   "y": 44
+  },
+  "crouch": {
+   "file": "guard/crouch.png",
+   "h": 48,
+   "n": 6,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 38
+  },
+  "death": {
+   "file": "guard/death.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 38
+  },
   "downed": {
    "file": "guard/downed.png",
    "h": 48,
@@ -9,10 +36,37 @@
    "x": 23,
    "y": 38
   },
+  "drink": {
+   "file": "guard/drink.png",
+   "h": 32,
+   "n": 1,
+   "type": "feet",
+   "w": 32,
+   "x": 14,
+   "y": 30
+  },
   "hit": {
    "file": "guard/hit.png",
    "h": 48,
    "n": 6,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 38
+  },
+  "jump": {
+   "file": "guard/jump.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 38
+  },
+  "leap": {
+   "file": "guard/leap.png",
+   "h": 48,
+   "n": 8,
    "type": "feet",
    "w": 48,
    "x": 23,
@@ -38,6 +92,15 @@
   },
   "lunge_mid": {
    "file": "guard/lunge_mid.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 38
+  },
+  "run": {
+   "file": "guard/run.png",
    "h": 48,
    "n": 8,
    "type": "feet",
@@ -89,6 +152,15 @@
    "w": 32,
    "x": 14,
    "y": 30
+  },
+  "step": {
+   "file": "guard/step.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 38
   },
   "strike": {
    "file": "guard/strike.png",

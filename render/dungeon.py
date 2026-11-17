@@ -165,7 +165,7 @@ class DungeonArt:
         self.meta = genart.sprites(root)
         self._strips = {who: {name: load(m["file"]) for name, m in d.items()}
                         for who, d in self.meta.items()}
-        self.counts = {name: m["n"] for name, m in self.meta["rival"].items()}
+        self.counts = {who: {name: m["n"] for name, m in d.items()} for who, d in self.meta.items()}
         self._frames: dict[tuple, pygame.Surface] = {}
         self._gates: dict[int, pygame.Surface] = {}
         self._spikes = {k: spikes_image(k) for k in (0, 1, 2)}
@@ -193,15 +193,18 @@ class DungeonArt:
             ax = m["w"] - ax if m["type"] == "ledge" else m["w"] - 1 - ax
         s.blit(im, (round(x - ax), round(y - m["y"])))
 
-    def draw_kid(self, s, pose: Pose, colour: str = "indigo") -> None:
+    def draw_kid(self, s, pose: Pose, colour: str = "indigo", who: str = "rival") -> None:
+        """Draw a pose with the rival's strips, or with the guard's (who="guard"):
+        the guard carries the same movement strips, so anything observed as a
+        guard runs, jumps and climbs with the same clips (VERSUS_SPEC R-V18)."""
         if not pose.visible:
             return
-        strip, i = genart.frame_for(pose.frame, self.counts)
-        if self.meta["rival"][strip]["type"] == "ledge":
+        strip, i = genart.frame_for(pose.frame, self.counts[who])
+        if self.meta[who][strip]["type"] == "ledge":
             lx, ly = pose.ledge if pose.ledge else (pose.x + 7 * pose.facing, pose.y - HANG_DROP)
-            self.blit_actor(s, "rival", strip, i, lx, ly, pose.facing, colour)
+            self.blit_actor(s, who, strip, i, lx, ly, pose.facing, colour)
         else:
-            self.blit_actor(s, "rival", strip, i, pose.x, pose.y, pose.facing, colour)
+            self.blit_actor(s, who, strip, i, pose.x, pose.y, pose.facing, colour)
 
     def draw_hearts(self, s, x0: int, y0: int, hp: int, max_hp: int) -> None:
         shape = (".##.##.", "#######", "#######", ".#####.", "..###..", "...#...")
