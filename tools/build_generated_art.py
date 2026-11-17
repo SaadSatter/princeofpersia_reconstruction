@@ -64,6 +64,15 @@ GUARD_STRIPS = {"stand": None, "walk": "patrol-walk-2", "stance": "guard-stance"
                 "stance_high": "stance-high-2", "stance_mid": "stance-mid-3", "stance_low": "stance-low-3",
                 "lunge_high": "lunge-high-2", "lunge_mid": "lunge-mid-2", "lunge_low": "lunge-low-2"}
 
+# PixelLab's lunges start and end in a rest pose (blade raised), not in the stance
+# they belong to. The build keeps only their thrust frames, where the blade is
+# level at the stance's height, and sets them between that stance's own frame
+# (compose_lunge). Indices picked by eye from the downloaded clips, 2026-11-17.
+LUNGE_THRUST = {
+    "rival": {"high": (3, 4), "mid": (4, 5), "low": (5, 5)},
+    "guard": {"high": (4, 5), "mid": (4, 5), "low": (4, 5)},
+}
+
 # Ledge-anchored canvas for hang/climb frames.
 CW, CH = 56, 80
 AX, AY = 20, 44            # first ledge column, ledge surface row
@@ -123,15 +132,25 @@ def build(raw: Path) -> None:
         save(s, f"{who}/{name}.png", source)
 
     rival_dir, guard_dir = raw / "rival", raw / "guard"
-    for name, anim in RIVAL_STRIPS.items():
-        frames = frames_of(rival_dir, anim)
-        source = SOURCES["rival"] + (f" animation {anim}" if anim else " rotation east")
-        if name == "stance_mid":
-            frames = [add_blade(pygame, f) for f in frames]
-            source += " + blade hand-drawn in tools/build_generated_art.py"
-        strip("rival", name, frames, source)
-    for name, anim in GUARD_STRIPS.items():
-        strip("guard", name, frames_of(guard_dir, anim), SOURCES["guard"] + (f" animation {anim}" if anim else " rotation east"))
+    for who, char_dir, table in (("rival", rival_dir, RIVAL_STRIPS), ("guard", guard_dir, GUARD_STRIPS)):
+        built = {}
+        for name, anim in table.items():
+            frames = frames_of(char_dir, anim)
+            if who == "rival" and name == "stance_mid":
+                frames = [add_blade(pygame, f) for f in frames]
+            built[name] = frames
+        for name, anim in table.items():
+            frames = built[name]
+            source = SOURCES[who] + (f" animation {anim}" if anim else " rotation east")
+            if who == "rival" and name == "stance_mid":
+                source += " + blade hand-drawn in tools/build_generated_art.py"
+            if name.startswith("lunge_"):
+                height = name.split("_")[1]
+                a1, a2 = LUNGE_THRUST[who][height]
+                frames = compose_lunge(built["stance_" + height][0], frames, a1, a2)
+                source += (f" frames {a1},{a2} between stance_{height} frames"
+                           " (composed in tools/build_generated_art.py)")
+            strip(who, name, frames, source)
     climb = climb_frames(pygame, frames_of(rival_dir, None)[0], frames_of(rival_dir, "climb-skel"))
     strip("rival", "climb", climb,
           "hand-built in tools/build_generated_art.py from the rival rotation + PixelLab animation climb-skel",
@@ -146,6 +165,13 @@ def build(raw: Path) -> None:
         lines.append(f"{rel}\t{src}\t{len(data)}\t{hashlib.sha256(data).hexdigest()}")
     (OUT / "MANIFEST.tsv").write_text("\n".join(lines) + "\n")
     print(f"wrote {len(files)} files to {OUT.relative_to(PROJECT)}")
+
+
+def compose_lunge(stance, lunge, a1, a2):
+    """8 frames, as VERSUS_SPEC R-V04 (2 windup, 2 active, 4 recovery): the stance,
+    the two thrust frames, a held thrust, then back to the same stance. So every
+    lunge starts and ends exactly in the high, mid or low guard it is made from."""
+    return [stance, stance, lunge[a1], lunge[a2], lunge[a2], lunge[a1], stance, stance]
 
 
 def add_blade(pygame, frame):

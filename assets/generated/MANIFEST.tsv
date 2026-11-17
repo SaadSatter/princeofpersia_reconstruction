@@ -1,9 +1,9 @@
 path	source	bytes	sha256
 guard/downed.png	PixelLab character 3e3205ed-340e-4965-a0ca-71cd9d2a4f2a animation downed	5853	990be46811ea5db7301783b8e52acd09385272d7e94bc6b6e5f0519b5f15c833
 guard/hit.png	PixelLab character 3e3205ed-340e-4965-a0ca-71cd9d2a4f2a animation hit	3767	99671491632ce356027f90c548d975ed54e07d6751ce3e7519da602a30d00a2e
-guard/lunge_high.png	PixelLab character 3e3205ed-340e-4965-a0ca-71cd9d2a4f2a animation lunge-high-2	5337	d724961c0a3e60eb66d1380e1ddacde5eecca20e1bf9406fdc3c3ed5e5d29b84
-guard/lunge_low.png	PixelLab character 3e3205ed-340e-4965-a0ca-71cd9d2a4f2a animation lunge-low-2	4268	ab510112cda86a2dac0b8b1ef61b5f1e5b38a87a7cad1d224d530b6d75d284fb
-guard/lunge_mid.png	PixelLab character 3e3205ed-340e-4965-a0ca-71cd9d2a4f2a animation lunge-mid-2	5313	d55e5c559773b0b2c00b6d37325d87df5bdedb0ffd0ddb7d487c0d0992d14406
+guard/lunge_high.png	PixelLab character 3e3205ed-340e-4965-a0ca-71cd9d2a4f2a animation lunge-high-2 frames 4,5 between stance_high frames (composed in tools/build_generated_art.py)	2897	2ca5c3739c1df08dac98faebbda0b028cfd53e510afd556198a0f1363dd532a1
+guard/lunge_low.png	PixelLab character 3e3205ed-340e-4965-a0ca-71cd9d2a4f2a animation lunge-low-2 frames 4,5 between stance_low frames (composed in tools/build_generated_art.py)	2797	969f5a6140032c774a6a0a42db5f0bdc94457b75d7a4fbbd9bdd67c97db93a0b
+guard/lunge_mid.png	PixelLab character 3e3205ed-340e-4965-a0ca-71cd9d2a4f2a animation lunge-mid-2 frames 4,5 between stance_mid frames (composed in tools/build_generated_art.py)	3043	119a7b69e430bf4bde1cf32bdd63551e79bea85bc8d3d2addae68449c20656fb
 guard/stance.png	PixelLab character 3e3205ed-340e-4965-a0ca-71cd9d2a4f2a animation guard-stance	2402	965b6cdf3010302b681ff45b9a4ebbd0bc51fdf62ba437f7caba350a865faa4f
 guard/stance_high.png	PixelLab character 3e3205ed-340e-4965-a0ca-71cd9d2a4f2a animation stance-high-2	1906	574f9a4ef9741c6be650887f5241f6d927d6c27b875deaccbe83207eb1efeadc
 guard/stance_low.png	PixelLab character 3e3205ed-340e-4965-a0ca-71cd9d2a4f2a animation stance-low-3	1898	df35a77e409c16c68d6cc3c2e877f29635cd72a7e8961aab86ac201b4ac3f84b
@@ -23,9 +23,9 @@ rival/drink.png	PixelLab character 200624a1-3d6e-4098-b4a6-781eb38a7312 animatio
 rival/hit.png	PixelLab character 200624a1-3d6e-4098-b4a6-781eb38a7312 animation hit	2466	d9073eb19a89a9d1e677d3fd54bb0f96413a040c96531e4dffd84a7dbab8b60c
 rival/jump.png	PixelLab character 200624a1-3d6e-4098-b4a6-781eb38a7312 animation jump	2798	59a324c6672000880fb1c8add8600addcd9bf87b229ee8c00733223d7cc299bc
 rival/leap.png	PixelLab character 200624a1-3d6e-4098-b4a6-781eb38a7312 animation leap	3354	bc119065c82e5eeb1c96c5a1f283f356924ed7cc9e28359eecba6505234b1531
-rival/lunge_high.png	PixelLab character 200624a1-3d6e-4098-b4a6-781eb38a7312 animation lunge-high-2	2945	fe4d5354578f78e643f7c045d8c8843f0f0f68d923e3f017c0755aa919f3da19
-rival/lunge_low.png	PixelLab character 200624a1-3d6e-4098-b4a6-781eb38a7312 animation lunge-low-2	3957	d635a3692f9b3363764ebf370afc0382feb9cd5d3536e4fd79a13600a3982736
-rival/lunge_mid.png	PixelLab character 200624a1-3d6e-4098-b4a6-781eb38a7312 animation lunge-mid-2	3033	bbd15582a008105bef2181f3c3e465d00e27b4ccdecab197b430b77088262c4c
+rival/lunge_high.png	PixelLab character 200624a1-3d6e-4098-b4a6-781eb38a7312 animation lunge-high-2 frames 3,4 between stance_high frames (composed in tools/build_generated_art.py)	2220	e4492f4514f36dad2366d63eb58a6d9ff6267c2c0db6daf8dc6490cc262cb245
+rival/lunge_low.png	PixelLab character 200624a1-3d6e-4098-b4a6-781eb38a7312 animation lunge-low-2 frames 5,5 between stance_low frames (composed in tools/build_generated_art.py)	1876	c70384cfbeb20bfd66e4f5bca61a5f33537563bebb42b7b19d68a1a794de04b5
+rival/lunge_mid.png	PixelLab character 200624a1-3d6e-4098-b4a6-781eb38a7312 animation lunge-mid-2 frames 4,5 between stance_mid frames (composed in tools/build_generated_art.py)	1819	a07e84d79826cbbcb3810e0f998de767ff4cb0552e65bbcc4f17117b04582a92
 rival/run.png	PixelLab character 200624a1-3d6e-4098-b4a6-781eb38a7312 animation run	3221	106a629d352822d5d56f142c00b8163e388af84474fb9a5e989329f837eb64de
 rival/stance_high.png	PixelLab character 200624a1-3d6e-4098-b4a6-781eb38a7312 animation stance-high-2	1010	6826c20fbe049dac7eccfc2a104c18ad0119d2ae61ec19f2b9e6204c73382737
 rival/stance_low.png	PixelLab character 200624a1-3d6e-4098-b4a6-781eb38a7312 animation stance-low-3	1129	11e29a677bc60bdcfaeca28acf626425507e7d5468a3b4a2dc7251c4abc18b2e
