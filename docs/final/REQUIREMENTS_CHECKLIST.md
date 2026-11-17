@@ -52,6 +52,7 @@ These still hold for every PR (`AGENTS.md`, midterm checks 2c, 3b, 3c):
 | Step, model-call and timeout limits with terminal reasons | done for one seat; per-seat limits not started |
 | Hidden-information tests: current room only | done for one seat |
 | Hidden-information tests: disguise identity, trap ownership | not started |
+| Server sends each client only its own seat's observation | not started |
 | A `test_regression_<issue>` test per observed bug | ongoing |
 
 ## Decisions in force (Saad, 2026-11-15)
@@ -63,6 +64,11 @@ From [`GDD.md`](GDD.md), "Decisions confirmed by Saad":
 - 3 hearts per rival; 1 heart per stab, trap or damaging fall.
 - One AI macro-action about every 4 s per AI seat (playability open: OQ-9).
 
+Saad, 2026-11-16:
+
+- Online play, each rival on their own screen, instead of local split screen
+  (a shared screen lets each player see the other's view).
+
 Pending: engine choice recommendation in
 [`ENGINE_DECISION.md`](ENGINE_DECISION.md) (stay on Python/Pygame).
 
@@ -72,6 +78,9 @@ Pending: engine choice recommendation in
 | --- | --- | --- |
 | OQ-2 | Disguise rules and their leak tests | Wed 18 Nov |
 | OQ-5 | Taking a uniform from a downed guard | Wed 18 Nov |
-| OQ-7 | Split-screen key map | Sun 22 Nov |
+| OQ-11 | Browser client technology | Sun 22 Nov |
+| OQ-7 | Key map | Sun 22 Nov |
+| OQ-10 | Hosting | Thu 26 Nov |
+| OQ-8 | Art for the online build (no original sprites on a reachable server) | Thu 26 Nov |
 | CQ-1 | Macro-action vocabulary for the AI rival | Thu 26 Nov |
 | CQ-6 | Playtest log format | Fri 27 Nov |

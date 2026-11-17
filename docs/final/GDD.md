@@ -25,6 +25,7 @@ The agent drafted these decisions. Saad confirmed them on 2026-11-15:
 | Trap limit | Each rival can set 4 traps | OQ-6: re-arm time |
 | Health rule | Each rival has 3 hearts. Each stab, trap or damaging fall costs 1 heart. 0 hearts is death | — |
 | AI decision cadence | One macro-action about every 4 s per AI seat | OQ-9 / CQ-3: whether it plays well, checked at the first playtest |
+| Play context (2026-11-16) | **Online**, each rival on their own screen. Replaces local split screen, because on a shared screen each player can see the other's half | OQ-10 hosting, OQ-11 browser client, OQ-12 latency |
 
 ---
 
@@ -40,8 +41,8 @@ The agent drafted these decisions. Saad confirmed them on 2026-11-15:
 | Item | Decision | Label |
 |---|---|---|
 | Players | Two rivals. Each seat is a human or an AI agent. | Planned |
-| Context | Two friends at one computer (local split screen) | Planned |
-| Platform | Desktop Python 3.11+ with Pygame, the midterm frontend | Implemented (single player) |
+| Context | Two players online, each on their own computer and screen | Planned |
+| Platform | An authoritative Python game server runs the `pop/` engine; each player opens a browser page (OQ-11). The desktop Pygame frontend stays for development, replays and watching AI vs AI | Implemented (single-player Pygame); Planned (server, browser client) |
 | Genre | 2D cinematic platformer with versus stealth and duelling | Planned |
 | Session | One duel, about 5 minutes (OQ-3) | Planned |
 
@@ -92,6 +93,8 @@ The headless, deterministic engine in `pop/` is the base: fixed-step kinematics,
 | **Guards** | Scripted, not AI. Fixed patrol routes. Attack any undisguised rival in view, or a disguised one who breaks the disguise rules. Hostile to both rivals equally. | OQ-5 how guards are downed |
 | **Suspicion** | Per-rival meter shown on that rival's HUD; rises when acting oddly near a guard | Cut candidate (yes/no rule) |
 | **Traps** | Two types: **loose floor** (rig a floor tile so it drops whoever steps on it next) and **gate plate** (rig a plate to slam a gate). Traps hurt everyone, including the rival who set them; a sprung trap costs 1 heart. Each rival can set 4 traps. A rigged tile looks normal to everyone else. | OQ-6 re-arm time |
+| **Online play** | One server holds the only `GameState` and steps it. Each browser sends its player's inputs and receives only its own seat's observation. An AI seat runs on the server and gets the same per-seat observation. | OQ-10, OQ-11, OQ-12 |
+| **Disconnect** | A rival who disconnects for more than a grace period loses the duel (proposal) | OQ-13 |
 | **Modes** | Human vs human, human vs AI, AI vs AI (watch or test) | — |
 
 ### 5.3 Win, loss and edge cases [Planned]
@@ -104,19 +107,21 @@ The headless, deterministic engine in `pop/` is the base: fixed-step kinematics,
 | A rival dies on their own trap | The other rival wins |
 | An invalid action | Refused, counted, changes no state (as in the midterm runner) |
 | An AI seat times out | Labelled fallback action (Section 8 of the [Configuration Document](CONFIGURATION.md)) |
+| A human rival disconnects | Proposal: the other rival wins after a grace period (OQ-13) |
 
 No score beyond win, draw or loss is planned.
 
 ## 6. Controls and feedback [Planned]
 
-- **Controls:** two keyboard layouts on one keyboard (OQ-7: final key map). Per-frame inputs map to the same actions an AI seat sends, as in the midterm.
-- **Split screen:** each half shows only its own rival's current room and HUD.
+- **Controls:** each player uses their own keyboard with the same key map (OQ-7). Inputs map to the same actions an AI seat sends, as in the midterm; the server validates them.
+- **Own screen:** each browser shows only its own rival's current room and HUD. There is no shared screen to look at, so a disguise cannot be seen through by watching the other player's view.
 - **HUD:** three hearts, the suspicion icon, a disguised/undisguised marker.
 - **Reveal:** a short flash and sound-free animation when a disguise breaks. No sound: excluded, as in the midterm.
 
 ## 7. Information boundaries
 
 - **World state (engine only):** both rivals' true positions and uniforms, every guard's patrol and suspicion, which tiles are rigged and by whom, all rooms, and the RNG seed.
+- **What the server sends a client:** that seat's observation only. The browser never holds the `GameState`, the other seat's observation or the arena layout, so reading the page's network traffic reveals nothing a player could not see on screen.
 - **What a player or AI seat sees:** its own room only; figures in view, with a disguised rival drawn as a guard; a rigged tile drawn as normal unless you rigged it; its own health and suspicion; its legal actions.
 
 The midterm's hidden-information tests (`observe` and `legal_actions` reveal nothing outside the current room) carry over. New tests must check that disguise identity and trap ownership never leak.
@@ -125,7 +130,7 @@ The midterm's hidden-information tests (`observe` and `legal_actions` reveal not
 
 | Included by G2/G3 | Excluded | Cut first, in order |
 |---|---|---|
-| One arena of 4–6 rooms · sword strike and block · disguises · 2 trap types · scripted guards · split screen · 3 modes · traces and tests | Online play · Levels 2–14 · original level data · sound · AI or adaptive guards · more than two players | 1. Rooms 6 → 3 · 2. Suspicion meter → yes/no rule · 3. One trap type · 4. AI vs AI becomes test-only. Never cut: the duel or the disguise. |
+| One arena of 4–6 rooms · sword strike and block · disguises · 2 trap types · scripted guards · online play (one server, one browser per rival) · 3 modes · traces and tests | Accounts, matchmaking, more than one duel per server at a time · Levels 2–14 · original level data · sound · AI or adaptive guards · more than two players | 1. Rooms 6 → 3 · 2. Suspicion meter → yes/no rule · 3. One trap type · 4. AI vs AI becomes test-only · 5. Public hosting → two computers on one local network, same server. Never cut: the duel or the disguise. |
 
 ## 9. Balance (initial, untested)
 
@@ -156,6 +161,10 @@ Guard and disguise art is unresolved (OQ-8).
 | OQ-4 | Arena size: 4, 5 or 6 rooms | Saad, after the greybox duel | Before G2 |
 | OQ-5 | How a guard is downed so its uniform can be taken | Saad | Combat work |
 | OQ-6 | Trap re-arm time (limit of 4 per rival is decided) | Saad | Trap work |
-| OQ-7 | Two-player key map on one keyboard | Saad | Split screen work |
-| OQ-8 | Guard and uniform art: original sprites (private branch) or our own | Saad (IP) | Before public builds |
+| OQ-7 | Key map (one per player, each on their own keyboard) | Saad | Browser client work |
+| OQ-8 | Art for the online build. A public server cannot serve the original sprites, which are only on the private course branch; our own or placeholder art is needed | Saad (IP) | Before the server is reachable by anyone outside the course |
 | OQ-9 | Whether a 4 s AI decision cadence is playable in a sword fight | Playtest evidence | G2 |
+| OQ-10 | Where the server is hosted, and who can reach it | Saad (Producer) | First playable recording |
+| OQ-11 | Browser client technology (proposal: a small HTML canvas page in plain JavaScript that only draws observations) | Saad, on the agent's proposal | Sun 22 Nov |
+| OQ-12 | How much network delay a sword fight tolerates | Playtest evidence | G2 |
+| OQ-13 | Disconnect rule and grace period | Saad | Server work |

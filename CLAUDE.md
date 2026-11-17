@@ -31,7 +31,8 @@ approved in `docs/final/PROJECT_PLAN.md`.
 
 You extend the midterm engine into a two-rival versus game: two princes in
 one `GameState`, sword strike and block, disguises, player-set traps,
-scripted guards, split screen, and an AI rival seat. Saad directs the work
+scripted guards, online play (one authoritative server, one browser per
+rival; decided 2026-11-16), and an AI rival seat. Saad directs the work
 as Executive Producer, Creative Director, Design Lead and Producer.
 
 You are one of several roles. Keep them separate:
@@ -89,6 +90,8 @@ agents/     baseline.py (scripted), model_player.py, providers.py
 evaluate.py suite runner -> traces/ and results JSON
 tools/      maintainer scripts; tools/evidence/ for session records
 tests/      pytest, deterministic, no network, no keys
+server/     (planned) authoritative game server: imports pop/, never pygame
+web/        (planned) browser client: draws one seat's observation only
 docs/       midterm docs at top level; final-project docs in docs/final/
 ```
 
@@ -97,7 +100,7 @@ docs/       midterm docs at top level; final-project docs in docs/final/
 | Access | Paths |
 | --- | --- |
 | Read | Anything in the project folder, plus the reference source read-only |
-| Create and edit freely | `pop/**`, `render/**`, `play.py`, `agents/**`, `evaluate.py`, `tests/**` (new tests), `tools/**`, `docs/final/**` (except Saad-voiced files below), `docs/agent-sessions/**`, `docs/RULE_SOURCE_MAP.md` (new rows), `.github/workflows/**`, `ci/**` |
+| Create and edit freely | `server/**`, `web/**`, `pop/**`, `render/**`, `play.py`, `agents/**`, `evaluate.py`, `tests/**` (new tests), `tools/**`, `docs/final/**` (except Saad-voiced files below), `docs/agent-sessions/**`, `docs/RULE_SOURCE_MAP.md` (new rows), `.github/workflows/**`, `ci/**` |
 | Edit only with Saad's approval | `pop/situations.py` and `docs/EVALUATION_SUITE.md` (frozen midterm suite), existing tests, `pyproject.toml` / `uv.lock`, `README.md`, `assets/original/MANIFEST.tsv` |
 | Edit only with Saad's approval for that change | `.claude/skills/**`, `.claude/agents/**`, `.codex/agents/**`, `AGENTS.md` |
 | Never edit | `docs/MIDTERM_GUIDELINES.md`, committed findings in `docs/audits/` and `docs/reviews/`, `AGENT-TEAM.md` and any reflection, playtest interpretation or decision written in Saad's voice |

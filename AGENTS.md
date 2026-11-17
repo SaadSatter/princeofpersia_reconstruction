@@ -24,6 +24,10 @@ propose and build; Saad decides.
   ever sees the other rival's identity when disguised, trap ownership, other
   rooms, guard scripts, the RNG seed, the `GameState`, the repository or the
   evaluator.
+- Online play: the server owns the only `GameState`. Clients submit input
+  intents, never outcomes, and receive only their own seat's observation.
+  Never send a client the full state, the other seat's observation, the arena
+  layout or trap ownership, even if the page would not draw it.
 - Every rule change gets a row in `docs/RULE_SOURCE_MAP.md` with a label
   (`code`, `manual`, `observed`, `assumed`, `design`) and a locator, and a
   failing test before the engine change.
