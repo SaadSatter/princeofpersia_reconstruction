@@ -154,7 +154,7 @@ def load_level1(path: Path | None = None) -> Situation:
     return _CACHE[key]
 
 
-EXHIBITION_IDS = ("L1",)
+EXHIBITION_IDS = ("L1", "ARENA")     # ARENA: Shadow Masque arena A (pop/arena.py), our own layouts
 
 
 def available() -> bool:
@@ -171,4 +171,7 @@ def get(situation_id: str) -> Situation:
         return SITUATIONS[situation_id]
     if situation_id == "L1":
         return load_level1()
+    if situation_id == "ARENA":
+        from .arena import situation
+        return situation()
     raise KeyError(situation_id)

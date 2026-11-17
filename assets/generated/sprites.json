@@ -1,0 +1,312 @@
+{
+ "guard": {
+  "downed": {
+   "file": "guard/downed.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 38
+  },
+  "hit": {
+   "file": "guard/hit.png",
+   "h": 48,
+   "n": 6,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 38
+  },
+  "lunge_high": {
+   "file": "guard/lunge_high.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 38
+  },
+  "lunge_low": {
+   "file": "guard/lunge_low.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 38
+  },
+  "lunge_mid": {
+   "file": "guard/lunge_mid.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 38
+  },
+  "stance": {
+   "file": "guard/stance.png",
+   "h": 48,
+   "n": 6,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 38
+  },
+  "stance_high": {
+   "file": "guard/stance_high.png",
+   "h": 48,
+   "n": 6,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 38
+  },
+  "stance_low": {
+   "file": "guard/stance_low.png",
+   "h": 48,
+   "n": 6,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 38
+  },
+  "stance_mid": {
+   "file": "guard/stance_mid.png",
+   "h": 48,
+   "n": 6,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 38
+  },
+  "stand": {
+   "file": "guard/stand.png",
+   "h": 32,
+   "n": 1,
+   "type": "feet",
+   "w": 32,
+   "x": 14,
+   "y": 30
+  },
+  "strike": {
+   "file": "guard/strike.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 38
+  },
+  "walk": {
+   "file": "guard/walk.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 38
+  }
+ },
+ "rival": {
+  "block": {
+   "file": "rival/block.png",
+   "h": 48,
+   "n": 6,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  },
+  "climb": {
+   "file": "rival/climb.png",
+   "h": 80,
+   "n": 6,
+   "type": "ledge",
+   "w": 56,
+   "x": 20,
+   "y": 44
+  },
+  "crouch": {
+   "file": "rival/crouch.png",
+   "h": 48,
+   "n": 6,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  },
+  "death": {
+   "file": "rival/death.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  },
+  "dive_kick": {
+   "file": "rival/dive_kick.png",
+   "h": 48,
+   "n": 6,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  },
+  "drink": {
+   "file": "rival/drink.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  },
+  "hit": {
+   "file": "rival/hit.png",
+   "h": 48,
+   "n": 6,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  },
+  "jump": {
+   "file": "rival/jump.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  },
+  "leap": {
+   "file": "rival/leap.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  },
+  "lunge_high": {
+   "file": "rival/lunge_high.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  },
+  "lunge_low": {
+   "file": "rival/lunge_low.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  },
+  "lunge_mid": {
+   "file": "rival/lunge_mid.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  },
+  "run": {
+   "file": "rival/run.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  },
+  "stance_high": {
+   "file": "rival/stance_high.png",
+   "h": 48,
+   "n": 6,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  },
+  "stance_low": {
+   "file": "rival/stance_low.png",
+   "h": 48,
+   "n": 6,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  },
+  "stance_mid": {
+   "file": "rival/stance_mid.png",
+   "h": 48,
+   "n": 6,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  },
+  "stand": {
+   "file": "rival/stand.png",
+   "h": 32,
+   "n": 1,
+   "type": "feet",
+   "w": 32,
+   "x": 15,
+   "y": 29
+  },
+  "step": {
+   "file": "rival/step.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  },
+  "strike": {
+   "file": "rival/strike.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  },
+  "sweep": {
+   "file": "rival/sweep.png",
+   "h": 48,
+   "n": 7,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  },
+  "take": {
+   "file": "rival/take.png",
+   "h": 48,
+   "n": 5,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  },
+  "throw": {
+   "file": "rival/throw.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  }
+ }
+}

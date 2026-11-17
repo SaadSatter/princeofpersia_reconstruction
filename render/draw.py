@@ -5,6 +5,8 @@ original screen looks: a tile's own piece, the right-hand piece of the tile
 to its left (floors and pillars reach into the next cell), and a 3-pixel
 front edge. Piece choices and offsets are ours (docs/ASSETS.md).
 Placeholder mode draws simple shapes and needs no files.
+Generated mode draws Shadow Masque's own dungeon art (render/dungeon.py,
+assets/generated/; Saad's decision OQ-8).
 """
 
 from __future__ import annotations
@@ -15,7 +17,7 @@ import pygame
 
 from pop import tiles as T
 
-from . import anim, assets, layout
+from . import anim, assets, genart, layout
 from .anim import COL_W, ROOM_H, ROOM_W, ROW_H, Pose
 
 HUD_H = 8
@@ -38,9 +40,34 @@ TEAL = (40, 160, 160)
 row_top = layout.row_top
 
 
+ARTS = ("original", "generated", "placeholder")
+
+
+def default_art() -> str:
+    """Original art where it is bundled (course branch), else our generated art,
+    else placeholder shapes."""
+    if assets.asset_dir():
+        return "original"
+    return "generated" if genart.pack_dir() else "placeholder"
+
+
 class Renderer:
-    def __init__(self, original: bool, root: Path | None = None):
-        self.original = bool(original and (root or assets.asset_dir()))
+    def __init__(self, original: bool, root: Path | None = None, art: str | None = None):
+        """art: "original", "generated" or "placeholder". Left out, `original`
+        chooses between the bundled original art and placeholder shapes (as before)."""
+        if art is None:
+            art = "original" if original else "placeholder"
+        self.dungeon = None
+        if art == "generated":
+            pack = genart.pack_dir()
+            if pack:
+                from .dungeon import DungeonArt
+                self.dungeon = DungeonArt(pack)
+            art = "generated" if self.dungeon else "placeholder"
+        self.original = bool(art == "original" and (root or assets.asset_dir()))
+        if art == "original" and not self.original:
+            art = "placeholder"
+        self.art = art
         self.root = root or assets.asset_dir()
         self._img: dict[tuple[str, int, bool], pygame.Surface] = {}
 
@@ -73,7 +100,9 @@ class Renderer:
         pressed = {tuple(x) for x in st["plates_pressed"]}
         ctx = dict(room=obs["room"], tick=tick, gates=gates, exits=exits,
                    sprung=sprung, shaking=shaking, pressed=pressed)
-        if self.original:
+        if self.dungeon:
+            self.dungeon.draw_room(s, obs["tiles"], ctx, self._object_shape)
+        elif self.original:
             self._room_original(s, obs["tiles"], ctx)
         else:
             self._room_placeholder(s, obs["tiles"], ctx)
@@ -219,7 +248,9 @@ class Renderer:
     def draw_kid(self, s: pygame.Surface, pose: Pose) -> None:
         if not pose.visible:
             return
-        if self.original:
+        if self.dungeon:
+            self.dungeon.draw_kid(s, pose)
+        elif self.original:
             im = self.img("KID", assets.image_for(pose.frame), flip=pose.facing > 0)
             s.blit(im, (round(pose.x - im.get_width() / 2), round(pose.y) - im.get_height()))
         else:
@@ -248,6 +279,9 @@ class Renderer:
         y0 = ROOM_H
         s.fill(BG, (0, y0, SCREEN_W, HUD_H))
         kid = obs["kid"]
+        if self.dungeon:
+            self.dungeon.draw_hearts(s, 2, y0 + 1, kid["hp"], kid["max_hp"])
+            return
         for i in range(kid["max_hp"]):
             full = i < kid["hp"]
             x = 2 + i * 7
@@ -277,4 +311,4 @@ def interp_gates(before: dict | None, after: dict, t: float) -> dict[tuple[int, 
     return out
 
 
-__all__ = ["Renderer", "SCREEN_W", "SCREEN_H", "interp_gates", "anim"]
+__all__ = ["ARTS", "Renderer", "SCREEN_W", "SCREEN_H", "default_art", "interp_gates", "anim"]

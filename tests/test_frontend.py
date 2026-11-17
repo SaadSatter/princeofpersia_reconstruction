@@ -231,7 +231,11 @@ def test_tracked_images_are_the_bundle_or_nothing():
     images = {f for f in out if f.lower().endswith((".png", ".pal", ".dat", ".bmp", ".gif"))}
     listed = {"assets/original/" + line.split("\t")[0]
               for line in assets.MANIFEST.read_text().splitlines()[1:]}
-    assert images in (set(), listed)
+    # Our own generated art (OQ-8, Saad 2026-11-16) is allowed, but only the
+    # files its own manifest lists (tests/test_generated_art.py checks them).
+    from render import genart
+    generated = {"assets/generated/" + row["path"] for row in genart.manifest_rows()}
+    assert images - generated in (set(), listed)
     assert not [f for f in out if f.startswith("vendor/")]
 
 

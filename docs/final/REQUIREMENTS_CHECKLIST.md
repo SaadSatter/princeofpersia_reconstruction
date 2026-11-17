@@ -68,6 +68,23 @@ Saad, 2026-11-16:
 
 - Online play, each rival on their own screen, instead of local split screen
   (a shared screen lets each player see the other's view).
+- OQ-8: our own medieval stone dungeon art made with PixelLab plus
+  hand-drawn frames (32 px rivals and guards, background pillars, iron
+  portcullis gates), committed in `assets/generated/`. PixelLab's terms of
+  30 Oct 2026 permit publishing outputs (Saad's reading).
+  [`ART_PROVENANCE.md`](ART_PROVENANCE.md). SakPix demo art rejected (style
+  clash; redistribution unclear).
+- OQ-4: a six-room arena, `pop/arena.py`.
+
+Saad, 2026-11-17 ([`VERSUS_SPEC.md`](VERSUS_SPEC.md), **approved as written**,
+including its numbers, observation fields and key map):
+
+- Swordplay in the style of *Nidhogg* (stances, matched-height blocks,
+  disarms); lunge, sword throw, dive kick and sweep in the first playable;
+  3 hearts kept.
+- CQ-1 timing: real-time ticks, 12 frames per second, both seats overlap.
+- OQ-2 and OQ-5: guards downed for good by one clean hit or a trap; DOWN
+  takes the uniform; suspicion meter kept, shown only to the suspected rival.
 
 Pending: engine choice recommendation in
 [`ENGINE_DECISION.md`](ENGINE_DECISION.md) (stay on Python/Pygame).
@@ -76,11 +93,8 @@ Pending: engine choice recommendation in
 
 | ID | Blocks | Needed by |
 | --- | --- | --- |
-| OQ-2 | Disguise rules and their leak tests | Wed 18 Nov |
-| OQ-5 | Taking a uniform from a downed guard | Wed 18 Nov |
 | OQ-11 | Browser client technology | Sun 22 Nov |
 | OQ-7 | Key map | Sun 22 Nov |
 | OQ-10 | Hosting | Thu 26 Nov |
-| OQ-8 | Art for the online build (no original sprites on a reachable server) | Thu 26 Nov |
 | CQ-1 | Macro-action vocabulary for the AI rival | Thu 26 Nov |
 | CQ-6 | Playtest log format | Fri 27 Nov |

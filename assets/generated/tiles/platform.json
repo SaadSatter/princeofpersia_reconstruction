@@ -1,0 +1,166 @@
+{
+ "tile": 32,
+ "corners": "NW NE SW SE, true = stone",
+ "tiles": [
+  {
+   "corners": [
+    false,
+    false,
+    true,
+    false
+   ],
+   "x": 0,
+   "y": 0
+  },
+  {
+   "corners": [
+    false,
+    true,
+    false,
+    true
+   ],
+   "x": 32,
+   "y": 0
+  },
+  {
+   "corners": [
+    true,
+    false,
+    true,
+    true
+   ],
+   "x": 64,
+   "y": 0
+  },
+  {
+   "corners": [
+    false,
+    false,
+    true,
+    true
+   ],
+   "x": 96,
+   "y": 0
+  },
+  {
+   "corners": [
+    true,
+    false,
+    false,
+    true
+   ],
+   "x": 0,
+   "y": 32
+  },
+  {
+   "corners": [
+    false,
+    true,
+    true,
+    true
+   ],
+   "x": 32,
+   "y": 32
+  },
+  {
+   "corners": [
+    true,
+    true,
+    true,
+    true
+   ],
+   "x": 64,
+   "y": 32
+  },
+  {
+   "corners": [
+    true,
+    true,
+    true,
+    false
+   ],
+   "x": 96,
+   "y": 32
+  },
+  {
+   "corners": [
+    false,
+    true,
+    false,
+    false
+   ],
+   "x": 0,
+   "y": 64
+  },
+  {
+   "corners": [
+    true,
+    true,
+    false,
+    false
+   ],
+   "x": 32,
+   "y": 64
+  },
+  {
+   "corners": [
+    true,
+    true,
+    false,
+    true
+   ],
+   "x": 64,
+   "y": 64
+  },
+  {
+   "corners": [
+    true,
+    false,
+    true,
+    false
+   ],
+   "x": 96,
+   "y": 64
+  },
+  {
+   "corners": [
+    false,
+    false,
+    false,
+    false
+   ],
+   "x": 0,
+   "y": 96
+  },
+  {
+   "corners": [
+    false,
+    false,
+    false,
+    true
+   ],
+   "x": 32,
+   "y": 96
+  },
+  {
+   "corners": [
+    false,
+    true,
+    true,
+    false
+   ],
+   "x": 64,
+   "y": 96
+  },
+  {
+   "corners": [
+    true,
+    false,
+    false,
+    false
+   ],
+   "x": 96,
+   "y": 96
+  }
+ ]
+}
