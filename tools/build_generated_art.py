@@ -50,9 +50,19 @@ SOURCES = {
 # strip name -> PixelLab animation folder (None: the east rotation)
 RIVAL_STRIPS = {"stand": None, "run": "run", "step": "step", "jump": "jump", "leap": "leap",
                 "crouch": "crouch", "death": "death", "drink": "drink", "strike": "strike",
-                "block": "block", "hit": "hit"}
+                "block": "block", "hit": "hit",
+                # swordplay (docs/final/VERSUS_SPEC.md; rules not implemented yet)
+                # The sword is drawn along the forearm, so the stances use straight
+                # arms (-2/-3 retries); stance-mid-3 came back without a blade, which
+                # the build adds by hand (add_blade).
+                "stance_high": "stance-high-2", "stance_mid": "stance-mid-3", "stance_low": "stance-low-3",
+                "lunge_high": "lunge-high-2", "lunge_mid": "lunge-mid-2", "lunge_low": "lunge-low-2",
+                "throw": "sword-throw", "dive_kick": "dive-kick", "sweep": "sweep",
+                "take": "take-uniform"}
 GUARD_STRIPS = {"stand": None, "walk": "patrol-walk-2", "stance": "guard-stance",
-                "strike": "strike", "hit": "hit", "downed": "downed"}
+                "strike": "strike", "hit": "hit", "downed": "downed",
+                "stance_high": "stance-high-2", "stance_mid": "stance-mid-3", "stance_low": "stance-low-3",
+                "lunge_high": "lunge-high-2", "lunge_mid": "lunge-mid-2", "lunge_low": "lunge-low-2"}
 
 # Ledge-anchored canvas for hang/climb frames.
 CW, CH = 56, 80
@@ -114,7 +124,12 @@ def build(raw: Path) -> None:
 
     rival_dir, guard_dir = raw / "rival", raw / "guard"
     for name, anim in RIVAL_STRIPS.items():
-        strip("rival", name, frames_of(rival_dir, anim), SOURCES["rival"] + (f" animation {anim}" if anim else " rotation east"))
+        frames = frames_of(rival_dir, anim)
+        source = SOURCES["rival"] + (f" animation {anim}" if anim else " rotation east")
+        if name == "stance_mid":
+            frames = [add_blade(pygame, f) for f in frames]
+            source += " + blade hand-drawn in tools/build_generated_art.py"
+        strip("rival", name, frames, source)
     for name, anim in GUARD_STRIPS.items():
         strip("guard", name, frames_of(guard_dir, anim), SOURCES["guard"] + (f" animation {anim}" if anim else " rotation east"))
     climb = climb_frames(pygame, frames_of(rival_dir, None)[0], frames_of(rival_dir, "climb-skel"))
@@ -131,6 +146,30 @@ def build(raw: Path) -> None:
         lines.append(f"{rel}\t{src}\t{len(data)}\t{hashlib.sha256(data).hexdigest()}")
     (OUT / "MANIFEST.tsv").write_text("\n".join(lines) + "\n")
     print(f"wrote {len(files)} files to {OUT.relative_to(PROJECT)}")
+
+
+def add_blade(pygame, frame):
+    """Draw a level scimitar forward from the fist: the frontmost skin pixel in the
+    chest rows. 12 px long, two rows (light edge over steel), tip curving up 1 px,
+    a dark crossguard; colours are the rival's own sword colours."""
+    SKIN = {(241, 157, 115), (219, 125, 87), (195, 93, 69)}
+    EDGE, STEEL, DARK = (220, 231, 236, 255), (135, 139, 142, 255), (69, 78, 106, 255)
+    f = frame.copy()
+    bb = f.get_bounding_rect()
+    rows = range(bb.y + bb.h // 4, bb.y + bb.h // 2)
+    hand = max(((x, y) for y in rows for x in range(f.get_width())
+                if f.get_at((x, y)).a and tuple(f.get_at((x, y)))[:3] in SKIN), default=None)
+    if hand is None:
+        return f
+    hx, hy = hand
+    for y in (hy - 1, hy, hy + 1):                   # crossguard
+        f.set_at((hx + 1, y), DARK)
+    for i in range(2, 14):
+        lift = 1 if i >= 10 else 0                   # the curve near the tip
+        f.set_at((hx + i, hy - lift), EDGE)
+        if i < 13:
+            f.set_at((hx + i, hy + 1 - lift), STEEL)
+    return f
 
 
 def climb_frames(pygame, base, skel):
