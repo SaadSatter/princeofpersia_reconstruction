@@ -26,6 +26,8 @@ The agent drafted these decisions. Saad confirmed them on 2026-11-15:
 | Health rule | Each rival has 3 hearts. Each stab, trap or damaging fall costs 1 heart. 0 hearts is death | — |
 | AI decision cadence | One macro-action about every 4 s per AI seat | OQ-9 / CQ-3: whether it plays well, checked at the first playtest |
 | Play context (2026-11-16) | **Online**, each rival on their own screen. Replaces local split screen, because on a shared screen each player can see the other's half | OQ-10 hosting, OQ-11 browser client, OQ-12 latency |
+| Art (2026-11-16, OQ-8) | Our own **medieval stone dungeon** art, made with PixelLab plus hand-drawn frames; 32 px rivals and guards; pillars in the background; frameless iron portcullis gates. Committed in `assets/generated/` ([`ART_PROVENANCE.md`](ART_PROVENANCE.md)). Saad's reading of PixelLab's terms (30 Oct 2026): outputs may be published in the public repository | Second rival is the first recoloured crimson (same frames, same size) |
+| Arena size (2026-11-16, OQ-4) | **Six rooms** in a 3 x 2 loop, our own layouts ([`pop/arena.py`](../../pop/arena.py)); see Section 5.2 | Guard routes and two-seat starts wait for the two-seat engine (CQ-1) |
 
 ---
 
@@ -86,7 +88,7 @@ The headless, deterministic engine in `pop/` is the base: fixed-step kinematics,
 
 | Mechanic | Rule (initial) | Open questions |
 |---|---|---|
-| **Arena** | 4–6 rooms of our own layouts (no original level data); both rivals start in different rooms | OQ-4 layout size |
+| **Arena** | Six rooms of our own layouts (no original level data), `pop/arena.py`: West Cells, Gatehouse, East Tower above Barracks, Undercroft, Pit Hall, linked in a loop with a shaft from the Gatehouse to the Undercroft. Rivals start in the West Cells and East Tower (mirror images). Each middle room has an open gate between two drop plates (the gate-plate trap spots); Barracks and Pit Hall each hold a guard post. Every row of every room is reachable from both starts in the real engine (`tools/check_arena.py`) | Decided 2026-11-16 (OQ-4) |
 | **Second player** | Two prince-type characters in one `GameState`, stepped in the same frame | — |
 | **Sword** | `STRIKE` and `BLOCK`, close range. Each rival has 3 hearts. Each stab, trap or damaging fall costs 1 heart; 0 hearts is death. | — |
 | **Disguise** | Interact with a downed guard to take the uniform. While disguised and walking, guards ignore you. Running, climbing, drawing the sword or striking breaks the disguise. | OQ-2 exact break conditions |
@@ -144,12 +146,13 @@ All numbers are **[Open]** until the greybox duel (see [Project Plan](PROJECT_PL
 | Source | Specific moment or mechanic | Borrowed / changed | Terms |
 |---|---|---|---|
 | *Prince of Persia* (1989), Jordan Mechner | Level 1 movement, loose floors, gates and plates; guard sword duels | Rules re-written in our own Python (`pop/`); versus play, disguises and player-set traps are new | `historicalsource/princeofpersia` at `2b4ddb5`: README permits study and modification, grants no rights in Prince of Persia (Ubisoft franchise) |
-| Original DOS sprites (207 images) | Prince and tile art | Drawn as-is only on the private course branch; placeholder art in public | Basis recorded in [`docs/ASSET_PROVENANCE.md`](../ASSET_PROVENANCE.md); not licensed by the README or SDLPoP's GPL |
+| Original DOS sprites (207 images) | Prince and tile art | Drawn as-is only on the private course branch; not used by the online build | Basis recorded in [`docs/ASSET_PROVENANCE.md`](../ASSET_PROVENANCE.md); not licensed by the README or SDLPoP's GPL |
+| PixelLab (pixellab.ai) | Rival, guard and dungeon art generated from our own text prompts; gate, spikes, hang and climb frames hand-drawn by the agent | Our own designs in the genre's style; no original sprite was uploaded or traced and "Prince of Persia" was never in a prompt | PixelLab terms of 30 Oct 2026; [`ART_PROVENANCE.md`](ART_PROVENANCE.md) |
 | *SpyParty* (Chris Hecker) | The spy must act like the party's scripted guests | Idea only; here both rivals hide among scripted guards | No assets or code |
 | *Hitman* (IO Interactive) | Taking a downed enemy's uniform | Idea only; guards judge behaviour, not faces | No assets or code |
 | Our midterm (this repository) | Engine, runner, baseline, model player, tests | Reused and extended | Our own work |
 
-Guard and disguise art is unresolved (OQ-8).
+Guard and disguise art: one PixelLab guard; a disguised rival is drawn with the guard's own sprite, so the picture never reveals who wears the uniform (OQ-8, decided 2026-11-16).
 
 ## Open questions
 
@@ -158,11 +161,11 @@ Guard and disguise art is unresolved (OQ-8).
 | OQ-1 | **Decided 2026-11-15:** 3 hearts; 1 heart per stab, trap or damaging fall | Saad (Design Lead) | Greybox duel |
 | OQ-2 | Exactly which actions break a disguise | Saad | Greybox duel |
 | OQ-3 | Duel time limit (5 min assumed) | Saad | First playtest |
-| OQ-4 | Arena size: 4, 5 or 6 rooms | Saad, after the greybox duel | Before G2 |
+| OQ-4 | **Decided 2026-11-16:** six rooms (`pop/arena.py`) | Saad | Before G2 |
 | OQ-5 | How a guard is downed so its uniform can be taken | Saad | Combat work |
 | OQ-6 | Trap re-arm time (limit of 4 per rival is decided) | Saad | Trap work |
 | OQ-7 | Key map (one per player, each on their own keyboard) | Saad | Browser client work |
-| OQ-8 | Art for the online build. A public server cannot serve the original sprites, which are only on the private course branch; our own or placeholder art is needed | Saad (IP) | Before the server is reachable by anyone outside the course |
+| OQ-8 | **Decided 2026-11-16:** our own PixelLab-generated medieval dungeon art (`assets/generated/`, [`ART_PROVENANCE.md`](ART_PROVENANCE.md)) | Saad (IP) | Before the server is reachable by anyone outside the course |
 | OQ-9 | Whether a 4 s AI decision cadence is playable in a sword fight | Playtest evidence | G2 |
 | OQ-10 | Where the server is hosted, and who can reach it | Saad (Producer) | First playable recording |
 | OQ-11 | Browser client technology (proposal: a small HTML canvas page in plain JavaScript that only draws observations) | Saad, on the agent's proposal | Sun 22 Nov |

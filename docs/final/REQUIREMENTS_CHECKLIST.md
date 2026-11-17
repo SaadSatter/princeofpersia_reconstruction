@@ -68,6 +68,13 @@ Saad, 2026-11-16:
 
 - Online play, each rival on their own screen, instead of local split screen
   (a shared screen lets each player see the other's view).
+- OQ-8: our own medieval stone dungeon art made with PixelLab plus
+  hand-drawn frames (32 px rivals and guards, background pillars, iron
+  portcullis gates), committed in `assets/generated/`. PixelLab's terms of
+  30 Oct 2026 permit publishing outputs (Saad's reading).
+  [`ART_PROVENANCE.md`](ART_PROVENANCE.md). SakPix demo art rejected (style
+  clash; redistribution unclear).
+- OQ-4: a six-room arena, `pop/arena.py`.
 
 Pending: engine choice recommendation in
 [`ENGINE_DECISION.md`](ENGINE_DECISION.md) (stay on Python/Pygame).
@@ -81,6 +88,5 @@ Pending: engine choice recommendation in
 | OQ-11 | Browser client technology | Sun 22 Nov |
 | OQ-7 | Key map | Sun 22 Nov |
 | OQ-10 | Hosting | Thu 26 Nov |
-| OQ-8 | Art for the online build (no original sprites on a reachable server) | Thu 26 Nov |
 | CQ-1 | Macro-action vocabulary for the AI rival | Thu 26 Nov |
 | CQ-6 | Playtest log format | Fri 27 Nov |
