@@ -18,8 +18,8 @@ Updated 2026-11-16, branch `final/g1-shadow-masque`.
 | Inherited model player and limits | `agents/model_player.py`, `agents/providers.py`, `pop/runner.py`; live run `traces/live/20261026T180142Z` (single player) | S02–S04 | Versus prompts, per-seat isolation (*planned*) |
 | Agent configuration | `CLAUDE.md`, `AGENTS.md`, `.claude/agents/rules-reviewer.md`, `.codex/agents/pop-rule-reviewer.toml`, `.claude/skills/game-rules-audit/SKILL.md`, `.claude/skills/session-evidence/SKILL.md` | — | Invocations for the final project (*planned*) |
 | Engine choice | [`ENGINE_DECISION.md`](ENGINE_DECISION.md) (recommendation) | — | Saad's decision |
-| Art for the online build (OQ-8) | `assets/generated/` with `MANIFEST.tsv`; [`ART_PROVENANCE.md`](ART_PROVENANCE.md); `render/dungeon.py`, `render/genart.py`; `tests/test_generated_art.py`; branch `final/art-pixellab` | not yet recorded | Session record (*planned*, `session-evidence`) |
-| Arena (OQ-4) | `pop/arena.py`; `tests/test_arena.py`; full reachability `tools/check_arena.py` (run 2026-11-16: every row of all six rooms from both starts) | not yet recorded | Two-seat starts and guard routes (*planned*, CQ-1) |
+| Art for the online build (OQ-8) | `assets/generated/` with `MANIFEST.tsv`; [`ART_PROVENANCE.md`](ART_PROVENANCE.md); `render/dungeon.py`, `render/genart.py`; `tests/test_generated_art.py`; branch `final/art-pixellab`, PR #1 | S12 | Saad's check of the macOS window |
+| Arena (OQ-4) | `pop/arena.py`; `tests/test_arena.py`; full reachability `tools/check_arena.py` (run 2026-11-16: every row of all six rooms from both starts) | S12 | Two-seat starts and guard routes (*planned*, CQ-1) |
 | Checkpoint: model call, isolation, timeout | — | — | *planned* |
 | First playable, playtest log, scope lock | — | — | *planned* |
 
@@ -27,7 +27,7 @@ Updated 2026-11-16, branch `final/g1-shadow-masque`.
 
 | Date | Agent or skill | Session | Output | Independent of the builder? |
 | --- | --- | --- | --- | --- |
-| — | none yet | — | — | — |
+| 2026-11-16 | `session-evidence` | S12 (`e2b80258`) | `docs/agent-sessions/12-pixellab-art-and-arena.md` | Records the builder's own session |
 
 Add a row only when a transcript or committed report shows the invocation.
 A subagent spawned by the implementing session is not an independent review.
