@@ -177,3 +177,28 @@ the suspected seat only.
 
 Each step ends with `uv run pytest -q` and an independent review
 (`rules-reviewer` or `game-rules-audit`) before the next starts.
+
+## 10. Implementation notes (2026-11-17, for Saad's confirmation)
+
+Built on branch `final/versus-engine` in stages 1-4 (`pop/versus.py`,
+`pop/guards.py`; tests `tests/test_versus.py`, `test_swordplay.py`,
+`test_guards.py`, `test_disguise.py`). Where this spec was silent the
+implementation chose the values below; each is a constant and can change.
+
+| Where | Choice |
+| --- | --- |
+| R-V00 timing | A move's arrival is applied at the start of the next frame (the inherited macros place the kid after their last frame); same for both rivals and guards |
+| Sheathe | 3 frames, like drawing |
+| Throw | 8 frames; the blade leaves on frame 3; a sword and a body swapping cells meet |
+| Dive kick | 4 frames, active on the last 2; lands 1 cell ahead of where the jump is |
+| Sweep | Active on frames 3-4 of 6 |
+| Guards | Chase at run pace (4 frames per cell); cannot be disarmed; a kick or sweep knocks a guard down for 10 frames instead of downing it; patrol starts at the end its post faces from |
+| Disguise | TAKE needs the downed guard in the cell ahead; a disguised rival is observed with the guard's sheathed look (stance null, armed false) |
+| Observation | Two additions: `motion` (Section 6) and flying swords in `swords` (`flying: true`) |
+| Local test keys | `play.py ARENA --versus`: A uses WASD, F attack, G draw/sheathe, T take; B uses arrows, `.` attack, `/` draw/sheathe, `'` take. One keyboard, two panels, each drawn from its own seat's observation; not the online key map (OQ-7) |
+
+Not done yet: the independent review after each stage (Section 9 asks for
+one before the next stage; it must run in a separate session to be
+independent), the game server and browser client, the AI seat in versus
+play, traps set by rivals, and the duel time limit (OQ-3: the limit is a
+parameter, default the inherited 60-minute clock).

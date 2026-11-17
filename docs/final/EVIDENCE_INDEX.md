@@ -20,6 +20,7 @@ Updated 2026-11-16, branch `final/g1-shadow-masque`.
 | Engine choice | [`ENGINE_DECISION.md`](ENGINE_DECISION.md) (recommendation) | — | Saad's decision |
 | Art for the online build (OQ-8) | `assets/generated/` with `MANIFEST.tsv`; [`ART_PROVENANCE.md`](ART_PROVENANCE.md); `render/dungeon.py`, `render/genart.py`; `tests/test_generated_art.py`; branch `final/art-pixellab`, PR #1 | S12 | Saad's check of the macOS window |
 | Arena (OQ-4) | `pop/arena.py`; `tests/test_arena.py`; full reachability `tools/check_arena.py` (run 2026-11-16: every row of all six rooms from both starts) | S12 | Two-seat starts and guard routes (*planned*, CQ-1) |
+| Two-seat engine, swordplay, guards, disguise (VERSUS_SPEC stages 1-4) | `pop/versus.py`, `pop/guards.py`; tests `tests/test_versus.py`, `test_swordplay.py`, `test_guards.py`, `test_disguise.py`; rule map R-V00 to R-V21; branch `final/versus-engine` | not yet recorded | Independent review per stage (*planned*, separate session) |
 | Checkpoint: model call, isolation, timeout | — | — | *planned* |
 | First playable, playtest log, scope lock | — | — | *planned* |
 
