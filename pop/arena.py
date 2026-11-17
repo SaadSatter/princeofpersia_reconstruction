@@ -57,7 +57,9 @@ NAMES = {1: "West Cells", 2: "Gatehouse", 3: "East Tower",
          4: "Barracks", 5: "Pit Hall", 6: "Undercroft"}
 # Two-seat annotations (not read by the engine yet).
 STARTS = {"A": (1, 2, 2, +1), "B": (3, 2, 7, -1)}            # room, row, col, facing
-GUARD_POSTS = {"barracks": (4, 2, (1, 8)), "pit_hall": (5, 2, (1, 8))}   # room, row, patrol cols
+# room, row, patrol cols, starting facing: each guard starts at the end it faces away
+# from (the Pit Hall guard mirrors the Barracks guard).
+GUARD_POSTS = {"barracks": (4, 2, (1, 8), +1), "pit_hall": (5, 2, (1, 8), -1)}
 
 
 def situation(seat: str = "A") -> Situation:

@@ -250,6 +250,14 @@ class Renderer:
             return
         if self.dungeon:
             self.dungeon.draw_kid(s, pose)
+        elif pose.spin % 360:
+            # A flip (R-V22): draw the stick figure upright on its own surface,
+            # then turn it forward about its middle (19 px above the feet).
+            from dataclasses import replace
+            tmp = pygame.Surface((64, 64), pygame.SRCALPHA)
+            self._kid_placeholder(tmp, replace(pose, x=32, y=51, spin=0.0))
+            turned = pygame.transform.rotate(tmp, -pose.spin * pose.facing)
+            s.blit(turned, turned.get_rect(center=(round(pose.x), round(pose.y) - 19)))
         elif self.original:
             im = self.img("KID", assets.image_for(pose.frame), flip=pose.facing > 0)
             s.blit(im, (round(pose.x - im.get_width() / 2), round(pose.y) - im.get_height()))
