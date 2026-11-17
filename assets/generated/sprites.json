@@ -1,0 +1,168 @@
+{
+ "guard": {
+  "downed": {
+   "file": "guard/downed.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 38
+  },
+  "hit": {
+   "file": "guard/hit.png",
+   "h": 48,
+   "n": 6,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 38
+  },
+  "stance": {
+   "file": "guard/stance.png",
+   "h": 48,
+   "n": 6,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 38
+  },
+  "stand": {
+   "file": "guard/stand.png",
+   "h": 32,
+   "n": 1,
+   "type": "feet",
+   "w": 32,
+   "x": 14,
+   "y": 30
+  },
+  "strike": {
+   "file": "guard/strike.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 38
+  },
+  "walk": {
+   "file": "guard/walk.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 38
+  }
+ },
+ "rival": {
+  "block": {
+   "file": "rival/block.png",
+   "h": 48,
+   "n": 6,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  },
+  "climb": {
+   "file": "rival/climb.png",
+   "h": 80,
+   "n": 6,
+   "type": "ledge",
+   "w": 56,
+   "x": 20,
+   "y": 44
+  },
+  "crouch": {
+   "file": "rival/crouch.png",
+   "h": 48,
+   "n": 6,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  },
+  "death": {
+   "file": "rival/death.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  },
+  "drink": {
+   "file": "rival/drink.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  },
+  "hit": {
+   "file": "rival/hit.png",
+   "h": 48,
+   "n": 6,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  },
+  "jump": {
+   "file": "rival/jump.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  },
+  "leap": {
+   "file": "rival/leap.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  },
+  "run": {
+   "file": "rival/run.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  },
+  "stand": {
+   "file": "rival/stand.png",
+   "h": 32,
+   "n": 1,
+   "type": "feet",
+   "w": 32,
+   "x": 15,
+   "y": 29
+  },
+  "step": {
+   "file": "rival/step.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  },
+  "strike": {
+   "file": "rival/strike.png",
+   "h": 48,
+   "n": 8,
+   "type": "feet",
+   "w": 48,
+   "x": 23,
+   "y": 37
+  }
+ }
+}

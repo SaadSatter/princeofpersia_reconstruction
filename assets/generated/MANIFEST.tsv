@@ -1,0 +1,25 @@
+path	source	bytes	sha256
+guard/downed.png	PixelLab character 3e3205ed-340e-4965-a0ca-71cd9d2a4f2a animation downed	5853	990be46811ea5db7301783b8e52acd09385272d7e94bc6b6e5f0519b5f15c833
+guard/hit.png	PixelLab character 3e3205ed-340e-4965-a0ca-71cd9d2a4f2a animation hit	3767	99671491632ce356027f90c548d975ed54e07d6751ce3e7519da602a30d00a2e
+guard/stance.png	PixelLab character 3e3205ed-340e-4965-a0ca-71cd9d2a4f2a animation guard-stance	2402	965b6cdf3010302b681ff45b9a4ebbd0bc51fdf62ba437f7caba350a865faa4f
+guard/stand.png	PixelLab character 3e3205ed-340e-4965-a0ca-71cd9d2a4f2a rotation east	1156	4955bee760ed0b1fb8c48f20738ca587343b7e59a64cd7d37ebcde9f0d4b2f28
+guard/strike.png	PixelLab character 3e3205ed-340e-4965-a0ca-71cd9d2a4f2a animation strike	5670	9220ac2107420c2d57fd62e6432c255f58a28595c2a94dc0defcca3f67dc744c
+guard/walk.png	PixelLab character 3e3205ed-340e-4965-a0ca-71cd9d2a4f2a animation patrol-walk-2	4537	a54d54537ca8cf173407ddb952b900f38d8122ac4a5001b8aeb6a05b0fd38d6f
+props/door.png	PixelLab map object 5e16db79-5736-4c2c-bc57-5ddc81c4c4d7	1814	10bdc2cf7215a60d4c5d5eb7cf670034df2cebd1eb74915ee36bac617b15cb08
+props/pillar.png	PixelLab map object a6907856-2cc4-4fd6-8642-8e96ca3715d5	1587	2592c42e438b8ef7084f4dc487d6d439ca3efffde3fc3883615924fc3848497c
+props/torch.png	PixelLab map object b692d8c1-34ae-4f27-8298-b31f6ecfc8d8	779	b064cd23bb2ef2cae1e2756651e68262efe242cf76be110f5bb414947cf15889
+rival/block.png	PixelLab character 200624a1-3d6e-4098-b4a6-781eb38a7312 animation block	2315	67e7336f91a3bbde9292d6b3d876245cd4187e425e6799142fc72dc6d21d6054
+rival/climb.png	hand-built in tools/build_generated_art.py from the rival rotation + PixelLab animation climb-skel	2984	a5fe25e862866f763de5b977e89d8509e4e87d77296219e64466746a565f17e3
+rival/crouch.png	PixelLab character 200624a1-3d6e-4098-b4a6-781eb38a7312 animation crouch	1553	60ec7c37748346eaebc04870e195b5e9f7dc9a3e40c9d37fe09cb649cc3d5285
+rival/death.png	PixelLab character 200624a1-3d6e-4098-b4a6-781eb38a7312 animation death	3072	0b1616300038af19eddf5b5a3f4c893433071ca9e7fb14be29d5af6e7fa7e658
+rival/drink.png	PixelLab character 200624a1-3d6e-4098-b4a6-781eb38a7312 animation drink	1591	270bd30e5f4ce0fa76d205f44ba15302e02af87f4ce0d78720cc29570e5d1b38
+rival/hit.png	PixelLab character 200624a1-3d6e-4098-b4a6-781eb38a7312 animation hit	2466	d9073eb19a89a9d1e677d3fd54bb0f96413a040c96531e4dffd84a7dbab8b60c
+rival/jump.png	PixelLab character 200624a1-3d6e-4098-b4a6-781eb38a7312 animation jump	2798	59a324c6672000880fb1c8add8600addcd9bf87b229ee8c00733223d7cc299bc
+rival/leap.png	PixelLab character 200624a1-3d6e-4098-b4a6-781eb38a7312 animation leap	3354	bc119065c82e5eeb1c96c5a1f283f356924ed7cc9e28359eecba6505234b1531
+rival/run.png	PixelLab character 200624a1-3d6e-4098-b4a6-781eb38a7312 animation run	3221	106a629d352822d5d56f142c00b8163e388af84474fb9a5e989329f837eb64de
+rival/stand.png	PixelLab character 200624a1-3d6e-4098-b4a6-781eb38a7312 rotation east	602	8007efaeea4a016e75f18b2aca90f11b60f7b7cb943fa936b2444d7e0605b599
+rival/step.png	PixelLab character 200624a1-3d6e-4098-b4a6-781eb38a7312 animation step	2303	774020d8ff7d7de9891436ab3a37670ea95b4a54d70a8dbc1477b35067755757
+rival/strike.png	PixelLab character 200624a1-3d6e-4098-b4a6-781eb38a7312 animation strike	3457	c8256e40f736ddf9aff693ae6b8866c3cd9a6e19f99e147594e68b46209abee8
+sprites.json	tools/build_generated_art.py	2274	0139da6d789a4dce8daaf4329243c68c48d7a12225cec5ad47eb61aea8ce4e39
+tiles/platform.json	PixelLab sidescroller tileset b723a004-aac5-4b9e-8a71-c3742a4a53a7 (pro) (corner table)	1584	8efd59115d1c884c51a60c42d45c8ee21a564ae0113b6eaaf44296ef7d371f5e
+tiles/platform.png	PixelLab sidescroller tileset b723a004-aac5-4b9e-8a71-c3742a4a53a7 (pro)	8125	7b77d0cf6e9594d54d985e9cd394cdaf180b8b6731c7dafa0fc2c791f45007e4

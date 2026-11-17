@@ -4,7 +4,9 @@ Working directory: the project folder.
 
     uv sync --extra play
     uv run python play.py S3                      # play with the keyboard (bundled original art)
+    uv run python play.py S3 --art generated      # Shadow Masque's own dungeon art
     uv run python play.py S3 --placeholder        # placeholder shapes instead
+    uv run python play.py ARENA --art generated   # walk the six-room arena (pop/arena.py)
     uv run python play.py S1 --watch baseline     # watch the baseline play
     uv run python play.py S1 --watch model-history --live   # watch the model (paid calls)
     uv run python play.py --replay traces/eval/20261026T060347Z-baseline-S3-100.jsonl
@@ -231,6 +233,8 @@ def main(argv: list[str] | None = None) -> int:
                     choices=sorted(SITUATIONS) + list(levels.EXHIBITION_IDS))
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--placeholder", action="store_true", help="draw placeholder shapes")
+    ap.add_argument("--art", choices=("original", "generated", "placeholder"),
+                    help="art to draw (default: original if bundled, else generated)")
     ap.add_argument("--scale", type=int, default=3)
     ap.add_argument("--speed", type=float, default=1.0, help="animation speed multiplier")
     ap.add_argument("--watch", choices=("baseline", "model-history", "model-obs-only"))
@@ -251,7 +255,8 @@ def main(argv: list[str] | None = None) -> int:
             print(f"error: {exc}", file=sys.stderr)
             return 2
         if args.watch and args.watch.startswith("model"):
-            ap.error("model players are not set up for L1 yet (its tile legend is not in the prompt)")
+            ap.error(f"model players are not set up for {args.situation} yet "
+                     "(its tile legend is not in the prompt)")
     if args.watch and args.watch.startswith("model"):
         if not args.live:
             ap.error("model players make paid API calls; pass --live")
@@ -294,7 +299,8 @@ def main(argv: list[str] | None = None) -> int:
     window = pygame.display.set_mode((draw.SCREEN_W * scale, draw.SCREEN_H * scale + info_h))
     pygame.display.set_caption(f"Prince of Persia L1 reconstruction: {title}")
     screen = pygame.Surface((draw.SCREEN_W, draw.SCREEN_H))
-    renderer = draw.Renderer(original=not args.placeholder)
+    art = "placeholder" if args.placeholder else (args.art or draw.default_art())
+    renderer = draw.Renderer(original=art == "original", art=art)
     font = pygame.font.Font(None, 9 * scale)
     clock = pygame.time.Clock()
 
@@ -310,9 +316,7 @@ def main(argv: list[str] | None = None) -> int:
     clip_poses: list = []
     clip_i = 0
     current: Shown | None = None
-    status = ("original art" if renderer.original else
-              "placeholder art" + ("" if args.placeholder else
-                                   " (bundled images missing)"))
+    status = f"{renderer.art} art" + ("" if renderer.art == art else f" ({art} images missing)")
     message = ""
     replay_i = 0
     watch_done = None
