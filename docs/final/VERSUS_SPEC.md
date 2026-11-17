@@ -193,7 +193,7 @@ implementation chose the values below; each is a constant and can change.
 | Dive kick | 4 frames, active on the last 2; lands 1 cell ahead of where the jump is |
 | Sweep | Active on frames 3-4 of 6 |
 | Guards | Chase at run pace (4 frames per cell); cannot be disarmed; a kick or sweep knocks a guard down for 10 frames instead of downing it; patrol starts at the end its post faces from |
-| Disguise | TAKE needs the downed guard in the cell ahead; a disguised rival is observed with the guard's sheathed look (stance null, armed false) |
+| Disguise | TAKE works from the downed guard's own cell (standing over it, either facing) or from the cell ahead, facing it; the own cell was added after Saad's playtest (2026-11-17), where T over the body did nothing. A disguised rival is observed with the guard's sheathed look (stance null, armed false) |
 | Observation | Two additions: `motion` (Section 6) and flying swords in `swords` (`flying: true`) |
 | Local test keys | `play.py ARENA --versus`: A uses WASD, F attack, G draw/sheathe, T take; B uses arrows, `.` attack, `/` draw/sheathe, `'` take. One keyboard, two panels, each drawn from its own seat's observation; not the online key map (OQ-7) |
 

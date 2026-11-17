@@ -228,3 +228,13 @@ def test_disguise_and_suspicion_are_deterministic():
             out.append(json.dumps(ep._duel.snapshot(), sort_keys=True, default=str))
         return out
     assert trace() == trace()
+
+
+@pytest.mark.parametrize("facing", [+1, -1])
+def test_regression_take_while_standing_over_the_downed_guard(facing):
+    """Playtest 2026-11-17 (Saad): pressing T while standing over a downed guard
+    did nothing; TAKE only looked at the cell ahead, and a downed guard can be
+    walked onto. Taking works from its own cell, facing either way, too."""
+    ep = episode(a=(2, 0, 1, facing))                   # on top of the downed guard
+    take(ep)
+    assert ep.observe("A")["me"]["disguised"] is True

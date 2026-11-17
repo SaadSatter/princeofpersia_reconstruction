@@ -141,11 +141,15 @@ class Rival(Game):
         self.disguised = False                              # R-V21: losing a heart
 
     def uniform_ahead(self):
-        """A downed guard still in uniform in the cell ahead (R-V17), or None."""
-        ahead = self.ahead()
-        for g in self.duel.guards.values():
-            if g.downed and g.uniform and g.cell == ahead:
-                return g
+        """A downed guard still in uniform to take (R-V17): in this rival's own cell
+        (standing over the body, facing either way) or in the cell ahead. The own
+        cell was added after Saad's playtest of 2026-11-17: a downed guard can be
+        walked onto, and T over the body did nothing."""
+        here, ahead = self.kid.cell, self.ahead()
+        for cell in (here, ahead):
+            for g in self.duel.guards.values():
+                if g.downed and g.uniform and g.cell == cell:
+                    return g
         return None
     # --- swordplay macros (per-frame generators, like the inherited ones) ---
     def _versus_macro(self, action: str):
