@@ -42,6 +42,15 @@ HEART, HEART_DK = (200, 40, 40), (90, 20, 24)
 SOLID = T.HAS_FLOOR | {T.WALL}
 
 
+def ready(img: pygame.Surface) -> pygame.Surface:
+    """Convert to the window's alpha format once a window exists, as draw.py does
+    for the original images. Without this, under macOS's cocoa driver (whose
+    plain surfaces carry an alpha byte) transparent pixels blitted onto the
+    screen came out black: tests/test_generated_art.py
+    test_regression_black_box_around_the_kid_on_macos."""
+    return img.convert_alpha() if pygame.display.get_surface() else img
+
+
 def surface_y(r: int) -> int:
     """The flagstone line of row r: where feet stand (anim.stand_point)."""
     return TOP + r * ROW_H + FEET
@@ -112,7 +121,7 @@ def gate_image(h: int) -> pygame.Surface:
     plane(0, 1, IRON, IRON_HI, IRON_DK, True)
     for y in range(4, h, 13):
         s.set_at((4, y), RUST)
-    return s
+    return ready(s)
 
 
 def spikes_image(state: int) -> pygame.Surface:
@@ -136,14 +145,14 @@ def spikes_image(state: int) -> pygame.Surface:
         s.set_at((x + 1, 12 - ht), IRON_HI)
         for j in range(3):
             s.set_at((x + j, 11), RUST)
-    return s
+    return ready(s)
 
 
 # ------------------------------------------------------------------ the art
 class DungeonArt:
     def __init__(self, root: Path):
         self.root = root
-        load = lambda rel: pygame.image.load(str(root / rel))
+        load = lambda rel: ready(pygame.image.load(str(root / rel)))
         table = json.loads((root / "tiles" / "platform.json").read_text())
         sheet = load("tiles/platform.png")
         self.wang = {tuple(t["corners"]): sheet.subsurface((t["x"], t["y"], 32, 32)).copy()
@@ -159,6 +168,7 @@ class DungeonArt:
         self.counts = {name: m["n"] for name, m in self.meta["rival"].items()}
         self._frames: dict[tuple, pygame.Surface] = {}
         self._gates: dict[int, pygame.Surface] = {}
+        self._spikes = {k: spikes_image(k) for k in (0, 1, 2)}
 
     # --- sprites ------------------------------------------------------------
     def frame(self, who: str, strip: str, i: int, flip: bool, colour: str = "indigo") -> pygame.Surface:
@@ -167,7 +177,7 @@ class DungeonArt:
             m = self.meta[who][strip]
             im = self._strips[who][strip].subsurface((i * m["w"], 0, m["w"], m["h"])).copy()
             if colour == "crimson":
-                im = crimson(im)
+                im = ready(crimson(im))
             self._frames[key] = pygame.transform.flip(im, True, False) if flip else im
         return self._frames[key]
 
@@ -213,7 +223,7 @@ class DungeonArt:
         def solid(r, c):
             return rows[r][min(max(c, 0), 9)] in SOLID
 
-        floor = pygame.Surface((ROOM_W, ROOM_H), pygame.SRCALPHA)
+        floor = ready(pygame.Surface((ROOM_W, ROOM_H), pygame.SRCALPHA))
         for r in range(3):
             for tx in range(-1, 10):
                 a, b = solid(r, tx), solid(r, tx + 1)
@@ -303,7 +313,7 @@ class DungeonArt:
                         pygame.draw.line(s, SHADOW, (R.x + 4, R.y + sink), (R.x + 4, R.y + 3 + sink))
                         pygame.draw.line(s, SHADOW, (R.right - 6, R.y + sink), (R.right - 6, R.y + 3 + sink))
                 elif t == T.SPIKES:
-                    s.blit(spikes_image(2 if (r, c) in ctx["sprung"] else 0), (x0, y0 - 11))
+                    s.blit(self._spikes[2 if (r, c) in ctx["sprung"] else 0], (x0, y0 - 11))
                 elif t == T.RUBBLE:
                     for dx, dy, w in ((6, -2, 4), (11, -3, 5), (17, -2, 3), (21, -1, 4)):
                         pygame.draw.rect(s, IRON_LT, (x0 + dx, y0 + dy, w, 2))

@@ -25,6 +25,8 @@ CTX = dict(tick=0, gates={}, exits={}, sprung=set(), shaking=set(), pressed=set(
 @pytest.fixture(scope="module")
 def art():
     pygame.init()
+    if not pygame.display.get_surface():
+        pygame.display.set_mode((10, 10))          # the game draws with a window open
     from render.dungeon import DungeonArt
     return DungeonArt(genart.PACK_DIR)
 
@@ -124,3 +126,30 @@ def test_generated_art_is_the_default_without_original_images(monkeypatch, tmp_p
     monkeypatch.setenv("POP_ASSETS", str(tmp_path))            # no original images there
     assert draw.default_art() == "generated"
     assert draw.Renderer(original=False, art="generated").art == "generated"
+
+
+def test_regression_black_box_around_the_kid_on_macos(art):
+    """Bug seen 2026-11-16 in the macOS window: a black box the size of the
+    sprite canvas around the kid. Under SDL's cocoa driver a plain Surface
+    (play.py's screen) has an alpha byte but no SRCALPHA flag; unconverted
+    alpha images blitted onto it left alpha 0 behind, and the kid's
+    transparent pixels then blended to black. Reproduced headless with that
+    surface format."""
+    from render.anim import Pose
+    argb = (0xFF0000, 0xFF00, 0xFF, 0xFF000000)
+
+    def room():                       # drawn afresh: Surface.copy() would change the format
+        surf = pygame.Surface((320, 192), 0, 32, argb)
+        surf.fill((0, 0, 0))          # as Renderer.draw_room does first
+        art.draw_room(surf, ("..........", "..........", "__________"), CTX)
+        return surf
+
+    base = room()
+    for frame, kind, strip in ((anim.STAND, "stand", "stand"), (anim.RUN_CYCLE[0], "run", "run")):
+        s = room()
+        art.draw_kid(s, Pose(frame, 100, 184, 1, kind))
+        changed = sum(s.get_at((x, y))[:3] != base.get_at((x, y))[:3]
+                      for x in range(40, 160) for y in range(100, 192))
+        im = art.frame("rival", strip, 0, False)
+        opaque = sum(im.get_at((x, y)).a > 0 for x in range(im.get_width()) for y in range(im.get_height()))
+        assert changed <= opaque, (strip, changed, opaque)          # only the sprite's own pixels
