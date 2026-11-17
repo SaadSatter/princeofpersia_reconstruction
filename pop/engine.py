@@ -67,6 +67,7 @@ class Game:
         self.terminal: str | None = None
         self._result: dict = {}
         self._airborne = False        # kid has left his floor mid-move (see _phase)
+        self.plan: dict | None = None  # the move in progress, for real-time display (_plan)
         self.intro: dict | None = None
         if situation.start_falling or situation.start_presses:
             self._intro()
@@ -135,6 +136,17 @@ class Game:
         alive = k.posture not in ("dead", "won")
         events = self.mech.tick(self._pressing() if alive else None,
                                 self._near_cells() if alive else set())
+        self._react(events)
+        if self.terminal is None and self.frames >= P.GAME_FRAMES:
+            self.terminal = "time_up"
+
+    def _react(self, events: list) -> None:
+        """The kid's part of one frame: loose floors that fell this frame (`events`
+        from Mechanics.tick), then his own fall. Split from `_tick` so a duel
+        (pop/versus.py) can advance the shared world once per frame and let each
+        rival react; single-player behaviour is unchanged."""
+        k = self.kid
+        alive = k.posture not in ("dead", "won")
         for _, loose_cell, landed in events:
             if not alive:
                 break
@@ -153,8 +165,6 @@ class Game:
             if k.fall_timer >= P.FALL_PER_ROW:
                 k.fall_timer = 0
                 self._descend()
-        if self.terminal is None and self.frames >= P.GAME_FRAMES:
-            self.terminal = "time_up"
 
     def _hurt(self, amount: int, reason: str) -> None:
         self.kid.hp -= amount
@@ -250,12 +260,23 @@ class Game:
         finally:
             self._airborne = False
 
+    def _plan(self, effect: str, frames: int, to: Cell | None = None,
+              posture: str = "standing", facing: int | None = None) -> None:
+        """Record the move just decided: its effect, length in frames and where it
+        should end. Display only (a real-time renderer animates the move while it
+        runs; the macro places the kid only at its end). Never part of results,
+        observations or traces."""
+        k = self.kid
+        self.plan = {"effect": effect, "frames": frames, "to": to or k.cell,
+                     "posture": posture, "facing": k.facing if facing is None else facing}
+
     # --- macros --------------------------------------------------------
     def _directional(self, d: int, kind: str):
         k = self.kid
         if k.facing != d:                            # R-D20: reverse = turn only
             k.facing = d
             self._result["effect"] = "turned"
+            self._plan("turned", P.TURN)
             yield from self._frames(P.TURN)
             return
         if kind == "run":
@@ -271,9 +292,11 @@ class Game:
         target = self.ahead()
         if self.blocks(target):
             self._result["effect"] = "bumped"
+            self._plan("bumped", P.BUMP)
             yield from self._frames(P.BUMP)
             return
         self._result["effect"] = "moved"
+        self._plan("moved", P.RUN, target if isinstance(target, tuple) else None)
         if (yield from self._phase(P.RUN, P.RUN_DEPART)):
             self._enter(target, "run")
 
@@ -281,13 +304,16 @@ class Game:
         target = self.ahead()
         if self.blocks(target):
             self._result["effect"] = "bumped"
+            self._plan("bumped", P.BUMP)
             yield from self._frames(P.BUMP)
             return
         if not self.geom.supported(target):
             self._result["effect"] = "edge"           # careful steps never walk off
+            self._plan("edge", P.BUMP)
             yield from self._frames(P.BUMP)
             return
         self._result["effect"] = "moved"
+        self._plan("moved", P.STEP, target)
         if (yield from self._phase(P.STEP, P.STEP_DEPART)):
             self._enter(target, "step")
 
@@ -299,6 +325,7 @@ class Game:
             if self.blocks(first) or not self.geom.supported(first):
                 yield from self._run()               # no run-up: behaves as LEFT/RIGHT
                 return
+            self._plan("moved", P.RUN, first)
             if not (yield from self._phase(P.RUN, P.RUN_DEPART)):
                 return
             self._enter(first, "run")
@@ -313,9 +340,11 @@ class Game:
             target = cell
         if target is None:
             self._result["effect"] = "bumped"
+            self._plan("bumped", P.JUMP_IN_PLACE)
             yield from self._frames(P.JUMP_IN_PLACE)
             return
         self._result["effect"] = "jumped"
+        self._plan("jumped", flight, target)
         if (yield from self._phase(flight, depart)):
             self._enter(target, "jump")
 
@@ -323,6 +352,7 @@ class Game:
         k = self.kid
         if k.posture == "hanging":
             self._result["effect"] = "climbed"
+            self._plan("climbed", P.HANG_UP, k.hang_ledge)
             # Holds the ledge throughout: if it falls, he falls (R-C14).
             if (yield from self._phase(P.HANG_UP)):
                 ledge, k.hang_ledge, k.posture = k.hang_ledge, None, "standing"
@@ -331,6 +361,7 @@ class Game:
         ex = self.mech.exit_for(k.cell)
         if ex is not None and ex.open:               # R-C17
             self._result["effect"] = "won"
+            self._plan("won", P.STAIRS, posture="won")
             yield from self._frames(P.STAIRS)
             if self.terminal is None:
                 k.posture = "won"
@@ -342,6 +373,7 @@ class Game:
                 and isinstance(above_ahead, tuple) and not self.blocks(above_ahead)
                 and self.geom.supported(above_ahead)):
             self._result["effect"] = "climbed"       # R-C12 (simplified)
+            self._plan("climbed", P.CLIMB_UP, above_ahead)
             if (yield from self._phase(P.CLIMB_UP, P.CLIMB_DEPART)):
                 self._enter(above_ahead, "climb")
             return
@@ -355,6 +387,7 @@ class Game:
             self._result["effect"] = "bumped_ceiling" if above[0] == k.room else "none"
         else:
             self._result["effect"] = "none"
+        self._plan(self._result["effect"], P.JUMP_IN_PLACE)
         yield from self._frames(P.JUMP_IN_PLACE)
 
     def _down(self):
@@ -363,16 +396,19 @@ class Game:
             k.hang_ledge = None
             self._start_fall(from_hang=True)
             self._result["effect"] = "dropped"
+            self._plan("dropped", 0, posture="falling")
             return
             yield  # pragma: no cover  (makes this a generator)
         if self.rule("sword") and self.geom.tile(k.cell) == T.SWORD:   # R-C21
             self._result["effect"] = "took_sword"
+            self._plan("took_sword", P.PICKUP_SWORD)
             if (yield from self._phase(P.PICKUP_SWORD)):
                 self.geom.set_tile(k.cell, T.FLOOR)
                 k.sword = True
             return
         if self.geom.tile(k.cell) == T.POTION:      # R-C16 type 1 (R-A03)
             self._result["effect"] = "drank"
+            self._plan("drank", P.DRINK)
             if (yield from self._phase(P.DRINK)):
                 self.geom.set_tile(k.cell, T.FLOOR)
                 if k.hp < k.max_hp:
@@ -383,6 +419,7 @@ class Game:
         if (isinstance(target, tuple) and not self.blocks(target)
                 and not self.geom.supported(target)):
             self._result["effect"] = "hanging"
+            self._plan("hanging", P.HANG_DOWN, target, posture="hanging", facing=-k.facing)
             # Stands on the ledge throughout: if it falls, he falls (R-C14).
             if (yield from self._phase(P.HANG_DOWN)):
                 k.hang_ledge = k.cell
@@ -391,10 +428,12 @@ class Game:
                 k.posture = "hanging"
             return
         self._result["effect"] = "none"
+        self._plan("none", P.CROUCH)
         yield from self._frames(P.CROUCH)
 
     def _wait(self):
         self._result["effect"] = "waited"
+        self._plan("waited", P.WAIT)
         yield from self._frames(P.WAIT)
 
     # --- public --------------------------------------------------------
@@ -403,22 +442,28 @@ class Game:
             return ()
         return LEGAL_BY_POSTURE[self.kid.posture]
 
+    def _macro(self, action: str):
+        """Start one legal macro: reset the result and return its per-frame
+        generator (one `_tick` per yield). `perform` runs it to the end; a duel
+        (pop/versus.py) advances it one frame per tick."""
+        self._result = {"effect": None, "frames": 0, "fell_rows": 0, "hp_change": 0}
+        self.plan = None
+        if action == "WAIT":
+            return self._wait()
+        if action == "UP":
+            return self._up()
+        if action == "DOWN":
+            return self._down()
+        parts = action.split("_")
+        d = DIRECTIONS[parts[-1]]
+        kind = {"LEFT": "run", "RIGHT": "run", "STEP": "step",
+                "JUMP": "jump", "RUN": "run_jump"}[parts[0]]
+        return self._directional(d, kind)
+
     def perform(self, action: str) -> dict:
         """Run one legal macro action. Caller must validate `action` first."""
         assert action in self.legal_actions(), action
-        self._result = {"effect": None, "frames": 0, "fell_rows": 0, "hp_change": 0}
-        if action == "WAIT":
-            gen = self._wait()
-        elif action == "UP":
-            gen = self._up()
-        elif action == "DOWN":
-            gen = self._down()
-        else:
-            parts = action.split("_")
-            d = DIRECTIONS[parts[-1]]
-            kind = {"LEFT": "run", "RIGHT": "run", "STEP": "step",
-                    "JUMP": "jump", "RUN": "run_jump"}[parts[0]]
-            gen = self._directional(d, kind)
+        gen = self._macro(action)
         frames = 0
         # Run the macro to completion: code after its last frame (e.g. landing)
         # must execute. Every macro is at most MAX_FRAMES long by construction.

@@ -127,6 +127,12 @@ its own rival) plus:
   sorted by position. A disguised rival appears with `kind: "guard"`, a
   guard's posture set and no extra field. There are no ids, seats or
   names in `figures`.
+- `motion` (added in implementation, 2026-11-17, **for Saad's review**): on `me`
+  and on each figure, the move in progress as it looks on screen: effect,
+  frames done, length, and its planned end cell only if that cell is in the
+  same room (`to` is `null` otherwise, so up/down links stay hidden). A
+  client needs it to animate a move while it runs; it shows nothing a player
+  watching the screen would not see. Not a seat's pending input.
 - `swords`: dropped swords in the room, as cells.
 - `me`: the seat's own rival, adding `stance`, `armed`, `disguised`,
   `knocked_down_frames`.

@@ -7,6 +7,7 @@ Working directory: the project folder.
     uv run python play.py S3 --art generated      # Shadow Masque's own dungeon art
     uv run python play.py S3 --placeholder        # placeholder shapes instead
     uv run python play.py ARENA --art generated   # walk the six-room arena (pop/arena.py)
+    uv run python play.py ARENA --versus          # two rivals, two panels, one keyboard (testing)
     uv run python play.py S1 --watch baseline     # watch the baseline play
     uv run python play.py S1 --watch model-history --live   # watch the model (paid calls)
     uv run python play.py --replay traces/eval/20261026T060347Z-baseline-S3-100.jsonl
@@ -71,6 +72,119 @@ def held_repeat(held: set[str], shift: bool) -> str | None:
         if d in held:
             return f"STEP_{d.upper()}" if shift else d.upper()
     return None
+
+
+# --- versus keys (pure) -----------------------------------------------------
+# Local testing only: both rivals on one keyboard, each panel drawing only its
+# own seat's observation. Real play is one player per screen (online, GDD).
+VERSUS_KEYS = {
+    "A": {"left": "a", "right": "d", "up": "w", "down": "s", "shift": "lshift"},
+    "B": {"left": "left", "right": "right", "up": "up", "down": "down", "shift": "rshift"},
+}
+
+
+def versus_input(held: set[str], shift: bool) -> str | None:
+    """The action a held key set asks for this frame (left/right/up/down names).
+    Re-sent every frame while held; the duel starts it when the rival is free."""
+    horiz = next((d for d in ("left", "right") if d in held), None)
+    if horiz and "up" in held:
+        return f"RUN_JUMP_{horiz.upper()}" if shift else f"JUMP_{horiz.upper()}"
+    if horiz:
+        return f"STEP_{horiz.upper()}" if shift else horiz.upper()
+    if "up" in held:
+        return "UP"
+    if "down" in held:
+        return "DOWN"
+    return None
+
+
+def versus_main(args) -> int:
+    """Two seats on real-time ticks (pop/versus.py), one panel per seat."""
+    import os
+    if args.screenshot:
+        os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
+    import pygame
+    from pop.versus import SEATS, arena_episode
+    from render import draw, versus_view
+
+    ep = arena_episode(args.seed)
+    pygame.init()
+    scale = max(1, args.scale)
+    gap = 4 * scale
+    panel_w, panel_h = draw.SCREEN_W * scale, draw.SCREEN_H * scale
+    info_h = 22 * scale // 3
+    window = pygame.display.set_mode((2 * panel_w + gap, panel_h + info_h))
+    pygame.display.set_caption("Shadow Masque: local versus test")
+    # Shadow Masque's own art by default: the versus game never uses the original images.
+    art = "placeholder" if args.placeholder else (args.art or "generated")
+    renderer = draw.Renderer(original=art == "original", art=art)
+    colours = {"A": "indigo", "B": "crimson"}
+    other = {"A": "B", "B": "A"}
+    font = pygame.font.Font(None, 9 * scale)
+    clock = pygame.time.Clock()
+    caches = {seat: {} for seat in SEATS}
+    scripted = [k for k in args.keys.split(",") if k]       # "A:RIGHT" tokens, one per frame
+    frames_left = None if not args.screenshot else max(60, 2 * len(scripted) + 40)
+    tick = 0
+    names = {pygame.key.key_code(v): (seat, k) for seat, m in VERSUS_KEYS.items()
+             for k, v in m.items() if k != "shift"}
+
+    def draw_actor(s, view, room, seat_colour, cache_key, cache):
+        p = versus_view.pose(view, room, cache, cache_key)
+        if renderer.dungeon:
+            renderer.dungeon.draw_kid(s, p, seat_colour)
+        else:
+            renderer.draw_kid(s, p)
+
+    running = True
+    while running:
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT or (e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE):
+                running = False
+            elif e.type == pygame.KEYDOWN and e.key == pygame.K_r:
+                ep.reset(args.seed)
+        pressed = pygame.key.get_pressed()
+        mods = pygame.key.get_mods()
+        for seat in SEATS:
+            held = {k for code, (s_, k) in names.items() if s_ == seat and pressed[code]}
+            shift = bool(mods & (pygame.KMOD_LSHIFT if seat == "A" else pygame.KMOD_RSHIFT))
+            act = versus_input(held, shift)
+            if act and act in ep.legal_actions(seat):
+                ep.step(seat, act)
+        if scripted:
+            seat, _, act = scripted.pop(0).partition(":")
+            ep.step(seat, act)
+        ep.tick()
+
+        window.fill((0, 0, 0))
+        for i, seat in enumerate(SEATS):
+            obs = ep.observe(seat)
+            panel = pygame.Surface((draw.SCREEN_W, draw.SCREEN_H))
+            renderer.draw_room(panel, obs, tick)
+            for j, fig in enumerate(obs["figures"]):
+                if fig["kind"] == "rival":
+                    draw_actor(panel, fig, obs["room"], colours[other[seat]], ("fig", j), caches[seat])
+            draw_actor(panel, obs["me"], obs["room"], colours[seat], "me", caches[seat])
+            renderer.draw_hud(panel, obs)
+            x = i * (panel_w + gap)
+            window.blit(pygame.transform.scale(panel, (panel_w, panel_h)), (x, 0))
+            label = f"rival {seat} ({colours[seat]})  hearts {obs['me']['hp']}"
+            window.blit(font.render(label, True, (200, 200, 200)), (x + 6, panel_h + 2))
+        out = ep.outcome()
+        if out["status"] == "terminal":
+            msg = font.render(f"{out['reason']}   R to restart, Esc to quit", True, (240, 220, 120))
+            window.blit(msg, (panel_w - msg.get_width() // 2, panel_h + 2))
+        pygame.display.flip()
+        tick += 1
+        if frames_left is not None:
+            frames_left -= 1
+            if frames_left <= 0:
+                pygame.image.save(window, args.screenshot)
+                break
+            continue
+        clock.tick(FPS * args.speed)
+    pygame.quit()
+    return 0
 
 
 # --- driving the episode (pure) ----------------------------------------------
@@ -233,6 +347,8 @@ def main(argv: list[str] | None = None) -> int:
                     choices=sorted(SITUATIONS) + list(levels.EXHIBITION_IDS))
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--placeholder", action="store_true", help="draw placeholder shapes")
+    ap.add_argument("--versus", action="store_true",
+                    help="two rivals on one keyboard, one panel each (ARENA only; testing)")
     ap.add_argument("--art", choices=("original", "generated", "placeholder"),
                     help="art to draw (default: original if bundled, else generated)")
     ap.add_argument("--scale", type=int, default=3)
@@ -246,6 +362,15 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--keys", default="", help=argparse.SUPPRESS)   # scripted input for checks
     args = ap.parse_args(argv)
 
+    if args.versus:
+        if args.situation != "ARENA" or args.watch or args.replay:
+            ap.error("--versus plays the ARENA only, without --watch or --replay")
+        try:
+            import pygame  # noqa: F401
+        except ImportError:
+            print("pygame is not installed. Run: uv sync --extra play", file=sys.stderr)
+            return 2
+        return versus_main(args)
     if args.watch and args.replay:
         ap.error("choose --watch or --replay, not both")
     if args.situation in levels.EXHIBITION_IDS and not args.replay:
