@@ -78,23 +78,36 @@ def held_repeat(held: set[str], shift: bool) -> str | None:
 # Local testing only: both rivals on one keyboard, each panel drawing only its
 # own seat's observation. Real play is one player per screen (online, GDD).
 VERSUS_KEYS = {
-    "A": {"left": "a", "right": "d", "up": "w", "down": "s", "shift": "lshift"},
-    "B": {"left": "left", "right": "right", "up": "up", "down": "down", "shift": "rshift"},
+    "A": {"left": "a", "right": "d", "up": "w", "down": "s", "attack": "f", "draw": "g",
+          "shift": "lshift"},
+    "B": {"left": "left", "right": "right", "up": "up", "down": "down", "attack": ".",
+          "draw": "/", "shift": "rshift"},
 }
 
 
-def versus_input(held: set[str], shift: bool) -> str | None:
-    """The action a held key set asks for this frame (left/right/up/down names).
-    Re-sent every frame while held; the duel starts it when the rival is free."""
+def versus_input(held: set[str], shift: bool, armed: bool = False) -> str | None:
+    """The action a held key set asks for this frame (left/right/up/down/attack/draw).
+    Re-sent every frame while held; the duel starts it when the rival is free.
+    Swordplay keys (VERSUS_SPEC 2.3): attack = lunge, with Up a throw, with Down
+    a sweep (and in the air a dive kick, chosen by the caller when KICK is legal);
+    while the sword is drawn, Up/Down change stance."""
+    if "draw" in held:
+        return "SHEATHE" if armed else "DRAW"
+    if "attack" in held:
+        if "up" in held:
+            return "THROW"
+        if "down" in held:
+            return "SWEEP"
+        return "LUNGE"
     horiz = next((d for d in ("left", "right") if d in held), None)
     if horiz and "up" in held:
         return f"RUN_JUMP_{horiz.upper()}" if shift else f"JUMP_{horiz.upper()}"
     if horiz:
         return f"STEP_{horiz.upper()}" if shift else horiz.upper()
     if "up" in held:
-        return "UP"
+        return "STANCE_UP" if armed else "UP"
     if "down" in held:
-        return "DOWN"
+        return "STANCE_DOWN" if armed else "DOWN"
     return None
 
 
@@ -129,12 +142,29 @@ def versus_main(args) -> int:
     names = {pygame.key.key_code(v): (seat, k) for seat, m in VERSUS_KEYS.items()
              for k, v in m.items() if k != "shift"}
 
+    counts = ({k: v["n"] for k, v in renderer.dungeon.meta["rival"].items()}
+              if renderer.dungeon else {})
+
     def draw_actor(s, view, room, seat_colour, cache_key, cache):
+        spr = versus_view.sprite(view, counts) if renderer.dungeon else None
+        if spr is not None:
+            renderer.dungeon.blit_actor(s, "rival", spr.strip, spr.index, spr.x, spr.y,
+                                        spr.facing, seat_colour)
+            return
         p = versus_view.pose(view, room, cache, cache_key)
         if renderer.dungeon:
             renderer.dungeon.draw_kid(s, p, seat_colour)
         else:
             renderer.draw_kid(s, p)
+
+    def draw_swords(s, swords):
+        """Dropped swords lie on the floor; a thrown one flies at chest height."""
+        from render.anim import stand_point
+        for sw in swords:
+            x, y = stand_point(sw["row"], sw["col"])
+            y = y - 18 if sw["flying"] else y - 1
+            pygame.draw.line(s, (220, 231, 236), (x - 7, y), (x + 6, y))
+            pygame.draw.line(s, (69, 78, 106), (x - 8, y - 1), (x - 8, y + 1))
 
     running = True
     while running:
@@ -148,8 +178,11 @@ def versus_main(args) -> int:
         for seat in SEATS:
             held = {k for code, (s_, k) in names.items() if s_ == seat and pressed[code]}
             shift = bool(mods & (pygame.KMOD_LSHIFT if seat == "A" else pygame.KMOD_RSHIFT))
-            act = versus_input(held, shift)
-            if act and act in ep.legal_actions(seat):
+            legal = ep.legal_actions(seat)
+            act = versus_input(held, shift, armed=ep.observe(seat)["me"]["armed"])
+            if act == "LUNGE" and "KICK" in legal:
+                act = "KICK"                                  # attack in the air: dive kick
+            if act and act in legal:
                 ep.step(seat, act)
         if scripted:
             seat, _, act = scripted.pop(0).partition(":")
@@ -161,6 +194,7 @@ def versus_main(args) -> int:
             obs = ep.observe(seat)
             panel = pygame.Surface((draw.SCREEN_W, draw.SCREEN_H))
             renderer.draw_room(panel, obs, tick)
+            draw_swords(panel, obs["swords"])
             for j, fig in enumerate(obs["figures"]):
                 if fig["kind"] == "rival":
                     draw_actor(panel, fig, obs["room"], colours[other[seat]], ("fig", j), caches[seat])

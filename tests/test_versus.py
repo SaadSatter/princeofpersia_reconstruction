@@ -227,3 +227,28 @@ def test_versus_pose_follows_the_move_in_progress():
     fig = obs["figures"][0]
     p = versus_view.pose(fig, obs["room"])
     assert p.kind == "run" and 2 * 32 + 16 < p.x < 3 * 32 + 16      # on its way to col 3
+
+
+@pytest.mark.parametrize("held,armed,expected", [
+    ({"draw"}, False, "DRAW"), ({"draw"}, True, "SHEATHE"), ({"attack"}, True, "LUNGE"),
+    ({"attack", "up"}, True, "THROW"), ({"attack", "down"}, True, "SWEEP"),
+    ({"up"}, True, "STANCE_UP"), ({"down"}, True, "STANCE_DOWN"), ({"up"}, False, "UP"),
+])
+def test_versus_swordplay_keys(held, armed, expected):
+    import play
+    assert play.versus_input(held, False, armed) == expected
+
+
+def test_swordplay_is_drawn_from_our_strips():
+    from render import versus_view
+    counts = {"lunge_high": 8, "lunge_mid": 8, "lunge_low": 8, "throw": 8, "dive_kick": 6,
+              "sweep": 7, "take": 5, "stance_mid": 6, "death": 8}
+    base = {"row": 0, "col": 3, "facing": "right", "posture": "standing", "armed": True,
+            "stance": "high", "motion": None}
+    assert versus_view.sprite(base, counts).strip == "stance_high"
+    lunging = dict(base, motion={"effect": "lunge", "frame": 4, "frames": 8, "to": [0, 3],
+                                 "to_posture": "standing", "to_facing": "right"})
+    spr = versus_view.sprite(lunging, counts)
+    assert spr.strip == "lunge_high" and spr.index == 3
+    assert versus_view.sprite(dict(base, posture="knocked_down"), counts).strip == "death"
+    assert versus_view.sprite(dict(base, armed=False, stance=None), counts) is None

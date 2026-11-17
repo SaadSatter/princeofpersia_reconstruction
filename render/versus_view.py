@@ -10,9 +10,26 @@ picture keeps up with the duel's real-time ticks.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from pop import physics as P
 
-from .anim import AnimState, Pose, Step, clip, idle_pose
+from .anim import AnimState, Pose, Step, clip, idle_pose, stand_point
+
+
+@dataclass(frozen=True)
+class Sprite:
+    """A swordplay frame drawn straight from one of our strips (no original frame
+    number exists for it): strip name, frame index, feet point, facing."""
+    strip: str
+    index: int
+    x: float
+    y: float
+    facing: int
+
+
+COMBAT_STRIPS = {"lunge": None, "throw": "throw", "dive_kick": "dive_kick",
+                 "sweep": "sweep", "took_sword": "take", "drew": "stance_mid"}
 
 
 def _dir(facing: str) -> str:
@@ -45,11 +62,36 @@ def _kid(view: dict) -> dict:
             "posture": view["posture"]}
 
 
+def _strip_index(frame: int, frames: int, n: int) -> int:
+    return max(0, min(n - 1, (max(1, frame) - 1) * n // max(1, frames)))
+
+
+def sprite(view: dict, counts: dict[str, int]) -> Sprite | None:
+    """A swordplay picture for `view`, or None when an ordinary pose applies.
+    counts: frames per rival strip (sprites.json)."""
+    f = 1 if view["facing"] == "right" else -1
+    x, y = stand_point(view["row"], view["col"])
+    if view["posture"] == "knocked_down" or view.get("knocked_down_frames"):
+        return Sprite("death", 6, x, y, f)                       # lying on the floor
+    m = view.get("motion")
+    if m and m["effect"] in COMBAT_STRIPS:
+        strip = COMBAT_STRIPS[m["effect"]] or f"lunge_{view.get('stance') or 'mid'}"
+        i = _strip_index(m["frame"], m["frames"], counts[strip])
+        if m["effect"] == "dive_kick" and m["to"] is not None:
+            tx, ty = stand_point(*m["to"])
+            t = min(1.0, m["frame"] / max(1, m["frames"]))
+            x, y = x + (tx - x) * t, y + (ty - y) * t - 10 * (1 - t)   # dropping in
+        return Sprite(strip, i, x, y, f)
+    if not m and view.get("armed") and view["posture"] == "standing" and view.get("stance"):
+        return Sprite(f"stance_{view['stance']}", 0, x, y, f)
+    return None
+
+
 def pose(view: dict, room: str, cache: dict | None = None, key: object = None) -> Pose:
     """This frame's pose for `view` (obs["me"] or one of obs["figures"]).
     cache/key: optional memo so a move's clip is built once."""
     m = view.get("motion")
-    if not m or m["frames"] <= 0:
+    if not m or m["frames"] <= 0 or m["effect"] in COMBAT_STRIPS or m["effect"] == "sheathed":
         return idle_pose(_kid(view))
     before = _kid(view)
     after = dict(before)
