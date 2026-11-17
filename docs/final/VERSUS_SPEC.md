@@ -1,9 +1,9 @@
 # Shadow Masque versus spec: two seats, swordplay, guards, disguise
 
-Status: **draft for Saad's approval** (2026-11-17). Nothing here is
-implemented. The decisions in Section 1 are Saad's; every number marked
-*proposed* is the agent's and needs approval before the engine uses it
-(`CLAUDE.md`: rules, tuning and balance numbers). Each rule gets an `R-V`
+Status: **approved as written by Saad, 2026-11-17**, including every number
+marked *proposed*, the observation fields (Section 6) and the key map
+proposal (Section 2.3, OQ-7). The decisions in Section 1 are Saad's; the
+numbers were drafted by the agent. Implementation follows Section 9. Each rule gets an `R-V`
 id; it becomes a `design` row in `docs/RULE_SOURCE_MAP.md` when it is
 implemented, with its failing test written first.
 

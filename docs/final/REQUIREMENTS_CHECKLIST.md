@@ -76,8 +76,8 @@ Saad, 2026-11-16:
   clash; redistribution unclear).
 - OQ-4: a six-room arena, `pop/arena.py`.
 
-Saad, 2026-11-17 ([`VERSUS_SPEC.md`](VERSUS_SPEC.md), draft awaiting approval
-of its numbers):
+Saad, 2026-11-17 ([`VERSUS_SPEC.md`](VERSUS_SPEC.md), **approved as written**,
+including its numbers, observation fields and key map):
 
 - Swordplay in the style of *Nidhogg* (stances, matched-height blocks,
   disarms); lunge, sword throw, dive kick and sweep in the first playable;
@@ -93,7 +93,6 @@ Pending: engine choice recommendation in
 
 | ID | Blocks | Needed by |
 | --- | --- | --- |
-| VERSUS_SPEC | Approval of the proposed numbers, observation fields and key map in `VERSUS_SPEC.md` | Wed 18 Nov |
 | OQ-11 | Browser client technology | Sun 22 Nov |
 | OQ-7 | Key map | Sun 22 Nov |
 | OQ-10 | Hosting | Thu 26 Nov |
