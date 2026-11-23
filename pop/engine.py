@@ -357,8 +357,9 @@ class Game:
             self._plan("bumped", P.JUMP_IN_PLACE)
             yield from self._frames(P.JUMP_IN_PLACE)
             return
-        self._result["effect"] = "jumped"
-        self._plan(self._jump_look(running, vaulted), flight, target)
+        look = self._jump_look(running, vaulted)     # "jumped" in single-player
+        self._result["effect"] = look                # the result agrees with the motion
+        self._plan(look, flight, target)
         if (yield from self._phase(flight, depart)):
             self._enter(target, "jump")
 

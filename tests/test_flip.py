@@ -137,15 +137,20 @@ def test_a_flip_never_lands_on_the_rival_nor_passes_a_wall():
     assert motion["effect"] == "flipped" and me(ep, "A")["col"] == 8
 
 
-def test_a_rival_in_the_next_room_still_blocks_and_is_not_revealed():
-    """B stands just inside the next room, out of A's sight: A's jump stops at the
-    room edge as before, and nothing A observes names a flip."""
-    ep = episode((2, 0, 8, +1), (3, 0, 0, -1))
+def test_a_rival_in_the_next_room_does_not_stop_the_jump():
+    """B stands just inside the next room, out of A's sight. This test used to
+    assert that A's jump stopped at the room edge (motion.to [0, 9]), which the
+    independent review of 2026-11-18 showed reveals B. R-V23 (Saad, 2026-11-23):
+    a body out of sight never stops a move. A's jump is the same as with nobody
+    there, never a flip, and A lands in the next room, where it now sees B."""
+    ep = episode((1, 0, 9, +1), (2, 0, 0, -1))
     room = ep.observe("A")["room"]
     motion = jump_and_land(ep, "A", "JUMP_RIGHT", P.JUMP)
-    assert motion["effect"] == "jumped" and motion["to"] == [0, 9]
-    assert me(ep, "A")["col"] == 9 and ep.observe("A")["room"] == room
-    assert ep.observe("A")["figures"] == []
+    assert motion["effect"] == "jumped" and motion["to"] is None
+    run(ep, 1)
+    assert (me(ep, "A")["row"], me(ep, "A")["col"]) == (0, 2)
+    assert ep.observe("A")["room"] != room
+    assert [f["col"] for f in ep.observe("A")["figures"]] == [0]
 
 
 def test_a_dive_kick_is_legal_during_a_flip():

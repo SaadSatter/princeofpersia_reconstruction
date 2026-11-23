@@ -126,13 +126,19 @@ class Rival(Game):
         self._react(self.duel.events)
 
     def blocks(self, where: Cell | str) -> bool:
-        """Walls and gates, as before, the other rival standing there, and a
-        standing guard: rivals cannot pass through either (VERSUS_SPEC 3); a
-        downed guard can be crossed."""
+        """Walls and gates, as before; in this rival's own room, also the other
+        rival standing there, a standing guard, and the other rival's landing
+        cell: rivals cannot pass through either (VERSUS_SPEC 3); a downed guard
+        can be crossed. R-V23 (Saad, 2026-11-23): a body or landing cell in
+        another room is out of sight and never stops a move; a mover that
+        arrives on someone settles beside them (Duel._settle_arrivals)."""
         if super().blocks(where):
             return True
-        return isinstance(where, tuple) and (self.duel.standing_at(where, other_than=self.seat)
-                                             or self.duel.guard_at(where) is not None)
+        if not isinstance(where, tuple) or where[0] != self.kid.room:
+            return False
+        d = self.duel
+        return (d.standing_at(where, other_than=self.seat) or d.guard_at(where) is not None
+                or d.claimed(where, other_than=self.seat))
 
     def _can_vault(self, where: Cell | str) -> bool:
         """R-V22 (Saad, 2026-11-17): a jump flies over the other rival or a standing
@@ -309,6 +315,10 @@ class Duel:
         self._moves: dict[str, object] = {seat: None for seat in SEATS}
         self._move_frame: dict[str, int] = {seat: 0 for seat in SEATS}
         self._move_action: dict[str, str | None] = {seat: None for seat in SEATS}
+        self._started: dict[str, int] = {seat: -1 for seat in SEATS}   # frame a move began
+        # While the rivals advance, each plans against the other as it was when the
+        # frame began, so the seat id never decides where a move goes (R-V00).
+        self._view: dict[str, dict] | None = None
         self.pending: dict[str, str | None] = {seat: None for seat in SEATS}
         self.last_result: dict[str, dict | None] = {seat: None for seat in SEATS}
         self.terminal: str | None = None
@@ -320,6 +330,9 @@ class Duel:
 
     # --- queries ------------------------------------------------------
     def standing_at(self, cell: Cell, other_than: str) -> bool:
+        if self._view is not None:                          # rivals advancing: frame start
+            return any(v["cell"] == cell and v["posture"] == "standing"
+                       for seat, v in self._view.items() if seat != other_than)
         return any(r.kid.cell == cell and r.kid.posture == "standing"
                    for seat, r in self.rivals.items() if seat != other_than)
 
@@ -338,12 +351,30 @@ class Duel:
                 and cell not in self.landings()
                 and all(o is g or o.downed or o.cell != cell for o in self.guards.values()))
 
+    def claims(self) -> dict[str, Cell]:
+        """Each rival in mid-jump: the cell it will land in, when that cell is in
+        its own room. A jumper keeps its cell until it lands, so nobody may step
+        into its landing cell meanwhile (R-V22: a flip ends right beside whoever
+        it passed). Only in its own room, where every seat and guard that could
+        step in sees `motion.to`; a landing in the next room is out of their
+        sight and settles on arrival instead (R-V23, reviewer 2026-11-18)."""
+        out = {}
+        for seat, r in self.rivals.items():
+            to = (r.plan or {}).get("to")
+            if (self.busy(seat) and r.plan["effect"] in JUMPS
+                    and isinstance(to, tuple) and to[0] == r.kid.room):
+                out[seat] = to
+        return out
+
     def landings(self) -> set[Cell]:
-        """Cells rivals in mid-jump will land in. A jumper keeps its cell until it
-        lands, so a guard must not step into its landing cell meanwhile (R-V22:
-        a flip ends right beside the guard it passed)."""
-        return {r.plan["to"] for seat, r in self.rivals.items()
-                if self.busy(seat) and r.plan and r.plan["effect"] in JUMPS}
+        return set(self.claims().values())
+
+    def claimed(self, cell: Cell, other_than: str) -> bool:
+        """`cell` is the other rival's landing cell (as at frame start while the
+        rivals advance, like standing_at)."""
+        claims = ({s: v["claim"] for s, v in self._view.items()} if self._view is not None
+                  else self.claims())
+        return any(c == cell for s, c in claims.items() if s != other_than)
 
     def guard_sees(self, g: Guard) -> str | None:
         """R-V14: the nearest rival in the guard's room and row, in front, within
@@ -476,9 +507,15 @@ class Duel:
                 if not g.downed and g.cell in (fell, landed):
                     g.knock_out()
         before = {seat: r.kid.cell for seat, r in self.rivals.items()}
-        for seat in SEATS:
-            self._advance(seat)
-        self._separate(before)
+        claims = self.claims()
+        self._view = {seat: {"cell": r.kid.cell, "posture": r.kid.posture,
+                             "claim": claims.get(seat)} for seat, r in self.rivals.items()}
+        try:
+            for seat in SEATS:
+                self._advance(seat)
+        finally:
+            self._view = None
+        self._settle_arrivals(before)
         for r in self.rivals.values():                      # R-V03: stance timers
             if r.stance_change and r.armed:
                 target, left = r.stance_change
@@ -543,6 +580,7 @@ class Duel:
         """Start a move and run its first frame; False if it had no frames."""
         r = self.rivals[seat]
         self._move_action[seat] = action
+        self._started[seat] = self.frames
         gen = r._versus_macro(action)
         self._moves[seat], self._move_frame[seat] = gen, 0
         try:
@@ -570,16 +608,66 @@ class Duel:
         self._moves[seat] = None
         self._move_frame[seat] = 0
 
-    def _separate(self, before: dict[str, Cell]) -> None:
-        """Two rivals that ended a frame standing in one cell both moved into it at
-        once (a block is checked when a move starts). Whoever moved this frame
-        goes back where it was, so neither passes through the other."""
+    def _settle_arrivals(self, before: dict[str, Cell]) -> None:
+        """A rival that ended this frame standing on someone else's cell.
+
+        R-V00: two rivals that ran into one cell in the same frame both go back
+        where they were. R-V23 (Saad, 2026-11-23, "step in and settle"): one that
+        arrived on someone it could not plan around (a body out of sight, or one
+        that arrived after its move began) ends on the nearest free cell of the
+        room it arrived in, back toward where it came from first, then forward.
+        It never goes back to a room it has left, so a body out of sight is only
+        found by entering its room and seeing it. Only if that row has no free
+        cell does it go back where it was."""
         a, b = self.rivals["A"].kid, self.rivals["B"].kid
-        if a.cell == b.cell and a.posture == b.posture == "standing":
+        movers = [seat for seat in SEATS if self.rivals[seat].kid.cell != before[seat]]
+        if len(movers) == 2 and a.cell == b.cell and a.posture == b.posture == "standing":
             for seat in SEATS:
                 k = self.rivals[seat].kid
-                if k.cell != before[seat]:
-                    k.room, k.row, k.col = before[seat]
+                k.room, k.row, k.col = before[seat]
+            return
+        dest = {seat: self._nearest_free(seat, before[seat])
+                for seat in movers if self._on_someone(seat)}
+        if len(dest) == 2 and dest["A"] == dest["B"]:
+            dest = {seat: before[seat] for seat in dest}      # symmetric: both go back
+        for seat, cell in dest.items():
+            k = self.rivals[seat].kid
+            k.room, k.row, k.col = cell
+            self.mech.touch_loose(cell)
+            self._replan(seat)
+
+    def _on_someone(self, seat: str) -> bool:
+        r = self.rivals[seat]
+        return (r.alive and r.kid.posture == "standing"
+                and (self.standing_at(r.kid.cell, other_than=seat)
+                     or self.guard_at(r.kid.cell) is not None))
+
+    def _nearest_free(self, seat: str, came_from: Cell) -> Cell:
+        k = self.rivals[seat].kid
+        back = -k.facing                                    # every arrival moves forward
+        for n in range(1, 10):
+            for d in (back * n, -back * n):
+                c = self.geom.offset(k.cell, 0, d)
+                if (isinstance(c, tuple) and c[0] == k.room and self._settles_in(seat, c)
+                        and not blocked_between(self.geom, self.mech, k.cell, c)):
+                    return c
+        return came_from
+
+    def _settles_in(self, seat: str, c: Cell) -> bool:
+        return (self.geom.tile(c) not in (T.WALL, T.SPIKES) and not self.mech.gate_bars(c)
+                and self.geom.supported(c) and not self.standing_at(c, other_than=seat)
+                and self.guard_at(c) is None and not self.claimed(c, other_than=seat))
+
+    def _replan(self, seat: str) -> None:
+        """A settled rival's move in progress was planned from the cell it was
+        moved off: stop it. A move that only began this frame (an input queued
+        for the landing) is queued again, to be planned from the new cell."""
+        if not self.busy(seat):
+            return
+        action = self._move_action[seat] if self._started[seat] == self.frames else None
+        self.cancel(seat)
+        if action is not None and not action.startswith("_") and self.pending[seat] is None:
+            self.pending[seat] = action
 
     # --- swords and contacts (R-V04 to R-V12) ---------------------------------
     def _free(self, r: Rival, cell) -> bool:

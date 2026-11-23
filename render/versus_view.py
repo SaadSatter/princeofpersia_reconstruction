@@ -108,11 +108,17 @@ def pose(view: dict, room: str, cache: dict | None = None, key: object = None) -
            m["effect"], m["frames"], tuple(m["to"] or ()), m["to_facing"])
     poses = cache.get(sig) if cache is not None else None
     if poses is None:
+        # A running jump's flight leaves the floor at once (pop/engine.py: depart 0),
+        # but the clip is the standing jump's, which stays down for its first 20%:
+        # build it that much longer and drop the grounded lead-in (review 2026-11-18).
+        running = m["effect"] == "flipped" and m["frames"] == P.RUN_JUMP_FLIGHT
+        lead = m["frames"] // 4 if running else 0
         step = Step(action=action, before=before, after=after, before_room=room,
-                    after_room=room, effect=m["effect"], frames=m["frames"])
+                    after_room=room, effect=m["effect"], frames=m["frames"] + lead)
         poses = clip(step, AnimState())
         if m["effect"] == "flipped":
             poses = flip(poses)
+        poses = poses[lead:]
         if cache is not None:
             cache.clear() if len(cache) > 64 else None
             cache[sig] = poses
