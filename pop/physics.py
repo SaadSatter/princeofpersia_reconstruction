@@ -21,9 +21,16 @@ HANG_DOWN = 6
 HANG_UP = 8
 CROUCH = 4
 DRINK = 8
+PICKUP_SWORD = 12  # original pickupsword+resheathe is 22 frames; capped at MAX_FRAMES (R-D28)
 STAIRS = 12
 WAIT = 6
 FALL_PER_ROW = 4   # R-D16
+# Frame at which a moving kid leaves his starting floor (R-D33): before it, a
+# floor falling away interrupts the move; after it, he is in motion.
+RUN_DEPART = 2     # half of RUN
+STEP_DEPART = 4    # half of STEP
+JUMP_DEPART = 6    # half of a standing jump; a running jump leaves at once
+CLIMB_DEPART = 4   # the jump-up part of a climb, before he hangs from above
 MAX_FRAMES = 12    # macro cap (R-D05)
 
 GAME_FRAMES = 60 * 60 * 12  # 60-minute clock (R-C24)

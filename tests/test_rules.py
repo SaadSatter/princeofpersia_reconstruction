@@ -313,3 +313,19 @@ def test_every_macro_is_at_most_twelve_frames():
     for a in g.legal_actions():
         g2 = game()
         assert g2.perform(a)["frames"] <= 12
+
+
+def test_any_plate_kind_opens_a_linked_exit():
+    """`openexit` (Source/MOVER.S:546-569) does not check the plate type: a
+    drop plate linked to an exit opens it too; only gates distinguish raise
+    from drop (`triggate`). Found by the session-08 independent review."""
+    from pop.engine import Game
+    from pop.situations import Situation
+    s = Situation(id="fixture", rooms={1: ("##########", "_p___Ee___", "##########")},
+                  links={1: (0, 0, 0, 0)}, start=(1, 1, 0, +1),
+                  plate_links={(1, 1, 1): ((1, 1, 5),)}, exits_open=False)
+    g = Game(s)
+    g.perform("RIGHT")                         # onto the drop plate
+    for _ in range(9):
+        g.perform("WAIT")
+    assert g.mech.exits[(1, 1, 5)].open

@@ -16,6 +16,7 @@ OBSERVATION_KEYS = {"room", "tiles", "state", "edges", "kid", "minutes_left",
                     "actions_left", "last_result", "task"}
 STATE_KEYS = {"gates", "exits", "spikes_sprung", "loose_shaking", "plates_pressed"}
 KID_KEYS = {"row", "col", "facing", "posture", "hp", "max_hp"}
+LEVEL1_KID_KEYS = KID_KEYS | {"sword"}
 RESULT_KEYS = {"effect", "frames", "fell_rows", "hp_change"}
 
 
@@ -36,6 +37,11 @@ def build(game: Game, actions_left: int | None, last_result: dict | None) -> dic
               "open": e.open}
              for c, e in sorted(game.mech.exits.items()) if in_room(c)]
     left, right, _up, _down = game.geom.links[room]
+    kid = {"row": k.row, "col": k.col,
+           "facing": "right" if k.facing > 0 else "left",
+           "posture": k.posture, "hp": k.hp, "max_hp": k.max_hp}
+    if game.rule("sword"):
+        kid["sword"] = k.sword          # Level 1 only: shown on screen in the original
     return {
         "room": room_label(game.situation.id, room),
         "tiles": game.geom.rows(room),
@@ -51,9 +57,7 @@ def build(game: Game, actions_left: int | None, last_result: dict | None) -> dic
         # Up/down links are not shown: a pit looks the same whether or not a
         # room lies below it.
         "edges": {"left": bool(left), "right": bool(right)},
-        "kid": {"row": k.row, "col": k.col,
-                "facing": "right" if k.facing > 0 else "left",
-                "posture": k.posture, "hp": k.hp, "max_hp": k.max_hp},
+        "kid": kid,
         "minutes_left": max(0, (P.GAME_FRAMES - game.frames) // (12 * 60)),
         "actions_left": actions_left,
         "last_result": None if last_result is None else

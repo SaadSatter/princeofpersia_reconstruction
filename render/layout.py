@@ -111,6 +111,10 @@ def _tile(t: str, r: int, c: int, x: int, top: int, bottom: int, ctx: dict) -> l
         out.append(Piece("potion", P, assets.POTION, x + 12, bottom - 4, cell))
         b = assets.BUBBLES[ctx["tick"] % len(assets.BUBBLES)]
         out.append(Piece("bubbles", P, b, x + 15, bottom - 15, cell))
+    elif t in (T.SWORD, T.BONES):
+        # Level 1 objects: drawn as shapes in code until their original images
+        # are bundled (decision D4; render/draw.py `_object_shape`).
+        out.append(Piece("sword" if t == T.SWORD else "bones", "", 0, x, bottom - 4, cell))
     elif t == T.TORCH:
         out.append(Piece("torch_bracket", V, D["torch_bracket"], x, top + 30, cell))
         fl = assets.FLAMES[(ctx["tick"] + c) % len(assets.FLAMES)]

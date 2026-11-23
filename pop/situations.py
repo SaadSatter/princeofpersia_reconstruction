@@ -27,6 +27,13 @@ class Situation:
     max_calls: int = 40
     held_out: bool = False
     task: str = TASK
+    # Level 1 reconstruction only (pop/levels.py). The frozen suite leaves all
+    # of these at their defaults, so its behavior cannot change
+    # (tests/test_frozen_suite.py).
+    gates_open: tuple[Cell, ...] = ()       # gates open at load (R-C29)
+    start_falling: bool = False             # kid enters falling (R-C30)
+    start_presses: tuple[Cell, ...] = ()    # plates pressed at load (R-C30)
+    rules: frozenset[str] = frozenset()     # extra original rules (pop/levels.py RULES)
 
 
 SITUATIONS: dict[str, Situation] = {}

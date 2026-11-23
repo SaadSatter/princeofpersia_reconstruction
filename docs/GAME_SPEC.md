@@ -12,15 +12,19 @@ careful steps, standing and running jumps, climbing, falling damage, loose
 floors, spikes, pressure plates, timed gates, and an exit door opened by a
 plate.
 
-**This is not the complete original Level 1.** The original Level 1 has 23
-rooms (decoded locally from `Levels/LEVEL1`), a sword, two guards, and four
-potions. Our playable rooms are **independently authored layouts** informed
-by the verified mechanics and by the original Level 1's room sequence
-(start by dropping into the dungeon; loose floors and pits; spikes; a plate
-that opens a gate; an exit opened by a plate on an upper-left ledge, as in
-original room 9). The exact rooms are listed in `docs/EVALUATION_SUITE.md`.
-A larger reconstruction toward all 23 rooms is a stretch goal, only after
-the interface, baseline, model player, and CI work.
+**Two parts.** (1) The **evaluation suite** (S1–S3, H1–H3) uses
+**independently authored layouts** informed by the verified mechanics and
+by the original Level 1's room sequence (start by dropping into the
+dungeon; loose floors and pits; spikes; a plate that opens a gate; an exit
+opened by a plate on an upper-left ledge, as in original room 9). They are
+listed in `docs/EVALUATION_SUITE.md` and frozen. (2) **`L1`, the original
+Level 1** (student decisions of session 08): all 24 original room slots
+(21 reachable), built at run time from the original level file, which a
+maintainer fetches locally (`tools/fetch_level1.py`); the file is never
+committed. `L1` is an exhibition scenario outside the suite and the
+comparison table. Its guards and combat are phase P5 (not yet
+implemented); until then nothing blocks room 3. Details, deviations and
+verification: `docs/LEVEL1.md`.
 
 ### Included
 Movement (run, turn, careful step, standing jump, running jump, climb up,
@@ -34,10 +38,10 @@ game clock, restart.
 | Excluded | Reason |
 | --- | --- |
 | Levels 2–14 | Student scope decision: Level 1 only. |
-| The original 23-room Level 1 layout | Publication rights unclear; authored layouts instead (R-D13). |
-| Sword pickup, guards, combat | Deferred until platforming and exit work (student decision). Actions `STRIKE`, `BLOCK`, `ADVANCE`, `RETREAT` are not implemented. |
+| The original Level 1 layout **in the repository** | Publication rights unclear: `L1` reads it from a local file that is never committed; the suite uses authored layouts (R-D13). |
+| Guards, combat | Phase P5, after student review (decision D2). Actions `STRIKE`, `BLOCK`, `ADVANCE`, `RETREAT` are not implemented. The sword can be picked up in `L1` only. |
 | Ledge grab after a short jump or while falling | Needs the original's continuous motion; jumps land on fixed blocks (R-D01). |
-| Jumping up to knock down a loose floor above | Not needed for the authored rooms; noted as an omission. |
+| Jumping up to knock down a loose floor above | Implemented in `L1` only (R-C31, R-D31); the frozen suite keeps its original rules. |
 | Loose-floor shaking when landing nearby | Simplified; only stepping on a loose floor triggers it (R-D14). |
 | Unused original assets; sound | Only the 207 original images the frontend draws are bundled, in the course submission only (`assets/original/`, `docs/ASSET_PROVENANCE.md`); no sound, music, fonts or other original files (R-D02). |
 | Potions other than heal | Level 1 potions all have the same spec value (R-A03). |
@@ -101,8 +105,8 @@ back turns the prince around.
 | `STEP_LEFT` / `STEP_RIGHT` | Facing that way; ahead supported and not blocked (else `edge` / `bumped`, 2 frames) | 8 | Careful step one block. Never walks off an edge. Never impaled (R-C13). |
 | `JUMP_LEFT` / `JUMP_RIGHT` | Facing that way | 12 | Standing jump: move up to 3 blocks ahead (R-C27). Stops before the first wall/barring gate in the path. Then land: unsupported → fall; spikes → `died:spikes`. |
 | `RUN_JUMP_LEFT` / `RUN_JUMP_RIGHT` | Facing that way; block 1 ahead supported and not blocked (else behaves as `LEFT`/`RIGHT`) | 12 | Run up one block, then jump to 5 blocks ahead of the start (clears gaps of up to 3) (R-C27). Same blocking and landing rules as a jump. |
-| `UP` | — | 12 or 8 | In order: (1) standing on an open exit tile → climb stairs → **win**; (2) hanging → climb back up; (3) cell above is open (no floor, not wall) and the cell above-ahead is supported → climb onto it (R-C12); (4) otherwise jump in place (`none`, 8 frames). |
-| `DOWN` | — | 4–8 | In order: (1) hanging → let go and fall; (2) on a potion → drink (heal 1, up to max) (R-C16); (3) ahead is open with no floor → climb down and hang from this ledge; (4) otherwise crouch (`none`). |
+| `UP` | — | 12 or 8 | In order: (1) standing on an open exit tile → climb stairs → **win**; (2) hanging → climb back up; (3) cell above is open (no floor, not wall) and the cell above-ahead is supported → climb onto it (R-C12); (4) otherwise jump in place (`none`, 8 frames); in `L1`, if the floor above is loose it is knocked loose (falls 10 frames later), and the effect is `bumped_ceiling` when that floor is in the current room (R-C31). |
+| `DOWN` | — | 4–12 | In order: (1) hanging → let go and fall; (`L1` only) on the sword → pick it up (`took_sword`, 12 frames, R-C21, R-D28); (2) on a potion → drink (heal 1, up to max) (R-C16); (3) ahead is open with no floor → climb down and hang from this ledge; (4) otherwise crouch (`none`). |
 
 Legal actions (R-D06) depend **only on posture**:
 
@@ -126,10 +130,14 @@ episode (`invalid_limit`). A legal action that does nothing reports
 | Raise plate `u` | Pressed while the kid stands on it. Each frame pressed: linked gates rise / linked exits open, and the gate's hold timer restarts. Pops up 5 frames after the kid leaves. | R-C05, R-C09 |
 | Drop plate `p` | Pressed: linked gates drop fast. | R-C09, R-C08 |
 | Gate `G` | Position 0 (closed) to 188 (open). Rises 4/frame; at the top holds 50 frames; then lowers 1/frame. Drops fast when a drop plate is pressed. Bars the kid while `position/4 + 6 < 40`, i.e. below 136 (R-C28). | R-C08, R-C28 |
-| Exit `E e` | Opens 4/frame up to 188 once triggered; never closes. Open (usable) at 188. | R-C09, R-C17 |
-| Loose floor `L` | Kid stepping onto it starts it; 10 frames later it falls: the tile becomes space; the floor lands on the first supported cell below in the same column as rubble `r`; a kid there loses 1 HP (`died:crushed` at 0). A kid on it when it falls starts falling. | R-C14, R-D14 |
+| Exit `E e` | Opens 4/frame up to 188 once triggered by **any** linked plate (raise or drop); never closes. Open (usable) at 188. | R-C09, R-C17 |
+| Loose floor `L` | Kid stepping onto it starts it; 10 frames later it falls: the tile becomes space; the floor lands on the first supported cell below in the same column as rubble `r`; a kid there loses 1 HP (`died:crushed` at 0). A kid on it when it falls starts falling. **During a move** (run, step, jump, climb) the kid keeps his footing only until the move's departure frame (run 2/4, step 4/8, standing jump 6/12, running jump at once, climb up 4/12; a hang throughout): if the floor falls before that, the move is interrupted and he falls from where he stood; after it, he is in motion and the move completes normally. | R-C14, R-D14, R-D33 |
 | Spikes `^` | Spring when the kid is on the same row within one block; stay sprung while he is near, then retract 15 frames later. Running or jumping onto them, or falling onto them, kills; careful steps never kill; standing among sprung spikes is safe. | R-C13, R-C15, R-D19 |
 | Potion `f` | `DOWN` on it: heal 1 HP up to max; the potion is gone. | R-C16 |
+| Sword `S` (`L1`) | `DOWN` on it picks it up; the tile becomes floor; `kid.sword` becomes true. No use until combat (P5). | R-C21 |
+| Skeleton `k` (`L1`) | Floor with bones; decoration only in Level 1. | R-C03 |
+| Gates open at load (`L1`) | A gate stored open starts fully up and stays up until a plate acts on it. | R-C29 |
+| Level 1 entry (`L1`) | `reset` drops the kid from room 1 block 0 onto the floor below, facing right, and presses the drop plate at room 5 (0,2), slamming the gate at room 5 (0,9) behind him. The first observation's `last_result` reports this landing. | R-C30, R-D29 |
 | Clock | 60 minutes (43,200 frames). At 0 → `time_up`. | R-C24 |
 | HP | Start 3 of 3. | R-C19 |
 
@@ -166,7 +174,9 @@ Current room only: its 3 rows as symbol strings (table above), dynamic
 state (gate open %, whether each gate bars, spikes sprung, loose floors
 shaking, plates pressed, exit open %), which edges lead on, an opaque room
 label; the kid's row, column, facing, posture, HP/max; minutes left;
-actions and calls left; the last action's result; the task text.
+actions and calls left; the last action's result; the task text. In `L1`
+the kid also has `sword` (true after picking it up), and the first
+observation's `last_result` is the entry drop (R-D29).
 
 Never visible: other rooms, plate→gate links, internal timer counts, the
 level data, solution routes, and the evaluator's records. Plate kinds

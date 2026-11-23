@@ -256,3 +256,130 @@ def test_regression_wall_side_face_hid_a_one_cell_pit():
                                   if pc.x // 32 == c and pc.cell[0] == r]
                         assert all(pc.cell == (r, c) or pc.name in OVERHANG
                                    for pc in inside), (sit.id, room, r, c)
+
+
+def test_regression_loose_ledge_fell_during_climb_crashed():
+    """Observed 2026-10-26 (session 08, a search over S3's legal actions): the
+    kid hangs from a loose floor, presses UP, and the floor falls during the
+    8-frame climb. `Game._up` then called `_enter(None)` and `Episode.step`
+    raised TypeError, which would have crashed an evaluation run. Fix: if the
+    ledge falls during the climb, the kid simply falls (R-C14)."""
+    from pop.interface import Episode
+    ep = Episode("S3")
+    ep.reset(0)
+    for a in ("RUN_JUMP_RIGHT", "WAIT", "RIGHT", "JUMP_RIGHT", "RUN_JUMP_RIGHT", "DOWN"):
+        assert ep.step("kid", a)["accepted"]
+    assert ep.observe("kid")["kid"]["posture"] == "hanging"
+    result = ep.step("kid", "UP")                    # raised TypeError before the fix
+    assert result["accepted"]
+    assert result["effect"] in ("fell", "landed", "hurt", "died")
+    assert result["effect"] != "climbed"
+    kid = ep.observe("kid")["kid"]
+    assert kid["row"] == 2                           # below the fallen ledge, not on it
+    while ep.outcome()["status"] != "terminal" and ep.observe("kid")["kid"]["posture"] == "falling":
+        ep.step("kid", "WAIT")
+    assert ep.observe("kid")["kid"]["posture"] in ("standing", "dead")
+
+
+def test_regression_kid_hung_from_a_loose_floor_that_had_fallen():
+    """Observed 2026-10-26 (session 08, same search as above): standing on a
+    loose floor in S3, the kid starts climbing down (DOWN, 6 frames) and the
+    floor falls meanwhile. The macro still finished as "hanging", from a cell
+    that was now empty air. Fix: if he is already falling, the climb-down
+    stops and he falls (R-C14)."""
+    from pop.interface import Episode
+    ep = Episode("S3")
+    ep.reset(0)
+    for a in ("RUN_JUMP_RIGHT", "WAIT", "RIGHT", "JUMP_RIGHT", "RUN_JUMP_RIGHT", "WAIT"):
+        assert ep.step("kid", a)["accepted"]
+    result = ep.step("kid", "DOWN")
+    assert result["effect"] != "hanging"             # was "hanging" before the fix
+    assert ep.observe("kid")["kid"]["posture"] != "hanging"
+
+
+def test_regression_bumped_ceiling_revealed_a_loose_floor_in_the_unseen_room_above():
+    """Observed 2026-10-26 (session 08 audit, docs/audits/AUDIT-2026-10-26-session08-level1.md
+    finding 1): in row 0, hopping up under the room above's loose floor returned
+    effect "bumped_ceiling" while nothing in view changed, so the effect told
+    the player about a tile it cannot see. Fix: the effect is "none" unless the
+    knocked floor is in the current room; the floor still falls (R-C31)."""
+    from level_fixture import build
+    from pop import levelfile as LF
+    from pop import levels
+    from pop.interface import Episode
+    rooms = {1: ("_" * 10, "_" * 10, "__L_______"),
+             2: ("__________", "##########", "##########")}
+    data = build(rooms, {1: (0, 0, 0, 2), 2: (0, 0, 1, 0)}, start=(2, 2, 0xFF))
+    ep = Episode(levels.to_situation(LF.parse(data), "fx", special_start=False))
+    ep.reset(0)
+    assert ep.observe("kid")["kid"]["col"] == 2            # room 2 (0,2), under room 1 (2,2)
+    out = ep.step("kid", "UP")
+    assert out["effect"] == "none"                         # was "bumped_ceiling"
+    assert ep._game.mech.loose == {(1, 2, 2): 8}           # still knocked loose
+
+
+# ---------------------------------------------------------------------------
+# Session 10: loose floor falling during a move (independent rules review).
+# Observed: the move macros planned their destination, ran their frames, and
+# then placed the kid there without checking that the floor under him had
+# not fallen meanwhile. He ended up "falling" on solid ground, or fell on
+# into a wall. Fix: shared movement resolution, Game._phase (R-D33).
+
+from consistency import assert_consistent  # noqa: E402
+
+# A loose floor at (1,1) with floor below it at (2,1); open air above it at
+# (0,1) and a floor at (0,2) to climb onto.
+_LOOSE_ROOM = {1: ("#._______#",
+                   "_L________",
+                   "__________")}
+
+
+def _on_loose(timer: int, facing: int = +1) -> Game:
+    """Kid standing on the loose floor at (1,1), already triggered `timer` frames ago."""
+    s = Situation(id="fixture", rooms=_LOOSE_ROOM, links={1: (0, 0, 0, 0)},
+                  start=(1, 1, 1, facing))
+    g = Game(s)
+    g.mech.loose[(1, 1, 1)] = timer
+    return g
+
+
+@pytest.mark.parametrize("action", ["RIGHT", "STEP_RIGHT", "JUMP_RIGHT", "RUN_JUMP_RIGHT", "UP"])
+def test_regression_move_off_a_loose_floor_that_falls_before_he_leaves(action):
+    """Observed 2026-10-26 (session 10): with the floor falling 2 frames into
+    the move, the kid was placed at the planned destination while falling
+    (RIGHT -> (2,2) via a fall from (1,2); STEP/JUMP similar; UP climbed onto
+    (0,2) while falling). Now the move is interrupted: he falls from where he
+    stood, onto (2,1)."""
+    g = _on_loose(timer=8)
+    g.perform(action)
+    assert_consistent(g, action)
+    assert g.kid.cell == (1, 2, 1) and g.kid.posture == "standing"
+    assert g.geom.tile((1, 1, 1)) == "."
+
+
+@pytest.mark.parametrize("action, cell", [("RIGHT", (1, 1, 2)), ("STEP_RIGHT", (1, 1, 2)),
+                                          ("JUMP_RIGHT", (1, 1, 4)),
+                                          ("RUN_JUMP_RIGHT", (1, 1, 6))])
+def test_regression_floor_falling_after_he_has_left_does_not_pull_him_back(action, cell):
+    """Same defect, other half: when the floor fell after the kid had already
+    left it, he was treated as standing on it. Now the move completes."""
+    timer = {"RIGHT": 7, "STEP_RIGHT": 4, "JUMP_RIGHT": 2, "RUN_JUMP_RIGHT": 7}[action]
+    g = _on_loose(timer=timer)
+    g.perform(action)
+    assert_consistent(g, action)
+    assert g.kid.cell == cell and g.kid.posture == "standing"
+
+
+@pytest.mark.parametrize("sequence", [
+    "RUN_JUMP_RIGHT WAIT RIGHT JUMP_RIGHT RUN_JUMP_RIGHT JUMP_RIGHT",   # was: falling while supported
+    "RUN_JUMP_RIGHT WAIT RIGHT JUMP_RIGHT RUN_JUMP_RIGHT LEFT STEP_LEFT",  # was: inside a wall
+])
+def test_regression_s3_loose_floor_move_left_kid_in_an_impossible_state(sequence):
+    """Observed 2026-10-26 (session 10, search over S3's legal actions with the
+    session-08 engine): these exact sequences ended with the kid falling while
+    standing on solid ground, and inside a wall."""
+    from pop.situations import SITUATIONS
+    g = Game(SITUATIONS["S3"])
+    for a in sequence.split():
+        g.perform(a)
+        assert_consistent(g, a)

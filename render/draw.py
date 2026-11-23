@@ -85,6 +85,8 @@ class Renderer:
             elif pc.name == "exit":
                 r, c = pc.cell
                 self._exit_original(s, pc.x, row_top(r), pc.bottom, pc.value)
+            elif pc.name in ("sword", "bones"):
+                self._object_shape(s, pc.name, pc.x, pc.bottom)
             else:
                 self.blit_bottom(s, pc.folder, pc.number, pc.x, pc.bottom)
 
@@ -197,6 +199,21 @@ class Renderer:
                 elif t == T.RUBBLE:
                     for k in range(5):
                         pygame.draw.rect(s, STONE_DARK, (x + 3 + k * 6, floor_y - 3, 4, 3))
+                elif t in (T.SWORD, T.BONES):
+                    self._object_shape(s, "sword" if t == T.SWORD else "bones", x, floor_y)
+
+    def _object_shape(self, s, name: str, x: int, floor_y: int) -> None:
+        """Sword or skeleton lying on the floor, drawn in code (no image yet)."""
+        if name == "sword":
+            pygame.draw.line(s, WHITE, (x + 6, floor_y - 2), (x + 24, floor_y - 2), 2)
+            pygame.draw.line(s, GOLD, (x + 24, floor_y - 5), (x + 24, floor_y + 1), 2)
+            pygame.draw.line(s, GOLD, (x + 25, floor_y - 2), (x + 29, floor_y - 2), 2)
+        else:
+            pygame.draw.circle(s, STONE_LIGHT, (x + 7, floor_y - 3), 3)
+            for k in range(4):
+                pygame.draw.line(s, STONE_LIGHT, (x + 11 + k * 4, floor_y - 5),
+                                 (x + 11 + k * 4, floor_y - 1), 1)
+            pygame.draw.line(s, STONE_LIGHT, (x + 10, floor_y - 3), (x + 27, floor_y - 3), 1)
 
     # --- kid ---------------------------------------------------------------
     def draw_kid(self, s: pygame.Surface, pose: Pose) -> None:
