@@ -17,6 +17,7 @@ Working title: *Shadow Masque*. A two-player versus game built on this repositor
 | [`REQUIREMENTS_CHECKLIST.md`](REQUIREMENTS_CHECKLIST.md) | Gate deliverables, status, decisions in force |
 | [`EVIDENCE_INDEX.md`](EVIDENCE_INDEX.md) | Where each deliverable's evidence lives |
 | [`ENGINE_DECISION.md`](ENGINE_DECISION.md) | Python/Pygame vs Godot (recommendation, pending Saad) |
+| [`ART_PROVENANCE.md`](ART_PROVENANCE.md) | Where the generated art came from and on what terms (OQ-8) |
 
 Agent configuration: [`AGENTS.md`](../../AGENTS.md) (shared invariants, Claude and Codex), [`CLAUDE.md`](../../CLAUDE.md) (implementation agent), `.claude/agents/rules-reviewer.md` and `.codex/agents/pop-rule-reviewer.toml` (independent reviewers), `.claude/skills/game-rules-audit/` and `.claude/skills/session-evidence/` (skills).
 

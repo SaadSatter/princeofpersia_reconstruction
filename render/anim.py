@@ -66,6 +66,9 @@ class Pose:
     facing: int                # +1 right, -1 left
     kind: str                  # stand run step jump turn hang climb fall crouch drink dead stairs
     flash: bool = False        # hurt this frame (red flash)
+    # Climb poses only: the ledge corner (edge x, surface y) the hands hold. The
+    # feet point moves during a climb; art drawn relative to the ledge needs this.
+    ledge: tuple[float, float] | None = None
 
     @property
     def visible(self) -> bool:
@@ -105,6 +108,11 @@ def hang_point(row: int, col: int, facing: int) -> tuple[float, float]:
     """Feet point while hanging in cell (row, col) from the ledge at col+facing."""
     edge = (col + 1) * COL_W if facing > 0 else col * COL_W
     return edge - facing * 7, TOP + row * ROW_H + FEET + HANG_DROP
+
+
+def ledge_of(hang: tuple[float, float], facing: int) -> tuple[float, float]:
+    """The ledge corner held from hang point `hang` (inverse of hang_point)."""
+    return hang[0] + facing * 7, hang[1] - HANG_DROP
 
 
 def resample(seq: tuple[int, ...] | list[int], n: int) -> list[int]:
@@ -203,13 +211,13 @@ def clip(step: Step, state: AnimState | None = None) -> list[Pose]:
     move_n = min(_movement_frames(step, running_ok), n)
     move_end = (a["col"], vb_row)                     # moves are horizontal; falls vertical
 
-    def add(frames: list[int], p0, p1, facing, kind, ease=None):
+    def add(frames: list[int], p0, p1, facing, kind, ease=None, ledge=None):
         k = len(frames)
         for i, fr in enumerate(frames):
             t = (i + 1) / k if k else 1.0
             if ease:
                 t = ease(t)
-            poses.append(Pose(fr, *lerp(p0, p1, t), facing, kind))
+            poses.append(Pose(fr, *lerp(p0, p1, t), facing, kind, ledge=ledge))
 
     continuing_run = state.run_phase >= 0 and state.run_dir == fb
     new_run_phase = -1
@@ -249,17 +257,18 @@ def clip(step: Step, state: AnimState | None = None) -> list[Pose]:
         add(resample(STAIRS, move_n - 1), start, door, fb, "stairs")
         poses.append(Pose(0, *door, fb, "stairs"))
     elif act == "UP" and b["posture"] == "hanging":
-        add(resample(CLIMB_UP, move_n), start, end_stand, fa, "climb")
+        add(resample(CLIMB_UP, move_n), start, end_stand, fa, "climb", ledge=ledge_of(start, fa))
     elif act == "UP" and eff == "climbed":
         grab = hang_point(vb_row - 1, vb_col, fb)
         add(resample(JUMP_UP[:8], 4), start, grab, fb, "jump")
-        add(resample(CLIMB_UP, move_n - 4), grab, end_stand, fb, "climb")
+        add(resample(CLIMB_UP, move_n - 4), grab, end_stand, fb, "climb", ledge=ledge_of(grab, fb))
     elif act == "UP":
         add(resample(JUMP_UP, move_n), start, start, fb, "jump")
     elif act == "DOWN" and eff == "drank":
         add(resample(DRINK, move_n), start, start, fb, "drink")
     elif act == "DOWN" and eff == "hanging":
-        add(resample(CLIMB_DOWN, move_n), start, hang_point(a["row"], a["col"], fa), fa, "climb")
+        target = hang_point(a["row"], a["col"], fa)
+        add(resample(CLIMB_DOWN, move_n), start, target, fa, "climb", ledge=ledge_of(target, fa))
     elif act == "DOWN" and b["posture"] != "hanging":
         add(resample(CROUCH + STAND_UP[-1:], move_n), start, start, fb, "crouch")
 
