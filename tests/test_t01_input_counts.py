@@ -35,7 +35,7 @@ def test_a_newer_input_replacing_a_pending_one_is_counted():
     ep.step("A", "STEP_LEFT")
     ep.step("A", "STEP_RIGHT")                          # replaces STEP_LEFT before any tick
     run(ep, 1)
-    assert ep._duel.motion("A")["to_facing"] == "right"  # the latest press won
+    assert ep._duel.motion("A")["facing"] == +1            # the latest press won
     assert ep.outcome()["replaced_inputs"] == {"A": 1, "B": 0}
     assert ep.outcome()["stale_inputs"] == {"A": 0, "B": 0}
 
