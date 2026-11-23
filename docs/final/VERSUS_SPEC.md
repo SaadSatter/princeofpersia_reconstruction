@@ -219,5 +219,10 @@ implementation chose the values below; each is a constant and can change.
 Not done yet: the independent review after each stage (Section 9 asks for
 one before the next stage; it must run in a separate session to be
 independent), the game server and browser client, the AI seat in versus
-play, traps set by rivals, and the duel time limit (OQ-3: the limit is a
-parameter, default the inherited 60-minute clock).
+play, and traps set by rivals.
+
+Duel time limit (OQ-3, closed by Saad 2026-11-23: "Make the duel time limit
+5min"): 5 minutes, 3,600 frames at 12 per second (`pop/versus.py:DUEL_FRAMES`,
+the default for `Duel`, `VersusEpisode`, `arena_episode` and
+`play.py --versus`). The limit ends in `draw:time_up`; a seat's
+`minutes_left` counts down from the duel's own limit.

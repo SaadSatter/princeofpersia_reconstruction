@@ -45,6 +45,7 @@ from .situations import Situation
 
 SEATS = ("A", "B")
 TICKS_PER_SECOND = 12                 # R-D26 display rate; VERSUS_SPEC 2.1
+DUEL_FRAMES = 5 * 60 * TICKS_PER_SECOND   # OQ-3, Saad 2026-11-23: "Make the duel time limit 5min"
 TASK = ("Duel: bring the other rival's hearts to 0. Both rivals act at the same "
         "time; the duel ends on a death, a double death, or the time limit.")
 OBSERVATION_KEYS = observation.OBSERVATION_KEYS | {"me", "figures", "swords", "suspicion"}
@@ -307,10 +308,10 @@ class Rival(Game):
 
 class Duel:
     def __init__(self, situation: Situation, starts: dict[str, tuple[int, int, int, int]],
-                 seed: int = 0, time_limit_frames: int = P.GAME_FRAMES,
+                 seed: int = 0, time_limit_frames: int = DUEL_FRAMES,
                  guard_posts: dict | None = None):
-        """time_limit_frames: OQ-3 (duel length) is open; the default is the
-        inherited 60-minute clock (R-C24) until Saad sets it.
+        """time_limit_frames: the duel's length; 5 minutes by default (OQ-3, closed
+        2026-11-23). The single-player 60-minute clock (R-C24) is unchanged.
         guard_posts: name -> (room, row, (c0, c1)[, facing]) (pop/arena.py)."""
         self.situation = situation
         self.seed = seed
@@ -929,6 +930,8 @@ def observe(duel: Duel, seat: str) -> dict:
     room = me.kid.room
     obs = observation.build(me, None, duel.last_result[seat])
     obs["task"] = TASK
+    # The duel's own clock, not the single-player one observation.build reads.
+    obs["minutes_left"] = max(0, (duel.time_limit - duel.frames) // (TICKS_PER_SECOND * 60))
     obs["me"] = {**obs["kid"], "stance": me.stance, "armed": me.armed,
                  "disguised": me.disguised, "knocked_down_frames": me.knocked_down,
                  "motion": _motion_view(duel, seat, room)}
@@ -982,7 +985,7 @@ class VersusEpisode:
     and server only. Seats never receive the Duel."""
 
     def __init__(self, situation: Situation, starts: dict[str, tuple[int, int, int, int]],
-                 seed: int = 0, time_limit_frames: int = P.GAME_FRAMES,
+                 seed: int = 0, time_limit_frames: int = DUEL_FRAMES,
                  guard_posts: dict | None = None):
         self._situation = situation
         self._starts = dict(starts)
@@ -1048,7 +1051,7 @@ def _check_seat(seat: str) -> None:
         raise ValueError(INVALID_SEAT)
 
 
-def arena_episode(seed: int = 0, time_limit_frames: int = P.GAME_FRAMES) -> VersusEpisode:
+def arena_episode(seed: int = 0, time_limit_frames: int = DUEL_FRAMES) -> VersusEpisode:
     """The six-room arena (pop/arena.py) with both rivals at their starts."""
     from . import arena
     return VersusEpisode(arena.situation("A"), arena.STARTS, seed, time_limit_frames,
