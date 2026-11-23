@@ -47,11 +47,11 @@ These still hold for every PR (`AGENTS.md`, midterm checks 2c, 3b, 3c):
 | Requirement | Status for versus play |
 | --- | --- |
 | Engine headless, no `pygame` in `pop/` | done (test exists) |
-| Deterministic reset and traces | done for one seat; two seats not started |
-| Legal and illegal actions validated, refused action changes no state | done for one seat; two seats not started |
+| Deterministic reset and traces | done for one seat; two seats done on `final/versus-engine` (`tests/test_versus.py`, `test_swordplay.py`, `test_guards.py`, `test_disguise.py`) |
+| Legal and illegal actions validated, refused action changes no state | done for one seat; two seats done (`tests/test_versus.py::test_refused_input_changes_nothing_and_is_counted`) |
 | Step, model-call and timeout limits with terminal reasons | done for one seat; per-seat limits not started |
 | Hidden-information tests: current room only | done for one seat |
-| Hidden-information tests: disguise identity, trap ownership | not started |
+| Hidden-information tests: disguise identity, trap ownership | disguise identity and suspicion done (`tests/test_disguise.py`); flips and bodies out of sight done (`tests/test_flip_review.py`, R-V22, R-V23, after the 2026-11-18 review); trap ownership not started (traps not built) |
 | Server sends each client only its own seat's observation | not started |
 | A `test_regression_<issue>` test per observed bug | ongoing |
 

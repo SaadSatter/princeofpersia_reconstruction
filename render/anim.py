@@ -69,6 +69,9 @@ class Pose:
     # Climb poses only: the ledge corner (edge x, surface y) the hands hold. The
     # feet point moves during a climb; art drawn relative to the ledge needs this.
     ledge: tuple[float, float] | None = None
+    # Degrees turned forward about the body's middle (a versus flip, R-V22);
+    # 0 for every single-player pose.
+    spin: float = 0.0
 
     @property
     def visible(self) -> bool:

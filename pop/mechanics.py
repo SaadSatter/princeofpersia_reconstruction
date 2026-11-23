@@ -136,13 +136,18 @@ class Mechanics:
                 self.exits[target].opening = True
 
     # --- per frame -----------------------------------------------------
-    def tick(self, pressing: Cell | None, near: set[Cell]) -> list[tuple]:
+    def tick(self, pressing: Cell | None, near: set[Cell],
+             more_pressing: frozenset[Cell] = frozenset()) -> list[tuple]:
         """Advance one frame. `pressing`: plate under the kid; `near`: cells within
-        one block of the kid on his row. Returns loose-floor fall events."""
-        if pressing in self.plates:
-            self._press(pressing)
+        one block of the kid on his row. Returns loose-floor fall events.
+        `more_pressing`: plates under other bodies (a duel's second rival,
+        pop/versus.py); empty in single-player play."""
+        pressed = ({pressing} | set(more_pressing)) - {None}
+        for cell in sorted(pressed):
+            if cell in self.plates:
+                self._press(cell)
         for cell, t in self.plates.items():
-            if cell != pressing and t > 0:
+            if cell not in pressed and t > 0:
                 self.plates[cell] = t - 1
         for gate in self.gates.values():
             gate.tick()

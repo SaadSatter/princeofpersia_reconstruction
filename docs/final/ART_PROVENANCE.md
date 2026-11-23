@@ -19,7 +19,7 @@ never committed.
 
 ## What is where
 
-`assets/generated/` (40 files). `MANIFEST.tsv` lists every file
+`assets/generated/` (48 files). `MANIFEST.tsv` lists every file
 with its source, size and SHA-256; `tests/test_generated_art.py` checks the
 folder against it, and `tests/test_frontend.py` allows no other tracked
 images besides the original-art manifest.
@@ -30,8 +30,10 @@ images besides the original-art manifest.
 | `props/pillar.png`, `props/torch.png`, `props/door.png` | PixelLab map objects | `a6907856-…`, `b692d8c1-…`, `5e16db79-…` |
 | `rival/*.png` (stand, run, step, jump, leap, crouch, death, drink, strike, block, hit) | PixelLab character (v3, 32 px, side view) and its skeleton animations, east only | character `200624a1-3d6e-4098-b4a6-781eb38a7312` |
 | `rival/climb.png` | Hang, pull and press frames **hand-built** in `tools/build_generated_art.py` from the rival's standing sprite; crouch, rise and stand from the PixelLab `climb-skel` animation | as above |
-| `rival/stance_*.png`, `rival/lunge_*.png`, `rival/throw.png`, `rival/dive_kick.png`, `rival/sweep.png`, `rival/take.png` (2026-11-17) | PixelLab skeleton animations for the swordplay in [`VERSUS_SPEC.md`](VERSUS_SPEC.md); stances and lunges use straight-arm poses so the blade height reads at a glance. The mid stance's blade is **hand-drawn** by the build tool (PixelLab dropped it) | as above |
+| `rival/stance_*.png`, `rival/lunge_*.png`, `rival/throw.png`, `rival/dive_kick.png`, `rival/sweep.png`, `rival/take.png` (2026-11-17) | PixelLab skeleton animations for the swordplay in [`VERSUS_SPEC.md`](VERSUS_SPEC.md); stances and lunges use straight-arm poses so the blade height reads at a glance. The mid stance's blade is **hand-drawn** by the build tool (PixelLab dropped it). Each lunge is **composed** by the build tool: its stance's frame, then PixelLab's two thrust frames, then back to the same stance, so it starts and ends in the high, mid or low guard | as above |
 | `guard/*.png` (stand, walk, stance, strike, hit, downed, and since 2026-11-17 `stance_*`, `lunge_*`) | PixelLab character and skeleton animations | character `3e3205ed-340e-4965-a0ca-71cd9d2a4f2a` |
+| `guard/run.png`, `jump.png`, `leap.png`, `crouch.png` (2026-11-17); `guard/step.png`, `death.png`, `drink.png` reuse its walk, downed and standing frames | PixelLab skeleton animations, so anything observed as a guard (a disguised rival, R-V18) runs and jumps with the same clips as a rival | character `3e3205ed-…` |
+| `guard/climb.png` (2026-11-17) | Hang, pull and press **hand-built** by the build tool from the whole standing guard (blade erased, raised mail-sleeved arms drawn); crouch, rise and stand from the guard's PixelLab climb. PixelLab's skeleton hang drew no raised arms at 32 px | as above |
 | `sprites.json` | Frame sizes, counts and anchors, written by the build tool | — |
 
 Drawn in code, not stored: the portcullis gate and the floor spikes
@@ -60,7 +62,8 @@ docstring). The game and tests never contact PixelLab.
 
 ## Cost
 
-188 PixelLab generations of the account's 2,000 monthly plan allowance
-(`get_balance`, 2026-11-17: 95 by 2026-11-16, then 93 for the swordplay
-clips including two rounds of retries for readable stances); the prepaid
+206 PixelLab generations of the account's 2,000 monthly plan allowance
+(`get_balance`, 2026-11-17: 95 by 2026-11-16, 93 for the swordplay clips
+including two rounds of retries for readable stances, 18 for the guard's
+movement clips); the prepaid
 credit balance ($24.72) was not touched.

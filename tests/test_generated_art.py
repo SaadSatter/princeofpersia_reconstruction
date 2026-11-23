@@ -153,3 +153,38 @@ def test_regression_black_box_around_the_kid_on_macos(art):
         im = art.frame("rival", strip, 0, False)
         opaque = sum(im.get_at((x, y)).a > 0 for x in range(im.get_width()) for y in range(im.get_height()))
         assert changed <= opaque, (strip, changed, opaque)          # only the sprite's own pixels
+
+
+def test_the_guard_has_every_movement_frame_the_rival_has():
+    """A disguised rival is drawn as a guard (VERSUS_SPEC R-V18), so the guard
+    strips must cover every frame a rival's moves show."""
+    counts = {k: v["n"] for k, v in genart.sprites()["guard"].items()}
+    for f in anim.ALL_FRAMES:
+        strip, i = genart.frame_for(f, counts)
+        assert 0 <= i < counts[strip], (f, strip, i)
+
+
+def test_guard_hang_frame_matches_the_engines_geometry(art):
+    m = art.meta["guard"]["climb"]
+    assert m["type"] == "ledge"
+    bb = art.frame("guard", "climb", 0, False).get_bounding_rect()
+    assert bb.y == m["y"] and bb.bottom - 1 == m["y"] + HANG_DROP
+
+
+def test_a_figure_seen_as_a_guard_jumps_and_climbs_with_guard_clips(art):
+    from render import versus_view
+    counts = art.counts["guard"]
+    jumping = {"row": 0, "col": 3, "facing": "right", "posture": "standing", "armed": False,
+               "stance": None, "motion": {"effect": "jumped", "frame": 5, "frames": 12,
+                                          "to": [0, 6], "to_posture": "standing",
+                                          "to_facing": "right"}}
+    assert versus_view.guard_sprite(jumping, counts) is None          # drawn as a move, not a patrol
+    p = versus_view.pose(jumping, "room-x")
+    strip, _ = genart.frame_for(p.frame, counts)
+    assert strip == "jump"
+    s = pygame.Surface((320, 192))
+    art.draw_kid(s, p, who="guard")                                   # guard strips draw it
+    hanging = dict(jumping, posture="hanging", motion=None)
+    assert versus_view.guard_sprite(hanging, counts) is None
+    strip, _ = genart.frame_for(versus_view.pose(hanging, "room-x").frame, counts)
+    assert strip == "climb"
