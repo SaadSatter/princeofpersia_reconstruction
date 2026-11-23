@@ -37,7 +37,8 @@ from . import observation
 from . import physics as P
 from . import tiles as T
 from .engine import ACTIONS, LEGAL_BY_POSTURE, Game, Kid
-from .guards import SIGHT_CELLS, Guard, blocked_between
+from .guards import (ALERT_DRAW_FRAMES, CHASE_FRAMES, PATROL_FRAMES, SIGHT_CELLS, Guard,
+                     blocked_between)
 from .mechanics import Mechanics
 from .physics import Cell, Geometry
 from .situations import Situation
@@ -84,6 +85,15 @@ BREAKS_DISGUISE = ("DRAW", "LUNGE", "THROW", "KICK", "SWEEP")  # R-V21
 DIRECTIONAL = {d: (d, "STEP_" + d, "JUMP_" + d, "RUN_JUMP_" + d) for d in ("LEFT", "RIGHT")}
 HOPS = ("none", "bumped_ceiling")      # UP on open floor: a hop straight up (pop/engine.py _up)
 HOP_FLIPS = {"_HOP_FLIP_LEFT": -1, "_HOP_FLIP_RIGHT": +1}       # R-V22, started by the duel
+# R-V18 (T01, AUDIT-B F1): every motion a guard can show (pop/guards.py Guard.motion),
+# as (effect, frames). A disguised rival's move outside this set is shown to the
+# other seat only if it raises suspicion by rule (Duel.suspicious_rise); any
+# other move (a wait, a bump, a refused careful step, a crouch) is shown as
+# standing still, the way a paused guard is observed.
+GUARD_MOTIONS = frozenset({
+    ("moved", PATROL_FRAMES), ("moved", CHASE_FRAMES), ("turned", P.TURN),
+    ("drew", ALERT_DRAW_FRAMES), ("sheathed", ALERT_DRAW_FRAMES),
+    ("lunge", LUNGE_WINDUP + LUNGE_ACTIVE + LUNGE_RECOVERY)})
 
 
 class Rival(Game):
@@ -404,8 +414,26 @@ class Duel:
         d = (k.col - g.col) * g.facing
         return 1 <= d <= SIGHT_CELLS and not blocked_between(self.geom, self.mech, g.cell, k.cell)
 
+    def hopping(self, seat: str) -> bool:
+        """A hop straight up in progress: UP on open floor, not a climb (R-V24).
+        Crouching (DOWN) has the same effect name, "none", so the input decides."""
+        return (self.busy(seat) and self._move_action[seat] == "UP"
+                and (self.rivals[seat].plan or {}).get("effect") in HOPS)
+
+    def suspicious_rise(self, seat: str) -> int:
+        """Per-frame suspicion this rival's move in progress adds in a guard's
+        sight: running (R-V19), jumping or climbing (R-V19), hopping (R-V24)."""
+        m = self.motion(seat)
+        if m is None:
+            return 0
+        if m["effect"] == "moved" and m["frames"] == P.RUN:
+            return SUSPICION_RUN
+        if m["effect"] in LEAPS or self.hopping(seat):
+            return SUSPICION_LEAP
+        return 0
+
     def _suspect(self) -> None:
-        """R-V19 to R-V21: each guard's meter for each disguised rival."""
+        """R-V19 to R-V21, R-V24: each guard's meter for each disguised rival."""
         for seat, r in self.rivals.items():
             m = self.motion(seat)
             r.still = r.still + 1 if m is None else 0
@@ -419,10 +447,8 @@ class Duel:
                     if m is None:
                         delta = (SUSPICION_LINGER if r.still > LINGER_AFTER else 0) if near \
                             else -SUSPICION_FALL
-                    elif m["effect"] == "moved" and m["frames"] == P.RUN:
-                        delta = SUSPICION_RUN
-                    elif m["effect"] in LEAPS:
-                        delta = SUSPICION_LEAP
+                    elif self.suspicious_rise(seat):
+                        delta = self.suspicious_rise(seat)
                     elif m["effect"] == "moved":
                         delta = -SUSPICION_FALL                 # walking (a careful step)
                     else:
@@ -912,12 +938,17 @@ def observe(duel: Duel, seat: str) -> dict:
             continue
         # R-V18: a disguised rival is observed exactly as a guard (same kind and
         # fields; sheathed, so stance None and armed False, like a patrolling guard).
+        motion = _motion_view(duel, other, room)
+        if (r.disguised and motion is not None
+                and (motion["effect"], motion["frames"]) not in GUARD_MOTIONS
+                and not duel.suspicious_rise(other)):
+            motion = None           # T01 / AUDIT-B F1: shown as a paused guard is
         figures.append({"kind": "guard" if r.disguised else "rival",
                         "row": r.kid.row, "col": r.kid.col,
                         "facing": "right" if r.kid.facing > 0 else "left",
                         "posture": "knocked_down" if r.knocked_down else r.kid.posture,
                         "stance": r.stance, "armed": r.armed,
-                        "motion": _motion_view(duel, other, room)})
+                        "motion": motion})
     for g in duel.guards.values():
         if g.room != room:
             continue
