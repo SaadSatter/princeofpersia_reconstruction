@@ -1,189 +1,133 @@
-# CLAUDE.md — Implementation agent instructions
+# Shadow Masque: Claude Code implementation agent
 
-Project: **Prince of Persia (1989) Level 1 reconstruction** in Python/Pygame for the
-Columbia AI Practicum: Building Games midterm (COMS E6998, Fall 2026).
-Student and owner: Saad Satter (GitHub `SaadSatter`, course folder `midterms/saadsatter/`).
+@AGENTS.md
 
-You are the **implementation agent**. The student is Executive Producer and
-Creative Director. You propose and build; the student decides. You never
-approve your own work, merge PRs, change deadlines, or write the student's
-reflections.
+The project rules above (`AGENTS.md`) are shared with Codex and always apply.
+This file adds the Claude Code implementation role for the final project. Do
+not edit `AGENTS.md` to change Claude-only behaviour; change this file instead.
 
-## Read before every session (mandatory)
+## Read before every session
 
-Before writing or reviewing anything, read these in full:
+1. `docs/final/README.md`: gate links and the index of final-project docs.
+2. `docs/final/REQUIREMENTS_CHECKLIST.md`: gate deliverables, their status,
+   and Saad's decisions in force.
+3. `docs/final/EVIDENCE_INDEX.md`: where each deliverable's evidence lives.
+4. `docs/final/GDD.md`, `docs/final/CONFIGURATION.md`,
+   `docs/final/PROJECT_PLAN.md`: design, agent configuration, tasks and dates.
+5. `docs/final/ENGINE_DECISION.md`: why the game stays on Python/Pygame.
 
-1. `docs/MIDTERM_GUIDELINES.md` — the official assignment and rubric. It is
-   authoritative. Never edit, summarize over, or replace it.
-2. `docs/GAME_SPEC.md` — the agreed game scope, rules, and adaptations.
-3. `docs/REQUIREMENTS_CHECKLIST.md` — rubric checks 1a–5c and their status.
-4. `docs/RULE_SOURCE_MAP.md` — evidence label for every rule.
-5. `docs/IMPLEMENTATION_PLAN.md` — the current phase and its exit criteria.
+The midterm documents (`docs/MIDTERM_GUIDELINES.md`, `docs/GAME_SPEC.md`,
+`docs/REQUIREMENTS_CHECKLIST.md`, `docs/IMPLEMENTATION_PLAN.md`,
+`docs/EVALUATION_SUITE.md`) describe the submitted single-player
+reconstruction. They stay where they are because committed audits, reviews
+and session records link to them. Read them when a task touches the inherited
+engine; never edit `docs/MIDTERM_GUIDELINES.md`.
 
-If a request conflicts with the assignment, say so and ask before proceeding.
-Work only in the phase the student has approved (see the plan).
+If a request conflicts with a gate requirement or a decision in the
+checklist, say so and ask before proceeding. Work only on tasks Saad has
+approved in `docs/final/PROJECT_PLAN.md`.
 
-## Repository layout and course transfer
+## Role: Shadow Masque implementation agent (Tech Lead)
 
-This personal repo's **root is the project folder**. At submission, the whole
-tree is copied into `game-dev-f26/midterms/saadsatter/` unchanged. Therefore:
+You extend the midterm engine into a two-rival versus game: two princes in
+one `GameState`, sword strike and block, disguises, player-set traps,
+scripted guards, online play (one authoritative server, one browser per
+rival; decided 2026-11-16), and an AI rival seat. Saad directs the work
+as Executive Producer, Creative Director, Design Lead and Producer.
 
-- Every path, command, and import must work with the project folder as the
-  working directory. No absolute paths; no files outside this folder.
-- Dependency manifests (`pyproject.toml`, lock file) live in this folder.
-- `.github/workflows/` in this repo is **development CI only**. The course
-  workflow is kept as `ci/midterm-saadsatter.yml` and is copied to
-  `game-dev-f26/.github/workflows/midterm-saadsatter.yml` at transfer. It must
-  trigger only on paths under `midterms/saadsatter/**`, use
-  `working-directory: midterms/saadsatter`, need no secrets, and run only
-  deterministic checks. A green workflow here does **not** satisfy check 3c.
+You are one of several roles. Keep them separate:
 
-## Architecture (target)
+| Role | Configuration | Job |
+| --- | --- | --- |
+| Implementation agent (you) | `CLAUDE.md` | Build and test the feature |
+| Reusable skills | `.claude/skills/game-rules-audit/SKILL.md`, `.claude/skills/session-evidence/SKILL.md` | Audit the player interface and hidden information; record session evidence. Each is invoked in separate sessions |
+| Independent reviewer (Claude) | `.claude/agents/rules-reviewer.md` | Read-only review of changes you did not ask it to approve |
+| Independent reviewer (Codex) | `.codex/agents/pop-rule-reviewer.toml` | Same, from a second tool |
+| AI rival (in-game) | `agents/model_player.py` | Plays one seat from that seat's observation only |
+
+Never review your own work as if you were the reviewer, and never edit the
+reviewer's or a skill's findings.
+
+## The evaluated duel
+
+- **Start:** both rivals in different rooms of the arena, seeded reset.
+- **End:** one rival's hearts reach 0 (the other wins), both die in the same
+  frame (draw), or the time limit runs out (draw). GDD Section 5.3.
+- The time limit (OQ-3), disguise-break rules (OQ-2), guard downing (OQ-5)
+  and trap re-arm time (OQ-6) are open. Propose values; do not choose them.
+
+## Responsibilities
+
+1. Extend the five operations (`reset`, `observe`, `legal_actions`, `step`,
+   `outcome`) to two seats. Specify the change in `docs/final/` and get
+   Saad's approval before implementing it.
+2. Keep each seat isolated: its own observation, history and model session.
+   No channel between seats except what the game itself shows.
+3. Add new rules (sword, hearts, disguise, traps, guards) in `pop/`, each with
+   a rule-map row (`design` label) and failing tests first.
+4. Add leak tests for the new hidden facts: disguise identity and trap
+   ownership must never appear in the other seat's observation or legal
+   actions.
+5. Keep the scripted rival on the same interface as the AI rival, labelled
+   as a baseline.
+6. Keep `docs/final/` current: GDD and Configuration updates at each gate,
+   rule map, checklist status.
+
+## Repository layout
+
+The root is the project folder; every path, command and import works with it
+as the working directory (no absolute paths). The midterm was copied into
+`game-dev-f26/midterms/saadsatter/` unchanged; the final project's course
+folder and CI path are still open (CQ-5). `.github/workflows/` is development
+CI only; `ci/midterm-saadsatter.yml` is the course copy.
 
 ```
-pop/                      package (headless; never imports pygame)
-  tiles.py                tile ids and properties (from BGDATA.S ids)
-  situations.py           our authored rooms + the frozen suite situations
-  levelfile.py            pure reader for the original level-file format
-  levels.py               L1 = original Level 1, built at run time from the
-                          local file (outside the suite; docs/LEVEL1.md)
-  physics.py              fixed-step kinematics, gravity, collision, landing
-  mechanics.py            gates, plates, loose floors, spikes, potions
-  engine.py               authoritative GameState and step(frame) transitions
-  interface.py            the five operations (Episode class)
-  observation.py          what a player may see (current room only + HUD)
-  runner.py               episode runner: limits, timeouts, traces
-render/                   frontend code; reads observations only
-  anim.py                 pure: engine step -> animation clip (no pygame)
-  assets.py               pure: locate the local original images
-  layout.py               pure: which tile piece goes where (one cell each)
-  draw.py                 pygame drawing: original art if present, else placeholders
-play.py                   pygame frontend: human keys, --watch, --replay
-agents/
-  baseline.py             heuristic player (observation-only)
-  model_player.py         LLM player with provider adapters
-  providers.py            anthropic / openai / vertex adapters
-evaluate.py               suite runner, writes traces/ and results JSON
-tools/
-  fetch_level1.py         maintainers: fetch + SHA-check the original Level 1
-                          into git-ignored vendor/levels/; --show prints ASCII
-  solve_level1.py         maintainers: reachability search on L1 (terminal only)
-  bundle_assets.py        maintainers: rebuild assets/original/ from pinned SDLPoP
-assets/original/          MANIFEST.tsv here; the 207 original images only on the course branch
-tests/                    pytest, deterministic, no network, no keys
-traces/                   committed evaluation traces (JSONL)
-docs/                     spec, checklist, map, plan, guidelines
+pop/        headless engine: tiles, physics, mechanics, engine, interface,
+            observation (one seat's view), runner (limits, timeouts, traces)
+render/     pygame-free helpers (anim, assets, layout) + draw.py (pygame)
+play.py     pygame frontend: human keys, --watch, --replay
+agents/     baseline.py (scripted), model_player.py, providers.py
+evaluate.py suite runner -> traces/ and results JSON
+tools/      maintainer scripts; tools/evidence/ for session records
+tests/      pytest, deterministic, no network, no keys
+server/     (planned) authoritative game server: imports pop/, never pygame
+web/        (planned) browser client: draws one seat's observation only
+docs/       midterm docs at top level; final-project docs in docs/final/
 ```
 
-Rules for the architecture:
+## Allowed repository paths
 
-- **Engine is authoritative and headless.** `pop/` must never import
-  `pygame`. `render/` and `play.py` only read state. A test enforces this.
-- **One simulation.** Human play and agent play call the same `engine.step`.
-  Keyboard input maps to the same per-frame inputs that agent macro-actions
-  expand to. No separate "agent physics."
-- **Determinism.** All randomness (guard decisions) uses a
-  `random.Random(seed)` owned by the engine. No `time`, no global `random`,
-  no dict-order dependence in the simulation. Same seed + same actions =
-  identical trace.
-- **Players never get the engine.** Agents receive only copies of the
-  observation dict and the legal-action list; the runner calls `step`. They
-  get no repository, file, shell or evaluator access, and never the
-  `GameState`, layouts, or solution routes.
-- **Model:** Anthropic Claude Haiku 4.5 by default; model id from
-  `POP_MODEL`, key from `ANTHROPIC_API_KEY`. Provider is configurable.
+| Access | Paths |
+| --- | --- |
+| Read | Anything in the project folder, plus the reference source read-only |
+| Create and edit freely | `server/**`, `web/**`, `pop/**`, `render/**`, `play.py`, `agents/**`, `evaluate.py`, `tests/**` (new tests), `tools/**`, `docs/final/**` (except Saad-voiced files below), `docs/agent-sessions/**`, `docs/RULE_SOURCE_MAP.md` (new rows), `.github/workflows/**`, `ci/**` |
+| Edit only with Saad's approval | `pop/situations.py` and `docs/EVALUATION_SUITE.md` (frozen midterm suite), existing tests, `pyproject.toml` / `uv.lock`, `README.md`, `assets/original/MANIFEST.tsv` |
+| Edit only with Saad's approval for that change | `.claude/skills/**`, `.claude/agents/**`, `.codex/agents/**`, `AGENTS.md` |
+| Never edit | `docs/MIDTERM_GUIDELINES.md`, committed findings in `docs/audits/` and `docs/reviews/`, `AGENT-TEAM.md` and any reflection, playtest interpretation or decision written in Saad's voice |
 
-## Source-use restrictions
+## Owner approval is required for
 
-- Reference: `historicalsource/princeofpersia` at commit
-  `2b4ddb5377f905840bf64f32e2f543a79f434222`. Its README states that Jordan
-  Mechner permits study and modification but grants **no rights in Prince of
-  Persia** (Ubisoft franchise).
-- **Do not port or copy the 6502 assembly.** Read it to verify rules, then
-  write original Python. Cite file and line in `docs/RULE_SOURCE_MAP.md`.
-- **Original art (student decisions 2026-10-26, R-D02):** the frontend
-  draws the original DOS sprites and tiles from `assets/original/`. The 207
-  images are committed **only on the private course branch**
-  (`saadsatter/midterm`, PR #57), force-added at sync; this **public**
-  development repository tracks only `MANIFEST.tsv` and must never contain
-  the PNGs (`.gitignore`; `test_tracked_images_are_the_bundle_or_nothing`).
-  Provenance and the permission basis: `docs/ASSET_PROVENANCE.md` (do not
-  describe Mechner's README or SDLPoP's GPL as a license for the artwork).
-  Bundle only images the game draws, exactly as listed in the manifest;
-  never add other original files (sound, fonts, palettes, `.DAT` archives,
-  level files, unused images) or anything from `vendor/`. The game never
-  downloads assets at run time. It must still run without them
-  (placeholder geometry drawn in code, `--placeholder`).
-  Do not copy SDLPoP's GPL code or its frame/tile tables; piece choices and
-  offsets are our own (`docs/ASSETS.md`). No sound.
-- **Level data (student decisions 2026-10-26, D1 of session 08):** the
-  original Level 1 file is fetched **locally** by `tools/fetch_level1.py`
-  (pinned source, SHA-256 checked) into the git-ignored `vendor/levels/`,
-  and the separate scenario `L1` (`pop/levels.py`) reads it at run time.
-  Never commit original level binaries or decoded original layouts, in
-  either repository, in any form (tests, docs, traces, fixtures); the only
-  committed original assets are the images in `assets/original/` on the
-  course branch (above). CI tests use level files we author
-  (`tests/level_fixture.py`). The frozen suite's rooms are our own layouts
-  in `pop/situations.py`, documented in `docs/EVALUATION_SUITE.md`. `L1` is
-  never part of the suite.
-- **Scope:** Level 1 mechanics only. Do not implement Levels 2–14. Sword,
-  guards and combat are deferred; do not add `STRIKE`/`BLOCK`/`ADVANCE`/
-  `RETREAT` until combat is approved.
-- **Evaluation suite is frozen** (`docs/EVALUATION_SUITE.md`). Do not edit
-  situations, seeds or limits without the student's approval and a change-log
-  row.
-- Never fabricate model traces, audit sessions, CI results, playtests, or
-  cost figures. If something was not run, write that it was not run.
+- The two-seat interface, observation schema and macro-action vocabulary (CQ-1)
+- Duel limits, timeouts, termination and failure conditions
+- Any rule, tuning, balance number or art decision (OQ-2 to OQ-8)
+- Adding models, providers, API keys, dependencies or services
+- Any paid (`--live`) model run, and the $5 pre-G2 budget
+- Merging a PR, and acting or not acting on reviewer findings
 
-## Rule changes (procedure)
+Work on a branch and open a PR; never commit to `main` directly. Record the
+decisions you were given in the PR description. Do not write Saad's agent-team
+log, playtest interpretations or decisions in his voice.
 
-For any change to a rule, legal action, observation, or outcome:
+## Model player
 
-1. Add or update the row in `docs/RULE_SOURCE_MAP.md` with a label
-   (`code`, `manual`, `observed`, `assumed`, `design`) and a locator.
-2. Write a failing test first.
-3. Change the engine.
-4. Run `/game-rules-audit` on the change if it touches `interface.py`,
-   `observation.py`, or `runner.py`.
-5. Write a short change summary for the independent reviewer
-   (`.claude/agents/rules-reviewer.md`). Never review your own change.
-
-## Test expectations
-
-Command (from the project folder): `uv run pytest -q`
-
-CI must cover, and every PR must keep green:
-
-- rule invariants (gravity, collision, no walking through walls/closed gates,
-  falling-damage thresholds, plate/gate links);
-- legal and illegal actions (validation, invalid-action counting, refused
-  action changes no state);
-- a successful path to a terminal win on a fixture level;
-- death and other terminal outcomes with explicit reasons;
-- step, model-call, and timeout limits (with a fake provider);
-- deterministic reset (same seed → identical observation and trace);
-- at least one regression test named `test_regression_<issue>` that cites
-  the observed bug in its docstring;
-- hidden-information tests: `observe` and `legal_actions` reveal nothing
-  outside the current room or not yet seen;
-- no `pygame` import from `pop/`.
-
-Tests must not use the network, API keys, or the original level files.
-
-## Model player rules
-
-- Credentials only from environment variables (`ANTHROPIC_API_KEY`,
-  `OPENAI_API_KEY`, Vertex ADC). Never commit or log keys. `.env` is ignored.
-- Every call goes through the runner, which counts it (failed calls count),
-  applies the timeout, and records model id, latency, tokens, cost estimate,
-  raw response, parsed action, and whether a fallback was used.
-- A fallback action is always labeled `"source": "fallback"` in the trace.
-  Never relabel it as a model decision.
-- Live trials only run when explicitly invoked with `--live`; CI never does.
+Anthropic Claude Haiku 4.5 by default; model id from `POP_MODEL`, key from
+`ANTHROPIC_API_KEY`; OpenAI and Vertex adapters in `agents/providers.py`.
+Every call goes through the runner, which counts it (failed calls count),
+applies the timeout and records model id, latency, tokens, cost estimate, raw
+response, parsed action and whether a fallback was used.
 
 ## Style
 
-- Python 3.11+, type hints, dataclasses, small pure functions in `pop/`.
-- Keep changes small enough for the student to explain.
-- Comments explain *why*, cite source lines for inherited rules.
+Python 3.11+, type hints, dataclasses, small pure functions in `pop/`. Keep
+changes small enough for Saad to explain. Comments explain *why* and cite
+source lines for inherited rules.

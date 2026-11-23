@@ -10,6 +10,16 @@ Working title: *Shadow Masque*. A two-player versus game built on this repositor
 | Initial Configuration Document, with role coverage | [`CONFIGURATION.md`](CONFIGURATION.md) |
 | Initial Project Plan, with gate dates and Initial Risk Register | [`PROJECT_PLAN.md`](PROJECT_PLAN.md) |
 
+## Working documents
+
+| Document | Purpose |
+|---|---|
+| [`REQUIREMENTS_CHECKLIST.md`](REQUIREMENTS_CHECKLIST.md) | Gate deliverables, status, decisions in force |
+| [`EVIDENCE_INDEX.md`](EVIDENCE_INDEX.md) | Where each deliverable's evidence lives |
+| [`ENGINE_DECISION.md`](ENGINE_DECISION.md) | Python/Pygame vs Godot (recommendation, pending Saad) |
+
+Agent configuration: [`AGENTS.md`](../../AGENTS.md) (shared invariants, Claude and Codex), [`CLAUDE.md`](../../CLAUDE.md) (implementation agent), `.claude/agents/rules-reviewer.md` and `.codex/agents/pop-rule-reviewer.toml` (independent reviewers), `.claude/skills/game-rules-audit/` and `.claude/skills/session-evidence/` (skills).
+
 Open questions are marked `OQ-n` (design) and `CQ-n` (configuration) in each document.
 
 The midterm documents in [`docs/`](../) still describe the Level 1 reconstruction. The final project's changes will be recorded here.

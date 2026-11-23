@@ -37,13 +37,15 @@ G2 is two weeks after G1, so the cut order in GDD Section 8 applies from the sta
 | Wed 18 Nov | Move this plan into Asana; add owners and acceptance criteria | Producer (Saad) | Asana project exists, linked from this file |
 | Wed 18 Nov | Close OQ-2 and OQ-5 (disguise rules, downing guards) on paper | Design Lead (Saad) | GDD updated with decisions |
 | Wed 18 Nov | Rule-map rows for sword, hearts, disguise and traps, labelled `design` | Design Lead, implementation agent | Rows in `docs/RULE_SOURCE_MAP.md` |
-| Sun 22 Nov | Greybox arena: 3 rooms of our own layout; two rivals in one `GameState`; split-screen view | Tech Lead (implementation agent) | Two humans can move in separate rooms; tests green |
+| Sun 22 Nov | Greybox arena: 3 rooms of our own layout; two rivals in one `GameState` | Tech Lead (implementation agent) | Two seats move in separate rooms through the interface; tests green |
+| Sun 22 Nov | Game server (authoritative, WebSocket) and browser client on localhost; each client receives only its seat's observation | Tech Lead | Two browser tabs play one duel; leak test on the server's outgoing messages; tests green |
 | Sun 22 Nov | **Checkpoint work:** AI rival seat makes a deployed model call through the runner; each seat has its own isolated session state; forced-timeout fallback | Tech Lead | Fake-provider tests for isolation and forced timeout in CI; one live call shown in class or by recording on Mon 23 Nov |
 | Tue 24 Nov | `STRIKE` and `BLOCK`; 3 hearts, 1 per stab, trap or damaging fall; failing tests first | Tech Lead | Rule-invariant tests pass; rules-reviewer has no blocking findings |
 | Wed 25 Nov | Disguise and scripted guard rule; leak test for disguise identity | Tech Lead, QA (`game-rules-audit`) | Audit report shows no leak |
 | Wed 25 Nov | Traps: loose floor and gate plate, 4 per rival; leak test for trap ownership | Tech Lead, QA | Tests pass; audit report |
 | Thu 26 Nov | Scripted rival on the existing baseline; AI rival in versus play | Tech Lead | Scripted rival beats a do-nothing rival on fixed seeds; CI green, no live calls in CI |
 | Thu 26 Nov | Live tuning runs within the $5 cap; re-measure latency and cost (CQ-4) | Tech Lead, BI | Results JSON in `traces/live/` |
+| Thu 26 Nov | Host the server (OQ-10) with our own or placeholder art (OQ-8) | Producer (Saad), Tech Lead | Two testers on different computers reach one duel |
 | Fri 27 Nov | First playtest with external testers; Initial Playtest Log (CQ-6) | Design Lead, QA, BI | Observations recorded before interpretation |
 | Fri 27 Nov | Scope-lock plan: what stays, what is cut | Producer, Design Lead | Document in `docs/final/` |
 | Sat 28 Nov | **First playable recording** | Saad | Recording linked from `docs/final/README.md` |
@@ -58,8 +60,9 @@ The six-dimension Risk Profile from the pitch, in the reader's Section 5.4 form.
 | **IP / Concept:** if original art or names appear in a public build, the project infringes Ubisoft's rights | *Prince of Persia* belongs to Ubisoft; the source README grants no rights | High | Producer | Original title and rooms; original art only on the private course branch; placeholders in public | Ship with placeholder art only |
 | **Technology:** if AI decisions stay at about 3 s, the AI rival cannot keep up in a sword fight | Measured mean latency 3.0 s (single player) | High | Tech Lead | Macro-actions only; scripted frames; 5 s timeout with labelled fallback | Scripted rival only; AI vs AI becomes test-only |
 | **Genre / Mechanics:** if the greybox duel is not fun, the concept fails | Combat was deferred in the midterm; disguise and traps are untested | High | Design Lead | Greybox duel and paper test in week 1, before art | Cut to 3 rooms and one trap type |
-| **Business / Audience:** if pairs of testers are hard to find, the playtest question goes unanswered | Needs two people at one machine; no playtest yet | Medium | Producer | AI seat lets one person play | Test human vs AI only |
+| **Business / Audience:** if pairs of testers are hard to find, the playtest question goes unanswered | Needs two people online at the same time; no playtest yet | Medium | Producer | AI seat lets one person play | Test human vs AI only |
+| **Network:** if network delay makes sword timing feel unfair, the duel fails online | Online play decided 2026-11-16; nothing measured yet | Medium | Tech Lead | One authoritative server; small messages (one seat's observation); measure round-trip time at the first playtest (OQ-12) | Two computers on one local network |
 | **Team:** if Saad's review capacity runs out, changes ship unreviewed | One student plus an agent team | Medium | Producer | Independent reviewer agent; small, explainable changes | Reduce scope per the cut order |
 | **Timeline:** if combat takes longer than a week, everything after it slips | G2 is Mon 30 Nov, two weeks after G1; combat, two players and traps are new | Medium | Producer | Cut order in the GDD, Section 8 | Rooms 6 → 3, then the suspicion meter, then one trap type |
 
-**Shared cause:** the Technology and Genre/Mechanics Highs both come from real-time combat that is not built yet. The IP High is separate.
+**Shared cause:** the Technology and Genre/Mechanics Highs both come from real-time combat that is not built yet. The IP High is separate, and online play raises it: a reachable server must not serve the original sprites (GDD OQ-8).

@@ -45,6 +45,7 @@ The engine expands each macro-action into per-frame inputs, so frame-level fenci
 | Which tiles are rigged, and by whom | **No**, except tiles it rigged itself |
 | Other rooms, guard patrol scripts, RNG seed, `GameState` | **No** |
 | Repository, files, rule map, evaluator | **No** |
+| Anything a browser client could not see | **No.** Online, the AI seat runs on the server and gets exactly the per-seat observation a browser receives |
 
 The midterm already enforces "players never get the engine": agents receive copies of the observation dict and the legal-action list, and the runner calls `step` ([Implemented]: `pop/interface.py`, `pop/observation.py`, `pop/runner.py`, hidden-information tests in `tests/`). The new hidden facts, disguise identity and trap ownership, need new leak tests ([Planned]).
 
@@ -109,6 +110,8 @@ Same observation and same actions. Policy: take the nearest available uniform, t
 | Test command | `uv run pytest -q` | Implemented |
 | CI workflow (development) | `.github/workflows/` | Implemented |
 | CI workflow (course copy) | `ci/midterm-saadsatter.yml` | Implemented; a final-project copy is CQ-5 |
+| Game server (online play; the AI seat runs here) | `server/` (proposed) | Planned |
+| Browser client (draws one seat's observation) | `web/` (proposed) | Planned |
 
 ---
 
@@ -136,7 +139,7 @@ The student remains Executive Producer and Creative Director. Agents recommend; 
 | **Narrative and Audio** | Not needed: no story beyond the premise, no sound | Excluded by scope |
 | **QA** | `game-rules-audit` skill + `rules-reviewer` + CI tests | Implemented |
 | **Business Intelligence** | `evaluate.py` result tables; Saad interprets playtests | Partial: playtest log format is CQ-6 |
-| **Publishing and Release** | Saad; README run instructions | Planned |
+| **Publishing and Release** | Saad; README run instructions; hosting the game server (GDD OQ-10) | Planned |
 
 ### B3. Handoffs
 
@@ -156,3 +159,4 @@ The student remains Executive Producer and Creative Director. Agents recommend; 
 | CQ-5 | Course CI workflow path for the final project | Before transfer to the course repo |
 | CQ-6 | Playtest log format (reader Section 5.9) | First playtest |
 | CQ-7 | Whether to add a course `agent-config.json` manifest for the final project | Before G2 |
+| CQ-8 | Where the AI seat's API key lives once the server is hosted (host secret store, never the browser) | Before hosting |
