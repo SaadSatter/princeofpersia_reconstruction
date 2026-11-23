@@ -331,6 +331,9 @@ class Duel:
         # frame began, so the seat id never decides where a move goes (R-V00).
         self._view: dict[str, dict] | None = None
         self.pending: dict[str, str | None] = {seat: None for seat in SEATS}
+        # Reporting only (AUDIT-B F3): queued inputs that never started.
+        self.replaced: dict[str, int] = {seat: 0 for seat in SEATS}
+        self.stale: dict[str, int] = {seat: 0 for seat in SEATS}
         self.last_result: dict[str, dict | None] = {seat: None for seat in SEATS}
         self.terminal: str | None = None
         self.guards = {name: Guard.at_post(name, post)
@@ -512,6 +515,8 @@ class Duel:
             i = STANCES.index(base) + (1 if action == "STANCE_UP" else -1)
             r.stance_change = (STANCES[i], STANCE_FRAMES)
             return
+        if self.pending[seat] is not None:
+            self.replaced[seat] += 1         # the latest press wins (VERSUS_SPEC 2.1)
         self.pending[seat] = action
 
     def tick(self) -> None:
@@ -589,9 +594,12 @@ class Duel:
                 self._finish(seat)
         action = self.pending[seat]
         self.pending[seat] = None
-        if action is not None and action != "KICK" and action in self.legal_actions(seat) \
-                and r.terminal is None and self._start(seat, action):
-            return
+        if action is not None:
+            if action != "KICK" and action in self.legal_actions(seat) and r.terminal is None:
+                if self._start(seat, action):
+                    return
+            else:
+                self.stale[seat] += 1        # no longer legal now that the rival is free
         r._tick()                            # free this frame: the world still acts on it
 
     def _hop_turn(self, seat: str) -> str | None:
@@ -1034,7 +1042,9 @@ class VersusEpisode:
         t = self._duel.terminal
         return {"status": "ongoing" if t is None else "terminal", "reason": t,
                 "frames": self._duel.frames, "inputs": dict(self.inputs),
-                "invalid_inputs": dict(self.invalid)}
+                "invalid_inputs": dict(self.invalid),
+                "stale_inputs": dict(self._duel.stale),
+                "replaced_inputs": dict(self._duel.replaced)}
 
     # runner and server only
     def tick(self) -> None:
