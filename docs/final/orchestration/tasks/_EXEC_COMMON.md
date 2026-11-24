@@ -15,9 +15,9 @@ git config user.name "Claude (<role> subagent)"; git config user.email "noreply@
 ```
 
 - Commit only on your `task/<TASK-ID>` branch, only inside your permitted write paths. Never push to `dev.git`; the orchestrator fetches your branch from your clone.
-- Every commit message ends with:
+- Every commit message ends with the trailer below, naming the model you actually run on (for example `Claude Sonnet 5.5` for a Sonnet subagent):
   ```
-  Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+  Co-Authored-By: Claude <your model> <noreply@anthropic.com>
   Claude-Session: https://claude.ai/code/session_01DktSfuWQ416LWvPbT3AoAS
   ```
 - Tests: `python3 -m pytest -q -p no:cacheprovider` (sandbox: Python 3.13, pytest 9.1, numpy present, pygame/anthropic absent). Paste the real result line.
