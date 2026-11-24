@@ -61,7 +61,7 @@ No `rc/*` (approved release candidate) branch exists.
 | under review | T06a / T06b | traps spec (decision #22) + rival-rigged loose floor | G1, G2 pending (brief `tasks/GATE-wave3.md`; no report on record) | `orch/preview` 9af96a9 / 4e9121b | none |
 | under review | T07 | PPO encoder, trainer, stdlib policy. **Full training not started** | G1, G2 pending (GATE-wave3) | `orch/preview` 1e34cf2 | none |
 | under review | T14 + fix1 | hosted web build (Pyodide + Phaser) | T14 G1/G2 accept w/ notes; fix1 G1/G2 pending (GATE-wave3) | `orch/preview` ca3667b | none |
-| unreviewed WIP | T05-fix1 | macro reachability, CLIMB down, baseline fixes | — | `orch/wip-T05-fix1` (failing tests 0846a16 + WIP ab78522) | none |
+| **active** (tech-lead running, dispatched 2026-11-24 14:2x ET) | T05-fix1 (resumed) | macro reachability, CLIMB both ways (#31), baseline fixes, QA-1 mirror deadlock | G1, G2 pending | `task/T05-fix1` from 0846a16 (brief@38aca15); WIP `orch/wip-T05-fix1` ab78522 for reference only | issue #7 |
 | unreviewed WIP | T04-fix3 | refuse shared controller (QA-5), in-flight race | — | `orch/wip-T04-fix3` (tests 7fe2e9c + WIP 76de25c) | none |
 | unreviewed WIP | T08 | scenario suite D1/B2/I3/F5 + held-out H6, CLI, analysis | — | `orch/wip-T08` 25e4587 | none |
 | blocked | T07 full training run | ~85 min PPO run | needs T05-fix1 closed **and** Saad's go-ahead | — | none |
@@ -72,7 +72,9 @@ No `rc/*` (approved release candidate) branch exists.
 
 ## Next eligible task
 
-**T05-fix1 (resume)**, assigned to `tech-lead`. Brief: `tasks/T05-fix1.md`
+**T05-fix1 (resume) is running** (brief@38aca15, issue #7). After its chain closes: **T04-fix3 (resume)**, then **GATE-wave3** (decision #32: one chain at a time).
+
+Original note: **T05-fix1 (resume)**, assigned to `tech-lead`. Brief: `tasks/T05-fix1.md`
 (written for the sandbox; add a dated "Resumed" note with the local setup
 from `tasks/_EXEC_COMMON.md`). Base `6692771`. The WIP snapshot `ab78522` is
 unreviewed input the Tech Lead may read, not a base to trust. It unblocks
