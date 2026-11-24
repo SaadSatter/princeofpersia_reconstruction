@@ -23,3 +23,13 @@ A task is closed only when its Gate 3 line says `closed`.
 | 2026-11-24 | T04 chain (T04, fix1, fix2) | Gate 1+2 | QA / Eval (Sonnet) | cd5c4aa | ACCEPT WITH NOTES | concurrent-start busy race (minor) | T04-fix3 (QA-5 refuse, in-flight flag); otherwise closed |
 | 2026-11-24 | T05 | Gate 1 | QA (Sonnet) | 19b5da2 | ACCEPT WITH NOTES | gate/T05-qa dec85c8; 3 majors | folded into T05-fix1 |
 | 2026-11-24 | T02 handoff | closed | QA (T02-close) | 72f6552 | ACCEPT | 650 passed; Student decision empty | Saad writes decision |
+
+## From 2026-11-24: native agents and file-based handoffs
+
+Rows now name the **model** (configured, and verified from transcript
+metadata with `tools/orchestration/verify_models.py`) and the **handoff
+files** read and written (`HANDOFF_PROTOCOL.md`).
+
+| Date | Task | Gate / event | Agent | Model (configured; verified) | Commit | Verdict | Handoff consumed → produced | Follow-up |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-11-24 | config probe | delegation probe (headless `claude -p`, session 197da38f) | orchestrator → tech-lead | opus-5-5 → sonnet-5-5; verified: transcript (main `claude-opus-5-5`, subagent `agentType: tech-lead`, `claude-sonnet-5-5`) | 721b3e6 | `general-purpose` spawn refused; `tech-lead` spawned | — | allowlist kept; `disallowedTools: Agent(...)` removes the whole Agent tool on 2.1.331 |

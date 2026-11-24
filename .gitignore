@@ -38,3 +38,7 @@ screenshots/
 .DS_Store
 .idea/
 .vscode/
+
+# Claude Code worker worktrees (isolation: worktree) and the orchestrator's integration worktree
+.claude/worktrees/
+.claude/settings.local.json
