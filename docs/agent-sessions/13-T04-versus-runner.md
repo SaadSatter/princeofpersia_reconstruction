@@ -50,3 +50,45 @@ branch.
 
 - Before the implementation: `python3 -m pytest -q -p no:cacheprovider tests/test_seats.py tests/test_versus_runner.py` -> `2 errors in 0.15s` (collection: modules missing).
 - After: the same files -> `38 passed in 0.36s`; full suite `python3 -m pytest -q -p no:cacheprovider` -> `457 passed, 12 skipped in 3.02s` (sandbox Python 3.13; pygame absent, so frontend tests skip).
+
+## Follow-up: T04-fix1 (corrective work on the gate findings), 2026-11-23
+
+| Field | Value |
+| --- | --- |
+| Tool / role | Claude Code subagent, Tech Lead; brief `docs/final/orchestration/tasks/T04-fix1.md`, findings `docs/final/orchestration/reports/GATE-T04.md` |
+| Session | Same orchestrator session trailer as above; the subagent's own transcript id is not known to it |
+| Model | `claude-opus-5-5` |
+| Branch / base | `task/T04-fix1` from `task/T04` at `af76c30` |
+| Independence | Builder. Not a review. The gates have not re-run on this branch |
+
+### Instructions (quoted, truncated)
+
+- "Read …/agents/tech-lead.md and follow it. Your task brief is …/tasks/T04-fix1.md … Do not push."
+
+### What happened
+
+- **Failing tests first** (`f1bd7c7`, `2fb60ff`): the two gate test files
+  copied unchanged except that the `xfail` marks were removed for QA-1, QA-2,
+  QA-3, QA-4, eval-2, eval-3 and eval-4. QA-5 (Saad's decision) and eval-1
+  (default left unkeyed, see below) stay `xfail`. New tests in
+  `tests/test_versus_runner.py` and `tests/test_seats.py`. The isolation test
+  `test_controller_gets_only_plain_copies_of_its_own_seat` now builds its
+  comparison episode with the run's duel limit (it failed on a merge with
+  T01, `minutes_left` 0 vs 5).
+- **Fix** (`93c8cc6`): plain-`str` normalisation of answers; safe text for
+  refused answers and for exceptions whose `__str__` raises; bounded
+  `reset`; busy controllers get a `busy` fallback and are never called
+  concurrently; `BaseException` is an `error`; `VersusLimits` validation;
+  optional `seed_key` (HMAC) for `controller_seed`; `on_frame` hook with a
+  read-only `EpisodeView`; `copy_mode="json"` / `threaded=False` fast path,
+  defaults unchanged and recorded in the result.
+- **Docs:** `docs/final/VERSUS_RUNNER.md` (the above, plus the section on
+  in-process isolation being by convention).
+- **Not decided here:** QA-5, the default for `seed_key`, cadence/timeout,
+  aborted vs forfeit, exact-name validation (listed for Saad in the note).
+
+### Tests (verified, run in this session)
+
+- Gate tests copied with marks removed, before the fix: `45 failed, 477 passed, 12 skipped, 2 xfailed`.
+- After the fix, on `task/T04-fix1`: `python3 -m pytest -q -p no:cacheprovider` -> `524 passed, 12 skipped, 2 xfailed`.
+- Scratch merge of `task/T04-fix1` with `task/T01` (`83127cf`), not committed to the branch: the same command -> `617 passed, 12 skipped, 2 xfailed`.
