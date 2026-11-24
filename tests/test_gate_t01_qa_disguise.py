@@ -191,9 +191,6 @@ def test_masked_moves_never_move_or_turn_the_figure_unseen():
     assert not bad, bad
 
 
-@pytest.mark.xfail(strict=True, reason="GATE-T01-QA1: a disguised careful step whose end is "
-                   "in the next room shows motion.to = null for 8 frames; no guard's move "
-                   "ever ends outside its room")
 def test_disguised_step_toward_the_next_room_is_guard_shaped():
     # Room 1 row 0 col 9 facing right: STEP_RIGHT ends in room 2.
     ep = _episode("A", (1, 0, 9, +1), (1, 0, 3, +1), {})

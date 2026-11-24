@@ -35,9 +35,6 @@ def disguise(ep, seat="A"):
 
 # --- leaks (fail today) -----------------------------------------------------
 
-@pytest.mark.xfail(strict=True, reason="GATE-T01-eval-L1: a downed guard's uniform "
-                   "(taken or not) is absent from the observation and the renderer, "
-                   "but TAKE in legal_actions reveals it")
 def test_legal_actions_reveal_nothing_the_observation_does_not():
     """B faces a downed guard. Whether a rival already took its uniform is not
     in B's observation (nor drawn), yet TAKE is legal only if it was not: an
@@ -54,8 +51,6 @@ def test_legal_actions_reveal_nothing_the_observation_does_not():
     assert seen[False][1] == seen[True][1]              # ... so the legal actions must be
 
 
-@pytest.mark.xfail(strict=True, reason="GATE-T01-eval-L2: figures tied on (row, col, "
-                   "kind) keep insertion order, rivals before guards")
 def test_figure_order_does_not_tell_a_disguised_rival_from_a_guard():
     """A standing 'guard' over a downed guard (a downed body can be walked onto):
     the list order is rival-first for the disguised rival, dict order for a

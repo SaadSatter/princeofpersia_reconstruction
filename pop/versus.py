@@ -31,6 +31,7 @@ any move (VERSUS_SPEC 2.1, R-V03). Guards and disguise follow (R-V13 to R-V21).
 from __future__ import annotations
 
 import copy
+import json
 import random
 
 from . import observation
@@ -196,17 +197,22 @@ class Rival(Game):
         super()._hurt(amount, reason)
         self.disguised = False                              # R-V21: losing a heart
 
-    def uniform_ahead(self):
-        """A downed guard still in uniform to take (R-V17): in this rival's own cell
-        (standing over the body, facing either way) or in the cell ahead. The own
-        cell was added after Saad's playtest of 2026-11-17: a downed guard can be
-        walked onto, and T over the body did nothing."""
+    def downed_guard_ahead(self):
+        """A downed guard in this rival's own cell (standing over the body, facing
+        either way) or in the cell ahead. The own cell was added after Saad's
+        playtest of 2026-11-17: a downed guard can be walked onto, and T over the
+        body did nothing."""
         here, ahead = self.kid.cell, self.ahead()
         for cell in (here, ahead):
             for g in self.duel.guards.values():
-                if g.downed and g.uniform and g.cell == cell:
+                if g.downed and g.cell == cell:
                     return g
         return None
+
+    def uniform_ahead(self):
+        """The downed guard in reach if its uniform is still there to take (R-V17)."""
+        g = self.downed_guard_ahead()
+        return g if g is not None and g.uniform else None
     # --- swordplay macros (per-frame generators, like the inherited ones) ---
     def _versus_macro(self, action: str):
         if action in HOP_FLIPS:                             # internal: never a seat's input
@@ -291,7 +297,11 @@ class Rival(Game):
         self._result["effect"] = "took_uniform"
         self._plan("took_uniform", TAKE_FRAMES)
         yield from self._frames(TAKE_FRAMES)
-        if g is not None and g.uniform and g.downed:
+        if g is None or not (g.uniform and g.downed):
+            # R-V26: nothing to take is a no-op the acting seat can read; the
+            # other seat saw the same TAKE frames either way.
+            self._result["effect"] = "no_uniform"
+        else:
             g.uniform = False
             self.disguised = True
             if self.sword == "drawn":
@@ -499,8 +509,8 @@ class Duel:
             elif r.sword == "sheathed":
                 acts.append("DRAW")
             acts.append("SWEEP")
-            if not r.disguised and r.uniform_ahead() is not None:
-                acts.append("TAKE")
+            if not r.disguised and r.downed_guard_ahead() is not None:
+                acts.append("TAKE")                         # R-V26: whether or not a uniform remains
         if self.airborne_jump(seat):
             acts.append("KICK")
         return tuple(acts)
@@ -950,8 +960,11 @@ def observe(duel: Duel, seat: str) -> dict:
         # R-V18: a disguised rival is observed exactly as a guard (same kind and
         # fields; sheathed, so stance None and armed False, like a patrolling guard).
         motion = _motion_view(duel, other, room)
+        # A move that ends in another room is masked too (GATE-T01 QA1): a guard's
+        # move never does, and the figure still leaves the room on arrival.
         if (r.disguised and motion is not None
-                and (motion["effect"], motion["frames"]) not in GUARD_MOTIONS
+                and ((motion["effect"], motion["frames"]) not in GUARD_MOTIONS
+                     or motion["to"] is None)
                 and not duel.suspicious_rise(other)):
             motion = None           # T01 / AUDIT-B F1: shown as a paused guard is
         figures.append({"kind": "guard" if r.disguised else "rival",
@@ -974,7 +987,9 @@ def observe(duel: Duel, seat: str) -> dict:
                             "to": [m["to"][1], m["to"][2]] if m["to"][0] == room else None,
                             "to_posture": m["posture"],
                             "to_facing": "right" if m["facing"] > 0 else "left"}})
-    obs["figures"] = sorted(figures, key=lambda f: (f["row"], f["col"], f["kind"]))
+    # Every observed field, so a tie never falls back to insertion order (rivals
+    # before guards), which would tell a disguised rival from a guard (GATE-T01 L2).
+    obs["figures"] = sorted(figures, key=lambda f: (f["row"], f["col"], f["kind"], json.dumps(f, sort_keys=True)))
     obs["swords"] = sorted(
         [{"row": c[1], "col": c[2], "flying": False} for c in duel.swords if c[0] == room]
         + [{"row": f["cell"][1], "col": f["cell"][2], "flying": True}
