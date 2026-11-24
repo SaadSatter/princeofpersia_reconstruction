@@ -35,7 +35,11 @@ is a trained PPO policy; the scripted baseline is the comparison).
 
 An agent never acts as player or observer and never fills in any sheet.
 
-## 2. Two session types
+## 2. Session types
+
+Three types: A (core loop, required), R (external retest of a revised
+encounter, required [R] between G2/G3 and G4) and B (comparative,
+recommended). A and R are not comparative tests.
 
 ### Session A: G2/G3 core-loop session (required [R])
 
@@ -44,13 +48,21 @@ An agent never acts as player or observer and never fills in any sheet.
 answers to OQ-9 and the balance questions. It does **not** test the
 comparative hypothesis.
 
-**Build:** whatever the G2/G3 build is on the day, at a recorded commit.
-Use the first that is available:
+**Build:** whatever the G2/G3 build is on the day, at a recorded commit or
+deployed version. Use the first that is available:
 
-1. **Preferred, when T12 is merged:** human vs scripted baseline,
+0. **Preferred, hosted web build (Saad's decisions of 2026-11-23 #12-13:
+   Pyodide + Phaser, due by G2/G3):** URL `<TO BE FILLED IN BY SAAD>`.
+   Record the URL, the build id or commit the page reports, and the date.
+   Do not assume it writes a round file: the per-round trace download is
+   planned (T14) and **not yet verified**; use consent option (a) unless the
+   facilitator has seen the file saved (`CONSENT.md`, "Logging rule").
+   The remaining options are the local bench, kept as the fallback if the
+   hosted build is down or not ready.
+1. **Local bench, when T12 is merged:** human vs scripted baseline,
    `play.py ARENA --versus --rival baseline` showing only the human's panel.
    Identification events can be scored (Section 3).
-2. **Otherwise:** human vs human on the two-panel bench,
+2. **Otherwise (local fallback):** human vs human on the two-panel bench,
    `play.py ARENA --versus` (one keyboard, two panels). Both panels are on
    one screen, so each player can see where the other is and who wears a
    uniform. **Identification events are not scored** in this setup; the
@@ -70,6 +82,34 @@ Use the first that is available:
 | 0:11 | Round 2 (up to 5 min), questions |
 | 0:17 | Round 3 only if time allows and the player wants it |
 | 0:17 | End questions (part E), debrief (`CONSENT.md`) |
+
+### Session R: external retest of a revised encounter (required [R])
+
+**Purpose:** FINAL_REQUIREMENTS asks for an external test of the revised
+encounter between G2/G3 and G4. Each Session R tests one specific change made
+in response to an earlier finding, so the playtest log shows finding ->
+change -> retest.
+
+**Link to a change (filled before the session, never invented):** the sheet
+header names
+
+1. the finding (log row and its source session or review, e.g. a Session A
+   observation);
+2. the change (commit or pull request that made it);
+3. what would count as the change working, written before the session in
+   words the observer can check on the sheet (for example "player names the
+   rival without a prompt", or "no `STUCK` at the door").
+
+A Session R without all three is run as Session A instead. If several
+findings were fixed, test the most important one per session and list the
+rest. Use a different external player where possible; a returning player (a
+code seen before) is marked as such and does not replace a fresh one.
+
+**Script:** as Session A (about 20 minutes), rounds on the revised build
+only, same questions. Results go in `LOG.md` section 6 (changes and
+verification) next to the change they test, whatever the outcome; "the
+change did not work" is a valid, recorded result. Hypotheses are not tested
+here.
 
 ### Session B: comparative session (recommended [+]; G4 at the earliest)
 
@@ -122,11 +162,33 @@ anything.
 ## 3. Frozen definitions
 
 These are scored from the two-seat trace (ground truth of who wears which
-uniform) together with the observation sheet and the player's answers, after
+uniform; Session B needs it, see Section 4 item 4) together with the observation sheet and the player's answers, after
 the session. The observer does not judge them live.
 
 **Disguised rival.** The rival seat is wearing a guard uniform (R-V17,
-R-V18): it is drawn and observed exactly as a guard.
+R-V18): it is drawn as a guard and observed through the same fields as a guard.
+This is **not** a claim that it is indistinguishable. Known remaining tells
+(not hidden by the build):
+
+- position: real guards never leave their room or row (GATE-T01-eval tells
+  list, tell 1);
+- reaction: a real guard draws on an undisguised rival in front of it, a
+  disguised rival does not (tell 2);
+- stillness and patrol: stillness beyond a guard's, or off its patrol, ends
+  it (tell 3); repeated WAIT beside a guard resets the stillness counter
+  (GATE-T01-qa QA3);
+- movements no guard makes: falling, hanging, dead postures (QA2), a
+  disguised step into the next room (QA1: `motion.to` null for 8 frames),
+  hop, jump, climb, unarmed run (tell 4);
+- a one-frame gap between moves (tell 5), and a meterless "guard" when both
+  rivals are disguised (tell 6).
+
+The playtest therefore records **which cue a player used** for each
+identification (position, guard reaction, stillness, odd movement, other, or
+guess); question R2 collects it and the observer notes any spoken reason
+verbatim. Identification rates are reported with that cue breakdown and are
+not read as evidence about the policy alone. Which tells are fixed by the
+day of a session depends on the build; record the build.
 
 **Identification opportunity.** An interval during which the disguised rival
 is in the human seat's current room, so it appears in the human's
@@ -199,19 +261,25 @@ Session B cannot run until all of these exist and are tested:
 4. A two-seat trace written per round, with: build commit, condition code,
    seat, start, seed, time limit, and per frame which figure is the disguised
    rival (ground truth for Section 3). The trace must stay out of the
-   player's view.
+   player's view. Status: not verified in any build at this kit's base
+   (local bench: in-memory only; hosted build: planned in T14). Session B
+   cannot be scored without it.
 5. A clock or frame counter the observer can see, matching the trace, so
    sheet times line up with trace frames.
 6. The 5-minute duel limit (Saad's decision of 2026-11-23 #5: 3,600 frames
-   at 12 fps) applied in the playtest build. At base `721b3e6` the versus
-   duel's default time limit is `P.GAME_FRAMES` (the midterm's 60-minute
-   clock), so this must be set explicitly.
+   at 12 fps). It is the default since T01, so it is not set by hand. Check,
+   do not assume: at the start of each session the observer confirms that the
+   build shows 5:00 (or 3,600 frames) at round start and records it in the
+   sheet header.
 7. A quick rematch key on the end screen, so a rematch request can be acted
    on and timed.
 8. Optional: an idle-rival practice mode.
 
-Session A (option 1) needs items 1 (baseline only), 4, 5 and 6. Session A
-(option 2) needs only item 6 and a recorded commit.
+Session A (options 0 and 1) needs items 1 (baseline only), 5 and 6; item 4
+(the trace) only if consent option (b) is to be used, otherwise sessions run
+on notes and answers alone and identification is scored from the sheet and
+answers with the build's ground truth left unavailable (record that). Session
+A (option 2) needs only item 6 and a recorded commit.
 
 ## 5. During play
 

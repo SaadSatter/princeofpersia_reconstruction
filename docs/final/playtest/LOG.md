@@ -55,7 +55,7 @@ tallies in section 5 are written; then recorded here with who sealed it.
 
 ## 3. Sessions and consent
 
-| Session | Date | Gate | Type (A1/A2/B) | Player code(s) | External? | Consent read (time, by role) | Recording | Notes publishable | Completed / stopped at |
+| Session | Date | Gate | Type (A1/A2/R/B) | Player code(s) | External? | Consent read (time, by role) | Recording | Notes publishable | Completed / stopped at |
 |---|---|---|---|---|---|---|---|---|---|
 | | | | | | | | | | |
 

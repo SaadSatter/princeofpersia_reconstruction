@@ -18,10 +18,13 @@ Saad, and labelled with who wrote it and when.
 |---|---|
 | Session id | |
 | Date and start time | |
-| Session type | A1 (human vs baseline, own panel only) / A2 (human vs human, two panels) / B (comparative) |
+| Session type | A1 (human vs baseline, own panel only) / A2 (human vs human, two panels) / R (retest of a revised encounter) / B (comparative) |
+| If type R: finding, change (commit or PR), success check written before the session | |
+| Build used | hosted web build (URL, build id or commit shown, date) / local bench (fallback) |
 | Player code(s) | |
 | External player? (yes/no, per code) | |
 | Played before? (earlier code) | |
+| Round file saved by the build (consent option) | (a) none: notes and answers only / (b) per-round trace file (only if seen to be written) |
 | Consent text read (time, by role) | |
 | Agreed to take part | yes / no |
 | Screen recording / audio | yes/no / yes/no |
@@ -29,13 +32,14 @@ Saad, and labelled with who wrote it and when.
 | Build commit (full sha) and branch | |
 | Launch command(s), exactly as typed | |
 | Duel time limit (frames) | |
+| Build showed 5:00 (3,600 frames) at round start? | yes / no (if no, note what it showed) |
 | Rival build: baseline version / policy weights hash | (Session B: leave the mapping sealed; record only the hashes and codes) |
 | Observer role; facilitator role | |
 | Identification scoring | valid / contaminated (A2) |
 
 ## Rounds
 
-| Round | Condition code | Human seat and start | Seed | Trace file | Start clock | End clock | Result shown on screen |
+| Round | Condition code | Human seat and start | Seed | Round file (name, or "none") | Start clock | End clock | Result shown on screen |
 |---|---|---|---|---|---|---|---|
 | P (practice) | — | | | | | | not counted |
 | 1 | | | | | | | |

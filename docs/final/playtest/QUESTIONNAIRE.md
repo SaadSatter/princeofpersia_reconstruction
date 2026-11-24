@@ -7,7 +7,7 @@ per session; it carries the player code, never a name.
 
 ```
 Session id:            Player code:            Date:
-Session type: A / B    Build commit:           Facilitator role:
+Session type: A / R / B    Build commit:           Facilitator role:
 ```
 
 ---
@@ -19,7 +19,7 @@ Ask before offering a rematch. Repeat for each round.
 | # | Question | Answer format | Round 1 | Round 2 | Round 3 | Round 4 |
 |---|---|---|---|---|---|---|
 | R1 | How tense was that round, from 1 (not tense at all) to 7 (extremely tense)? | 1–7 | | | | |
-| R2 | Did you work out which figure was your rival while it looked like a guard? If yes: which one, roughly where, and when (early, middle, late, or the moment)? | Free text, or "no", or "it never disguised as far as I know" | | | | |
+| R2 | Did you work out which figure was your rival while it looked like a guard? If yes: which one, roughly where, and when (early, middle, late, or the moment)? What told you (where it stood, how it moved, how it reacted to you, how long it stood still, something else)? | Free text, or "no", or "it never disguised as far as I know" | | | | |
 | R3 | You struck a guard at [times from the sheet]. For each: why? (a) to take its uniform, (b) I thought it was my rival, (c) it attacked me, (d) by accident, (e) other | One letter per strike, plus words | | | | |
 | R4 | How fair did that round feel, from 1 (very unfair) to 7 (completely fair)? What, if anything, felt unfair? | 1–7 + free text | | | | |
 | R5 | Would you like to play again right now? | yes / no / maybe | | | | |

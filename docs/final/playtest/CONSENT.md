@@ -28,9 +28,12 @@ at any point. Nothing in this kit is filled in: no session has been run.
 > notes from the part you played; if you say no, I delete them.
 >
 > **What is recorded.**
-> - The game writes a log of the round: the keys you pressed as game actions,
->   where the characters were, and what happened in the game. It contains no
->   name and no audio or video.
+> - [READ ONE OF THESE TWO, as marked on the observation sheet header.]
+>   **(a)** The game itself does not save anything about the round. Only my
+>   written notes and your answers are kept.
+>   **(b)** The game saves a file for each round: the keys you pressed as game
+>   actions, where the characters were, and what happened in the game. It
+>   contains no name and no audio or video.
 > - I take written notes of what happens on screen and of things you say
 >   while playing, word for word when I can, without your name.
 > - Your answers to the questions.
@@ -38,7 +41,8 @@ at any point. Nothing in this kit is filled in: no session has been run.
 > **No video or audio recording unless you agree.** I will ask you
 > separately now. Saying no changes nothing about the session.
 >
-> **Where it goes.** The anonymous notes, answers and game logs may be put in
+> **Where it goes.** The anonymous notes, answers and, if option (b) was read, the round
+> files may be put in
 > the project's repository and in course reports, which other students,
 > course staff and, if the repository is public, anyone can read. Nothing in
 > them names you.
@@ -54,6 +58,7 @@ at any point. Nothing in this kit is filled in: no session has been run.
 
 | Question | Recorded as |
 |---|---|
+| Round file saved by the build (selects which "What is recorded" option is read) | (a) none: notes and answers only / (b) per-round trace file. Choose (b) only if the facilitator has seen the build write the file (see "Logging rule" below); otherwise (a) |
 | Agrees to take part | yes / no (if no, stop; record nothing else) |
 | Screen recording | yes / no |
 | Audio recording | yes / no |
@@ -64,6 +69,23 @@ at any point. Nothing in this kit is filled in: no session has been run.
 The facilitator records that the text was read, and by whom (role, not
 name), next to the time. The player's own words of agreement are not needed
 in writing.
+
+## Logging rule
+
+The consent text must describe exactly what the build used records.
+
+- Do not read option (b) unless the build is known to write a per-round trace
+  file. As of this kit, that is **not verified**: the local bench
+  (`play.py --versus`) keeps its event log in memory only and writes no file,
+  and the per-round trace download in the hosted web build is planned (T14)
+  but not yet verified. Until someone has run the build and seen the file,
+  read option (a).
+- If the build later changes between sessions, the facilitator re-checks and
+  records the option on that session's sheet. A player who heard (a) is never
+  logged; a file saved after (a) was read is deleted unread and the event
+  recorded as a finding.
+- The kit never claims a log exists; the sheet's "Round file" column holds
+  the actual file name or "none".
 
 ## Variant for session (a), human vs human
 
