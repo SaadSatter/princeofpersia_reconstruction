@@ -87,9 +87,13 @@ if you were the reviewer, and never edit a reviewer's or a skill's findings.
 - Adding models, providers, API keys, dependencies or services.
 - Any paid (`--live`) model call (under $1 total, smoke only, decision #8),
   and the full PPO training run.
-- Pushing, merging a PR, merging anything into `main` except orchestration
-  records (`docs/final/orchestration/**`, decision #11), and acting or not
+- Merging a PR, merging anything into `main` except orchestration records
+  (`docs/final/orchestration/**`, decisions #11 and #29), and acting or not
   acting on reviewer findings.
+
+**Pre-approved** (Saad, 2026-11-24, decisions #27 to #29): pushing branches
+(never force-push), opening issues and PRs for handoffs and posting reports
+on them, and committing orchestration records to `main`.
 - Editing `.claude/agents/**`, `.claude/skills/**`, `.codex/agents/**`,
   `.claude/settings.json`, `AGENTS.md`, existing tests, `pyproject.toml`,
   `uv.lock`, `README.md`, the frozen midterm suite (`pop/situations.py`,

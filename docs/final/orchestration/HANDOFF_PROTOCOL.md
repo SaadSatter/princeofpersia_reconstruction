@@ -87,8 +87,9 @@ required.
 
 ## GitHub
 
-When Saad has approved pushing for the session (AGENTS.md), the orchestrator
-pushes the branches and opens a PR for each integrated task. The PR body
+Pushing, issues and PRs need no per-push approval (decisions #27 and #28).
+The orchestrator pushes each worker branch, opens an issue for each task, and
+opens a PR for each task branch. The PR body
 lists each report as `path @ sha` and quotes each verdict line. QA and
 Evaluation findings may also be posted as PR comments (decision #14). A
 report counts as published only after `git ls-remote` or `gh` shows it.

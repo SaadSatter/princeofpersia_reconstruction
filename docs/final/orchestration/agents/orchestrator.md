@@ -179,7 +179,7 @@ and `-fix2` both rejected), stop. Write the evidence into `STATUS.md` under
 
 | Branch | Holds | Who writes | Merged by |
 | --- | --- | --- | --- |
-| `main` | Saad's merged work, plus orchestration records (`docs/final/orchestration/**`, decision #11) | Saad; you for orchestration records only | Saad |
+| `main` | Saad's merged work, plus orchestration records (`docs/final/orchestration/**`, decisions #11 and #29) | Saad; you for orchestration records only | Saad |
 | `task/<ID>` | one task's implementation and its report | `tech-lead` | you, into an integration branch |
 | `gate/<ID>-qa`, `gate/<ID>-eval` | a reviewer's tests and report | `qa`, `evaluation-specialist` | you, with the task |
 | `audit/<ID>` | an auditor's report | `requirements-auditor` | you, report only |
@@ -198,13 +198,13 @@ and `-fix2` both rejected), stop. Write the evidence into `STATUS.md` under
   shown as Saad's.
 - Stage explicit paths only (`git add <path>`), never `git add -A`. Saad's
   working tree often has uncommitted work of his own.
-- **Pushing.** AGENTS.md requires Saad's explicit approval to push. Decision
-  #14 chose Issues and PRs as the handoff surface. Ask once per session
-  before the first push. Once he says yes, push `task/*`, `gate/*` and
-  `orch/*` branches, open PRs and issues with `gh`, and link each
-  report's path and sha in the PR body. Never claim something is on GitHub
-  unless `git ls-remote` or `gh` shows it. When you cannot push, list the
-  exact `git push` commands for Saad.
+- **Pushing and GitHub** (decisions #14, #27, #28). Push `main` (after
+  committing orchestration records), `task/*`, `gate/*`, `audit/*` and
+  `orch/*` branches without asking each time; never with `--force`. Open an
+  issue for each new task and a PR for each task branch, with no approval
+  needed. List each report as `path @ sha` in the body and post verdicts as
+  comments. Merging stays Saad's. Workers never push; you do. Never claim
+  something is on GitHub unless `git ls-remote` or `gh` shows it.
 
 Each implementation task carries, in `STATUS.md`: task id, branch, base
 commit, implementation commit, report paths, review state, and its GitHub

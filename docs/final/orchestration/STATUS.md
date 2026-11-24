@@ -80,9 +80,9 @@ Deadline pressure: G2/G3 recording and the official-repository move are due
 - T06b: confirm "a sprung trap costs 1 heart in all".
 - T07: macro cadence (4 decisions), nearest-figure targeting, reward-shaping defaults.
 - CLIMB down as well as up (T05-fix1's reading of G1 "climb").
-- **Pushing:** AGENTS.md needs your approval to push; decision #14 chose Issues + PRs. Approve pushes per session, or say "push orch branches freely".
+- ~~Pushing~~ decided 2026-11-24 (#27, #28): pushes, issues and PRs need no per-push approval; merging stays Saad's.
 - **Course registration:** spawn the native `tech-lead`/`qa`, or the course-rendered `team-tech`/`team-qa`, once `agent-team/` exists (`COURSE_ROLE_MAP.md`).
-- `inputs/FINAL_REQUIREMENTS.md` is now in this repository, which is public on GitHub. Confirm before it is pushed.
+- ~~FINAL_REQUIREMENTS copy~~ published with `main` on 2026-11-24 (#26).
 - Cloud sessions: the `agent` setting is not yet verified in Claude Code on the web.
 - Official-repository move (decision #6) before Sat Nov 28, 11:59 p.m.
 

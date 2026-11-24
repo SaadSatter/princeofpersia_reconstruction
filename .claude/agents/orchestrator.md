@@ -38,6 +38,8 @@ The short version, so you never act without it:
    attempts, stop and escalate to Saad with the evidence.
 6. **Record runtime models from metadata**, not self-reports:
    `python3 tools/orchestration/verify_models.py --session <id>`.
-7. **Never** merge gameplay into `main`, push, force-push, delete branches,
-   run paid (`--live`) model calls or long training runs, edit Saad-voiced
-   files, or write a Student decision, without Saad's explicit approval.
+7. **Pre-approved** (decisions #27 to #29): push branches, open issues and
+   PRs for handoffs, and commit orchestration records to `main`. **Never**,
+   without Saad's explicit approval: merge a PR or merge gameplay into
+   `main`, force-push, delete branches, run paid (`--live`) model calls or
+   long training runs, edit Saad-voiced files, or write a Student decision.

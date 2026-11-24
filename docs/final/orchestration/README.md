@@ -189,7 +189,10 @@ A skipped test is reported as skipped, not passed.
 
 Changing design or scope; changing evaluation success criteria; any paid
 (`--live`) call; the full PPO training run; destructive git operations;
-pushing; merging into `main` (except orchestration records, decision #11) or
-into the official repository; submitting graded work; release decisions;
+merging a PR; merging into `main` (except orchestration records, decisions
+#11 and #29) or into the official repository; submitting graded work; release decisions;
 editing `.claude/**`, `.codex/**`, `AGENTS.md`, existing tests,
 `pyproject.toml`/`uv.lock` or the frozen midterm suite.
+
+Pre-approved (decisions #27 to #29): pushing branches (never force), issues
+and PRs for handoffs, and orchestration records committed to `main`.
