@@ -1,0 +1,7 @@
+{
+  "pyodide": "0.27.7",
+  "pyodide_url": "https://cdn.jsdelivr.net/pyodide/v0.27.7/full/",
+  "phaser": "3.88.2",
+  "phaser_url": "https://cdn.jsdelivr.net/npm/phaser@3.88.2/dist/phaser.min.js",
+  "playwright": "1.49.1"
+}

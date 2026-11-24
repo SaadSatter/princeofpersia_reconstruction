@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Shadow Masque</title>
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body { background: #0d0e12; color: #d8d4c8; font: 14px/1.4 system-ui, sans-serif; margin: 0; padding: 16px; }
+  h1 { font-size: 20px; margin: 0 0 8px; }
+  #game canvas { image-rendering: pixelated; }
+  #status, #frames, #hud, #outcome, #label, #rival { margin: 4px 0; }
+  #outcome { font-size: 18px; color: #f0c040; min-height: 1.4em; }
+  #label { color: #e08040; }
+  .keys { color: #9a968c; font-size: 13px; }
+  a { color: #a0b0ff; }
+</style>
+<!-- Versions are pinned in web/versions.json; tools/web/build.py fills these in. -->
+<script>window.SM_CONFIG = { pyodideUrl: "{{PYODIDE_URL}}" };</script>
+<script src="{{PYODIDE_URL}}pyodide.js"></script>
+<script src="{{PHASER_URL}}"></script>
+<script src="keys.js"></script>
+</head>
+<body>
+<h1>Shadow Masque</h1>
+<div id="status" data-state="loading">loading</div>
+<div id="label"></div>
+<div id="rival"></div>
+<div id="game"></div>
+<div id="hud"></div>
+<div id="outcome"></div>
+<div>frames: <span id="frames">0</span></div>
+<p class="keys">
+  Seat A: A/D run (Shift: careful step), W up / jump, S down, F attack (with W: throw,
+  with S: sweep; in the air: dive kick), G draw or sheathe, T take a uniform.
+  Seat B: arrows, <kbd>.</kbd> attack, <kbd>/</kbd> draw, <kbd>'</kbd> take, right Shift.
+  R: rematch.
+</p>
+<p class="keys">
+  <a href="?mode=ai">Human vs AI (seat A)</a> ·
+  <a href="?mode=ai&amp;rival=random">vs random placeholder</a> ·
+  <a href="?mode=local">Local two-player test</a>
+</p>
+<script src="main.js"></script>
+</body>
+</html>
