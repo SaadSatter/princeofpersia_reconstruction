@@ -13,7 +13,9 @@ The main session is the Production Orchestrator (`claude-opus-5-5`, set by
 `.claude/settings.json`). It spawns named workers (`claude-sonnet-5-5`):
 `tech-lead`, `qa`, `evaluation-specialist`, `requirements-auditor`,
 `rules-reviewer`. Work passes as committed report files
-(`HANDOFF_PROTOCOL.md`). Smoke test SMOKE-01: see `REVIEW_LOG.md`.
+(`HANDOFF_PROTOCOL.md`). Smoke test SMOKE-01 ran the full chain on 2026-11-24
+(brief 58ea6e7 → tech-lead fc16525 → qa 3bb36f5 → Gate 3 closed). The worker
+models were verified from transcripts as `claude-sonnet-5-5`. See `REVIEW_LOG.md`.
 
 Earlier work (2026-11-23/24 02:00 ET) was orchestrated from a claude.ai
 sandbox with generic subagents. Those briefs name `/home/claude/sm/...`
@@ -29,6 +31,8 @@ paths and are historical.
 | `orch/wip-T05-fix1` | ab78522 | unreviewed WIP snapshot | interrupted ~02:00 ET 2026-11-24. **Untested; never merge** |
 | `orch/wip-T08` | 25e4587 | unreviewed WIP snapshot | same |
 | `orch/wip-T04-fix3` | 76de25c | unreviewed WIP snapshot | same |
+| `task/SMOKE-01` | fc16525 | worker branch (closed task) | tech-lead report only; worktree `.claude/worktrees/agent-a9e1b3e19488bb69c` kept |
+| `gate/SMOKE-01-qa` | 3bb36f5 | gate branch (closed task) | QA report only; worktree `.claude/worktrees/agent-a3224446806667f0e` kept |
 
 No `rc/*` (approved release candidate) branch exists.
 
@@ -48,6 +52,7 @@ No `rc/*` (approved release candidate) branch exists.
 | unreviewed WIP | T04-fix3 | refuse shared controller (QA-5), in-flight race | — | `orch/wip-T04-fix3` (tests 7fe2e9c + WIP 76de25c) | none |
 | unreviewed WIP | T08 | scenario suite D1/B2/I3/F5 + held-out H6, CLI, analysis | — | `orch/wip-T08` 25e4587 | none |
 | blocked | T07 full training run | ~85 min PPO run | needs T05-fix1 closed **and** Saad's go-ahead | — | none |
+| closed | SMOKE-01 | orchestration smoke test: every path in README Files + CLAUDE.md Roles tables, and agent procedure pointers, exist on `main` | G1 ACCEPT WITH NOTES (1 minor), G2 n/a, G3 closed | `task/SMOKE-01` fc16525, `gate/SMOKE-01-qa` 3bb36f5 (not merged) | none |
 | not started | T03 | official-repository move (decision #6), `python -m team init` | — | — | — |
 | not started | T10 | "Changes since the last gate": GDD/Configuration still describe the LLM rival (Haiku 4.5, ~4 s decisions), which decision #3 replaced | — | — | — |
 
@@ -68,6 +73,8 @@ Deadline pressure: G2/G3 recording and the official-repository move are due
 
 ## Waiting on Saad
 
+- **SMOKE-01 minor finding:** `CLAUDE.md:76` names `agents/rl/` and `docs/final/RL_POLICY.md`, which are not on `main` (only on `orch/preview`, T07). Either leave it until T07 merges, or approve a `CLAUDE.md` wording change such as "on `orch/preview`". Editing `CLAUDE.md` needs your approval.
+- **SMOKE-01 branches:** `task/SMOKE-01` and `gate/SMOKE-01-qa` hold only the two reports. Merge them, keep them, or delete them (deleting needs you). The two worker worktrees are still registered.
 - **Student decision** on `handoff-drafts/2026-11-24-qa-to-tech.md` (G2/G3 handoff).
 - B2 "low suspicion" threshold (proposed below 50/100); D1 "on screen" = same room (proposed).
 - T06b: confirm "a sprung trap costs 1 heart in all".
