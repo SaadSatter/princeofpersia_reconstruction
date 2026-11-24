@@ -95,3 +95,4 @@ Gate 3 note, T05-fix1 (2026-11-24, orchestrator session 8edb65a6, started as the
 - With `--with numpy`, the new preview gives `1 failed, 1021 passed, 11 skipped, 4 xfailed`; the old preview (87606b9) gave `956 passed, 11 skipped, 3 xfailed`.
 - Without numpy, both heads fail to collect `tests/test_rl_policy.py` and `tests/test_rl_train.py`, because T07 needs numpy and it is not declared.
 - The merge is parked on `int/preview-T05-fix1` (b52d145). `orch/preview` stays at 87606b9 until T07's test is fixed (T07-fix1, with GATE-wave3).
+| 2026-11-24 | T04-fix3 (resumed) | brief (coordination commit) | orchestrator (session 8edb65a6) | claude-opus-5-5 (verified: transcript) | 5a2db64 on `main` | n/a | → `tasks/T04-fix3.md`@5a2db64 (Resumed note); issue #8 | dispatched tech-lead; base 7fe2e9c; WIP 76de25c reference only |

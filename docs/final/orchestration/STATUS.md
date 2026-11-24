@@ -63,7 +63,7 @@ No `rc/*` (approved release candidate) branch exists.
 | under review | T07 | PPO encoder, trainer, stdlib policy. **Full training not started** | G1, G2 pending (GATE-wave3) | `orch/preview` 1e34cf2 | none |
 | under review | T14 + fix1 | hosted web build (Pyodide + Phaser) | T14 G1/G2 accept w/ notes; fix1 G1/G2 pending (GATE-wave3) | `orch/preview` ca3667b | none |
 | closed (Gate 3, 2026-11-24) | T05 + T05-fix1 | macros + baseline; CLIMB both ways (#31), descent, lone-guard rule 5, mirror no longer deadlocked | G1 ACCEPT w/ notes (12c11bd), G2 ACCEPT w/ notes (1b303ff), G3 closed | `orch/reviewed` 2180fea; preview merge parked on `int/preview-T05-fix1` b52d145 (breaks one T07 test, see REVIEW_LOG) | issue #7 |
-| unreviewed WIP | T04-fix3 | refuse shared controller (QA-5), in-flight race | — | `orch/wip-T04-fix3` (tests 7fe2e9c + WIP 76de25c) | none |
+| **active** (tech-lead running, dispatched 2026-11-24) | T04-fix3 (resumed) | refuse shared controller (QA-5), keyed seed (eval-1), in-flight race | G1, G2 pending | `task/T04-fix3` from 7fe2e9c (brief@5a2db64); WIP `orch/wip-T04-fix3` 76de25c reference only | issue #8 |
 | unreviewed WIP | T08 | scenario suite D1/B2/I3/F5 + held-out H6, CLI, analysis | — | `orch/wip-T08` 25e4587 | none |
 | blocked | T07 full training run | ~85 min PPO run | T05-fix1 closed 2026-11-24; still needs T07 gates (GATE-wave3), T07-fix1, numpy declared, **and** Saad's go-ahead | — | none |
 | closed | SMOKE-01 | orchestration smoke test: every path in README Files + CLAUDE.md Roles tables, and agent procedure pointers, exist on `main` | G1 ACCEPT WITH NOTES (1 minor), G2 n/a, G3 closed | `task/SMOKE-01` fc16525, `gate/SMOKE-01-qa` 3bb36f5 (not merged) | none |
@@ -73,7 +73,7 @@ No `rc/*` (approved release candidate) branch exists.
 
 ## Next eligible task
 
-**T04-fix3 (resume)**, `tech-lead`, brief `tasks/T04-fix3.md` (add a "Resumed" note), WIP `orch/wip-T04-fix3` 76de25c for reference only. Then **GATE-wave3** (T06b, T07, T14-fix1 on `orch/preview`), folding in **T07-fix1**: the T07 test fixture collects 200 observations from one mirror duel, and that breaks after the T05-fix1 merge. Decision #32: one chain at a time.
+**T04-fix3 (resume) is running** (brief@5a2db64, issue #8). Then **GATE-wave3** (T06b, T07, T14-fix1 on `orch/preview`), folding in **T07-fix1**: the T07 test fixture collects 200 observations from one mirror duel, and that breaks after the T05-fix1 merge. Decision #32: one chain at a time.
 
 T05-fix1 follow-ups (minor, docs and tests; not blocking):
 - F-E3: MACROS.md must state that the planner assumes a floor below a bottom-row pit.
