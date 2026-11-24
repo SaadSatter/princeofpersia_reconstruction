@@ -68,3 +68,23 @@ def test_the_other_seat_sees_the_same_with_or_without_a_uniform():
             frames.append(ep.observe("A")["figures"])
         obs[uniform] = frames
     assert obs[True] == obs[False]
+
+
+def _lingering(seat, other, wait):
+    ep = episode(*((((2, 0, 7, +1), (2, 0, 1, +1)) if seat == "A"
+                    else ((2, 0, 1, +1), (2, 0, 7, +1)))),
+                 {"watch": (2, 0, (8, 8), -1)})
+    for _ in range(120):
+        if wait:
+            ep.step(seat, "WAIT")
+        ep.tick()
+    return ep._duel.suspicion.get(("watch", seat), 0)
+
+
+def test_repeated_wait_lingers_like_standing_idle_for_both_seats():
+    """R-V19 (QA3, Saad 2026-11-23): over 2 s within 1 cell raises suspicion
+    whether or not the rival re-sends WAIT."""
+    for seat in ("A", "B"):
+        idle = _lingering(seat, None, False)
+        assert idle > 0
+        assert _lingering(seat, None, True) == idle
