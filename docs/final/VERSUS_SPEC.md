@@ -132,6 +132,7 @@ Scripted, not AI (GDD). Hostile to both rivals equally.
 | R-V19 | Suspicion: each guard has a meter 0–100 **per rival**. It rises only while that guard sees the disguised rival (R-V14 sight) | Running +4/frame; jumping or climbing +6/frame; standing still within 1 cell for over 2 s +1/frame |
 | R-V20 | It falls when the rival walks (`STEP`), stands still out of reach, or is out of sight | −2/frame |
 | R-V21 | The disguise breaks at once on: drawing, any attack, or any guard's meter reaching 100 (decided); *proposed additions:* a stance change (it draws the sword anyway) and losing a heart. Then it is gone for the rest of the duel (one uniform per downed guard) | — |
+| R-V24 | A hop straight up (`UP` on open floor, not a climb) by a disguised rival in a guard's sight raises that guard's suspicion (Saad, 2026-11-23: "Hopping should raise suspicion") | +6/frame, the jumping or climbing step *(proposed, for Saad to confirm)* |
 
 ## 6. What each seat sees (leak rules)
 
@@ -218,5 +219,10 @@ implementation chose the values below; each is a constant and can change.
 Not done yet: the independent review after each stage (Section 9 asks for
 one before the next stage; it must run in a separate session to be
 independent), the game server and browser client, the AI seat in versus
-play, traps set by rivals, and the duel time limit (OQ-3: the limit is a
-parameter, default the inherited 60-minute clock).
+play, and traps set by rivals.
+
+Duel time limit (OQ-3, closed by Saad 2026-11-23: "Make the duel time limit
+5min"): 5 minutes, 3,600 frames at 12 per second (`pop/versus.py:DUEL_FRAMES`,
+the default for `Duel`, `VersusEpisode`, `arena_episode` and
+`play.py --versus`). The limit ends in `draw:time_up`; a seat's
+`minutes_left` counts down from the duel's own limit.

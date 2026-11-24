@@ -37,13 +37,15 @@ from . import observation
 from . import physics as P
 from . import tiles as T
 from .engine import ACTIONS, LEGAL_BY_POSTURE, Game, Kid
-from .guards import SIGHT_CELLS, Guard, blocked_between
+from .guards import (ALERT_DRAW_FRAMES, CHASE_FRAMES, PATROL_FRAMES, SIGHT_CELLS, Guard,
+                     blocked_between)
 from .mechanics import Mechanics
 from .physics import Cell, Geometry
 from .situations import Situation
 
 SEATS = ("A", "B")
 TICKS_PER_SECOND = 12                 # R-D26 display rate; VERSUS_SPEC 2.1
+DUEL_FRAMES = 5 * 60 * TICKS_PER_SECOND   # OQ-3, Saad 2026-11-23: "Make the duel time limit 5min"
 TASK = ("Duel: bring the other rival's hearts to 0. Both rivals act at the same "
         "time; the duel ends on a death, a double death, or the time limit.")
 OBSERVATION_KEYS = observation.OBSERVATION_KEYS | {"me", "figures", "swords", "suspicion"}
@@ -84,6 +86,15 @@ BREAKS_DISGUISE = ("DRAW", "LUNGE", "THROW", "KICK", "SWEEP")  # R-V21
 DIRECTIONAL = {d: (d, "STEP_" + d, "JUMP_" + d, "RUN_JUMP_" + d) for d in ("LEFT", "RIGHT")}
 HOPS = ("none", "bumped_ceiling")      # UP on open floor: a hop straight up (pop/engine.py _up)
 HOP_FLIPS = {"_HOP_FLIP_LEFT": -1, "_HOP_FLIP_RIGHT": +1}       # R-V22, started by the duel
+# R-V18 (T01, AUDIT-B F1): every motion a guard can show (pop/guards.py Guard.motion),
+# as (effect, frames). A disguised rival's move outside this set is shown to the
+# other seat only if it raises suspicion by rule (Duel.suspicious_rise); any
+# other move (a wait, a bump, a refused careful step, a crouch) is shown as
+# standing still, the way a paused guard is observed.
+GUARD_MOTIONS = frozenset({
+    ("moved", PATROL_FRAMES), ("moved", CHASE_FRAMES), ("turned", P.TURN),
+    ("drew", ALERT_DRAW_FRAMES), ("sheathed", ALERT_DRAW_FRAMES),
+    ("lunge", LUNGE_WINDUP + LUNGE_ACTIVE + LUNGE_RECOVERY)})
 
 
 class Rival(Game):
@@ -297,10 +308,10 @@ class Rival(Game):
 
 class Duel:
     def __init__(self, situation: Situation, starts: dict[str, tuple[int, int, int, int]],
-                 seed: int = 0, time_limit_frames: int = P.GAME_FRAMES,
+                 seed: int = 0, time_limit_frames: int = DUEL_FRAMES,
                  guard_posts: dict | None = None):
-        """time_limit_frames: OQ-3 (duel length) is open; the default is the
-        inherited 60-minute clock (R-C24) until Saad sets it.
+        """time_limit_frames: the duel's length; 5 minutes by default (OQ-3, closed
+        2026-11-23). The single-player 60-minute clock (R-C24) is unchanged.
         guard_posts: name -> (room, row, (c0, c1)[, facing]) (pop/arena.py)."""
         self.situation = situation
         self.seed = seed
@@ -320,6 +331,9 @@ class Duel:
         # frame began, so the seat id never decides where a move goes (R-V00).
         self._view: dict[str, dict] | None = None
         self.pending: dict[str, str | None] = {seat: None for seat in SEATS}
+        # Reporting only (AUDIT-B F3): queued inputs that never started.
+        self.replaced: dict[str, int] = {seat: 0 for seat in SEATS}
+        self.stale: dict[str, int] = {seat: 0 for seat in SEATS}
         self.last_result: dict[str, dict | None] = {seat: None for seat in SEATS}
         self.terminal: str | None = None
         self.guards = {name: Guard.at_post(name, post)
@@ -404,8 +418,26 @@ class Duel:
         d = (k.col - g.col) * g.facing
         return 1 <= d <= SIGHT_CELLS and not blocked_between(self.geom, self.mech, g.cell, k.cell)
 
+    def hopping(self, seat: str) -> bool:
+        """A hop straight up in progress: UP on open floor, not a climb (R-V24).
+        Crouching (DOWN) has the same effect name, "none", so the input decides."""
+        return (self.busy(seat) and self._move_action[seat] == "UP"
+                and (self.rivals[seat].plan or {}).get("effect") in HOPS)
+
+    def suspicious_rise(self, seat: str) -> int:
+        """Per-frame suspicion this rival's move in progress adds in a guard's
+        sight: running (R-V19), jumping or climbing (R-V19), hopping (R-V24)."""
+        m = self.motion(seat)
+        if m is None:
+            return 0
+        if m["effect"] == "moved" and m["frames"] == P.RUN:
+            return SUSPICION_RUN
+        if m["effect"] in LEAPS or self.hopping(seat):
+            return SUSPICION_LEAP
+        return 0
+
     def _suspect(self) -> None:
-        """R-V19 to R-V21: each guard's meter for each disguised rival."""
+        """R-V19 to R-V21, R-V24: each guard's meter for each disguised rival."""
         for seat, r in self.rivals.items():
             m = self.motion(seat)
             r.still = r.still + 1 if m is None else 0
@@ -419,10 +451,8 @@ class Duel:
                     if m is None:
                         delta = (SUSPICION_LINGER if r.still > LINGER_AFTER else 0) if near \
                             else -SUSPICION_FALL
-                    elif m["effect"] == "moved" and m["frames"] == P.RUN:
-                        delta = SUSPICION_RUN
-                    elif m["effect"] in LEAPS:
-                        delta = SUSPICION_LEAP
+                    elif self.suspicious_rise(seat):
+                        delta = self.suspicious_rise(seat)
                     elif m["effect"] == "moved":
                         delta = -SUSPICION_FALL                 # walking (a careful step)
                     else:
@@ -485,6 +515,8 @@ class Duel:
             i = STANCES.index(base) + (1 if action == "STANCE_UP" else -1)
             r.stance_change = (STANCES[i], STANCE_FRAMES)
             return
+        if self.pending[seat] is not None:
+            self.replaced[seat] += 1         # the latest press wins (VERSUS_SPEC 2.1)
         self.pending[seat] = action
 
     def tick(self) -> None:
@@ -562,9 +594,12 @@ class Duel:
                 self._finish(seat)
         action = self.pending[seat]
         self.pending[seat] = None
-        if action is not None and action != "KICK" and action in self.legal_actions(seat) \
-                and r.terminal is None and self._start(seat, action):
-            return
+        if action is not None:
+            if action != "KICK" and action in self.legal_actions(seat) and r.terminal is None:
+                if self._start(seat, action):
+                    return
+            else:
+                self.stale[seat] += 1        # no longer legal now that the rival is free
         r._tick()                            # free this frame: the world still acts on it
 
     def _hop_turn(self, seat: str) -> str | None:
@@ -903,6 +938,8 @@ def observe(duel: Duel, seat: str) -> dict:
     room = me.kid.room
     obs = observation.build(me, None, duel.last_result[seat])
     obs["task"] = TASK
+    # The duel's own clock, not the single-player one observation.build reads.
+    obs["minutes_left"] = max(0, (duel.time_limit - duel.frames) // (TICKS_PER_SECOND * 60))
     obs["me"] = {**obs["kid"], "stance": me.stance, "armed": me.armed,
                  "disguised": me.disguised, "knocked_down_frames": me.knocked_down,
                  "motion": _motion_view(duel, seat, room)}
@@ -912,12 +949,17 @@ def observe(duel: Duel, seat: str) -> dict:
             continue
         # R-V18: a disguised rival is observed exactly as a guard (same kind and
         # fields; sheathed, so stance None and armed False, like a patrolling guard).
+        motion = _motion_view(duel, other, room)
+        if (r.disguised and motion is not None
+                and (motion["effect"], motion["frames"]) not in GUARD_MOTIONS
+                and not duel.suspicious_rise(other)):
+            motion = None           # T01 / AUDIT-B F1: shown as a paused guard is
         figures.append({"kind": "guard" if r.disguised else "rival",
                         "row": r.kid.row, "col": r.kid.col,
                         "facing": "right" if r.kid.facing > 0 else "left",
                         "posture": "knocked_down" if r.knocked_down else r.kid.posture,
                         "stance": r.stance, "armed": r.armed,
-                        "motion": _motion_view(duel, other, room)})
+                        "motion": motion})
     for g in duel.guards.values():
         if g.room != room:
             continue
@@ -951,7 +993,7 @@ class VersusEpisode:
     and server only. Seats never receive the Duel."""
 
     def __init__(self, situation: Situation, starts: dict[str, tuple[int, int, int, int]],
-                 seed: int = 0, time_limit_frames: int = P.GAME_FRAMES,
+                 seed: int = 0, time_limit_frames: int = DUEL_FRAMES,
                  guard_posts: dict | None = None):
         self._situation = situation
         self._starts = dict(starts)
@@ -1000,7 +1042,9 @@ class VersusEpisode:
         t = self._duel.terminal
         return {"status": "ongoing" if t is None else "terminal", "reason": t,
                 "frames": self._duel.frames, "inputs": dict(self.inputs),
-                "invalid_inputs": dict(self.invalid)}
+                "invalid_inputs": dict(self.invalid),
+                "stale_inputs": dict(self._duel.stale),
+                "replaced_inputs": dict(self._duel.replaced)}
 
     # runner and server only
     def tick(self) -> None:
@@ -1017,7 +1061,7 @@ def _check_seat(seat: str) -> None:
         raise ValueError(INVALID_SEAT)
 
 
-def arena_episode(seed: int = 0, time_limit_frames: int = P.GAME_FRAMES) -> VersusEpisode:
+def arena_episode(seed: int = 0, time_limit_frames: int = DUEL_FRAMES) -> VersusEpisode:
     """The six-room arena (pop/arena.py) with both rivals at their starts."""
     from . import arena
     return VersusEpisode(arena.situation("A"), arena.STARTS, seed, time_limit_frames,
