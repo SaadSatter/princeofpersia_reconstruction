@@ -36,3 +36,12 @@ Saad asked in chat: "What do you mean the numpy isnt a declared dependecy? Just 
 | 37 | WebSocket dependency | "websockets, online extra (Recommended)" | Optional extra `online = ["websockets>=13,<16"]` in `pyproject.toml`, and `uv.lock` refreshed. The base install is unchanged. Tests use no network beyond localhost |
 | 38 | OQ-13 disconnect | "Pause 15 s, then forfeit (Recommended)" | On disconnect the duel pauses for both players. A reconnect within 15 s resumes it; otherwise the disconnected seat loses, and the end screen says why. OQ-13 closed |
 | 39 | Task order (amends #32) | "T13 alongside reviews (Recommended)" | Finish T04-fix3 and T15, then run T13 (tech-lead) **at the same time as** GATE-wave3 (QA and Eval, tests and reports only; disjoint paths). Otherwise one chain at a time |
+
+## Addendum: Tue 2026-11-24, evening (numpy scope, rematch)
+
+Saad, in chat (verbatim): "add numpy as a train extra, also to call for a rematch, a button in the style of the game should popup for rematch"
+
+| # | Topic | Saad's answer (verbatim excerpt) | Orchestrator's reading and effect |
+|---|---|---|---|
+| 40 | numpy also in the `dev` group? | "add numpy as a train extra" | numpy stays an optional `train` extra only, as built in T15 (closed, `orch/reviewed` 199f858). It is not added to the `dev` group. The full suite is run with `--extra train` |
+| 41 | Rematch trigger (T13, and #25) | "to call for a rematch, a button in the style of the game should popup for rematch" | When a duel ends, a **Rematch** button pops up on each player's screen, drawn in the game's own pixel-art dungeon style (existing palette and art, no new generated asset). Pressing it requests a rematch; the duel restarts with the same seed (#25). Online, **both** players must press it, and the first to press sees "waiting for rival". The "both" part is the orchestrator's reading, flagged for Saad to confirm at review |
