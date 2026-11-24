@@ -8,6 +8,9 @@ malformed answer with a `WAIT` labelled `source: "fallback"`.
 
 from __future__ import annotations
 
+import json
+import math
+import threading
 import time
 
 import pytest
@@ -391,11 +394,6 @@ def test_controllers_must_fill_both_seats_and_cadence_is_positive():
 
 
 # --- T04-fix1: gate findings and the trusted hooks ------------------------------------
-import json  # noqa: E402
-import math  # noqa: E402
-import threading  # noqa: E402
-
-
 class NpStr(str):
     """Like numpy.str_: a str subclass a policy may return."""
 

@@ -5,8 +5,11 @@ A controller is anything with `name`, `kind` and
 `reset(seed)`. The versus runner (pop/versus_runner.py) is the only caller.
 It hands a controller deep copies of its own seat's observation and legal list,
 and never the episode, the duel, the other seat or the episode seed. `reset`
-gets `controller_seed(seed, seat)`, a number derived from the episode seed, so
-a controller cannot rebuild the engine's random stream from it.
+gets `controller_seed(seed, seat)`, a number derived from the episode seed.
+Unkeyed (the default) that hash is one-way but not secret: a controller that
+can call `controller_seed` can find a small episode seed by trying them all
+(GATE-T04-eval-1). A runner given a `seed_key` that controllers never see
+uses a keyed hash instead, which cannot be enumerated without the key.
 
 Kinds: "human" (input queued by a frontend), "scripted" (baselines and test
 scripts), "policy" (a trained or generative model) and "fallback" (always WAIT).
@@ -15,6 +18,7 @@ scripts), "policy" (a trained or generative model) and "fallback" (always WAIT).
 from __future__ import annotations
 
 import hashlib
+import hmac
 import random
 from typing import Callable, Protocol, runtime_checkable
 
@@ -30,9 +34,18 @@ class SeatController(Protocol):
     def decide(self, observation: dict, legal: tuple[str, ...]) -> str: ...
 
 
-def controller_seed(seed: int, seat: str) -> int:
-    """A per-seat seed derived from the episode seed by a one-way hash."""
-    digest = hashlib.sha256(f"shadow-masque:controller:{seed}:{seat}".encode()).digest()
+def controller_seed(seed: int, seat: str, key: bytes | None = None) -> int:
+    """A per-seat seed derived from the episode seed.
+
+    Without `key`: SHA-256, deterministic and reproducible by anyone (the
+    default, so evaluation runs repeat exactly). With `key`: HMAC-SHA-256,
+    still deterministic for the holder of the key, but a controller without
+    the key cannot enumerate episode seeds to invert it."""
+    message = f"shadow-masque:controller:{seed}:{seat}".encode()
+    if key is None:
+        digest = hashlib.sha256(message).digest()
+    else:
+        digest = hmac.new(bytes(key), message, hashlib.sha256).digest()
     return int.from_bytes(digest[:8], "big")
 
 
