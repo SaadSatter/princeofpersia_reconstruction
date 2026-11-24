@@ -617,3 +617,38 @@ def test_exception_whose_str_raises_is_still_an_error_fallback(threaded):
     res = run({"A": Thrower(), "B": WaitController()}, limit=12, threaded=threaded)
     assert [r["fallback_reason"] for r in res["traces"]["A"]] == ["error", "error"]
     assert "Nasty" in res["traces"]["A"][0]["error"]
+
+
+# --- T04-fix3: in-flight mark at call start (GATE-w2-QA-1 / eval-1) ---------------
+def test_concurrent_runners_never_call_one_controller_at_once_forced_overlap():
+    """Runner 1 is inside `decide` (held by an event) when runner 2 starts.
+    Runner 2 must not call the controller: every one of its asks is `busy`.
+    Events force the overlap, no sleeps decide the outcome."""
+    entered, release = threading.Event(), threading.Event()
+    calls: list[int] = []
+
+    class Held:
+        kind, name = "scripted", "held"
+
+        def decide(self, observation, legal):
+            calls.append(1)
+            entered.set()
+            release.wait(10)
+            return "WAIT"
+
+    held = Held()
+    mk = lambda: VersusRunner(lambda: arena_episode(time_limit_frames=12),
+                              {"A": held, "B": WaitController()},
+                              limits=VersusLimits(timeout_s=5.0))
+    first: list[dict] = []
+    t1 = threading.Thread(target=lambda: first.append(mk().run(1)))
+    t1.start()
+    assert entered.wait(10)                      # runner 1 is inside decide now
+    second = mk().run(1)                         # runner 2 runs to its end meanwhile
+    release.set()
+    t1.join(10)
+    assert len(calls) == len(first[0]["traces"]["A"])      # only runner 1 ever called it
+    s = second["seats"]["A"]
+    assert s["busy"] == s["decisions"] > 0
+    assert {r["fallback_reason"] for r in second["traces"]["A"]} == {"busy"}
+    assert first[0]["seats"]["A"]["busy"] == 0

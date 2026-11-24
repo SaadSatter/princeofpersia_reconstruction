@@ -137,26 +137,39 @@ def test_throughput_is_adequate_for_policy_training():
     assert decisions / (time.perf_counter() - t0) > 250
 
 
-# --- findings (xfail strict) ------------------------------------------------------
-@pytest.mark.xfail(strict=True, reason="GATE-T04-eval-1: controller_seed is unkeyed, so a "
-                   "controller recovers the episode seed and its seat by enumeration")
-def test_controller_cannot_recover_the_episode_seed_from_its_reset_seed():
-    class Thief:
-        kind, name = "scripted", "thief"
-        found = None
+# --- findings -------------------------------------------------------------------------
+class _Thief:
+    """Enumerates small episode seeds and checks them against the seed it got."""
+    kind, name = "scripted", "thief"
 
-        def reset(self, s):
-            for cand in range(100_000):
-                for seat in SEATS:
-                    if controller_seed(cand, seat) == s:
-                        Thief.found = (cand, seat)
-                        return
+    def __init__(self) -> None:
+        self.found = None
 
-        def decide(self, observation, legal):
-            return "WAIT"
+    def reset(self, s):
+        for cand in range(20_000):
+            for seat in SEATS:
+                if controller_seed(cand, seat) == s:
+                    self.found = (cand, seat)
+                    return
 
-    VersusRunner(factory(6), {"A": WaitController(), "B": Thief()}, clock=FakeClock()).run(4242)
-    assert Thief.found is None
+    def decide(self, observation, legal):
+        return "WAIT"
+
+
+def test_keyed_controller_seed_cannot_be_recovered_by_enumeration():
+    # Decision #24 (GATE-T04-eval-1): evaluation runs pass a seed_key.
+    thief = _Thief()
+    VersusRunner(factory(6), {"A": WaitController(), "B": thief}, clock=FakeClock(),
+                 seed_key=b"evaluator-secret").run(4242)
+    assert thief.found is None
+
+
+def test_unkeyed_controller_seed_is_reproducible_but_recoverable_by_design():
+    # Documented default (docs/final/VERSUS_RUNNER.md): no key, so runs repeat
+    # without one, and a controller can invert a small seed. Not for evaluation.
+    thief = _Thief()
+    VersusRunner(factory(6), {"A": WaitController(), "B": thief}, clock=FakeClock()).run(4242)
+    assert thief.found == (4242, "B")
 
 
 def test_decide_is_never_called_while_an_abandoned_call_is_still_running():

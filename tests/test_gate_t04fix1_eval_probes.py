@@ -211,11 +211,12 @@ def test_busy_never_runs_two_calls_concurrently_and_is_counted():
     assert {r["fallback_reason"] for r in recs} <= {"timeout", "busy"}
 
 
-def test_same_instance_in_both_seats_busy_blocks_both():
+def test_same_instance_in_both_seats_is_refused():
+    # Decision #24 (QA-5) and #33: one controller object in both seats is a
+    # channel between seats, so the runner refuses it.
     s = Slow("s", 0.25)
-    res = VersusRunner(factory(120), {"A": s, "B": s},
-                       limits=VersusLimits(timeout_s=0.05)).run(1)
-    assert s.max_active == 1
+    with pytest.raises(ValueError):
+        VersusRunner(factory(120), {"A": s, "B": s}, limits=VersusLimits(timeout_s=0.05))
 
 
 def test_busy_recovers_after_late_call_returns():
