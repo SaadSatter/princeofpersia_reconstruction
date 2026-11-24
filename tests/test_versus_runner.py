@@ -602,3 +602,20 @@ def test_keyed_controller_seed_is_used_when_the_runner_has_a_key():
     run({"A": a, "B": b}, limit=6, seed=11, seed_key=b"evaluation-secret")
     assert a.resets == [controller_seed(11, "A", key=b"evaluation-secret")]
     assert a.resets != [controller_seed(11, "A")]
+
+
+@pytest.mark.parametrize("threaded", [True, False])
+def test_exception_whose_str_raises_is_still_an_error_fallback(threaded):
+    class Nasty(Exception):
+        def __str__(self):
+            raise RuntimeError("str failed")
+
+    class Thrower:
+        kind, name = "policy", "thrower"
+
+        def decide(self, observation, legal):
+            raise Nasty()
+
+    res = run({"A": Thrower(), "B": WaitController()}, limit=12, threaded=threaded)
+    assert [r["fallback_reason"] for r in res["traces"]["A"]] == ["error", "error"]
+    assert "Nasty" in res["traces"]["A"][0]["error"]
