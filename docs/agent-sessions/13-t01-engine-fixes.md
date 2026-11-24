@@ -67,3 +67,27 @@ and anthropic absent):
   the move in progress). Not changed: a rule question for Saad.
 - `docs/agent-sessions/README.md` and `docs/final/EVIDENCE_INDEX.md` not
   updated (outside this task's write paths).
+
+## T01-fix1 (2026-11-23, tech-lead subagent, branch task/T01-fix1 from 83127cf)
+
+Corrective work after the T01 gates (inputs: GATE-T01-qa, GATE-T01-eval,
+decision 15).
+
+- L1: R-V26, TAKE always legal over a downed guard; no uniform gives
+  `last_result.effect = "no_uniform"` and nothing else. Marks removed:
+  `GATE-T01-eval-L1` in `tests/test_gate_t01_eval_boundary.py`.
+- L2: figure order sorts on every observed field. Mark removed:
+  `GATE-T01-eval-L2`.
+- QA1: a disguised move that ends in another room is masked (`motion: null`)
+  under R-V25 unless it raises suspicion. Mark removed: `GATE-T01-QA1` in
+  `tests/test_gate_t01_qa_disguise.py`.
+- Left xfail for Saad: QA2 (postures), QA3 (WAIT and lingering). R-V24's amount
+  untouched.
+- `tests/test_disguise.py::test_take_needs_a_downed_uniformed_guard_ahead`
+  asserts the pre-decision rule (no TAKE once the uniform is gone) and now
+  fails; it is an existing test, so it was not edited (needs Saad's approval).
+- Also updated VERSUS_SPEC section 2.2 (outcome keys added by T01) and the
+  R-V26 row.
+- QA3 (added by Saad 2026-11-23, "Yes, fix it"): a re-sent WAIT counts as
+  standing still for R-V19 lingering. Mark removed: `GATE-T01-QA3` in
+  `tests/test_gate_t01_qa_disguise.py`. QA2 stays xfail.

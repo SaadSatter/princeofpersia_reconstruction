@@ -55,7 +55,7 @@ mechanics only, no names, art or code from it.
 | `observe(seat)` | That seat's view only (Section 6) |
 | `legal_actions(seat)` | The inputs that seat may submit now |
 | `step(seat, action)` | Validates and queues the seat's input; refused input changes nothing and is counted, as in the midterm |
-| `outcome()` | `ongoing`, or terminal with reason: `won:A`, `won:B`, `draw:both_died`, `draw:time_up` (GDD 5.3) |
+| `outcome()` | `status` (`ongoing` or `terminal`) and `reason` (`won:A`, `won:B`, `draw:both_died`, `draw:time_up`, GDD 5.3), plus reporting counters: `frames`, `inputs`, `invalid_inputs`, `stale_inputs` and `replaced_inputs` (each per seat; added by T01; reporting and terminal reward only, never an observation feature) |
 | runner and server only: `tick()` | Advances one frame; never exposed to a seat |
 
 ### 2.3 Inputs (action vocabulary)
@@ -129,10 +129,11 @@ Scripted, not AI (GDD). Hostile to both rivals equally.
 | --- | --- | --- |
 | R-V17 | `TAKE` beside a downed, uniformed guard: the rival kneels, takes the uniform and is disguised; its sword is sheathed under it | 12 frames |
 | R-V18 | A disguised rival is drawn, and observed by the other seat, **exactly** as a guard (Section 6). Guards ignore a disguised rival whose suspicion is not full | — |
-| R-V19 | Suspicion: each guard has a meter 0–100 **per rival**. It rises only while that guard sees the disguised rival (R-V14 sight) | Running +4/frame; jumping or climbing +6/frame; standing still within 1 cell for over 2 s +1/frame |
+| R-V19 | Suspicion: each guard has a meter 0–100 **per rival**. It rises only while that guard sees the disguised rival (R-V14 sight) | Running +4/frame; jumping or climbing +6/frame; standing still within 1 cell for over 2 s +1/frame (a re-sent `WAIT` counts as standing still; Saad, 2026-11-23, "Yes, fix it") |
 | R-V20 | It falls when the rival walks (`STEP`), stands still out of reach, or is out of sight | −2/frame |
 | R-V21 | The disguise breaks at once on: drawing, any attack, or any guard's meter reaching 100 (decided); *proposed additions:* a stance change (it draws the sword anyway) and losing a heart. Then it is gone for the rest of the duel (one uniform per downed guard) | — |
 | R-V24 | A hop straight up (`UP` on open floor, not a climb) by a disguised rival in a guard's sight raises that guard's suspicion (Saad, 2026-11-23: "Hopping should raise suspicion") | +6/frame, the jumping or climbing step *(proposed, for Saad to confirm)* |
+| R-V26 | `TAKE` is legal whenever a downed guard is in this rival's own cell or the cell ahead, **whether or not its uniform is still there** (Saad, 2026-11-23, decision 15: "TAKE always legal"). With a uniform it is R-V17. Without one the input is accepted, plays the same 12 `TAKE` frames, changes nothing else and reports `last_result.effect: "no_uniform"` to the acting seat. The other seat sees the same frames either way | 12 frames |
 
 ## 6. What each seat sees (leak rules)
 
