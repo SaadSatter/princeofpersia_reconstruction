@@ -253,14 +253,15 @@ def test_busy_trace_is_wallclock_dependent_but_replay_is_exact():
     assert replay(f, loaded)["frames"] == res["frames"]
 
 
-def test_busy_state_is_per_runner_instance():
-    """Two runners sharing one controller (a pool of trial runners) can call it concurrently."""
+def test_busy_state_is_shared_across_runner_instances():
+    """Two runners sharing one controller never call it concurrently (T04-fix2 closes the gap
+    this probe documented in T04-fix1)."""
     s = Slow("s", 0.3)
     f = factory(24)
     lim = VersusLimits(timeout_s=0.02)
     VersusRunner(f, {"A": s, "B": WaitController()}, limits=lim).run(1)
     VersusRunner(f, {"A": s, "B": WaitController()}, limits=lim).run(1)
-    assert s.max_active >= 2        # documents the gap (reported as a note)
+    assert s.max_active == 1
 
 
 def test_inline_mode_has_no_real_time_bound_but_labels_slow_call_by_clock():

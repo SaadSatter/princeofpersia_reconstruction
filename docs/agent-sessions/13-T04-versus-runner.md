@@ -92,3 +92,11 @@ branch.
 - Gate tests copied with marks removed, before the fix: `45 failed, 477 passed, 12 skipped, 2 xfailed`.
 - After the fix, on `task/T04-fix1`: `python3 -m pytest -q -p no:cacheprovider` -> `524 passed, 12 skipped, 2 xfailed`.
 - Scratch merge of `task/T04-fix1` with `task/T01` (`83127cf`), not committed to the branch: the same command -> `617 passed, 12 skipped, 2 xfailed`.
+
+## T04-fix2 (second correction round)
+
+- **Brief:** `tasks/T04-fix2.md`; findings from GATE-T04-fix1 (QA and Eval, both ACCEPT WITH NOTES).
+- **Failing tests first:** the two fix1 gate files copied, `xfail` removed for QA-F1/eval-1 (class-spoofing answer), QA-F2 (busy across runner instances) and QA-F3 (`decision_every` 1.5 / True). Result before the fix: `6 failed, 95 passed` in those two files. The eval probe that documented the busy gap (`test_busy_state_is_per_runner_instance`) was flipped to assert the closed behaviour and renamed.
+- **Fix:** answers are text only if `issubclass(type(value), str)`, normalisation is guarded (any failure is `malformed`); busy is tracked in a module-level registry keyed by controller, so it holds across runner instances; `decision_every` must be an `int` >= 1 and not a bool.
+- **Docs:** `docs/final/VERSUS_RUNNER.md` states that real-timeout traces are not reproducible (replay is), that a still-busy controller is not reset (`reset_error: "busy"`; invalidate the trial or use fresh controllers) and that inline mode has no real-time bound.
+- **Result:** `625 passed, 12 skipped, 2 xfailed` (`python3 -m pytest -q -p no:cacheprovider`). The two xfails are QA-5 and the unkeyed-seed note, unchanged.

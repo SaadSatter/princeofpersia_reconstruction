@@ -52,6 +52,13 @@ MAX_ANSWER_CHARS = 80
 COPY_MODES = ("deepcopy", "json")      # how a controller's observation copy is made
 BUSY_ERROR = "an earlier call to this controller has not returned"
 
+# id(controller) -> its call that timed out and may still be running. Module
+# level, so it holds across runner instances sharing a controller (the
+# seat-swapped pair; GATE-T04-fix1-QA-F2). While the thread lives it holds the
+# controller's bound method, so the id cannot be reused by another object.
+_LATE: dict[int, threading.Thread] = {}
+_LATE_LOCK = threading.Lock()
+
 
 @dataclass
 class VersusLimits:
@@ -99,6 +106,12 @@ def winner(reason: str | None, seating: Mapping[str, str]) -> tuple[str | None, 
     return None, None
 
 
+def _is_str(value) -> bool:
+    """True only if the value's real type is a str (or subclass). `isinstance`
+    asks `value.__class__`, which an answer can spoof (GATE-T04-fix1-QA-F1)."""
+    return issubclass(type(value), str)
+
+
 def _plain_str(value: str) -> str:
     """An exact `str` with the same characters. A str subclass can override
     `__eq__` (passes `in legal`, GATE-T04-QA-1) or `strip` (the episode would
@@ -110,15 +123,15 @@ def _plain_str(value: str) -> str:
 def _answer_text(value) -> str:
     """A refused answer, printable and short, for the trace. Never raises
     (a `__repr__` that raises is QA-3)."""
-    if isinstance(value, str):
-        text = _plain_str(value)
-    else:
-        try:
+    try:
+        if _is_str(value):
+            text = _plain_str(value)
+        else:
             text = repr(value)
-            if type(text) is not str:
-                raise TypeError
-        except BaseException:  # noqa: BLE001 - controller-made object; record its type only
-            text = f"<unprintable {type(value).__name__}>"
+        if type(text) is not str:
+            raise TypeError
+    except BaseException:  # noqa: BLE001 - controller-made object; record its type only
+        text = f"<unprintable {type(value).__name__}>"
     return text if len(text) <= MAX_ANSWER_CHARS else text[:MAX_ANSWER_CHARS] + "..."
 
 
@@ -203,6 +216,9 @@ class VersusRunner:
         recorded in the result or the traces."""
         if set(controllers) != set(SEATS):
             raise ValueError("controllers must be given for exactly seats A and B")
+        if type(decision_every) is not int:        # bool and floats are not a cadence
+            raise TypeError(
+                f"decision_every must be an int, not {type(decision_every).__name__}")
         if decision_every < 1:
             raise ValueError("decision_every must be at least 1")
         if copy_mode not in COPY_MODES:
@@ -212,9 +228,6 @@ class VersusRunner:
         self.threaded = bool(threaded)
         self._copy = copy.deepcopy if copy_mode == "deepcopy" else _json_copy
         self._seed_key = seed_key
-        # id(controller) -> its call that timed out and may still be running.
-        # Kept across runs: a controller instance can outlive one episode.
-        self._late: dict[int, threading.Thread] = {}
         self.episode_factory = episode_factory
         self.controllers = dict(controllers)
         self.decision_every = decision_every
@@ -226,11 +239,12 @@ class VersusRunner:
 
     # --- one call to a controller ------------------------------------------------
     def _busy(self, ctrl) -> bool:
-        late = self._late.get(id(ctrl))
-        if late is not None and not late.is_alive():
-            del self._late[id(ctrl)]
-            late = None
-        return late is not None
+        with _LATE_LOCK:
+            late = _LATE.get(id(ctrl))
+            if late is not None and not late.is_alive():
+                del _LATE[id(ctrl)]
+                late = None
+            return late is not None
 
     def _call(self, ctrl, fn, args: tuple):
         """(value, error, busy). A busy controller is not called at all."""
@@ -238,7 +252,8 @@ class VersusRunner:
             return None, BUSY_ERROR, True
         value, error, late = _call(fn, args, self.limits.timeout_s, self.threaded)
         if late is not None:
-            self._late[id(ctrl)] = late
+            with _LATE_LOCK:
+                _LATE[id(ctrl)] = late
         return value, error, False
 
     # --- one decision ---------------------------------------------------------
@@ -253,12 +268,19 @@ class VersusRunner:
             reason, error = "timeout", "timeout"
         elif error is not None:
             reason = "error"
-        elif not isinstance(value, str):
-            reason, error = "malformed", "answer is not a string"
-        elif _plain_str(value) not in legal:
-            reason, error = "illegal", "answer is not in the seat's legal list"
+        else:
+            # Normalise inside a guard: any failure is a malformed answer, never
+            # a crash of the run (eval-1, QA-F1).
+            try:
+                text = _plain_str(value) if _is_str(value) else None
+            except BaseException:  # noqa: BLE001 - controller-made object
+                text = None
+            if text is None:
+                reason, error = "malformed", "answer is not a string"
+            elif text not in legal:
+                reason, error = "illegal", "answer is not in the seat's legal list"
         if reason is None:
-            chosen, source, answer = _plain_str(value), "controller", None
+            chosen, source, answer = text, "controller", None
         else:
             chosen = FALLBACK_ACTION if FALLBACK_ACTION in legal else None
             source = "fallback"
