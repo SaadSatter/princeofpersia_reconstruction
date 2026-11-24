@@ -66,8 +66,6 @@ def shown(fig):
 
 
 # --- F1 -------------------------------------------------------------------------
-@pytest.mark.xfail(strict=True, reason="T02-F1: a disguised WAIT shows motion "
-                   "'waited' (6 frames); a paused guard shows motion None")
 def test_qa_t02_disguised_wait_matches_paused_guard():
     """AUDIT-B F1 as a test. B (the observer) stands in room 2 row 1. In one game
     the disguised rival A stands at (2,0,4) facing left and sends WAIT; in the
@@ -103,9 +101,7 @@ def _cases():
     for action in ("WAIT", "LEFT", "RIGHT", "STEP_LEFT", "STEP_RIGHT", "JUMP_LEFT",
                    "JUMP_RIGHT", "RUN_JUMP_LEFT", "RUN_JUMP_RIGHT", "UP", "DOWN",
                    "DRAW", "SWEEP"):
-        marks = ([pytest.mark.xfail(strict=True, reason=EXPECTED_TELLS[action])]
-                 if action in EXPECTED_TELLS else [])
-        out.append(pytest.param(action, marks=marks, id=action))
+        out.append(pytest.param(action, id=action))
     return out
 
 
@@ -140,8 +136,6 @@ def test_qa_t02_disguised_motion_is_a_guard_motion_or_costs_the_disguise(action)
         f"and the disguise kept")
 
 
-@pytest.mark.xfail(strict=True, reason="T02-F2 / R-V24 (Saad 2026-11-23: 'Hopping "
-                   "should raise suspicion'), not built at 13c7488")
 def test_qa_t02_disguised_hop_in_a_guards_sight_raises_suspicion():
     ep = episode((2, 0, 5, -1), PARKED, {"watch": (2, 0, (1, 1), +1)})
     disguise(ep, "A")
