@@ -9,8 +9,10 @@ Priorities, first match wins:
   2. a figure labelled "rival", or a "guard" with a tell (below): STRIKE it;
   3. a "guard" with a weaker tell: FOLLOW it, to give it the chance to show one;
   4. not disguised and a downed guard in view: DISGUISE (nearest uniform);
-  5. not disguised, one standing guard in view, two or more hearts: STRIKE it
-     (down it for its uniform);
+  5. not disguised, one standing guard in view: STRIKE it only when the matchup
+     favours it (full hearts, and the guard knocked down, or unarmed, walking
+     and facing away); an armed guard that has come for me: FLEE the room
+     (STRIKE if cornered); otherwise keep away from its sight line (rule 7);
   6. disguised with suspicion above half, or one heart: BLEND;
   7. otherwise SEARCH for the rival (walking, if disguised).
 
@@ -34,6 +36,8 @@ LEAPS = ("jumped", "flipped", "climbed", "hanging", "dropped")
 AVOID_FOR = 8                 # decisions to leave a failed macro alone
 FLEE_RANGE = 4
 BLEND_SUSPICION = 50
+FAVOUR_HP = 3                 # full hearts (hearts are 3): a lone-guard fight must not cost one
+DANGER_RANGE = 3              # an armed guard this close in my row has come for me
 
 
 class FigureTracker:
@@ -135,14 +139,35 @@ class VersusBaseline:
             if any(f["posture"] == "downed" for f in obs["figures"]) and self._ok("DISGUISE"):
                 return "DISGUISE"
             guards = [f for f in figs if f["kind"] == "guard"]
-            if len(guards) == 1 and me["hp"] >= 2 and self._ok("STRIKE"):
+            if len(guards) == 1:
                 g = guards[0]
-                return "STRIKE", {"suspects": [(g["row"], g["col"])]}
+                if self._favours(me, g) and self._ok("STRIKE"):
+                    return "STRIKE", {"suspects": [(g["row"], g["col"])]}
+                if (g["armed"] and g["row"] == me["row"] and g["posture"] == "standing"
+                        and abs(g["col"] - me["col"]) <= DANGER_RANGE):
+                    if self._ok("FLEE"):
+                        return "FLEE", {"suspects": [(g["row"], g["col"])]}
+                    if self._ok("STRIKE"):
+                        return "STRIKE", {"suspects": [(g["row"], g["col"])]}
         else:
             level = max([s["level"] for s in obs.get("suspicion", [])] or [0])
             if (level > BLEND_SUSPICION or me["hp"] <= 1) and self._ok("BLEND"):
                 return "BLEND"
-        return "SEARCH"
+        return "SEARCH", {"prefer": "down"}
+
+    @staticmethod
+    def _favours(me: dict, g: dict) -> bool:
+        """A lone guard worth fighting: at full hearts, one that is knocked down (a
+        lunge always hits, R-V12) or unarmed, walking, with its back to me (a lunge
+        lands before it sees me). An armed guard otherwise wins too often."""
+        if me["hp"] < FAVOUR_HP or me["disguised"]:
+            return False
+        if g["posture"] == "knocked_down":
+            return True
+        if g["posture"] != "standing" or g["armed"] or g["motion"] is None:
+            return False
+        behind = (g["col"] > me["col"]) == (g["facing"] == "right")
+        return g["row"] == me["row"] and g["col"] != me["col"] and behind
 
 
 def make_baseline(name: str = "versus-baseline", decision_every: int = 6) -> MacroController:

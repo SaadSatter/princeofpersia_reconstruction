@@ -239,6 +239,21 @@ def _hp(ep, seat="A") -> int:
     return ep._duel.rivals[seat].kid.hp
 
 
+def drive_one(ep, seat, ctrl, frames):
+    """Decide every EVERY frames until the first macro event (done or failed), then stop
+    ticking, so the asserts see the state the macro ended in, not a later macro's."""
+    for f in range(frames):
+        if f % EVERY == 0:
+            legal = tuple(ep.legal_actions(seat))
+            if not legal:
+                break
+            ep.step(seat, ctrl.decide(copy.deepcopy(ep.observe(seat)), legal))
+            if ctrl.events:
+                break
+        ep.tick()
+    return ctrl.events[0] if ctrl.events else None
+
+
 def _custom(rooms, links, a, b, posts=None):
     sit = dataclasses.replace(arena.situation("A"), rooms=rooms, links=links,
                               plate_links={}, gates_open=())
@@ -248,25 +263,27 @@ def _custom(rooms, links, a, b, posts=None):
 def test_climb_down_drops_one_row_inside_the_room():
     ep = episode(a=(1, 0, 6, +1))                    # row 0, pit at col 8 over the middle floor
     ctrl = MacroController(Fixed("CLIMB", {"direction": "down"}), decision_every=EVERY)
-    drive(ep, "A", ctrl, 240)
+    ev = drive_one(ep, "A", ctrl, 400)
+    for _ in range(30):                              # let the fall finish
+        ep.tick()
+    assert ev["event"] == "macro_done" and ev["reason"] == "dropped"
     assert (_room_of(ep), ep._duel.rivals["A"].kid.row) == (1, 1) and _hp(ep) == 3
-    assert ctrl.executor.state == "done"
 
 
 def test_climb_down_leaves_the_room_through_a_pit_in_the_bottom_row():
     ep = episode(a=(1, 2, 5, +1))                    # shaft at col 7 down to the Barracks
     ctrl = MacroController(Fixed("CLIMB", {"direction": "down"}), decision_every=EVERY)
-    drive(ep, "A", ctrl, 300)
+    ev = drive_one(ep, "A", ctrl, 400)
+    assert ev["event"] == "macro_done" and ev["reason"] == "new_room"
     assert _room_of(ep) == 4 and _hp(ep) == 3
-    assert ctrl.executor.state == "done"
 
 
 def test_climb_up_leaves_the_room_through_a_shaft_found_by_trying_columns():
     ep = episode(a=(5, 0, 5, +1))                    # the shaft up to the East Tower is at col 2
     ctrl = MacroController(Fixed("CLIMB", {"direction": "up"}), decision_every=EVERY)
-    drive(ep, "A", ctrl, 900)
+    ev = drive_one(ep, "A", ctrl, 1500)
+    assert ev["event"] == "macro_done" and ev["reason"] == "new_room"
     assert _room_of(ep) == 3
-    assert ctrl.executor.state == "done"
 
 
 def test_a_hang_and_drop_saves_the_heart_of_a_two_row_fall():
@@ -274,9 +291,9 @@ def test_a_hang_and_drop_saves_the_heart_of_a_two_row_fall():
     links = {1: (0, 2, 0, 0), 2: (1, 0, 0, 0)}
     ep = _custom(rooms, links, (1, 0, 3, +1), (2, 2, 5, -1))
     ctrl = MacroController(Fixed("CLIMB", {"direction": "down"}), decision_every=EVERY)
-    drive(ep, "A", ctrl, 300)
+    ev = drive_one(ep, "A", ctrl, 500)
+    assert ev["event"] == "macro_done" and ev["reason"] == "dropped"
     assert ep._duel.rivals["A"].kid.row == 2 and _hp(ep) == 3      # a walk-off would cost one
-    assert ctrl.executor.state == "done"
 
 
 def test_search_visits_every_reachable_room_including_the_lower_floor():
@@ -300,8 +317,9 @@ def test_flee_leaves_by_a_pit_when_both_sides_are_walls():
     ep = _custom(rooms, links, (1, 2, 3, +1), (2, 2, 5, -1), {"g": (1, 2, (7, 8), -1)})
     ep._duel.guards["g"].sword = "drawn"             # test setup: an armed guard in the room
     ctrl = MacroController(Fixed("FLEE"), decision_every=EVERY)
-    drive(ep, "A", ctrl, 300)
-    assert _room_of(ep) == 2 and ctrl.executor.reason == "left_room"
+    ev = drive_one(ep, "A", ctrl, 500)
+    assert ev["event"] == "macro_done" and ev["reason"] == "left_room"
+    assert _room_of(ep) == 2
 
 
 def test_disguise_reports_no_uniform_from_the_take_result_and_remembers_the_cell():
