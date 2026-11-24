@@ -2,7 +2,10 @@
 //   NODE_PATH=<dir with playwright> node tools/web/smoke.cjs http://localhost:8000/ shot.png
 // Loads the page in Chromium, waits for "ready" (Pyodide and Phaser loaded,
 // first frame drawn), holds D (seat A runs right) for 2 s, and checks that
-// the frame counter advanced and that the console logged no errors.
+// the frame counter advanced, that the console logged no errors, and that the
+// key reached the engine: the human seat's position (window.__smLast, the
+// page's test-only readout) changed and the canvas picture differs before and
+// after. A page whose key handler is dead fails here (QA-T14-1).
 "use strict";
 const { chromium } = require("playwright");
 
@@ -22,9 +25,15 @@ async function main() {
     errors.push("status: " + (await page.textContent("#status")));
   }
   const before = Number(await page.textContent("#frames"));
+  const readout = () => page.evaluate(() => window.__smLast || null);
+  const canvas = page.locator("#game canvas");
+  const posBefore = await readout();
+  const picBefore = await canvas.screenshot();
   await page.click("#game");
   await page.keyboard.down("KeyD");
   await page.waitForTimeout(2000);
+  const posHeld = await readout();
+  const picAfter = await canvas.screenshot();
   await page.keyboard.up("KeyD");
   const after = Number(await page.textContent("#frames"));
   await page.screenshot({ path: shot, fullPage: true });
@@ -32,6 +41,16 @@ async function main() {
   console.log(`frames ${before} -> ${after}; screenshot ${shot}`);
   if (!(after > before + 12)) {
     errors.push(`frame counter did not advance enough: ${before} -> ${after}`);
+  }
+  const where = (p) => (p ? `${p.me.room}/${p.me.row}/${p.me.col}` : "none");
+  console.log(`position ${where(posBefore)} -> ${where(posHeld)}`);
+  if (!posBefore || !posHeld) {
+    errors.push("position readout window.__smLast is missing");
+  } else if (where(posBefore) === where(posHeld)) {
+    errors.push(`position did not change after holding D: ${where(posBefore)}`);
+  }
+  if (Buffer.compare(picBefore, picAfter) === 0) {
+    errors.push("canvas pixels did not change after holding D");
   }
   if (errors.length) {
     console.error(errors.join("\n"));

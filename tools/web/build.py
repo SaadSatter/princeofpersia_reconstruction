@@ -14,7 +14,12 @@ Writes:
 * art/        the generated art pack's images, the crimson rival's strips
               (render/webart.py crimson_pixel, as render/dungeon.py recolours
               at load time) and the spike states
-* manifest.json  every file above with its SHA-256, the versions and the sheets
+* manifest.json  every file above with its SHA-256, the versions, the sheets and
+              `build`, an 8-hex-digit hash of the file hashes (shown on the page,
+              for the playtest log)
+
+game.zip also holds agents/ (the scripted baseline rival and what it imports:
+standard library only; the model providers are not shipped). It is public.
 
 Reproducible: files are written in a fixed order, the zip has fixed
 timestamps and permissions, and PNGs are encoded with fixed settings, so the
@@ -46,6 +51,8 @@ DEFAULT_OUT = WEB / "dist"
 RENDER_MODULES = ("__init__.py", "anim.py", "genart.py", "versus_view.py", "draw_list.py",
                   "webart.py")
 WEB_MODULES = ("__init__.py", "bridge.py")
+# The scripted rival the page plays against; stdlib only (tests/test_web_rival.py).
+AGENT_MODULES = ("__init__.py", "baseline.py", "macros.py", "versus_baseline.py")
 PAGE_FILES = ("main.js", "keys.js")
 ZIP_TIME = (1980, 1, 1, 0, 0, 0)
 
@@ -61,6 +68,7 @@ def python_files() -> list[tuple[str, bytes]]:
     files = [(f"pop/{p.name}", p.read_bytes()) for p in sorted((ROOT / "pop").glob("*.py"))]
     files += [(f"render/{n}", (ROOT / "render" / n).read_bytes()) for n in RENDER_MODULES]
     files += [(f"web/{n}", (WEB / n).read_bytes()) for n in WEB_MODULES]
+    files += [(f"agents/{n}", (ROOT / "agents" / n).read_bytes()) for n in AGENT_MODULES]
     art = json.dumps(webart.art_meta(PACK), sort_keys=True, separators=(",", ":"))
     files.append(("web/art.json", art.encode()))
     return sorted(files)
@@ -102,6 +110,12 @@ def page(v: dict) -> bytes:
     return html.encode()
 
 
+def build_hash(file_hashes: dict[str, str]) -> str:
+    """Short id of a build: the first 8 hex digits of the hash of every file's hash."""
+    text = "".join(f"{h}  {n}\n" for n, h in sorted(file_hashes.items()))
+    return hashlib.sha256(text.encode()).hexdigest()[:8]
+
+
 def build(out: Path = DEFAULT_OUT) -> dict:
     out = Path(out)
     if out.exists():
@@ -117,8 +131,10 @@ def build(out: Path = DEFAULT_OUT) -> dict:
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_bytes(data)
     sheets = sorted(n[len("art/"):-len(".png")] for n, _ in files if n.startswith("art/"))
+    hashes = {n: hashlib.sha256(d).hexdigest() for n, d in sorted(files)}
     manifest = {
-        "files": {n: hashlib.sha256(d).hexdigest() for n, d in sorted(files)},
+        "build": build_hash(hashes),
+        "files": hashes,
         "versions": v,
         "sheets": sheets,
     }

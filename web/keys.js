@@ -57,18 +57,37 @@
     return { steps: steps, acc: acc };
   }
 
-  // Page options from the query string: ?mode=local|ai&seat=A|B&seed=N&rival=idle|random
+  // Page options from the query string:
+  //   ?mode=local|ai&seat=A|B&seed=N&rival=baseline|idle|random&label=neutral
+  // rival defaults to the scripted baseline; label=neutral shows the rival as
+  // just "Rival" (blind playtest sessions).
   function parseOptions(search) {
     const q = new URLSearchParams(search || "");
     const mode = q.get("mode") === "local" ? "local_two_players" : "human_vs_ai";
     const seat = q.get("seat") === "B" ? "B" : "A";
     const n = parseInt(q.get("seed") || "0", 10);
     const seed = Number.isFinite(n) && n >= 0 ? n : 0;
-    const rival = q.get("rival") === "random" ? "random" : "idle";
-    return { mode: mode, seat: seat, seed: seed, rival: rival };
+    const r = q.get("rival");
+    const rival = r === "random" || r === "idle" ? r : "baseline";
+    return { mode: mode, seat: seat, seed: seed, rival: rival, neutral: q.get("label") === "neutral" };
+  }
+
+  // The key hints for the seat actually played (text only; the keys themselves
+  // are mapped by KEY_MAP in web/bridge.py).
+  const HINT_A = "A/D run (Shift: careful step), W up / jump, S down, F attack " +
+    "(with W: throw, with S: sweep; in the air: dive kick), G draw or sheathe, T take a uniform.";
+  const HINT_B = "Arrow keys move (right Shift: careful step; up: jump), . attack " +
+    "(with up: throw, with down: sweep; in the air: dive kick), / draw or sheathe, ' take a uniform.";
+
+  function keyHints(mode, seat) {
+    if (mode === "local_two_players") {
+      return "Seat A: " + HINT_A + " Seat B: " + HINT_B + " R: rematch.";
+    }
+    return "You are seat " + seat + ". " + (seat === "B" ? HINT_B : HINT_A) + " R: rematch.";
   }
 
   return Object.freeze({
+    keyHints: keyHints,
     CODE_TO_KEY: CODE_TO_KEY,
     keyName: keyName,
     shouldPrevent: shouldPrevent,

@@ -77,8 +77,8 @@ def test_the_archive_holds_the_pure_packages_only(built):
             "render/draw_list.py", "render/versus_view.py", "render/anim.py"} <= names
     for banned in ("render/draw.py", "render/dungeon.py", "play.py"):
         assert banned not in names
-    assert not any(n.startswith(("tests/", "agents/", "tools/", "traces/", "docs/"))
-                   for n in names)
+    # agents/ is shipped since T14-fix1, but only the scripted rival (tests/test_web_rival.py).
+    assert not any(n.startswith(("tests/", "tools/", "traces/", "docs/")) for n in names)
 
 
 def test_the_archive_runs_on_its_own(built, tmp_path):
