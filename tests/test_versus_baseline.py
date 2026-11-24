@@ -251,3 +251,146 @@ def test_decisions_per_second_with_the_fast_path():
     print(f"decisions per second (both seats, baseline vs random, fast path): {rate:.0f}")
     assert res["seats"]["A"]["fallbacks"] == 0          # the baseline never needs a fallback
     assert rate > 100                                   # loose floor; the real number is in MACROS.md
+
+
+# --- T05-fix1: lower floors, lone guards, uniforms -------------------------------------------
+from pop import observation                             # noqa: E402
+
+ROOM = {observation.room_label("ARENA", n): n for n in range(1, 7)}
+
+# Fixed in the failing-tests commit, before any of these was run against the fixed baseline.
+# (baseline start, passive rival start); each is also played with the seats swapped.
+LOWER_TUNING_STARTS = [
+    ((1, 2, 3, +1), (4, 2, 6, -1)),
+    ((2, 2, 2, +1), (6, 2, 5, -1)),
+]
+LOWER_HELD_OUT_STARTS = [
+    ((1, 2, 5, +1), (6, 2, 2, +1)),
+    ((2, 2, 8, -1), (5, 2, 7, -1)),
+    ((3, 2, 6, -1), (4, 2, 2, +1)),
+    ((1, 2, 4, +1), (6, 2, 8, -1)),
+    ((4, 2, 5, +1), (2, 2, 3, +1)),                      # baseline starts in a lower room
+    ((6, 2, 2, +1), (3, 2, 3, -1)),
+    ((5, 2, 2, -1), (1, 2, 6, +1)),
+]
+
+
+def _run_tracking(base, starts, seed, swap, other=None, posts=None, frames=3600):
+    """One duel vs a passive seat; returns (result, rooms the baseline visited,
+    whether it was ever disguised)."""
+    a, b = starts
+    seat = "B" if swap else "A"
+    pair = (b, a) if swap else (a, b)
+    visited, disguised = set(), []
+
+    def on_frame(f, view):
+        obs = view.observe(seat)
+        visited.add(ROOM[obs["room"]])
+        disguised.append(obs["me"]["disguised"])
+    ctrls = {"A": other or WaitController(), "B": base} if swap else {"A": base, "B": other or WaitController()}
+    res = VersusRunner(factory(pair, posts, frames), ctrls, clock=lambda: 0.0,
+                       limits=VersusLimits(max_frames=frames), on_frame=on_frame).run(seed)
+    return res, visited, any(disguised)
+
+
+def test_from_the_default_start_the_baseline_reaches_rooms_4_and_5_and_gets_a_uniform():
+    reached = uniforms = games = 0
+    for swap in (False, True):
+        for seed in range(4):
+            _, visited, disguised = _run_tracking(make_baseline(), (arena.STARTS["A"], arena.STARTS["B"]),
+                                                  seed, swap)
+            games += 1
+            reached += {4, 5} <= visited
+            uniforms += disguised
+    print(f"default start: rooms 4 and 5 in {reached}/{games}, uniform in {uniforms}/{games}")
+    assert reached > games / 2 and uniforms > games / 2
+
+
+@pytest.mark.parametrize("room", [4, 5])
+def test_the_baseline_does_not_die_to_a_lone_guard_from_a_guard_room_start(room):
+    deaths = games = 0
+    for swap in (False, True):
+        for seed in range(2):
+            res, _, _ = _run_tracking(make_baseline(), ((room, 2, 3, +1), (3, 2, 7, -1)), seed, swap,
+                                      posts=arena.GUARD_POSTS)
+            games += 1
+            deaths += res["outcome"]["reason"] == ("won:A" if swap else "won:B")
+    assert games == 4 and deaths == 0, (room, deaths)
+
+
+def _guard_obs(armed, facing, posture="standing", hp=3, stance=None, disguised=False):
+    ep = Staged(arena.situation("A"), {"A": (4, 2, 3, +1), "B": (1, 2, 2, +1)}, 0, 3600,
+                {"g": (4, 2, (6, 6), facing)}, setup=None)
+    g = ep._duel.guards["g"]
+    g.sword = "drawn" if armed else "sheathed"
+    g.stance = stance or ("mid" if armed else None)
+    if posture == "knocked_down":
+        g.knocked_down = 8
+    ep._duel.rivals["A"].kid.hp = hp
+    ep._duel.rivals["A"].disguised = disguised
+    return ep.observe("A"), tuple(ep.legal_actions("A"))
+
+
+@pytest.mark.parametrize("armed,facing,posture,hp", [
+    (True, -1, "standing", 3),            # armed, facing me
+    (True, +1, "standing", 3),            # armed, back turned
+    (False, -1, "standing", 3),           # unarmed but facing me: it sees me and draws
+    (False, +1, "standing", 2),           # a good opening but not enough hearts
+])
+def test_rule5_does_not_engage_a_lone_guard_unless_the_matchup_favours_it(armed, facing, posture, hp):
+    obs, legal = _guard_obs(armed, facing, posture, hp)
+    choice = VersusBaseline().choose(obs, legal, {"macro": None, "state": "idle", "reason": None})
+    name = choice if isinstance(choice, str) else choice[0]
+    assert name != "STRIKE", (armed, facing, hp, name)
+
+
+@pytest.mark.parametrize("armed,facing,posture", [
+    (False, +1, "standing"),              # unarmed, back turned: a clean lunge
+    (True, -1, "knocked_down"),           # knocked down: a lunge always hits (R-V12)
+])
+def test_rule5_engages_a_lone_guard_with_a_favourable_matchup_at_full_hearts(armed, facing, posture):
+    obs, legal = _guard_obs(armed, facing, posture, 3)
+    choice = VersusBaseline().choose(obs, legal, {"macro": None, "state": "idle", "reason": None})
+    name = choice if isinstance(choice, str) else choice[0]
+    assert name == "STRIKE", (armed, facing, posture, name)
+
+
+@pytest.mark.parametrize("other", [WaitController, RandomController])
+def test_baseline_beats_wait_and_random_on_lower_tuning_starts(other):
+    wins, games = _score(LOWER_TUNING_STARTS, other)
+    print(f"lower tuning vs {other.__name__}: {wins}/{games}")
+    assert wins > games / 2
+
+
+@pytest.mark.parametrize("other", [WaitController, RandomController])
+def test_baseline_beats_wait_and_random_on_lower_held_out_starts(other):
+    wins, games = _score(LOWER_HELD_OUT_STARTS, other)
+    print(f"lower held-out vs {other.__name__}: {wins}/{games}")
+    assert wins > games / 2
+
+
+def test_a_felled_guard_is_finished_at_any_hearts():
+    obs, legal = _guard_obs(True, -1, "knocked_down", 2)
+    obs["figures"][0]["col"] = 4                        # adjacent
+    choice = VersusBaseline().choose(obs, legal, {"macro": None, "state": "idle", "reason": None})
+    assert choice[0] == "STRIKE"
+
+
+def test_a_guard_on_a_lower_row_is_gone_down_to_at_full_hearts():
+    obs, legal = _guard_obs(False, -1, "standing", 3)
+    obs["me"]["row"] = 0
+    choice = VersusBaseline().choose(obs, legal, {"macro": None, "state": "idle", "reason": None})
+    assert choice == ("CLIMB", {"direction": "down"})
+
+
+def test_mirror_match_is_not_a_frozen_stalemate_over_twelve_swapped_duels():
+    ends = []
+    for seed in range(6):
+        for swap in (False, True):
+            res = VersusRunner(factory((arena.STARTS["A"], arena.STARTS["B"])),
+                               {"A": make_baseline("a"), "B": make_baseline("b")},
+                               swap_seats=swap, clock=lambda: 0.0, copy_mode="json",
+                               threaded=False).run(seed)
+            ends.append(res["status"])
+    print("baseline vs baseline, 12 duels:", sorted(set(ends)), ends.count("draw:time_up"), "draws")
+    assert ends.count("draw:time_up") <= 3

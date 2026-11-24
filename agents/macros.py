@@ -27,19 +27,26 @@ from __future__ import annotations
 import heapq
 from dataclasses import dataclass, field
 
-from agents.baseline import COLS, LEAVE, RoomView, Pose
+from agents.baseline import (COLS, F_CLIMB, HURT_COST, LEAVE, LOOSE, SPIKES, SUNKEN,
+                             SUNKEN_COST, Pose, RoomView)
 
 from pop.seats import WAIT
 
 MACROS = ("BLEND", "DISGUISE", "WAIT", "FOLLOW", "STRIKE", "FLEE", "CLIMB", "SEARCH")
 RESERVED = ("RIG_TRAP",)                 # traps are not built yet (T05 brief)
 
-FRAMES = {"turn": 4, "run": 4, "step": 8, "jump": 12, "run_jump": 12, "up": 12}
+FRAMES = {"turn": 4, "run": 4, "step": 8, "jump": 12, "run_jump": 12, "up": 12, "down": 12}
+LEAVE_DOWN, LEAVE_UP = "leave_down", "leave_up"   # through a pit in the bottom row; up a shaft
+BLIND_DOWN_COST = 4                      # the room below is unseen: its floor is assumed
+BLIND_UP_COST = 8                        # a try at a climb into the room above (may do nothing)
+SIGHT_COST = 6                           # per cell in the sight line of a standing guard-looking figure
+SIGHT = 5                                # R-V14, a published rule
 WALKABLE = set("_tPr")                   # plain floor, torch, pillar, rubble: safe to step on
 FOLLOW_GAP = 3                           # FOLLOW stops this many cells from its figure
 DRAW_RANGE, DRAW_RANGE_DISGUISED = 5, 3  # STRIKE draws this close (a draw breaks a disguise)
 MAX_DECISIONS = {"BLEND": 40, "DISGUISE": 60, "WAIT": 1, "FOLLOW": 40, "STRIKE": 80,
                  "FLEE": 30, "CLIMB": 20, "SEARCH": 80}
+DANGER_FOR = 120                         # decisions SEARCH avoids a room it fled from
 RETRY_AFTER = 5                          # decisions before a failed macro may be asked again
 STUCK_AFTER = 5                          # decisions with no change of pose and no motion
 
@@ -52,7 +59,8 @@ def _primitive(action: str) -> str:
     if action in ("LEFT", "RIGHT"):
         return "run"
     kind = action.rsplit("_", 1)[0]
-    return {"STEP": "step", "JUMP": "jump", "RUN_JUMP": "run_jump", "UP": "up"}.get(kind, "step")
+    return {"STEP": "step", "JUMP": "jump", "RUN_JUMP": "run_jump", "UP": "up",
+            "DOWN": "down"}.get(kind, "step")
 
 
 def plan_path(view: RoomView, start: Pose, goal, actions: tuple[str, ...], every: int,
@@ -73,7 +81,7 @@ def plan_path(view: RoomView, start: Pose, goal, actions: tuple[str, ...], every
             result, extra = view.predict(pose, action)
             if result is None or result == "dead":
                 continue
-            turning = action not in ("UP",) and not action.endswith(
+            turning = action not in ("UP", "DOWN") and not action.endswith(
                 "LEFT" if pose.facing < 0 else "RIGHT")
             frames = FRAMES["turn"] if turning else FRAMES[_primitive(action)]
             new = cost + max(frames, every) + 3 * extra
@@ -90,18 +98,41 @@ def plan_path(view: RoomView, start: Pose, goal, actions: tuple[str, ...], every
 
 
 ALL_ACTIONS = ("LEFT", "RIGHT", "STEP_LEFT", "STEP_RIGHT", "JUMP_LEFT", "JUMP_RIGHT",
-               "RUN_JUMP_LEFT", "RUN_JUMP_RIGHT", "UP")
+               "RUN_JUMP_LEFT", "RUN_JUMP_RIGHT", "UP", "DOWN")
 CAREFUL_ACTIONS = ("LEFT", "RIGHT", "STEP_LEFT", "STEP_RIGHT")   # turn-in-place and walks
 
 
 class FieldView(RoomView):
     """The room model plus the figures standing in it: a body stops a walk but a
-    jump flies over it and lands beyond (VERSUS_SPEC R-V22, a published rule)."""
+    jump flies over it and lands beyond (VERSUS_SPEC R-V22, a published rule).
 
-    def __init__(self, obs: dict) -> None:
+    Vertical moves (T05-fix1), from the engine's fall rules (pop/engine.py
+    `_descend`/`_land`, R-D17) and this room's tiles only. A fall of one row is
+    safe, two rows cost a heart, three kill, and a fall that starts from a hang
+    counts one row less. A fall out of the bottom row lands in the room below,
+    which the observation does not show (a pit looks the same whether or not a
+    room is there): it is planned as `leave_down` at a blind cost, assuming a
+    floor at the top of that room. A climb at the top row is planned as
+    `leave_up` only at the (column, facing) pairs in `up_cols` (not yet tried, or
+    ones that worked before). Cells in front of a standing figure cost extra
+    when this seat is not disguised, so paths keep out of a guard's sight."""
+
+    def __init__(self, obs: dict, up_cols=(), shy: bool = True) -> None:
         super().__init__(obs)
         self.bodies = {(f["row"], f["col"]) for f in obs["figures"]
                        if f["posture"] not in ("downed", "dead")}
+        self.up_cols = set(up_cols)
+        self.watched: dict[tuple[int, int], int] = {}
+        if shy and not obs["me"]["disguised"]:
+            for f in obs["figures"]:
+                if f["posture"] != "standing" or f["kind"] == "rival":
+                    continue
+                d = 1 if f["facing"] == "right" else -1
+                for i in range(1, SIGHT + 1):
+                    c = f["col"] + d * i
+                    if not 0 <= c < COLS or self.tiles[f["row"]][c] == "#":
+                        break
+                    self.watched[(f["row"], c)] = SIGHT_COST
 
     def _move(self, p, how):
         if (p.row, p.col + p.facing) in self.bodies:
@@ -118,6 +149,57 @@ class FieldView(RoomView):
         if isinstance(res[0], Pose) and (res[0].row, res[0].col) in self.bodies:
             return None, 0
         return res
+
+    def _enter(self, r, c, facing, how):
+        res, cost = super()._enter(r, c, facing, how)
+        if isinstance(res, Pose):
+            cost += self.watched.get((res.row, res.col), 0)
+        return res, cost
+
+    def _fall(self, r, c, facing, from_cell_gone=False):
+        return self._fall_from(r, c, facing, 0)
+
+    def _fall_from(self, r: int, c: int, facing: int, hang: int):
+        """Where a fall that starts at (r, c) ends; `hang` is 1 when it starts from a hang."""
+        rows = 0
+        while True:
+            r += 1
+            rows += 1
+            if self.tile(r, c) == "below":
+                eff = rows - hang                   # the room below: its top row is where it lands
+                if eff >= 3 or (eff == 2 and self.hp <= 1):
+                    return "dead", 0
+                return LEAVE_DOWN, BLIND_DOWN_COST + (HURT_COST if eff == 2 else 0)
+            if self.supported(r, c):
+                break
+        eff = rows - hang
+        if self.tile(r, c) == SPIKES or eff >= 3:
+            return "dead", 0
+        cost = 0
+        if eff == 2:
+            if self.hp <= 1:
+                return "dead", 0
+            cost = HURT_COST
+        cost += SUNKEN_COST if self.tile(r, c) == SUNKEN else 0
+        cost += self.watched.get((r, c), 0)
+        return Pose(r, c, facing, 0 if self.tile(r, c) == LOOSE else -1), cost
+
+    def predict(self, p: Pose, action: str):
+        if action == "DOWN":
+            return self._hang_drop(p)
+        res = super().predict(p, action)
+        if (action == "UP" and res[0] is None and p.row == 0 and (p.col, p.facing) in self.up_cols
+                and (p.row, p.col) not in self.open_exit_cells):
+            return self._after(p, F_CLIMB, lambda: (LEAVE_UP, BLIND_UP_COST))
+        return res
+
+    def _hang_drop(self, p: Pose):
+        """DOWN at an edge: hang from the ledge, then let go (two inputs, one plan)."""
+        r, c = p.row, p.col + p.facing
+        if (not 0 <= c < COLS or self.blocks(r, c) or (r, c) in self.bodies
+                or self.supported(r, c) or self.tile(r, c) in ("edge", "below")):
+            return None, 0
+        return self._after(p, FRAMES["down"], lambda: self._fall_from(r, c, -p.facing, 1))
 
 
 @dataclass
@@ -149,9 +231,12 @@ class MacroExecutor:
         self.params: dict = {}
         self.decisions = 0                   # since reset (all macros)
         self.tried: set[tuple[str, int, int]] = set()   # downed cells whose uniform failed
-        self.rooms: dict[str, dict] = {}     # SEARCH memory: label -> visits, last, sides
+        self.rooms: dict[str, dict] = {}     # memory of rooms visited: label -> visits, last, sides
+        self.up_good: dict[str, set[tuple[int, int]]] = {}    # label -> (column, facing) of a climb out that worked
+        self.up_tried: dict[str, set[tuple[int, int]]] = {}   # label -> (column, facing) tried that did nothing
         self._room: str | None = None
-        self._leaving: int | None = None
+        self._leaving = None                 # side (+1/-1) or "down"/"up" of the exit in use
+        self._pending_up: tuple[str, int, int, int] | None = None
         self.substituted = 0                 # inputs replaced by WAIT because illegal now
         self._begin_state()
 
@@ -167,6 +252,7 @@ class MacroExecutor:
         self._last_effect: str | None = None
         self._struck = False
         self._took = False
+        self._hang_drop = False              # DOWN issued to hang: the next input lets go
 
     def begin(self, macro: str, suspects=(), **params) -> None:
         self.macro, self.state, self.reason = macro, "running", None
@@ -209,6 +295,11 @@ class MacroExecutor:
         legal only after the current move ends is replaced by WAIT and asked
         for again at the next decision."""
         if action in ctx.legal:
+            if action == "DOWN":
+                self._hang_drop = True
+            elif (action == "UP" and ctx.pose.row == 0
+                  and ctx.view.predict(ctx.pose, "UP")[0] == LEAVE_UP):
+                self._pending_up = (ctx.obs["room"], ctx.pose.col, ctx.pose.facing, self.decisions)
             return action
         self.substituted += 1
         if action == "UP" and "SHEATHE" in ctx.legal:      # a drawn sword turns UP into a stance
@@ -217,20 +308,45 @@ class MacroExecutor:
 
     def _context(self, obs: dict, legal: tuple) -> Context:
         me = obs["me"]
-        view = FieldView(obs)
+        view = FieldView(obs, self._up_cols(obs["room"]), shy=self.macro != "FLEE")
         face = _facing(me["facing"])
         loose = 0 if view.tile(me["row"], me["col"]) == "L" else -1
         cur = Pose(me["row"], me["col"], face, loose)
         m = me.get("motion")
         pose = cur
-        if m is not None and m.get("to") is not None and m["to_posture"] == "standing":
+        # A finished wait keeps the `to` of the move before it (seen after a fall: a
+        # stale row), so only a real move in progress tells where this seat will be.
+        if (m is not None and m["effect"] != "waited" and m.get("to") is not None
+                and m["to_posture"] == "standing"):
             r, c = m["to"]
             pose = Pose(r, c, _facing(m["to_facing"]), 0 if view.tile(r, c) == "L" else -1)
         moving = m is not None and m["effect"] != "waited"        # a wait is idle, not a move
         return Context(obs, legal, view, me, pose, cur, moving, obs["figures"])
 
+    def _up_cols(self, label: str) -> set[tuple[int, int]]:
+        """Top-row (column, facing) pairs where a climb into the room above may be
+        tried: the ones that worked, else every pair not yet tried (a climb needs
+        the cell above and the one ahead of it, so the facing matters). Blind tries
+        are for SEARCH and CLIMB; elsewhere only a pair that worked is used."""
+        good = self.up_good.get(label, set())
+        if good or self.macro not in ("SEARCH", "CLIMB"):
+            return set(good)
+        return {(c, f) for c in range(COLS) for f in (-1, +1)} - self.up_tried.get(label, set())
+
     def _note_room(self, obs: dict) -> None:
         label = obs["room"]
+        if self._pending_up is not None:                  # the outcome of a blind climb
+            room, col, face, since = self._pending_up
+            me, move = obs["me"], obs["me"]["motion"]
+            if label != room:
+                self.up_good.setdefault(room, set()).add((col, face))
+                self._pending_up = None
+            elif (me["row"] == 0 and me["col"] == col and move is not None
+                  and move["effect"] in ("none", "bumped_ceiling")) \
+                    or self.decisions - since > 6:
+                self.up_tried.setdefault(room, set()).add((col, face))   # the hop did nothing
+                self.up_good.get(room, set()).discard((col, face))
+                self._pending_up = None
         if label != self._room:
             if self._room is not None and self._leaving is not None:
                 self.rooms[self._room]["sides"][self._leaving] = label
@@ -244,6 +360,18 @@ class MacroExecutor:
         me = ctx.me
         if me["posture"] == "falling":
             return WAIT
+        if ctx.moving and me["motion"]["to"] is None:
+            # The move ends out of this room (the observation masks its end). An
+            # input queued now would run in a room not yet seen, and a direction
+            # during a hop turns it into a flip (R-V22): hold until it lands.
+            return WAIT
+        if self._hang_drop:
+            if me["posture"] == "hanging":
+                self._hang_drop = False
+                return "DOWN"                                   # let go of the ledge
+            if ctx.moving:
+                return WAIT                                     # the hang is in progress
+            self._hang_drop = False
         if me["posture"] == "hanging" and self.macro != "CLIMB":
             return "UP"
         if self.n > MAX_DECISIONS[self.macro]:
@@ -306,7 +434,8 @@ class MacroExecutor:
         me = ctx.me
         if me["disguised"]:
             return self._done(WAIT)
-        if me["motion"] and me["motion"]["effect"] == "took_uniform":
+        move = me["motion"]
+        if move and move["effect"] == "took_uniform":
             return WAIT                                         # the take is in progress
         room = ctx.obs["room"]
         bodies = self._near(ctx, lambda f: f["posture"] == "downed"
@@ -314,19 +443,17 @@ class MacroExecutor:
         if not bodies:
             return self._fail("no_target")
         t = bodies[0]
-        at = (ctx.pose.row == t["row"]
-              and ctx.pose.col in (t["col"], t["col"] - ctx.pose.facing)
-              and ctx.pose.col + ctx.pose.facing in (t["col"], t["col"] + 0) or
-              (ctx.pose.row == t["row"] and ctx.pose.col == t["col"]))
+        # TAKE reaches a body in this seat's own cell or the cell ahead (R-V26).
+        at = ctx.pose.row == t["row"] and t["col"] in (ctx.pose.col, ctx.pose.col + ctx.pose.facing)
         if at:
-            if self._took and not ctx.moving and not (me["motion"] and me["motion"]["effect"] == "took_uniform"):
-                self.tried.add((room, t["row"], t["col"]))      # taken, yet no disguise: stripped already
-                return self._fail("no_uniform")
-            if not ctx.moving and "TAKE" not in ctx.legal:
-                self.tried.add((room, t["row"], t["col"]))
-                return self._fail("no_uniform")
             self._holding = True
-            if "TAKE" in ctx.legal and not (me["motion"] and me["motion"]["effect"] == "took_uniform"):
+            idle = not ctx.moving
+            if self._took and idle and (ctx.obs.get("last_result") or {}).get("effect") == "no_uniform":
+                self.tried.add((room, t["row"], t["col"]))      # R-V26: accepted, nothing taken
+                return self._fail("no_uniform")
+            if self._took and idle:
+                return WAIT                                     # the take has not reported yet
+            if "TAKE" in ctx.legal and idle:
                 self._took = True
                 return "TAKE"
             return WAIT
@@ -360,7 +487,11 @@ class MacroExecutor:
         same_row = t["row"] == me["row"]
         dist = abs(t["col"] - me["col"])
         want = +1 if t["col"] > me["col"] else -1
-        adjacent = same_row and dist == 1 and face_me == want and not ctx.moving
+        # A knocked-down target is lunged at as soon as the sweep that felled it ends:
+        # the input queued now starts then, inside its 10 frames (a lunge always
+        # hits, R-V12). Waiting for a quiet decision lets it stand up again.
+        adjacent = (same_row and dist == 1 and face_me == want
+                    and (not ctx.moving or t["posture"] == "knocked_down"))
         near = same_row and dist <= (DRAW_RANGE_DISGUISED if me["disguised"] else DRAW_RANGE)
         if not me["armed"] and "DRAW" in ctx.legal and near and not ctx.moving:
             return "DRAW"
@@ -398,6 +529,7 @@ class MacroExecutor:
         if not threats and not self.suspects:
             return self._done(WAIT, "clear")
         origin = threats[0]["col"] if threats else self.suspects[0][1]
+        self.rooms[ctx.obs["room"]]["danger"] = (self.decisions, me["hp"])   # SEARCH keeps clear of it
         away = -1 if origin >= me["col"] else +1
         for side in (away, -away):
             if ctx.view.edges[side]:
@@ -405,45 +537,95 @@ class MacroExecutor:
                 if a:
                     self._leaving = side
                     return a
+        for key, goal in self._vertical_exits(ctx, blind=False):   # leave by a pit or a known shaft
+            a = self._go(ctx, goal)
+            if a:
+                self._leaving = key
+                return a
         a = self._go(ctx, lambda p: isinstance(p, Pose) and abs(p.col - origin) >= 6)
         return a if a else self._fail("cornered")
 
+    def _vertical_exits(self, ctx: Context, blind: bool) -> list:
+        """(key, goal) for the ways out of this room by a pit in the bottom row (down)
+        and by a shaft in the top row (up). Up is offered when a column that worked
+        is known, or, if `blind`, on any column not yet tried."""
+        out = [("down", lambda p: p == LEAVE_DOWN)]
+        if ctx.view.up_cols and (blind or self.up_good.get(ctx.obs["room"])):
+            out.append(("up", lambda p: p == LEAVE_UP))
+        return out
+
     def _do_climb(self, ctx: Context) -> str:
+        """Change floor. `direction` "up" climbs to a higher row (or into the room
+        above), "down" drops to a lower row (or into the room below); with no
+        direction it takes whichever is nearest, up first. Down is a plain walk-off
+        for a fall of one row, a hang and drop when that saves a heart. *Proposed
+        reading of the G1 word "climb": both ways (decision #23, pending Saad).*"""
         me = ctx.me
+        label = ctx.obs["room"]
         if self._start_row is None:
-            self._start_row = me["row"]
-        if me["row"] < self._start_row or (me["posture"] == "hanging" and False):
-            return self._done(WAIT, "climbed")
+            self._start_row, self._start_room = me["row"], label
+        if label != self._start_room:
+            return self._done(WAIT, "new_room")
+        if me["posture"] == "standing":
+            if me["row"] < self._start_row:
+                return self._done(WAIT, "climbed")
+            if me["row"] > self._start_row:
+                return self._done(WAIT, "dropped")
         if me["posture"] == "hanging":
             return "UP"
-        row = self._start_row
-        a = self._go(ctx, lambda p: isinstance(p, Pose) and p.row < row)
-        return a if a else self._fail("no_climb")
+        row, want = self._start_row, self.params.get("direction")
+        up_here = lambda p: isinstance(p, Pose) and p.row < row                    # noqa: E731
+        down_any = lambda p: (isinstance(p, Pose) and p.row > row) or p == LEAVE_DOWN   # noqa: E731
+        blind_up = lambda p: p == LEAVE_UP                                          # noqa: E731
+        goals = {"up": [up_here, blind_up], "down": [down_any],
+                 None: [up_here, down_any, blind_up]}.get(want)
+        for goal in goals or ():
+            a = self._go(ctx, goal)
+            if a:
+                return a
+        return self._fail("no_climb")
 
     def _do_search(self, ctx: Context) -> str:
-        """Leave by the edge toward the room seen least recently (never-seen first)."""
+        """Leave the room by the exit toward the room seen least recently (never-seen
+        first): a side edge, a pit down, or a shaft up (columns tried one by one).
+        Among rooms never seen the order is the right edge, the left edge, a pit down,
+        a shaft up; `prefer="down"` puts the pit first (the baseline asks for it, to
+        see the lower floors early). Memory is this seat's own visits."""
         careful = bool(ctx.me["disguised"])
         label = ctx.obs["room"]
         if self._start_room is None:
             self._start_room = label
         if label != self._start_room:
             return self._done(WAIT, "new_room")
+        rec = self.rooms[label]
+        options = []                                    # (key, goal, order)
         sides = [s for s in (+1, -1) if ctx.view.edges[s]]
         if "side" in self.params and self.params["side"] in sides:
             sides = [self.params["side"]]
-        rec = self.rooms[label]
+        for s_ in sides:
+            options.append((s_, (lambda p, s=s_: p == LEAVE[s]),
+                            1 if s_ == self.params.get("keep", +1) else 2))
+        for key, goal in self._vertical_exits(ctx, blind=True):
+            options.append((key, goal, (0 if self.params.get("prefer") == "down" else 3)
+                            if key == "down" else 4))
 
-        def age(side):
-            nb = rec["sides"].get(side)
+        def age(key):
+            nb = rec["sides"].get(key)
             return -1 if nb is None else self.rooms[nb]["last"]
-        sides.sort(key=lambda s: (age(s), 0 if s == self.params.get("keep", +1) else 1, -s))
-        for side in sides:
+
+        def danger(key):
+            """1 if the room beyond is one this seat fled from: for DANGER_FOR decisions,
+            or for good once it was fleeing on its last heart."""
+            nb = rec["sides"].get(key)
+            d = self.rooms[nb].get("danger") if nb is not None else None
+            return int(d is not None and (d[1] <= 1 or self.decisions - d[0] < DANGER_FOR))
+        options.sort(key=lambda o: (danger(o[0]), age(o[0]), o[2], -o[0] if isinstance(o[0], int) else 0))
+        for key, goal, _ in options:
             # Walk when disguised; leap only if walking cannot get there (a leap in a
             # guard's sight raises suspicion, one out of sight costs nothing).
-            a = (self._go(ctx, lambda p, s=side: p == LEAVE[s], careful)
-                 or (careful and self._go(ctx, lambda p, s=side: p == LEAVE[s])))
+            a = (self._go(ctx, goal, careful) or (careful and self._go(ctx, goal)))
             if a:
-                self._leaving = side
+                self._leaving = key
                 return a
         return self._fail("no_edge")
 
@@ -515,7 +697,13 @@ class MacroController:
         if asked:
             status = {"macro": ex.macro, "state": ex.state, "reason": ex.reason}
             choice = self.policy.choose(observation, legal, status)
-            macro, params = (choice, {}) if isinstance(choice, str) else choice
+            try:
+                macro, params = (choice, {}) if isinstance(choice, str) else choice
+                params = dict(params)
+                if not isinstance(macro, str):
+                    raise TypeError("macro name")
+            except (TypeError, ValueError):
+                macro, params = "?", {}                  # None or malformed: a reported failure
             suspects = params.get("suspects", ())
             rest = {k: v for k, v in params.items() if k != "suspects"}
             if ex.state == "running" and macro == ex.macro:
