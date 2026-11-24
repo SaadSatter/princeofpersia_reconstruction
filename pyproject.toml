@@ -8,6 +8,7 @@ dependencies = []
 [project.optional-dependencies]
 play = ["pygame>=2.6,<3"]
 model = ["anthropic>=0.84,<1"]
+train = ["numpy>=2,<3"]
 
 [dependency-groups]
 dev = ["pytest>=8,<9"]

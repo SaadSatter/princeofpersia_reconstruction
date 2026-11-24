@@ -215,8 +215,6 @@ def test_qa4_slow_reset_is_bounded_by_the_timeout():
     assert time.perf_counter() - t0 < 0.4
 
 
-@pytest.mark.xfail(strict=True, reason="GATE-T04-QA-5: one controller instance may fill "
-                   "both seats, a channel between seats (design decision for Saad)")
 def test_qa5_one_instance_cannot_play_both_seats():
     same = RandomController()
     with pytest.raises(ValueError):

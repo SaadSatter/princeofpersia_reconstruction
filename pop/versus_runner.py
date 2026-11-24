@@ -52,11 +52,15 @@ MAX_ANSWER_CHARS = 80
 COPY_MODES = ("deepcopy", "json")      # how a controller's observation copy is made
 BUSY_ERROR = "an earlier call to this controller has not returned"
 
-# id(controller) -> its call that timed out and may still be running. Module
-# level, so it holds across runner instances sharing a controller (the
-# seat-swapped pair; GATE-T04-fix1-QA-F2). While the thread lives it holds the
-# controller's bound method, so the id cannot be reused by another object.
-_LATE: dict[int, threading.Thread] = {}
+# id(controller) -> `_IN_FLIGHT` while a call is running, or the call's thread
+# once it timed out and may still be running. Module level, so it holds across
+# runner instances sharing a controller (the seat-swapped pair;
+# GATE-T04-fix1-QA-F2). The mark is set at call start under the lock, so
+# runners started at the same moment in threads never call one controller at
+# once (GATE-w2-QA-1, GATE-w2-eval-1). While the call or thread lives the
+# runner holds the controller, so the id cannot be reused by another object.
+_IN_FLIGHT = object()
+_LATE: dict[int, object] = {}
 _LATE_LOCK = threading.Lock()
 
 
@@ -216,6 +220,10 @@ class VersusRunner:
         recorded in the result or the traces."""
         if set(controllers) != set(SEATS):
             raise ValueError("controllers must be given for exactly seats A and B")
+        if controllers["A"] is controllers["B"]:
+            # One instance in both seats is a channel between seats (GATE-T04-QA-5,
+            # decision #24). Use two instances.
+            raise ValueError("seats A and B need separate controller instances")
         if type(decision_every) is not int:        # bool and floats are not a cadence
             raise TypeError(
                 f"decision_every must be an int, not {type(decision_every).__name__}")
@@ -238,22 +246,30 @@ class VersusRunner:
         self.seating = {"A": "B", "B": "A"} if swap_seats else {"A": "A", "B": "B"}
 
     # --- one call to a controller ------------------------------------------------
-    def _busy(self, ctrl) -> bool:
+    def _claim(self, ctrl) -> bool:
+        """Mark `ctrl` in flight unless a call to it is already running.
+        Check and mark happen under one lock hold, so two runners cannot both
+        win (the race the gate found)."""
         with _LATE_LOCK:
-            late = _LATE.get(id(ctrl))
-            if late is not None and not late.is_alive():
-                del _LATE[id(ctrl)]
-                late = None
-            return late is not None
+            held = _LATE.get(id(ctrl))
+            if held is _IN_FLIGHT or (held is not None and held.is_alive()):
+                return False
+            _LATE[id(ctrl)] = _IN_FLIGHT
+            return True
 
     def _call(self, ctrl, fn, args: tuple):
         """(value, error, busy). A busy controller is not called at all."""
-        if self._busy(ctrl):
+        if not self._claim(ctrl):
             return None, BUSY_ERROR, True
-        value, error, late = _call(fn, args, self.limits.timeout_s, self.threaded)
-        if late is not None:
+        late = None
+        try:
+            value, error, late = _call(fn, args, self.limits.timeout_s, self.threaded)
+        finally:
             with _LATE_LOCK:
-                _LATE[id(ctrl)] = late
+                if late is not None:
+                    _LATE[id(ctrl)] = late         # busy until the late call returns
+                else:
+                    _LATE.pop(id(ctrl), None)
         return value, error, False
 
     # --- one decision ---------------------------------------------------------
