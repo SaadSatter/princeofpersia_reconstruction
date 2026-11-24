@@ -7,6 +7,19 @@ this file and `git branch -a -vv` disagree, fix this file.
 #4, then the orchestration workflow). All newer gameplay work is on the
 `orch/*` branches. Merging is Saad's call.
 
+**What `main` already contains** (G1 engine, PRs #1 to #4; checked 2026-11-24
+after T10a-fix1 QA finding N1): two rivals in one `GameState`
+(`pop/versus.py`); sword strike and block (R-V01 to R-V12,
+`tests/test_swordplay.py`, 23 tests); hearts; disguise with `TAKE` and
+disguise-breaking actions (R-V17 to R-V21, `tests/test_disguise.py`, 18);
+suspicion, with the lingering rule `LINGER_AFTER` (R-V19); scripted guards
+(`pop/guards.py`, `tests/test_guards.py`, 15); the six-room arena
+(`pop/arena.py`); the flip (R-V22, R-V23); and a pygame HUD with hearts, the
+suspicion eye and bar, and a DISGUISED marker (`render/draw.py`, `play.py`).
+**Not on `main`:** the T01 fixes (R-V24 hop, R-V25 masking, R-V26, 5-minute
+duel, WAIT lingering), the seat controllers and versus runner, macros and
+baseline, traps, PPO, and the web build.
+
 ## Orchestration architecture (from 2026-11-24)
 
 The main session is the Production Orchestrator (`claude-opus-5-5`, set by
