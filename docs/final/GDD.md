@@ -101,9 +101,9 @@ Use the pillars to decide between design options: a feature that serves none of 
 
 | Step | What happens | Mechanics involved |
 |---|---|---|
-| **Act** | Move, climb, take a fallen guard's uniform, rig a trap, draw your sword | Movement [Implemented]; disguise [Planned; built on `orch/reviewed`, not on `main`]; trap [Planned; loose floor built on `orch/preview`, not on `main`]; sword [Planned] |
-| **Respond** | Scripted guards attack anyone undisguised, running or armed. A rigged floor drops whoever steps on it. The rival moves. | Guard rule [Planned; lingering rule built on `orch/reviewed`, not on `main`], traps [Planned; see above]; loose floors and gates [Implemented as level hazards] |
-| **Interpret** | Read the suspicion icon. Which guard broke its patrol? Is that tile rigged? | HUD [Planned] |
+| **Act** | Move, climb, take a fallen guard's uniform, rig a trap, draw your sword | Movement [Implemented]; take a uniform / disguise [Implemented on `main` (`pop/versus.py`, R-V17 to R-V21); the T01 fixes (R-V24 hop, R-V25, R-V26) are on `orch/reviewed`]; sword [Implemented on `main` (R-V01 to R-V12)]; rig a trap [Planned; loose floor on `orch/preview`, not on `main`] |
+| **Respond** | Scripted guards attack anyone undisguised, running or armed. A rigged floor drops whoever steps on it. The rival moves. | Guard rule [Implemented on `main` (`pop/guards.py`; R-V19 `LINGER_AFTER`); the WAIT-lingering fix is on `orch/reviewed`], traps [Planned; see above]; loose floors and gates [Implemented as level hazards] |
+| **Interpret** | Read the suspicion icon. Which guard broke its patrol? Is that tile rigged? | HUD [Implemented on `main` in the pygame frontend: hearts in `render/draw.py`, suspicion eye/bar and DISGUISED marker in `play.py`; the browser HUD is on `orch/preview`] |
 | **Next action** | Shadow a suspect, strike to unmask, lure them onto your trap, or slip away | — |
 
 - **Dynamics we expect** (hypotheses): bluffing between rivals; mimicry of the guard patrol; baiting the rival onto a trap; risky unmasking strikes.
@@ -115,7 +115,9 @@ Use the pillars to decide between design options: a feature that serves none of 
 
 The headless, deterministic engine in `pop/` is the base: fixed-step kinematics, gravity, collision, landing damage, gates, pressure plates, loose floors, spikes and potions. Its rules and their evidence are in [`docs/RULE_SOURCE_MAP.md`](../RULE_SOURCE_MAP.md); tests are in `tests/`. Human and agent play call the same `engine.step`.
 
-### 5.2 New for the final project [Planned]
+### 5.2 New for the final project
+
+*Status by row (checked against `main` 2026-11-24): **[Implemented on `main`]** arena, second player, sword, disguise, guards, suspicion (desktop versus engine, `pop/versus.py`, `pop/guards.py`, `pop/arena.py`; the T01 fixes are on `orch/reviewed`). **[Planned]** traps (loose floor on `orch/preview`), online play (deferred), disconnect, and the human-vs-human / human-vs-AI mode wiring (seat controllers are on `orch/reviewed`).*
 
 | Mechanic | Rule (initial) | Open questions |
 |---|---|---|
@@ -130,7 +132,9 @@ The headless, deterministic engine in `pop/` is the base: fixed-step kinematics,
 | **Disconnect** | A rival who disconnects for more than a grace period loses the duel (proposal) | OQ-13 |
 | **Modes** | Human vs human, human vs AI, AI vs AI (watch or test) *[G2/G3: human vs human on a local two-panel bench, human vs AI on the hosted page; decisions #1, #12]* | — |
 
-### 5.3 Win, loss and edge cases [Planned]
+### 5.3 Win, loss and edge cases
+
+*Status by row (checked against `main` 2026-11-24): **[Implemented on `main`]** hearts reaching 0, same-frame death draw, and time-out draw (the 5-minute / 3,600-frame limit is on `orch/reviewed`). **[Planned]** trap death (traps are not on `main`), the AI-seat timeout and fallback (versus runner on `orch/reviewed`), and disconnect.*
 
 | Situation | Outcome |
 |---|---|
