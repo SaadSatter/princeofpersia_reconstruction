@@ -71,7 +71,7 @@ def test_take_needs_a_downed_uniformed_guard_ahead():
     take(ep)
     ep2 = episode(b=(2, 0, 2, -1), a=(1, 2, 2, +1))     # B at the same spot after A took it
     ep2._duel.guards["down"].uniform = False
-    assert "TAKE" not in ep2.legal_actions("B")         # one uniform per downed guard
+    assert "TAKE" in ep2.legal_actions("B")             # R-V26, Saad decision #21: TAKE stays legal over a stripped guard
     assert "TAKE" not in ep.legal_actions("A")          # already disguised
 
 
