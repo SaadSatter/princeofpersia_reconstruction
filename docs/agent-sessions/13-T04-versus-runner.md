@@ -100,3 +100,9 @@ branch.
 - **Fix:** answers are text only if `issubclass(type(value), str)`, normalisation is guarded (any failure is `malformed`); busy is tracked in a module-level registry keyed by controller, so it holds across runner instances; `decision_every` must be an `int` >= 1 and not a bool.
 - **Docs:** `docs/final/VERSUS_RUNNER.md` states that real-timeout traces are not reproducible (replay is), that a still-busy controller is not reset (`reset_error: "busy"`; invalidate the trial or use fresh controllers) and that inline mode has no real-time bound.
 - **Result:** `625 passed, 12 skipped, 2 xfailed` (`python3 -m pytest -q -p no:cacheprovider`). The two xfails are QA-5 and the unkeyed-seed note, unchanged.
+
+## T04-fix3 (decision #24, wave-2 gate notes)
+
+- **QA-5:** `VersusRunner` raises `ValueError` if one controller object fills both seats. The xfail is gone.
+- **Eval-1:** `seed_key` stays opt-in. VERSUS_RUNNER.md says evaluation runs must pass one. The gate test is now two passing tests: keyed seed cannot be recovered; unkeyed one can (documented default).
+- **GATE-w2 race:** the busy mark is set at call start under `_LATE_LOCK` (`_claim`), so concurrently started runners never call one controller at once. A runner that finds it in flight gives a `busy` fallback. New test `test_concurrent_runners_never_call_one_controller_at_once_forced_overlap` (events, no sleeps) failed before the fix.

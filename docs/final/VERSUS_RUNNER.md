@@ -27,7 +27,11 @@ secret: a controller can find a small episode seed by hashing candidates
 (GATE-T04-eval-1). `VersusRunner(seed_key=...)` switches to HMAC-SHA-256 with
 a key the controllers never see; the key is not written to the result or the
 traces, so whoever keeps it can reproduce the controllers' seeds. The default
-stays unkeyed so that runs repeat without a key (*proposed*; see below).
+stays unkeyed so that runs repeat without a key. **Evaluation runs must pass
+a `seed_key`** (decision #24; the T08 harness does): with a key the seed cannot
+be recovered by enumeration (`test_keyed_controller_seed_cannot_be_recovered_by_enumeration`),
+and without one it can (`test_unkeyed_controller_seed_is_reproducible_but_recoverable_by_design`,
+kept to document the default).
 
 ## Runner (`pop/versus_runner.py`)
 
@@ -67,8 +71,11 @@ limits=VersusLimits(...), swap_seats=False, clock=time.perf_counter).run(seed)`
   `fallback_reason: "busy"` at each decision (eval-2). Busy is tracked per
   controller, not per runner (a module-level registry), so two runners that
   share one controller, such as the seat-swapped pair, never call it
-  concurrently either (T04-fix2). So a controller is never called
-  concurrently with itself.
+  concurrently either (T04-fix2). The mark is set at the start of each call,
+  under the registry lock, so runners started at the same moment in separate
+  threads cannot both call a shared controller either: the one that finds it
+  in flight gives its seat a `busy` fallback (T04-fix3, GATE-w2-QA-1). So a
+  controller is never called concurrently with itself.
 - **What this means for evaluation.**
   1. A trace from a run in which a real timeout or busy fallback happened is
      **not reproducible** by running the controllers again: whether a call
@@ -162,9 +169,8 @@ which tests compare with the run's.
   different human cadence, before it uses the runner (not in this task).
 - Trace records are not rule changes, so no `docs/RULE_SOURCE_MAP.md` row was
   added.
-- One controller instance may still fill both seats (GATE-T04-QA-5, test
-  kept `xfail` pending Saad's decision). The busy rule keys on the
-  controller, so such a controller is at least never called concurrently.
+- One controller instance in both seats is refused with `ValueError`
+  (GATE-T04-QA-5, decision #24, T04-fix3): it would be a channel between seats.
 - A controller whose `name` or `kind` attribute raises is not guarded (they
   are read when the run starts).
 
@@ -176,9 +182,8 @@ which tests compare with the run's.
    for `max_decisions` and `max_fallbacks` in evaluation.
 3. Exact-name validation (lowercase or padded answers are refused, although
    `VersusEpisode.step` would accept them).
-4. GATE-T04-QA-5: refuse one controller instance in both seats with
-   `ValueError` (both reviewers recommend it), or allow it.
+4. GATE-T04-QA-5: refused with `ValueError` (decided, #24, "Accept all").
 5. GATE-T04-eval-1: keep the unkeyed `controller_seed` as the default
    (reproducible without a secret; reversible for small seeds), or make
-   evaluation runs pass a `seed_key` (and decide who keeps it). The gate test
-   stays `xfail` until this is decided.
+   evaluation runs pass a `seed_key` (decided, #24: the default stays
+   unkeyed, evaluation runs pass a key).
