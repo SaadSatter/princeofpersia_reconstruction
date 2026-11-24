@@ -221,3 +221,104 @@ def test_executor_queues_the_next_primitive_from_the_end_of_the_current_move():
     assert obs["me"]["motion"] is not None          # still moving when the next decision is due
     nxt = ex.step(obs, tuple(ep.legal_actions("A")))
     assert nxt in ep.legal_actions("A") and nxt != "WAIT"
+
+
+# --- T05-fix1: vertical movement (CLIMB both ways, SEARCH, FLEE, DISGUISE) -----------------
+import dataclasses                                    # noqa: E402
+
+from pop import observation                           # noqa: E402
+
+ROOM = {n: observation.room_label("ARENA", n) for n in range(1, 7)}
+
+
+def _room_of(ep, seat="A") -> int:
+    return ep._duel.rivals[seat].kid.room
+
+
+def _hp(ep, seat="A") -> int:
+    return ep._duel.rivals[seat].kid.hp
+
+
+def _custom(rooms, links, a, b, posts=None):
+    sit = dataclasses.replace(arena.situation("A"), rooms=rooms, links=links,
+                              plate_links={}, gates_open=())
+    return VersusEpisode(sit, {"A": a, "B": b}, 0, 3600, posts or {})
+
+
+def test_climb_down_drops_one_row_inside_the_room():
+    ep = episode(a=(1, 0, 6, +1))                    # row 0, pit at col 8 over the middle floor
+    ctrl = MacroController(Fixed("CLIMB", {"direction": "down"}), decision_every=EVERY)
+    drive(ep, "A", ctrl, 240)
+    assert (_room_of(ep), ep._duel.rivals["A"].kid.row) == (1, 1) and _hp(ep) == 3
+    assert ctrl.executor.state == "done"
+
+
+def test_climb_down_leaves_the_room_through_a_pit_in_the_bottom_row():
+    ep = episode(a=(1, 2, 5, +1))                    # shaft at col 7 down to the Barracks
+    ctrl = MacroController(Fixed("CLIMB", {"direction": "down"}), decision_every=EVERY)
+    drive(ep, "A", ctrl, 300)
+    assert _room_of(ep) == 4 and _hp(ep) == 3
+    assert ctrl.executor.state == "done"
+
+
+def test_climb_up_leaves_the_room_through_a_shaft_found_by_trying_columns():
+    ep = episode(a=(5, 0, 5, +1))                    # the shaft up to the East Tower is at col 2
+    ctrl = MacroController(Fixed("CLIMB", {"direction": "up"}), decision_every=EVERY)
+    drive(ep, "A", ctrl, 900)
+    assert _room_of(ep) == 3
+    assert ctrl.executor.state == "done"
+
+
+def test_a_hang_and_drop_saves_the_heart_of_a_two_row_fall():
+    rooms = {1: ("#____.____", "#____.____", "#_________"), 2: ("__________",) * 3}
+    links = {1: (0, 2, 0, 0), 2: (1, 0, 0, 0)}
+    ep = _custom(rooms, links, (1, 0, 3, +1), (2, 2, 5, -1))
+    ctrl = MacroController(Fixed("CLIMB", {"direction": "down"}), decision_every=EVERY)
+    drive(ep, "A", ctrl, 300)
+    assert ep._duel.rivals["A"].kid.row == 2 and _hp(ep) == 3      # a walk-off would cost one
+    assert ctrl.executor.state == "done"
+
+
+def test_search_visits_every_reachable_room_including_the_lower_floor():
+    ep = episode(b=(3, 2, 8, -1))
+    ctrl = MacroController(Fixed("SEARCH"), decision_every=EVERY)
+    seen = set()
+    for f in range(3600):
+        if f % EVERY == 0:
+            legal = tuple(ep.legal_actions("A"))
+            if not legal:
+                break
+            ep.step("A", ctrl.decide(copy.deepcopy(ep.observe("A")), legal))
+        ep.tick()
+        seen.add(_room_of(ep))
+    assert seen == set(range(1, 7)), seen
+
+
+def test_flee_leaves_by_a_pit_when_both_sides_are_walls():
+    rooms = {1: ("#________#", "#________#", "#____.___#"), 2: ("__________",) * 3}
+    links = {1: (0, 0, 0, 2), 2: (0, 0, 1, 0)}
+    ep = _custom(rooms, links, (1, 2, 3, +1), (2, 2, 5, -1), {"g": (1, 2, (7, 8), -1)})
+    ep._duel.guards["g"].sword = "drawn"             # test setup: an armed guard in the room
+    ctrl = MacroController(Fixed("FLEE"), decision_every=EVERY)
+    drive(ep, "A", ctrl, 300)
+    assert _room_of(ep) == 2 and ctrl.executor.reason == "left_room"
+
+
+def test_disguise_reports_no_uniform_from_the_take_result_and_remembers_the_cell():
+    ep = episode(posts={"g": (1, 2, (5, 5), +1)})
+    g = ep._duel.guards["g"]
+    g.knock_out()
+    g.uniform = False                                # stripped already (R-V26)
+    ctrl = MacroController(Fixed("DISGUISE"), decision_every=EVERY)
+    inputs = []
+    for f in range(240):
+        if f % EVERY == 0:
+            legal = tuple(ep.legal_actions("A"))
+            a = ctrl.decide(copy.deepcopy(ep.observe("A")), legal)
+            inputs.append(a)
+            ep.step("A", a)
+        ep.tick()
+    fails = [e for e in ctrl.events if e["event"] == "macro_failed"]
+    assert fails and fails[0]["reason"] == "no_uniform"
+    assert inputs.count("TAKE") == 1                 # one try, not a retry loop
+    assert ctrl.executor.tried
