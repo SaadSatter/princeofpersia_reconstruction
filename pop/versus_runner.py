@@ -18,7 +18,8 @@ Both seats are asked at the same frames, from observations taken before
 either seat's answer is submitted, so seat order never matters.
 
 A call that outlives `timeout_s` cannot be killed. Its controller is "busy"
-until that call returns: the runner never calls it again meanwhile (not for
+until that call returns (it is marked in flight when a call starts, under a
+lock, so runners started at the same moment cannot both call it): the runner never calls it again meanwhile (not for
 `decide`, not for `reset`) and gives its seat a `WAIT` labelled
 `fallback_reason: "busy"` instead (GATE-T04-eval-2).
 
@@ -52,11 +53,15 @@ MAX_ANSWER_CHARS = 80
 COPY_MODES = ("deepcopy", "json")      # how a controller's observation copy is made
 BUSY_ERROR = "an earlier call to this controller has not returned"
 
-# id(controller) -> its call that timed out and may still be running. Module
-# level, so it holds across runner instances sharing a controller (the
-# seat-swapped pair; GATE-T04-fix1-QA-F2). While the thread lives it holds the
-# controller's bound method, so the id cannot be reused by another object.
-_LATE: dict[int, threading.Thread] = {}
+# id(controller) -> (controller, entry): a call to it that is in flight. The
+# entry is a `_STARTING` mark from the moment a runner decides to call, set
+# under the lock together with the busy check (so runners started at the same
+# moment cannot both call it; GATE-w2-QA-1), then the worker thread if the call
+# timed out and is still running. Module level, so it holds across runner
+# instances sharing a controller (the seat-swapped pair; GATE-T04-fix1-QA-F2).
+# The registry holds the controller, so its id cannot be reused meanwhile.
+_STARTING = object()
+_LATE: dict[int, tuple[object, object]] = {}
 _LATE_LOCK = threading.Lock()
 
 
@@ -216,6 +221,10 @@ class VersusRunner:
         recorded in the result or the traces."""
         if set(controllers) != set(SEATS):
             raise ValueError("controllers must be given for exactly seats A and B")
+        if controllers["A"] is controllers["B"]:
+            # One object in both seats is a channel between seats (decision #24,
+            # GATE-T04-QA-5): anything it remembers from one seat reaches the other.
+            raise ValueError("seats A and B need separate controller objects")
         if type(decision_every) is not int:        # bool and floats are not a cadence
             raise TypeError(
                 f"decision_every must be an int, not {type(decision_every).__name__}")
@@ -238,22 +247,30 @@ class VersusRunner:
         self.seating = {"A": "B", "B": "A"} if swap_seats else {"A": "A", "B": "B"}
 
     # --- one call to a controller ------------------------------------------------
-    def _busy(self, ctrl) -> bool:
+    def _claim(self, ctrl) -> bool:
+        """Atomically: False if a call to `ctrl` is in flight, else mark it in flight."""
         with _LATE_LOCK:
-            late = _LATE.get(id(ctrl))
-            if late is not None and not late.is_alive():
-                del _LATE[id(ctrl)]
-                late = None
-            return late is not None
+            held = _LATE.get(id(ctrl))
+            if held is not None:
+                entry = held[1]
+                if entry is _STARTING or entry.is_alive():
+                    return False
+            _LATE[id(ctrl)] = (ctrl, _STARTING)
+            return True
 
     def _call(self, ctrl, fn, args: tuple):
         """(value, error, busy). A busy controller is not called at all."""
-        if self._busy(ctrl):
+        if not self._claim(ctrl):
             return None, BUSY_ERROR, True
-        value, error, late = _call(fn, args, self.limits.timeout_s, self.threaded)
-        if late is not None:
+        late = None
+        try:
+            value, error, late = _call(fn, args, self.limits.timeout_s, self.threaded)
+        finally:
             with _LATE_LOCK:
-                _LATE[id(ctrl)] = late
+                if late is not None:
+                    _LATE[id(ctrl)] = (ctrl, late)     # still running: busy until it returns
+                else:
+                    _LATE.pop(id(ctrl), None)
         return value, error, False
 
     # --- one decision ---------------------------------------------------------
