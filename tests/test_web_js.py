@@ -64,3 +64,11 @@ def test_browser_smoke_script_parses():
 def test_page_asks_for_no_missing_favicon():
     """A 404 for /favicon.ico is a console error, which fails the browser smoke test."""
     assert 'rel="icon"' in (WEB / "index.html").read_text()
+
+
+# --- T13: the online page's scripts follow the same rule --------------------------
+@pytest.mark.parametrize("name", ["draw.js", "ui.js", "online.js"])
+def test_t13_page_scripts_hold_no_game_rules(name):
+    src = (WEB / name).read_text()
+    for word in ("LUNGE", "SWEEP", "TAKE", "suspicion", "legal_actions", "observe(", "hp -"):
+        assert word not in src, (name, word)
