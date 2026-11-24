@@ -70,6 +70,7 @@ The midterm's 11 movement actions stay. New inputs:
 | `KICK` | F while airborne (dive kick) | During the airborne frames of a jump |
 | `SWEEP` | Down + F | Standing or crouching |
 | `TAKE` | Down beside a downed, uniformed guard | Standing next to one, facing it |
+| `RIG` | (macro `RIG_TRAP`, CQ-1) | Standing, free, `traps_left > 0`, the floor cell ahead is plain floor with a floor below it in the same room, and holds no body (TRAPS_SPEC Section 1, R-V27) |
 
 Up and Down keep their midterm meanings (climb, crouch, hang, drink) when
 the sword is sheathed or nothing else applies. *Proposed:* while armed and
@@ -156,6 +157,11 @@ its own rival) plus:
   `knocked_down_frames`.
 - `suspicion`: a list of `{row, col, level}` for guards **in view** whose
   meter concerns **this** rival only.
+- `my_traps` (T06b, decision #22, R-V34): a list of `{row, col, kind}` for **this
+  seat's own** unsprung rigs in its current room, sorted; the key is present for
+  both seats and never holds a cell the seat did not rig. `me.traps_left` is the
+  seat's own budget (4 at the start). A rigged cell is a plain `_` in `tiles`
+  for everyone, the owner included. See `TRAPS_SPEC.md`.
 
 Never in a seat's observation: the other seat's suspicion meters, which
 figure is the disguised rival, guard scripts or posts, trap ownership, other
