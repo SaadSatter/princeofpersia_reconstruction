@@ -3,7 +3,8 @@
 **Version:** Initial (G1), 2026-11-15
 **Owner:** Saad Satter, as Producer
 **Drafted by:** the implementation agent (Claude Code). Saad reviews and owns it.
-**Next step:** after the G1 decision, this plan moves into Asana, with owners, acceptance criteria and dependencies per task. The full Risk Register follows at G2/G3.
+**Current plan (2026-11-24):** this G1 plan is kept for the record. The plan in force is [`orchestration/PLAN-2026-11-23-v2.md`](orchestration/PLAN-2026-11-23-v2.md) with [`orchestration/PLAN-2026-11-23-v3-delta.md`](orchestration/PLAN-2026-11-23-v3-delta.md) (hosting by G2/G3). Task state is in [`orchestration/STATUS.md`](orchestration/STATUS.md). Where this file disagrees with them, they win; the changes that matter are in the risk notes below and in [`GDD.md`](GDD.md) and [`CONFIGURATION.md`](CONFIGURATION.md), "Changes since the last gate". Gate dates are unchanged.
+**Next step (G1 text):** after the G1 decision, this plan moves into Asana, with owners, acceptance criteria and dependencies per task. The full Risk Register follows at G2/G3.
 
 ## Gate dates
 
@@ -50,6 +51,21 @@ G2 is two weeks after G1, so the cut order in GDD Section 8 applies from the sta
 | Fri 27 Nov | Scope-lock plan: what stays, what is cut | Producer, Design Lead | Document in `docs/final/` |
 | Sat 28 Nov | **First playable recording** | Saad | Recording linked from `docs/final/README.md` |
 | Sun 29 Nov | Update GDD, Configuration Document and Risk Register; Braintrust notes | Producer (Saad) | Documents labelled "Update" |
+
+## Risk updates since G1 (2026-11-24)
+
+The original rows below are kept. These dated notes record what changed in them. Ratings are not re-scored here; Saad owns the Risk Register update at G2/G3.
+
+| Risk row | What changed | Source |
+|---|---|---|
+| Technology (AI decisions at about 3 s) | The AI rival is a small PPO policy deciding at 6-frame runner decisions with no model latency, not an LLM. The 3 s latency concern applies only to the legacy LLM player. The new risks are the untrained policy (no weights yet, so no strength claim), over-fitting to two tuning starts and a leak through the features | #3, #24; `agent-config.json` |
+| Network (online delay) | Online human vs human is deferred, so network delay is not a G2/G3 risk. The hosted page runs the engine in the browser, so devtools could read hidden state: acceptable for human vs AI, not for online human vs human | #1, #12 |
+| Business / Audience (pairs of testers) | Local two-panel human vs human is available on one computer and a human vs AI mode on the hosted page. Whether testers are found is unchanged | #1, #12 |
+| Timeline (combat) | Combat, disguise and loose-floor traps are built on branches but not merged or playtested. The hosted build must be live by Sat 28 Nov (#13). New: the official-repository move is due the same day | #13, #6; `STATUS.md` |
+| Spending (the "$5 live budget" in tasks below) | Replaced by under $1 total, smoke only; the PPO rival needs no paid call | #8 |
+| IP / Concept | Unchanged. The hosted page is a static public build, so it must serve only our own art (OQ-8) | #12 |
+
+Task rows in the G1 task table above that name Asana, a WebSocket server, two browser tabs, a live model call or the $5 cap are superseded by #10, #1/#12, #3 and #8 respectively; they are left as written.
 
 ## Initial Risk Register
 

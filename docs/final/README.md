@@ -19,10 +19,10 @@ Working title: *Shadow Masque*. A two-player versus game built on this repositor
 | [`ENGINE_DECISION.md`](ENGINE_DECISION.md) | Python/Pygame vs Godot (recommendation, pending Saad) |
 | [`ART_PROVENANCE.md`](ART_PROVENANCE.md) | Where the generated art came from and on what terms (OQ-8) |
 
-Agent configuration: [`AGENTS.md`](../../AGENTS.md) (shared invariants, Claude and Codex), [`CLAUDE.md`](../../CLAUDE.md) (implementation agent), `.claude/agents/rules-reviewer.md` and `.codex/agents/pop-rule-reviewer.toml` (independent reviewers), `.claude/skills/game-rules-audit/` and `.claude/skills/session-evidence/` (skills).
+Agent configuration: [`AGENTS.md`](../../AGENTS.md) (shared invariants, Claude and Codex), [`agent-config.json`](../../agent-config.json) (course manifest for the in-game rival and the agent team), [`orchestration/README.md`](orchestration/README.md) (the native orchestrator and named workers, file-based handoffs, review gates), `.claude/agents/rules-reviewer.md` and `.codex/agents/pop-rule-reviewer.toml` (independent reviewers), `.claude/skills/game-rules-audit/` and `.claude/skills/session-evidence/` (skills).
 
 Open questions are marked `OQ-n` (design) and `CQ-n` (configuration) in each document.
 
-The midterm documents in [`docs/`](../) still describe the Level 1 reconstruction. The final project's changes will be recorded here.
+The midterm documents in [`docs/`](../) still describe the Level 1 reconstruction. The final project's changes are recorded here: [`GDD.md`](GDD.md) and [`CONFIGURATION.md`](CONFIGURATION.md) each open with "Changes since the last gate (G1 → G2/G3, as of 2026-11-24)". The orchestration state, Saad's decisions and review log are in [`orchestration/`](orchestration/) ([`STATUS.md`](orchestration/STATUS.md), [`DECISIONS-2026-11-23.md`](orchestration/DECISIONS-2026-11-23.md), [`DECISIONS-2026-11-24.md`](orchestration/DECISIONS-2026-11-24.md)). Most rival, trap, web and evaluation work is on `orch/preview` or WIP branches, not on `main`.
 
 Videos are never committed; the recording is linked only.
