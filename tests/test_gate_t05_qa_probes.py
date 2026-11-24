@@ -204,7 +204,6 @@ def test_qa_vocabulary_names_match_macros_md():
 
 
 # --- the baseline against itself ------------------------------------------------------------
-@pytest.mark.xfail(strict=True, reason="GATE-T05-qa-1")
 @pytest.mark.parametrize("swap", [False, True])
 def test_qa_mirror_match_on_the_arena_starts_is_not_a_frozen_stalemate(swap):
     """Two baselines meet on row 0, both armed and mid, and SWEEP each other until
@@ -277,14 +276,12 @@ def _vs_wait(seed, a, b, swap):
                         swap_seats=swap, clock=SLOW).run(seed)
 
 
-@pytest.mark.xfail(strict=True, reason="GATE-T05-qa-2")
 @pytest.mark.parametrize("seed,mine,theirs,swap", LOSSES_TO_WAIT)
 def test_qa_baseline_does_not_lose_to_a_wait_controller_by_fighting_a_guard(seed, mine, theirs, swap):
     res = _vs_wait(seed, mine, theirs, swap)
     assert res["winner_slot"] == "A", res["status"]
 
 
-@pytest.mark.xfail(strict=True, reason="GATE-T05-qa-3")
 @pytest.mark.parametrize("seed,mine,theirs,swap", TIMEOUTS_VS_WAIT)
 def test_qa_baseline_finds_a_motionless_rival_in_another_room_within_the_limit(seed, mine, theirs, swap):
     res = _vs_wait(seed, mine, theirs, swap)

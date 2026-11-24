@@ -112,16 +112,12 @@ def _wins_vs_wait(rival_start, posts, a_start=A_START, seeds=(0, 1)):
     return wins, games
 
 
-@pytest.mark.xfail(strict=True, reason="GATE-T05-eval-1: baseline loses to a passive WAIT seat "
-                   "(8/8 duels) when it starts in a guard room; rule 5 fights a patrolling armed guard")
 @pytest.mark.parametrize("room", [4, 5])
 def test_gate_t05_eval_baseline_survives_a_guard_room_start(room):
     wins, games = _wins_vs_wait((3, 2, 7, -1), arena.GUARD_POSTS, a_start=(room, 2, 3, +1))
     assert wins > games / 2, (wins, games)
 
 
-@pytest.mark.xfail(strict=True, reason="GATE-T05-eval-2: no macro descends a floor, so a passive "
-                   "rival in rooms 4-6 is never found (draw 6/6) and no uniform is reachable")
 @pytest.mark.parametrize("room,col", [(4, 3), (6, 5), (5, 7)])
 def test_gate_t05_eval_baseline_finds_a_passive_rival_on_the_lower_floor(room, col):
     wins, games = _wins_vs_wait((room, 2, col, -1), {})

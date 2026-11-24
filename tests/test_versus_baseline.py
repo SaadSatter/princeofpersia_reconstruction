@@ -367,3 +367,30 @@ def test_baseline_beats_wait_and_random_on_lower_held_out_starts(other):
     wins, games = _score(LOWER_HELD_OUT_STARTS, other)
     print(f"lower held-out vs {other.__name__}: {wins}/{games}")
     assert wins > games / 2
+
+
+def test_a_felled_guard_is_finished_at_any_hearts():
+    obs, legal = _guard_obs(True, -1, "knocked_down", 2)
+    obs["figures"][0]["col"] = 4                        # adjacent
+    choice = VersusBaseline().choose(obs, legal, {"macro": None, "state": "idle", "reason": None})
+    assert choice[0] == "STRIKE"
+
+
+def test_a_guard_on_a_lower_row_is_gone_down_to_at_full_hearts():
+    obs, legal = _guard_obs(False, -1, "standing", 3)
+    obs["me"]["row"] = 0
+    choice = VersusBaseline().choose(obs, legal, {"macro": None, "state": "idle", "reason": None})
+    assert choice == ("CLIMB", {"direction": "down"})
+
+
+def test_mirror_match_is_not_a_frozen_stalemate_over_twelve_swapped_duels():
+    ends = []
+    for seed in range(6):
+        for swap in (False, True):
+            res = VersusRunner(factory((arena.STARTS["A"], arena.STARTS["B"])),
+                               {"A": make_baseline("a"), "B": make_baseline("b")},
+                               swap_seats=swap, clock=lambda: 0.0, copy_mode="json",
+                               threaded=False).run(seed)
+            ends.append(res["status"])
+    print("baseline vs baseline, 12 duels:", sorted(set(ends)), ends.count("draw:time_up"), "draws")
+    assert ends.count("draw:time_up") <= 3
