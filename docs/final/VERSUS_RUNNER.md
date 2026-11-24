@@ -64,8 +64,27 @@ limits=VersusLimits(...), swap_seats=False, clock=time.perf_counter).run(seed)`
 - **Busy.** A timed-out call cannot be killed. Until it returns, its
   controller is *busy*: the runner does not call it again (not `decide`, not
   `reset`, also in a later run of the same runner) and its seat gets
-  `fallback_reason: "busy"` at each decision (eval-2). So a controller is
-  never called concurrently with itself.
+  `fallback_reason: "busy"` at each decision (eval-2). Busy is tracked per
+  controller, not per runner (a module-level registry), so two runners that
+  share one controller, such as the seat-swapped pair, never call it
+  concurrently either (T04-fix2). So a controller is never called
+  concurrently with itself.
+- **What this means for evaluation.**
+  1. A trace from a run in which a real timeout or busy fallback happened is
+     **not reproducible** by running the controllers again: whether a call
+     beats `timeout_s` depends on the wall clock. `replay` of the recorded
+     inputs is still exact.
+  2. A controller still busy when the next run starts is **not reset**
+     (`reset_error: "busy"`, its `reset(seed)` is skipped). Treat that trial
+     as invalid, or use fresh controllers for each trial.
+  3. Inline mode (`threaded=False`) has **no real-time bound**; only the
+     injected clock labels a slow call afterwards. Use it only for trusted
+     controllers.
+- **Answer and cadence checks.** An answer is accepted as text only if its
+  real type is a `str` (or subclass); an object whose `__class__` claims
+  `str` is `malformed`, and any failure while normalising an answer is
+  `malformed`, never a crash (T04-fix2). `decision_every` must be an `int`
+  of at least 1 (not a bool or float).
 - **Reset.** `reset(seed)` is bounded the same way (QA-4 / eval-3). A reset
   that raises, times out or finds the controller busy is recorded in
   `seats[seat].reset_error` (`"timeout"`, `"busy"` or the redacted error) and
@@ -144,8 +163,8 @@ which tests compare with the run's.
 - Trace records are not rule changes, so no `docs/RULE_SOURCE_MAP.md` row was
   added.
 - One controller instance may still fill both seats (GATE-T04-QA-5, test
-  kept `xfail` pending Saad's decision). The busy rule keys on the instance,
-  so such a controller is at least never called concurrently.
+  kept `xfail` pending Saad's decision). The busy rule keys on the
+  controller, so such a controller is at least never called concurrently.
 - A controller whose `name` or `kind` attribute raises is not guarded (they
   are read when the run starts).
 
