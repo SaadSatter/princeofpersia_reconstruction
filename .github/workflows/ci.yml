@@ -29,7 +29,7 @@ jobs:
       - uses: astral-sh/setup-uv@v6
         with:
           python-version: ${{ matrix.python }}
-      - name: Install (lockfile, no extras, no network at test time)
-        run: uv sync --frozen
+      - name: Install (lockfile, train extra for the numpy tests)
+        run: uv sync --frozen --extra train
       - name: Deterministic tests (no API keys, no original level files)
-        run: uv run --frozen pytest -q
+        run: uv run --frozen --extra train pytest -q
