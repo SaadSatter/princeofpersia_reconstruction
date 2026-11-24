@@ -13,7 +13,7 @@ Dated record of what changed after the G1 text below was written. The G1 text is
 | Area | Change | Source | Where it lives |
 |---|---|---|---|
 | Play context | Online human vs human is **deferred**; G2/G3 is shown locally (two-panel bench for human vs human, one panel for human vs AI) | #1 | Planned |
-| Platform | A **hosted static build**: the Python engine runs in the browser through Pyodide and a Phaser client draws only the human seat; live by G2/G3 (Sat 28 Nov). Online human vs human (two machines) still needs a server later. This supersedes #1 for hosting only | #12, #13 | `orch/preview` (T14, T14-fix1; fix1 review pending). No live page URL is recorded yet |
+| Platform | A **hosted static build**: the Python engine runs in the browser through Pyodide and a Phaser client draws only the human seat; live by G2/G3 (Sat 28 Nov). Online human vs human (two machines) still needs a server later. This supersedes #1 for hosting only. **Because the engine runs in the browser, the whole game state lives there and a human can read hidden state through the browser devtools.** That is acceptable for human vs AI and local play, but not for online human vs human, which needs the server (`PLAN-2026-11-23-v3-delta.md`, "Known limitation") | #12, #13 | `orch/preview` (T14, T14-fix1; fix1 review pending). No live page URL is recorded yet |
 | Web pins | Pyodide 0.27.7 and Phaser 3.88.2 from a CDN; deploy job gets `pages: write` and `id-token: write`; rematch keeps the seed; the end screen states how the duel ended | #25 | `orch/preview` |
 | AI rival | The AI seat is a **small PPO policy we train**, acting on macro-actions from its own seat's observation, compared against a scripted pathfinding baseline. The LLM (Claude Haiku 4.5) is no longer the rival; an LLM may be used only on a slow timescale, out of G2/G3 scope | #3 | encoder, policy and trainer on `orch/preview` (T07, review pending). **No trained weights exist** |
 | AI cadence | The G1 "one macro about every 4 s" is replaced: the runner asks at 6-frame decisions (0.5 s) and the policy picks a new macro at most every 4 decisions (2 s). The 4-decision value is still waiting on Saad | #24; `STATUS.md` "Waiting on Saad" | `orch/preview` |
@@ -77,7 +77,7 @@ The agent drafted these decisions. Saad confirmed them on 2026-11-15:
 | Context | Two players online, each on their own computer and screen *[Superseded 2026-11-23, decisions #1, #12: see Changes]* | Planned |
 | Platform | *[Superseded for G2/G3, decisions #1, #12, #13: a hosted static page, Pyodide + Phaser, engine in the browser; the server below is deferred.]* An authoritative Python game server runs the `pop/` engine; each player opens a browser page (OQ-11). The desktop Pygame frontend stays for development, replays and watching AI vs AI | Implemented (single-player Pygame); Planned (server, browser client) |
 | Genre | 2D cinematic platformer with versus stealth and duelling | Planned |
-| Session | One duel, 5 minutes = 3,600 frames (OQ-3 closed, decision #5) | Planned |
+| Session | One duel, 5 minutes = 3,600 frames (OQ-3 closed, decision #5) *[G1 text: "about 5 minutes (OQ-3)"; superseded by decision #5]* | Planned |
 
 ### Player motivation (Motivation Atlas groups)
 
@@ -101,8 +101,8 @@ Use the pillars to decide between design options: a feature that serves none of 
 
 | Step | What happens | Mechanics involved |
 |---|---|---|
-| **Act** | Move, climb, take a fallen guard's uniform, rig a trap, draw your sword | Movement [Implemented]; disguise, trap, sword [Planned] |
-| **Respond** | Scripted guards attack anyone undisguised, running or armed. A rigged floor drops whoever steps on it. The rival moves. | Guard rule, traps [Planned]; loose floors and gates [Implemented as level hazards] |
+| **Act** | Move, climb, take a fallen guard's uniform, rig a trap, draw your sword | Movement [Implemented]; disguise [Planned; built on `orch/reviewed`, not on `main`]; trap [Planned; loose floor built on `orch/preview`, not on `main`]; sword [Planned] |
+| **Respond** | Scripted guards attack anyone undisguised, running or armed. A rigged floor drops whoever steps on it. The rival moves. | Guard rule [Planned; lingering rule built on `orch/reviewed`, not on `main`], traps [Planned; see above]; loose floors and gates [Implemented as level hazards] |
 | **Interpret** | Read the suspicion icon. Which guard broke its patrol? Is that tile rigged? | HUD [Planned] |
 | **Next action** | Shadow a suspect, strike to unmask, lure them onto your trap, or slip away | — |
 
@@ -146,12 +146,16 @@ No score beyond win, draw or loss is planned.
 
 ## 6. Controls and feedback [Planned]
 
+*[Superseded for G2/G3, decisions #1, #12: the G1 text below assumes one browser per rival and a validating server. The hosted build runs the engine in the browser (Pyodide), so there is no server and devtools can read hidden state, which is acceptable for human vs AI but not for online human vs human.]*
+
 - **Controls:** each player uses their own keyboard with the same key map (OQ-7). Inputs map to the same actions an AI seat sends, as in the midterm; the server validates them.
 - **Own screen:** each browser shows only its own rival's current room and HUD. There is no shared screen to look at, so a disguise cannot be seen through by watching the other player's view.
 - **HUD:** three hearts, the suspicion icon, a disguised/undisguised marker.
 - **Reveal:** a short flash and sound-free animation when a disguise breaks. No sound: excluded, as in the midterm.
 
 ## 7. Information boundaries
+
+*[Superseded for the hosted G2/G3 build, decisions #1, #12: the engine runs in the browser through Pyodide, so the browser does hold the `GameState` and devtools can read hidden state. Acceptable for human vs AI, not for online human vs human, which needs the server (`PLAN-2026-11-23-v3-delta.md`, "Known limitation"). The G1 text below describes the server design.]*
 
 - **World state (engine only):** both rivals' true positions and uniforms, every guard's patrol and suspicion, which tiles are rigged and by whom, all rooms, and the RNG seed.
 - **What the server sends a client:** that seat's observation only. The browser never holds the `GameState`, the other seat's observation or the arena layout, so reading the page's network traffic reveals nothing a player could not see on screen.
