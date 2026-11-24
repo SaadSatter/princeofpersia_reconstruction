@@ -39,7 +39,9 @@ paths and are historical.
 | Branch | Head | Class | Content |
 | --- | --- | --- | --- |
 | `main` | see `git log` | Saad's merged work + orchestration records | gameplay as of 721b3e6; orchestration docs |
-| `orch/reviewed` | cd5c4aa | reviewed integration candidate | T01 chain, T02, T04 chain (except T04-fix3), T11 + fix1 |
+| `orch/reviewed` | 2180fea | reviewed integration candidate | T01 chain, T02, T04 chain (except T04-fix3), T11 + fix1, **T05 + T05-fix1** (2026-11-24) |
+| `int/preview-T05-fix1` | b52d145 | parked integration | `orch/preview` + `orch/reviewed` 2180fea. One T07 test fails (fixture relied on the mirror deadlock). Becomes `orch/preview` after T07-fix1 |
+| `task/T05-fix1`, `gate/T05-fix1-qa`, `gate/T05-fix1-eval` | 161a841, 12c11bd, 1b303ff | worker branches (closed task) | merged into `orch/reviewed` |
 | `orch/preview` | 87606b9 | preview / demo build; some gates pending | `orch/reviewed` + T05, T14, T14-fix1, T06a/T06b, T07, 2026-11-24 records. Suite there: 959 passed, 12 skipped, 3 xfailed (sandbox, Python 3.13, as recorded by the previous orchestrator; not re-run 2026-11-24) |
 | `orch/wip-T05-fix1` | ab78522 | unreviewed WIP snapshot | interrupted ~02:00 ET 2026-11-24. **Untested; never merge** |
 | `orch/wip-T08` | 25e4587 | unreviewed WIP snapshot | same |
@@ -57,14 +59,13 @@ No `rc/*` (approved release candidate) branch exists.
 | closed | T02 + T02-close | QA re-review of 13c7488 = Saad's G2/G3 QA→Tech handoff (decision #7) | closed | `orch/reviewed`; draft `handoff-drafts/2026-11-24-qa-to-tech.md` (**Student decision empty, for Saad**) | none |
 | closed (except fix3) | T04 + fix1 + fix2 | seat-controller protocol, versus runner | G1, G2 accept w/ notes; G3 closed | `orch/reviewed` | none |
 | under review | T11 + fix1 | playtest kit | G1 accept w/ notes; fix1 fact-check pending | `orch/reviewed` | none |
-| under review | T05 | macro layer + scripted baseline | G1 accept w/ notes (3 majors), G2 accept w/ notes (blocking for evaluation: no way down a floor) | `orch/preview` 19b5da2 | none |
 | under review | T06a / T06b | traps spec (decision #22) + rival-rigged loose floor | G1, G2 pending (brief `tasks/GATE-wave3.md`; no report on record) | `orch/preview` 9af96a9 / 4e9121b | none |
 | under review | T07 | PPO encoder, trainer, stdlib policy. **Full training not started** | G1, G2 pending (GATE-wave3) | `orch/preview` 1e34cf2 | none |
 | under review | T14 + fix1 | hosted web build (Pyodide + Phaser) | T14 G1/G2 accept w/ notes; fix1 G1/G2 pending (GATE-wave3) | `orch/preview` ca3667b | none |
-| **active** (tech-lead running, dispatched 2026-11-24 14:2x ET) | T05-fix1 (resumed) | macro reachability, CLIMB both ways (#31), baseline fixes, QA-1 mirror deadlock | G1, G2 pending | `task/T05-fix1` from 0846a16 (brief@38aca15); WIP `orch/wip-T05-fix1` ab78522 for reference only | issue #7 |
+| closed (Gate 3, 2026-11-24) | T05 + T05-fix1 | macros + baseline; CLIMB both ways (#31), descent, lone-guard rule 5, mirror no longer deadlocked | G1 ACCEPT w/ notes (12c11bd), G2 ACCEPT w/ notes (1b303ff), G3 closed | `orch/reviewed` 2180fea; preview merge parked on `int/preview-T05-fix1` b52d145 (breaks one T07 test, see REVIEW_LOG) | issue #7 |
 | unreviewed WIP | T04-fix3 | refuse shared controller (QA-5), in-flight race | — | `orch/wip-T04-fix3` (tests 7fe2e9c + WIP 76de25c) | none |
 | unreviewed WIP | T08 | scenario suite D1/B2/I3/F5 + held-out H6, CLI, analysis | — | `orch/wip-T08` 25e4587 | none |
-| blocked | T07 full training run | ~85 min PPO run | needs T05-fix1 closed **and** Saad's go-ahead | — | none |
+| blocked | T07 full training run | ~85 min PPO run | T05-fix1 closed 2026-11-24; still needs T07 gates (GATE-wave3), T07-fix1, numpy declared, **and** Saad's go-ahead | — | none |
 | closed | SMOKE-01 | orchestration smoke test: every path in README Files + CLAUDE.md Roles tables, and agent procedure pointers, exist on `main` | G1 ACCEPT WITH NOTES (1 minor), G2 n/a, G3 closed | `task/SMOKE-01` fc16525, `gate/SMOKE-01-qa` 3bb36f5 (not merged) | none |
 | not started | T03 | official-repository move (decision #6), `python -m team init` | — | — | — |
 | closed (Gate 3); **PR #6 awaiting Saad's merge** | T10a (+fix1, fix2) | docs in line with decisions #1–#30: Changes since G1 in GDD and Configuration, PPO rival, orchestration, checklist, plan, README | G1 accept w/ notes ×3; G2 n/a; G3 closed | `orch/T10a` a1b9738 | issue #5, PR #6 |
@@ -72,22 +73,20 @@ No `rc/*` (approved release candidate) branch exists.
 
 ## Next eligible task
 
-**T05-fix1 (resume) is running** (brief@38aca15, issue #7). After its chain closes: **T04-fix3 (resume)**, then **GATE-wave3** (decision #32: one chain at a time).
+**T04-fix3 (resume)**, `tech-lead`, brief `tasks/T04-fix3.md` (add a "Resumed" note), WIP `orch/wip-T04-fix3` 76de25c for reference only. Then **GATE-wave3** (T06b, T07, T14-fix1 on `orch/preview`), folding in **T07-fix1**: the T07 test fixture collects 200 observations from one mirror duel, and that breaks after the T05-fix1 merge. Decision #32: one chain at a time.
 
-Original note: **T05-fix1 (resume)**, assigned to `tech-lead`. Brief: `tasks/T05-fix1.md`
-(written for the sandbox; add a dated "Resumed" note with the local setup
-from `tasks/_EXEC_COMMON.md`). Base `6692771`. The WIP snapshot `ab78522` is
-unreviewed input the Tech Lead may read, not a base to trust. It unblocks
-T07 training and T08. Gates: QA and Evaluation.
+T05-fix1 follow-ups (minor, docs and tests; not blocking):
+- F-E3: MACROS.md must state that the planner assumes a floor below a bottom-row pit.
+- F-E4: relabel `LOWER_HELD_OUT_STARTS` as "frozen before implementation, not unseen".
+- QA-F1: one loss to WAIT, kept as a strict xfail.
+- Condition for T08: every comparison that uses the baseline reports results **per seat**, and a mirror match counts as one trial.
+- Session record `docs/agent-sessions/15-T05-fix1-macros-baseline.md` shares the number 15 with Saad's uncommitted `15-native-orchestration.md`. Renumber at the next evidence pass (T10b).
 
-Can run at the same time (disjoint write paths): **GATE-wave3** (QA and
-Evaluation reviews of T06b, T07, T14-fix1 on `orch/preview`), and
-**T04-fix3 (resume)** (`pop/versus_runner.py`, `pop/seats.py` only).
-
-Deadline pressure: G2/G3 recording and the official-repository move are due
-**Sat 2026-11-28, 11:59 p.m.** (T03, `COURSE_ROLE_MAP.md`).
+Deadline pressure: G2/G3 recording and the official-repository move are due **Sat 2026-11-28, 11:59 p.m.** (T03, `COURSE_ROLE_MAP.md`).
 
 ## Waiting on Saad
+
+- **numpy is not a declared dependency.** T07 (PPO trainer and tests) and one T04-fix1 QA probe import it, so a clean `uv` environment fails to collect `tests/test_rl_policy.py` and `tests/test_rl_train.py` on `orch/preview`. Adding it (an optional `train` extra in `pyproject.toml` + `uv.lock`) needs Saad's approval.
 
 - ~~SMOKE-01 minor finding~~ resolved 2026-11-24 in the orchestration refactor (Saad authorized `CLAUDE.md` edits for it): the AI-rival row in `CLAUDE.md` now says the paths are on `orch/preview`, not yet on `main`.
 - **SMOKE-01 branches:** `task/SMOKE-01` and `gate/SMOKE-01-qa` hold only the two reports. Merge them, keep them, or delete them (deleting needs you). The two worker worktrees are still registered.
