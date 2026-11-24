@@ -52,3 +52,15 @@ def test_main_js_holds_no_game_rules():
     for word in ("LUNGE", "SWEEP", "TAKE", "suspicion", "disguised", "legal_actions",
                  "observe(", "hp -", "hearts"):
         assert word not in src, word
+
+
+@needs_node
+def test_browser_smoke_script_parses():
+    out = subprocess.run([NODE, "--check", str(ROOT / "tools" / "web" / "smoke.cjs")],
+                         capture_output=True, text=True)
+    assert out.returncode == 0, out.stderr
+
+
+def test_page_asks_for_no_missing_favicon():
+    """A 404 for /favicon.ico is a console error, which fails the browser smoke test."""
+    assert 'rel="icon"' in (WEB / "index.html").read_text()

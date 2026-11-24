@@ -54,7 +54,7 @@ def test_the_site_has_the_page_the_archive_and_the_art(built):
     names = set(m["files"])
     assert {"index.html", "main.js", "keys.js", "game.zip", "art/spikes.png"} <= names
     assert "art/rival/run.png" in names and "art/rival_crimson/run.png" in names
-    assert "art/guard/walk.png" in names and "art/tiles/platform.png" in names
+    assert "art/guard/walk.png" in names and "art/tiles.png" in names
 
 
 def test_every_sheet_the_draw_list_can_name_is_shipped(built):
