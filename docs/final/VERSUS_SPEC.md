@@ -129,7 +129,7 @@ Scripted, not AI (GDD). Hostile to both rivals equally.
 | --- | --- | --- |
 | R-V17 | `TAKE` beside a downed, uniformed guard: the rival kneels, takes the uniform and is disguised; its sword is sheathed under it | 12 frames |
 | R-V18 | A disguised rival is drawn, and observed by the other seat, **exactly** as a guard (Section 6). Guards ignore a disguised rival whose suspicion is not full | — |
-| R-V19 | Suspicion: each guard has a meter 0–100 **per rival**. It rises only while that guard sees the disguised rival (R-V14 sight) | Running +4/frame; jumping or climbing +6/frame; standing still within 1 cell for over 2 s +1/frame |
+| R-V19 | Suspicion: each guard has a meter 0–100 **per rival**. It rises only while that guard sees the disguised rival (R-V14 sight) | Running +4/frame; jumping or climbing +6/frame; standing still within 1 cell for over 2 s +1/frame (a re-sent `WAIT` counts as standing still; Saad, 2026-11-23, "Yes, fix it") |
 | R-V20 | It falls when the rival walks (`STEP`), stands still out of reach, or is out of sight | −2/frame |
 | R-V21 | The disguise breaks at once on: drawing, any attack, or any guard's meter reaching 100 (decided); *proposed additions:* a stance change (it draws the sword anyway) and losing a heart. Then it is gone for the rest of the duel (one uniform per downed guard) | — |
 | R-V24 | A hop straight up (`UP` on open floor, not a climb) by a disguised rival in a guard's sight raises that guard's suspicion (Saad, 2026-11-23: "Hopping should raise suspicion") | +6/frame, the jumping or climbing step *(proposed, for Saad to confirm)* |

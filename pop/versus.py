@@ -450,7 +450,8 @@ class Duel:
         """R-V19 to R-V21, R-V24: each guard's meter for each disguised rival."""
         for seat, r in self.rivals.items():
             m = self.motion(seat)
-            r.still = r.still + 1 if m is None else 0
+            idle = m is None or m["effect"] == "waited"     # R-V19, QA3: a re-sent WAIT is still
+            r.still = r.still + 1 if idle else 0
             if not r.disguised:
                 continue
             for name, g in self.guards.items():
@@ -458,7 +459,7 @@ class Duel:
                 level = self.suspicion.get(key, 0)
                 if self.in_sight(g, r):
                     near = abs(r.kid.col - g.col) <= 1
-                    if m is None:
+                    if idle:
                         delta = (SUSPICION_LINGER if r.still > LINGER_AFTER else 0) if near \
                             else -SUSPICION_FALL
                     elif self.suspicious_rise(seat):

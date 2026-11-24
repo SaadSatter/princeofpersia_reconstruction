@@ -88,3 +88,6 @@ decision 15).
   fails; it is an existing test, so it was not edited (needs Saad's approval).
 - Also updated VERSUS_SPEC section 2.2 (outcome keys added by T01) and the
   R-V26 row.
+- QA3 (added by Saad 2026-11-23, "Yes, fix it"): a re-sent WAIT counts as
+  standing still for R-V19 lingering. Mark removed: `GATE-T01-QA3` in
+  `tests/test_gate_t01_qa_disguise.py`. QA2 stays xfail.

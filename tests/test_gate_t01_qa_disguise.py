@@ -213,9 +213,6 @@ def test_disguised_hang_is_not_a_free_guard_tell():
     assert all(f["posture"] == "standing" for f in figs), figs
 
 
-@pytest.mark.xfail(strict=True, reason="GATE-T01-QA3 (pre-existing, disclosed by T01): repeated "
-                   "WAIT next to a guard never counts as standing still, so R-V19 lingering "
-                   "(+1/frame after 2 s within 1 cell) never applies")
 def test_waiting_beside_a_guard_counts_as_lingering():
     ep = _episode("A", (2, 0, 7, +1), (2, 0, 1, +1), {"watch": (2, 0, (8, 8), -1)})
     idle = _episode("A", (2, 0, 7, +1), (2, 0, 1, +1), {"watch": (2, 0, (8, 8), -1)})

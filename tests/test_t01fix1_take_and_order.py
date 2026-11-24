@@ -74,6 +74,8 @@ def _lingering(seat, other, wait):
     ep = episode(*((((2, 0, 7, +1), (2, 0, 1, +1)) if seat == "A"
                     else ((2, 0, 1, +1), (2, 0, 7, +1)))),
                  {"watch": (2, 0, (8, 8), -1)})
+    r = ep._duel.rivals[seat]
+    r.disguised, r.sword, r.stance = True, "sheathed", None
     for _ in range(120):
         if wait:
             ep.step(seat, "WAIT")
