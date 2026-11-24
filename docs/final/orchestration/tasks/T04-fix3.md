@@ -28,3 +28,9 @@ The findings behind items 1–3 are condensed in `docs/final/orchestration/repor
 **Thread safety.** Item 3 is a concurrency fix. Its test must fail before the fix, and it must not be flaky: use a barrier or event to force the overlap, not sleeps. Run it at least 50 times and report the count.
 
 **Gates:** Gate 1 `qa` (`gate/T04-fix3-qa`) and Gate 2 `evaluation-specialist` (`gate/T04-fix3-eval`), because it changes the runner. Then Gate 3.
+
+## Amended 2026-11-24 (decision #33)
+
+The Tech Lead's first pass (report `reports/T04-fix3-tech-lead.md` @ 0dda555 on `task/T04-fix3`) was partial. One gate probe outside the permitted paths, `tests/test_gate_t04fix1_eval_probes.py::test_same_instance_in_both_seats_busy_blocks_both`, still runs one controller in both seats, and that setup is now refused under #24. Saad chose "Flip to ValueError (Recommended)" (#33).
+
+**Added permitted path:** `tests/test_gate_t04fix1_eval_probes.py`, for this one test only. Change it so that it asserts `VersusRunner(..., {"A": s, "B": s}, ...)` raises `ValueError`. Keep its name or rename it to say what it now checks, and leave every other test in the file unchanged. Commit on `task/T04-fix3`, and update your report in place: the status, the suite line, and this edit listed under "Test changes". The two numpy failures stay as they are; numpy is T15 (#34).

@@ -22,3 +22,13 @@ Saad answered two questions put to him by the orchestrator session (AskUserQuest
 |---|---|---|---|
 | 31 | CLIMB down (T05-fix1; was listed under "Waiting on Saad") | "CLIMB both ways (Recommended)" | `CLIMB` climbs up an edge, and also goes down safely: hang and drop, or a drop into a pit the engine lets you survive. `SEARCH` and `FLEE` may also use survivable drops. No new macro name (decision #23 stands). G1's "climb" is read as covering both directions. `MACROS.md` records it as confirmed by Saad, not pending |
 | 32 | Parallel work alongside T05-fix1 | "T05-fix1 only (Recommended)" | Only one task chain runs at a time for now. T04-fix3 and GATE-wave3 wait until the T05-fix1 chain is finished |
+
+## Addendum: Tue 2026-11-24, afternoon (T04-fix3, numpy, online play)
+
+Saad asked in chat: "What do you mean the numpy isnt a declared dependecy? Just pipinstall it? Also is the online play ready for play testing between humans?" After the orchestrator's answer, he chose (AskUserQuestion, verbatim):
+
+| # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
+|---|---|---|---|
+| 33 | Stale gate probe `tests/test_gate_t04fix1_eval_probes.py::test_same_instance_in_both_seats_busy_blocks_both` (it contradicts #24) | "Flip to ValueError (Recommended)" | The probe asserts that `VersusRunner` raises `ValueError` when one controller object fills both seats. The T04-fix3 Tech Lead makes the change (brief amended); it is reviewed at Gates 1 and 2. This is the same kind of change as #21 |
+| 34 | numpy | "Add a train extra (Recommended)" | `pyproject.toml` gets an optional extra `train = ["numpy>=2,<3"]`, and `uv.lock` is refreshed. RL tests run with `--extra train`. The base install stays numpy-free. New task **T15**, through the gates |
+| 35 | Online human vs human | "Build it for G2/G3" | **Overturns the online-play deferral in #1** (and the "deferred" note in #12): T13 (online play, one authoritative server, one browser per rival) is in G2/G3 scope, due Sat 2026-11-28. Hosting (OQ-10), disconnect rule (OQ-13), the WebSocket dependency and the task order are asked separately before the T13 brief |
