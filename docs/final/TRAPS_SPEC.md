@@ -1,7 +1,14 @@
 # Shadow Masque traps spec: the RIG action (addendum to VERSUS_SPEC)
 
-Status: **PROPOSAL for Saad's approval (T06a).** Nothing here is implemented or
-decided. Every number and choice below is a *proposal*; where the choice is a
+Status: approved by Saad 2026-11-23 (decision #22, "Accept recommendations"): every
+recommended option below stands (one-shot, cell ahead, 12-frame kneel, 4 shared,
+disguised rigging +3 per frame in sight, owner can be hurt, double rig, loose
+floor first and gate plate after, gate slam 1 heart, a cancelled rig spends the
+trap, one `RIG_TRAP` macro). Originally written as a proposal (T06a); read
+"proposal" below as "approved".
+
+Original status line: **PROPOSAL for Saad's approval (T06a).** Nothing here was
+implemented or decided when written. Every number and choice below is a *proposal*; where the choice is a
 real design call, two options are given and one is recommended. Decisions in
 force it builds on: GDD 2026-11-15 (two trap types, loose floor and gate plate,
 4 traps per rival, traps hurt everyone including the owner), DECISIONS #2
@@ -156,3 +163,28 @@ whether the kneel makes a rig-ing rival too easy to read.
 7. Kneel 12 frames and cancel-spends-the-trap (proposed numbers)?
 8. Macro shape: one `RIG_TRAP` (loose first) now; second type via argument or `RIG_GATE` with CQ-1?
 9. G2 minimum: loose floor only, gate plate in G3?
+
+## 11. Implementation notes (T06b, 2026-11-23, for Saad's confirmation)
+
+Built: the loose-floor rig (R-V27, R-V28, R-V30 to R-V34) in `pop/versus.py`. The
+engine input is `RIG`; the `RIG_TRAP` macro (agents, web) belongs to T05 and T07.
+Not built: the gate-plate rig (R-V29). It needs the second macro shape under
+CQ-1 (decision #23 lists only `RIG_TRAP`) and a harmful slam in
+`pop/mechanics.py`, which is outside T06b's write paths.
+
+Choices the spec left open, each easy to change:
+
+1. **Legality and hidden links.** The spec says a loose rig needs a floor the
+   fall can reach. A seat's observation hides up/down room links, so legality
+   uses only the tiles of the rival's own room: the floor below must be in the
+   same room. Rigging the bottom row, or over a hole that opens to a room
+   below, is not legal.
+2. **One heart in all.** A fall of 1 row hurts nothing in the inherited
+   physics, so a sprung loose rig adds 1 heart when the fall alone would not
+   cost one (a 2-row fall already costs 1). Reading it the other way (only
+   the inherited fall damage) leaves most rigs harmless.
+3. **Kneel look.** The kneel's motion effect is `kneeled` for an undisguised
+   rival (the spec's "kneeling figure"); a disguised rival's kneel is shown as
+   standing still (R-V25). T07's renderer needs a pose for `kneeled`.
+4. **Rig placement** happens when the 12 kneel frames end; if the floor changed
+   during the kneel the trap is lost and `last_result.effect` is `no_rig`.

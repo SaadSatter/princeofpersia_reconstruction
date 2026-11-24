@@ -51,8 +51,8 @@ def test_rig_is_legal_on_plain_floor_ahead():
 def test_rig_is_refused_on_anything_but_plain_floor_with_a_floor_below():
     assert "RIG" not in episode(a=(2, 0, 2, +1)).legal_actions("A")     # torch ahead (col 3)
     assert "RIG" not in episode(a=(2, 0, 9, +1)).legal_actions("A")     # room edge ahead
-    assert "RIG" not in episode(a=(2, 1, 1, +1)).legal_actions("A")     # hole ahead
-    assert "RIG" not in episode(a=(2, 1, 2, +1)).legal_actions("A")     # drop plate ahead
+    assert "RIG" not in episode(a=(2, 1, 0, +1)).legal_actions("A")     # hole ahead (col 1)
+    assert "RIG" not in episode(a=(2, 1, 2, +1)).legal_actions("A")     # drop plate ahead (col 3)
     assert "RIG" not in episode(a=(1, 1, 5, +1)).legal_actions("A")     # loose tile ahead
     assert "RIG" not in episode().legal_actions("B")                    # B is on the bottom row
     # Bottom row: the floor below would be in a room the seat cannot see.
@@ -130,7 +130,7 @@ def test_a_knockdown_during_the_kneel_cancels_the_rig_and_still_spends_the_trap(
 def walk_onto(ep, seat, steps):
     for action in steps:
         assert ep.step(seat, action)["accepted"]
-        run(ep, 8)
+        run(ep, 10)
 
 
 def b_in_room(posts=None):
@@ -252,3 +252,12 @@ def test_both_seats_use_the_same_rig_interface():
     ep = episode(a=(2, 0, 1, +1), b=(2, 0, 8, -1))
     assert "RIG" in ep.legal_actions("A") and "RIG" in ep.legal_actions("B")
     assert ep.step("A", "RIG")["accepted"] and ep.step("B", " rig ")["accepted"]
+
+
+def test_a_two_row_fall_from_a_rig_costs_one_heart_in_all_not_two():
+    ep = episode(a=(2, 0, 0, +1))                    # rigs (2, 0, 1): air below, floor two rows down
+    rig(ep)
+    assert mine(ep, "A") == [{"row": 0, "col": 1, "kind": "loose"}]
+    walk_onto(ep, "A", ["STEP_RIGHT"])
+    run(ep, LOOSE_DELAY + 20)
+    assert ep._duel.rivals["A"].kid.row == 2 and hearts(ep, "A") == 2

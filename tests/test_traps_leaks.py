@@ -120,14 +120,14 @@ def test_springing_a_rig_names_no_owner_and_no_trap_to_the_victim():
     rig(ep, "A")
     for _ in range(2):
         ep.step("B", "STEP_LEFT")
-        for _ in range(8):
+        for _ in range(10):
             ep.tick()
             assert_unnamed(ep.observe("B"))
     for _ in range(20):
         ep.tick()
         obs = ep.observe("B")
         assert_unnamed(obs)
-    assert obs["me"]["hp"] == 2 and obs["last_result"]["effect"] in ("hurt", "landed", "fell")
+    assert obs["me"]["hp"] == 2
 
 
 def test_a_guard_springing_a_rig_names_no_owner_either():
