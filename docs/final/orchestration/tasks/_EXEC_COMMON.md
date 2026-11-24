@@ -38,8 +38,14 @@ git show <handoff-sha>:docs/final/orchestration/reports/<prev>.md
   and stage explicit paths (`git add <path>`).
 - Your report goes in `docs/final/orchestration/reports/<TASK-ID>-<role>.md`
   on the same branch (`../HANDOFF_PROTOCOL.md`).
-- Trailer, naming the **configured** model (the verified one goes in the
-  review log):
+- Commit as the agent, so `git log` shows who did the work. (SMOKE-01 found
+  worker commits authored as Saad, because the worktree inherits his git
+  identity.) Use:
+  ```
+  git commit --author "Claude Sonnet 5.5 (<role> worker) <noreply@anthropic.com>" -m "..."
+  ```
+  and end the message with the trailer naming the **configured** model (the
+  verified one goes in the review log):
   ```
   Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
   ```
@@ -49,9 +55,17 @@ git show <handoff-sha>:docs/final/orchestration/reports/<prev>.md
 
 ## Tests
 
-`uv run pytest -q` (Saad's Mac: `uv` present, pygame installed). Where `uv`
-is missing: `python3 -m pytest -q -p no:cacheprovider`. Say which one you
-used, and paste the real result line.
+`uv run pytest -q` (Saad's Mac: `uv` present). Where `uv` is missing:
+`python3 -m pytest -q -p no:cacheprovider`. Say which one you used, and paste
+the real result line.
+
+Expect more skips in a worker worktree than in Saad's checkout. A fresh
+worktree has no gitignored data (original Level 1, bundled images), and its
+new `uv` environment has no pygame. Some tests are generated from local
+files, so a worktree also *collects* fewer tests: on 2026-11-24 a worktree
+collected 445 (SMOKE-01: 435 passed, 12 skipped) where the main checkout
+collected 459 (459 passed, 1 skipped). Report skips as skips. Gate 3 re-runs the suite in the main
+checkout or the integration worktree, and says which.
 
 No network for tests, no API keys, no paid calls, and no training run
 longer than 10 minutes without Saad's approval quoted in the brief.

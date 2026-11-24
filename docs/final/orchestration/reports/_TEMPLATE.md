@@ -8,7 +8,7 @@ configured_model: claude-sonnet-5-5
 runtime_model: not visible to the agent (orchestrator records the verified id in REVIEW_LOG.md)
 consumed: <docs/final/orchestration/tasks/<TASK-ID>.md@<sha> | reports/<prev>.md@<sha>>
 source_branch: <task/<ID> | gate/<ID>-qa | gate/<ID>-eval | audit/<ID>>
-source_commit: <sha holding the work, or "none (read-only)">
+source_commit: <sha holding your work; report-only tasks: the base sha. Not this report's own commit (the receiver records that under consumed)>
 reviewed_commit: <reviewers: exact sha under review; producers: n/a>
 verdict: <ACCEPT | ACCEPT WITH NOTES | REJECT | n/a>
 ---

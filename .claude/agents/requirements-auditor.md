@@ -31,3 +31,6 @@ one commit. Never run paid calls or training, push, or merge.
 
 Done when the matrix and the blocker lists are committed. Your final message
 gives the branch, the sha and the report path.
+
+Commit as yourself: `git commit --author "Claude Sonnet 5.5 (requirements-auditor worker) <noreply@anthropic.com>"`,
+with the trailer `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.

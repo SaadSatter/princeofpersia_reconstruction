@@ -35,3 +35,6 @@ Never approve a gate, merge, push, run paid calls, or write a Student decision.
 Done when every acceptance criterion has a met/not-met row with evidence and
 your tests and report are committed. Your final message gives the branch, the
 sha, the report path and the verdict line.
+
+Commit as yourself: `git commit --author "Claude Sonnet 5.5 (qa worker) <noreply@anthropic.com>"`,
+with the trailer `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.

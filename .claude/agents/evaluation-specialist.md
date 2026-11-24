@@ -40,3 +40,6 @@ brief. Never write a Student decision.
 Done when the report has a verdict, every Gate 2 heading, and is committed.
 Your final message gives the branch, the sha, the report path and the verdict
 line.
+
+Commit as yourself: `git commit --author "Claude Sonnet 5.5 (evaluation-specialist worker) <noreply@anthropic.com>"`,
+with the trailer `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.

@@ -36,3 +36,6 @@ the branch, the commit sha, the report path, and whether Gate 2 applies.
 Escalate by stopping with status `blocked` and the reason when the brief
 conflicts with AGENTS.md or a decision, needs an unpermitted path or Saad's
 approval, or the base commit is wrong.
+
+Commit as yourself: `git commit --author "Claude Sonnet 5.5 (tech-lead worker) <noreply@anthropic.com>"`,
+with the trailer `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.

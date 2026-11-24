@@ -73,7 +73,7 @@ audits and reviews link to them, so they stay where they are. Never edit
 | Rules reviewer (Claude) | `.claude/agents/rules-reviewer.md` | itself |
 | Rules reviewer (Codex) | `.codex/agents/pop-rule-reviewer.toml` | itself |
 | Skills | `.claude/skills/game-rules-audit/`, `session-evidence/`, `evaluate-rival/` | each `SKILL.md` |
-| AI rival (in game) | `agents/rl/` (PPO policy, decision #3) | `docs/final/RL_POLICY.md` |
+| AI rival (in game) | `agents/rl/` (PPO policy, decision #3; on `orch/preview`, not yet on `main`) | `docs/final/RL_POLICY.md` (same branch) |
 
 Course roles (`python -m team`) are mapped in
 `docs/final/orchestration/COURSE_ROLE_MAP.md`. Never review your own work as

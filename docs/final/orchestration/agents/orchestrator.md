@@ -193,6 +193,9 @@ and `-fix2` both rejected), stop. Write the evidence into `STATUS.md` under
 - Never: force-push, delete or rebase a branch that is not yours, rewrite
   history on a shared branch, merge an `orch/wip-*` snapshot, merge
   gameplay into `main`, or commit Saad's uncommitted files.
+- Commit as `--author "Claude Opus 5.5 (orchestrator) <noreply@anthropic.com>"`
+  with the matching `Co-Authored-By` trailer, so agent commits are never
+  shown as Saad's.
 - Stage explicit paths only (`git add <path>`), never `git add -A`. Saad's
   working tree often has uncommitted work of his own.
 - **Pushing.** AGENTS.md requires Saad's explicit approval to push. Decision

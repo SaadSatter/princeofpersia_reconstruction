@@ -57,3 +57,4 @@ adding this file"), because a commit cannot name its own sha. A template
 clarification could follow. Models from `tools/orchestration/verify_models.py --latest`:
 main `claude-opus-5-5`; subagent `type=tech-lead` and `type=qa`, both
 `meta_model=claude-sonnet-5-5 responses=claude-sonnet-5-5`.
+| 2026-11-24 | SMOKE-01 follow-up | configuration fixes from the chain (refactor session fb28fc89, Opus 5.5, not started as the orchestrator agent) | — | claude-opus-5-5 (verified: transcript) | see the commit after 44d02e2 | n/a | read `reports/SMOKE-01-tech-lead.md`@fc16525 and `reports/SMOKE-01-qa.md`@3bb36f5 | (1) agent commits now use `--author "Claude … (<role> …)"`, since worker commits showed Saad as author; (2) `source_commit` cannot be a report's own commit, which the template now says; (3) the QA minor finding was fixed in `CLAUDE.md`; (4) worktree test counts were documented (445 collected vs 459) |

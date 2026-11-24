@@ -64,7 +64,7 @@ full template is `reports/_TEMPLATE.md`.
 | `configured_model` | the model pinned in your `.claude/agents/<name>.md` |
 | `runtime_model` | always `not visible to the agent`. The orchestrator fills the verified value in `REVIEW_LOG.md` from transcript metadata |
 | `consumed` | `<path>@<sha>` of the brief or report you read first |
-| `source_branch` / `source_commit` | the branch and commit you produced or reviewed |
+| `source_branch` / `source_commit` | your branch, and the commit that holds your *work* (for a report-only task, the base you started from). A report cannot contain the sha of the commit that adds it: the receiver records that sha under its own `consumed`, and the orchestrator in `REVIEW_LOG.md` |
 | `reviewed_commit` | reviewers: the exact commit under review |
 | `verdict` | reviewers: `ACCEPT`, `ACCEPT WITH NOTES` or `REJECT`; producers: `n/a` |
 

@@ -73,7 +73,7 @@ Deadline pressure: G2/G3 recording and the official-repository move are due
 
 ## Waiting on Saad
 
-- **SMOKE-01 minor finding:** `CLAUDE.md:76` names `agents/rl/` and `docs/final/RL_POLICY.md`, which are not on `main` (only on `orch/preview`, T07). Either leave it until T07 merges, or approve a `CLAUDE.md` wording change such as "on `orch/preview`". Editing `CLAUDE.md` needs your approval.
+- ~~SMOKE-01 minor finding~~ resolved 2026-11-24 in the orchestration refactor (Saad authorized `CLAUDE.md` edits for it): the AI-rival row in `CLAUDE.md` now says the paths are on `orch/preview`, not yet on `main`.
 - **SMOKE-01 branches:** `task/SMOKE-01` and `gate/SMOKE-01-qa` hold only the two reports. Merge them, keep them, or delete them (deleting needs you). The two worker worktrees are still registered.
 - **Student decision** on `handoff-drafts/2026-11-24-qa-to-tech.md` (G2/G3 handoff).
 - B2 "low suspicion" threshold (proposed below 50/100); D1 "on screen" = same room (proposed).
