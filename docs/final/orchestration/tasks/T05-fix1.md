@@ -18,3 +18,32 @@ Acceptance (failing tests first):
 - Re-run the competence table on tuning starts and on new held-out starts that include lower rooms. Fix the held-out list in the failing-tests commit before implementing.
 - Full suite green; Handoff to QA block.
 Permitted writes: `agents/macros.py`, `agents/versus_baseline.py`, `tests/test_macros.py`, `tests/test_versus_baseline.py`, the copied gate files, `docs/final/MACROS.md`, `docs/agent-sessions/`.
+
+---
+
+## Resumed 2026-11-24 14:19 ET (native agents)
+
+The sandbox run of this brief was cut off by the usage limit at about 02:00 ET on 2026-11-24. This note replaces every `/home/claude/sm/...` path above. Setup, commits and tests now follow `tasks/_EXEC_COMMON.md` (your own worktree, `--author` on every commit, no push).
+
+**Decision in force, #31** (`DECISIONS-2026-11-24.md`): Saad chose "CLIMB both ways (Recommended)". Fix 1 is no longer pending. In `MACROS.md`, record `CLIMB` going down as **confirmed by Saad (decision #31)**, not as pending.
+
+**Base.** Branch from `0846a16`, not from `6692771`: `git switch -c task/T05-fix1 0846a16`. That commit is the earlier Tech Lead's failing-tests commit on top of `6692771`. It holds the copied gate files `tests/test_gate_t05_eval_baseline.py` and `tests/test_gate_t05_qa_probes.py`, the new tests in `tests/test_macros.py` and `tests/test_versus_baseline.py`, and the **frozen** `LOWER_HELD_OUT_STARTS`. Before implementing:
+1. Check that `git diff --name-only 6692771 0846a16` lists only those four test files.
+2. Run the suite and record which tests fail or xfail, and why.
+3. Do not change `LOWER_HELD_OUT_STARTS` or the tuning and held-out starts. If one is wrong (for example, unreachable by any legal play), stop and say so in your report; do not edit it.
+You may add tests, and fix a test only where it contradicts the brief or a decision. Explain each such fix in your report.
+
+**WIP snapshot.** `orch/wip-T05-fix1` at `ab78522` holds the interrupted, **untested and unreviewed** edits to `agents/macros.py`, `agents/versus_baseline.py` and `tests/test_macros.py`. You may read it (`git show ab78522:<path>`) and reuse ideas. Do not cherry-pick or merge it blindly. Everything you commit must be your own reviewed work, and it must pass the tests.
+
+**Findings to fix (where they are now).**
+- Gate 2: `docs/final/orchestration/reports/GATE-T05-eval.md` on `main` (Gap 1 no descent, Gap 2 lone guard, memory disclosure). xfails `GATE-T05-eval-1`, `-2` in `tests/test_gate_t05_eval_baseline.py`.
+- Gate 1: the QA report commit `dec85c8` was lost with the sandbox. Its findings are condensed in `docs/final/orchestration/reports/wave2-batch.md` ("GATE-T05-qa"), and its probes are in `tests/test_gate_t05_qa_probes.py` at `0846a16`. Majors: QA-1 mirror-match deadlock (10/10 draws), QA-2 lone-guard rule loses to WAIT, QA-3 SEARCH stays on one row. Minor: `decide` crashes on a `None` or malformed policy tuple. xfails `GATE-T05-qa-1` to `-3`.
+- Remove an xfail mark only for a finding you fixed. For a finding you did not fix, keep its mark and say why in the report.
+
+**QA-1 (mirror deadlock).** Add this to the fixes above. Baseline vs baseline must not end 10/10 in a no-hit draw. Report the baseline-vs-baseline result over at least 12 seat-swapped duels. A fix that breaks the symmetry must use only the seat's own observation and its own seeded state. No seat may read the other's identity or seed.
+
+**Report.** `docs/final/orchestration/reports/T05-fix1-tech-lead.md` on `task/T05-fix1`, from `reports/_TEMPLATE.md`, with `consumed: docs/final/orchestration/tasks/T05-fix1.md@<coordination sha>`. Include the competence numbers each acceptance criterion asks for, with seeds, and say whether you used `uv run pytest -q` or the fallback.
+
+**Permitted write paths** (unchanged, plus the report): `agents/macros.py`, `agents/versus_baseline.py`, `tests/test_macros.py`, `tests/test_versus_baseline.py`, `tests/test_gate_t05_eval_baseline.py`, `tests/test_gate_t05_qa_probes.py`, `docs/final/MACROS.md`, `docs/agent-sessions/` (a new file only), `docs/final/orchestration/reports/T05-fix1-tech-lead.md`. Nothing in `pop/`. If a fix needs an engine change, stop and report `blocked`.
+
+**Gates:** Gate 1 `qa` (branch `gate/T05-fix1-qa`), Gate 2 `evaluation-specialist` (branch `gate/T05-fix1-eval`; this changes the baseline and the macro layer), then Gate 3 by the orchestrator. Integration target: `orch/preview` (which already holds T05), via the orchestrator.

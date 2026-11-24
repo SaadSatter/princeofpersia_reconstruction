@@ -93,7 +93,7 @@ Deadline pressure: G2/G3 recording and the official-repository move are due
 - B2 "low suspicion" threshold (proposed below 50/100); D1 "on screen" = same room (proposed).
 - T06b: confirm "a sprung trap costs 1 heart in all".
 - T07: macro cadence (4 decisions), nearest-figure targeting, reward-shaping defaults.
-- CLIMB down as well as up (T05-fix1's reading of G1 "climb").
+- ~~CLIMB down as well as up~~ decided 2026-11-24 14:19 ET (#31): "CLIMB both ways".
 - ~~Pushing~~ decided 2026-11-24 (#27, #28): pushes, issues and PRs need no per-push approval; merging stays Saad's.
 - **Course registration:** spawn the native `tech-lead`/`qa`, or the course-rendered `team-tech`/`team-qa`, once `agent-team/` exists (`COURSE_ROLE_MAP.md`).
 - ~~FINAL_REQUIREMENTS copy~~ published with `main` on 2026-11-24 (#26).
