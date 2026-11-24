@@ -15,8 +15,8 @@ import pytest
 from pop.seats import (RandomController, ScriptedController, WaitController,
                        controller_seed)
 from pop.versus import SEATS, arena_episode
-from pop.versus_runner import (FALLBACK_ACTION, VersusLimits, VersusRunner, load_traces,
-                               replay, save_traces, snapshot)
+from pop.versus_runner import (FALLBACK_ACTION, VersusLimits, VersusRunner, digest,
+                               load_traces, replay, save_traces, snapshot)
 
 PLAIN = (dict, list, tuple, str, int, float, bool, type(None))
 
@@ -116,7 +116,7 @@ def walk_types(x):
 def test_controller_gets_only_plain_copies_of_its_own_seat():
     a, b = Spy("a"), Spy("b")
     run({"A": a, "B": b}, limit=12)
-    fresh = arena_episode()
+    fresh = factory(12)()                               # same duel limit as the run (T04-fix1)
     for seat, spy in (("A", a), ("B", b)):
         obs, legal = spy.calls[0]
         assert obs == fresh.observe(seat)               # its own seat, as at frame 0
@@ -388,3 +388,217 @@ def test_controllers_must_fill_both_seats_and_cadence_is_positive():
     with pytest.raises(ValueError):
         VersusRunner(factory(), {"A": WaitController(), "B": WaitController()},
                      decision_every=0)
+
+
+# --- T04-fix1: gate findings and the trusted hooks ------------------------------------
+import json  # noqa: E402
+import math  # noqa: E402
+import threading  # noqa: E402
+
+
+class NpStr(str):
+    """Like numpy.str_: a str subclass a policy may return."""
+
+
+def test_str_subclass_answer_is_played_and_recorded_as_a_plain_str():
+    res = run({"A": Spy("np", NpStr("RIGHT")), "B": WaitController()}, limit=12)
+    rec = res["traces"]["A"][0]
+    assert rec["source"] == "controller" and rec["input"] == "RIGHT"
+    assert type(rec["input"]) is str
+
+
+@pytest.mark.parametrize("bad", [None, 0, -1.0, math.nan, math.inf, "5", True])
+def test_limits_reject_a_bad_timeout(bad):
+    with pytest.raises((TypeError, ValueError)):
+        VersusLimits(timeout_s=bad)
+
+
+@pytest.mark.parametrize("field", ["max_decisions", "max_fallbacks", "max_frames"])
+@pytest.mark.parametrize("bad", [-1, 1.5, "3", True])
+def test_limits_reject_bad_counts(field, bad):
+    with pytest.raises((TypeError, ValueError)):
+        VersusLimits(**{field: bad})
+
+
+def test_limits_accept_good_values():
+    lim = VersusLimits(max_decisions=0, max_fallbacks=3, timeout_s=1, max_frames=None)
+    assert lim.timeout_s == 1
+
+
+def test_busy_seat_gets_a_labelled_fallback_until_its_late_call_returns():
+    class Slow:
+        kind, name = "policy", "slow"
+
+        def __init__(self):
+            self.calls = 0
+
+        def decide(self, observation, legal):
+            self.calls += 1
+            time.sleep(0.15)
+            return "WAIT"
+
+    slow = Slow()
+    res = VersusRunner(factory(24), {"A": slow, "B": WaitController()},
+                       limits=VersusLimits(timeout_s=0.03)).run(0)
+    reasons = [r["fallback_reason"] for r in res["traces"]["A"]]
+    assert reasons == ["timeout", "busy", "busy", "busy"]
+    assert all(r["input"] == "WAIT" and r["source"] == "fallback" for r in res["traces"]["A"])
+    s = res["seats"]["A"]
+    assert (s["timeouts"], s["busy"], s["fallbacks"], s["decisions"]) == (1, 3, 4, 4)
+    assert slow.calls == 1
+    assert res["seats"]["B"]["busy"] == 0
+
+
+def test_seat_is_asked_again_once_its_late_call_has_returned():
+    gate = threading.Event()
+
+    class Late:
+        kind, name = "policy", "late"
+
+        def __init__(self):
+            self.calls = 0
+
+        def decide(self, observation, legal):
+            self.calls += 1
+            if self.calls == 1:
+                gate.wait(1.0)
+            return "WAIT"
+
+    late = Late()
+    runner = VersusRunner(factory(12), {"A": late, "B": WaitController()},
+                          limits=VersusLimits(timeout_s=0.02))
+    first = runner.run(0)
+    assert [r["fallback_reason"] for r in first["traces"]["A"]] == ["timeout", "busy"]
+    gate.set()
+    time.sleep(0.05)
+    second = runner.run(0)                             # same instance, next episode
+    assert [r["source"] for r in second["traces"]["A"]] == ["controller", "controller"]
+
+
+def test_slow_reset_is_recorded_as_a_timeout_and_the_seat_waits_for_it():
+    class SlowReset(WaitController):
+        def reset(self, seed):
+            time.sleep(0.3)
+
+    t0 = time.perf_counter()
+    res = VersusRunner(factory(12), {"A": SlowReset(), "B": WaitController()},
+                       limits=VersusLimits(timeout_s=0.03)).run(0)
+    assert time.perf_counter() - t0 < 0.25
+    assert res["seats"]["A"]["reset_error"] == "timeout"
+    assert [r["fallback_reason"] for r in res["traces"]["A"]] == ["busy", "busy"]
+    assert res["seats"]["B"]["reset_error"] is None
+
+
+def test_keyboard_interrupt_in_decide_still_stops_an_inline_run():
+    class Stopper:
+        kind, name = "policy", "stopper"
+
+        def decide(self, observation, legal):
+            raise KeyboardInterrupt
+
+    with pytest.raises(KeyboardInterrupt):
+        run({"A": Stopper(), "B": WaitController()}, limit=6, threaded=False)
+
+
+@pytest.mark.parametrize("threaded", [True, False])
+def test_system_exit_in_decide_is_an_error_fallback(threaded):
+    class Exiter:
+        kind, name = "policy", "exiter"
+
+        def decide(self, observation, legal):
+            raise SystemExit("gone")
+
+    res = run({"A": Exiter(), "B": WaitController()}, limit=6, threaded=threaded)
+    assert res["traces"]["A"][0]["fallback_reason"] == "error"
+
+
+# on_frame: a runner-side observer for scenario metrics, never given to a controller
+def test_on_frame_sees_every_frame_and_changes_nothing():
+    seen = []
+
+    def on_frame(frame, view):
+        seen.append((frame, view.outcome()["frames"], digest(view.snapshot())))
+
+    plain = run(random_pair(), limit=60, seed=3)
+    hooked = run(random_pair(), limit=60, seed=3, on_frame=on_frame)
+    assert hooked["traces"] == plain["traces"]
+    assert hooked["final_snapshot"] == plain["final_snapshot"]
+    assert [f for f, _, _ in seen] == list(range(1, 61))
+    assert all(f == frames for f, frames, _ in seen)
+    assert seen[-1][2] == plain["final_snapshot_sha256"]
+
+
+def test_on_frame_view_is_read_only_and_hands_out_copies():
+    def on_frame(frame, view):
+        for name in ("step", "tick", "reset", "_episode", "_ep"):
+            assert not hasattr(view, name)
+        view.snapshot()["frames"] = -1
+        obs = view.observe("A")
+        obs.clear()
+        legal = view.legal_actions("A")
+        assert isinstance(legal, tuple)
+
+    plain = run(random_pair(), limit=30, seed=1)
+    hooked = run(random_pair(), limit=30, seed=1, on_frame=on_frame)
+    assert hooked["final_snapshot"] == plain["final_snapshot"]
+
+
+def test_on_frame_view_never_reaches_a_controller():
+    views, a, b = [], Spy("a"), Spy("b")
+    run({"A": a, "B": b}, limit=24, on_frame=lambda f, v: views.append(v))
+    for spy in (a, b):
+        for obs, legal in spy.calls:
+            assert set(walk_types(obs)) <= set(PLAIN)
+            assert set(walk_types(legal)) <= set(PLAIN)
+    assert views and not hasattr(a, "view") and not hasattr(b, "view")
+
+
+def test_on_frame_runs_when_a_runner_limit_stops_the_run():
+    seen = []
+    res = run({"A": Raiser(), "B": WaitController()}, limit=600,
+              limits=VersusLimits(max_fallbacks=2), on_frame=lambda f, v: seen.append(f))
+    assert res["frames"] == 12 and seen == list(range(1, 13))
+
+
+# trusted fast path for training: same results, cheaper copies, no worker thread
+def test_fast_path_gives_the_same_run_as_the_default():
+    slow = run(random_pair(), limit=240, seed=8)
+    fast = run(random_pair(), limit=240, seed=8, copy_mode="json", threaded=False)
+    assert fast["traces"] == slow["traces"]
+    assert fast["final_snapshot"] == slow["final_snapshot"]
+    assert fast["runner"] == {"copy_mode": "json", "threaded": False}
+    assert slow["runner"] == {"copy_mode": "deepcopy", "threaded": True}
+
+
+def test_fast_path_still_hands_out_copies():
+    script = ["RIGHT", "RIGHT", "DRAW", "WAIT", "LEFT"]
+    clean = run({"A": ScriptedController(script), "B": ScriptedController(script)})
+    dirty = run({"A": Mutator(script), "B": ScriptedController(script)},
+                copy_mode="json", threaded=False)
+    assert dirty["final_snapshot"] == clean["final_snapshot"]
+
+
+def test_fast_path_timeout_uses_the_injected_clock_only():
+    clock = FakeClock()
+    res = VersusRunner(factory(12), {"A": Slow(clock, 6.0), "B": WaitController()},
+                       clock=clock, threaded=False).run(0)
+    assert [r["fallback_reason"] for r in res["traces"]["A"]] == ["timeout", "timeout"]
+
+
+def test_unknown_copy_mode_is_refused():
+    with pytest.raises(ValueError):
+        VersusRunner(factory(), {"A": WaitController(), "B": WaitController()},
+                     copy_mode="none")
+
+
+def test_default_runner_behaviour_is_recorded_in_the_result_and_trace_header(tmp_path):
+    res = run(random_pair(), limit=12)
+    head = json.loads(save_traces(res, tmp_path)["A"].read_text().splitlines()[0])
+    assert head["runner"] == {"copy_mode": "deepcopy", "threaded": True}
+
+
+def test_keyed_controller_seed_is_used_when_the_runner_has_a_key():
+    a, b = Spy("a"), Spy("b")
+    run({"A": a, "B": b}, limit=6, seed=11, seed_key=b"evaluation-secret")
+    assert a.resets == [controller_seed(11, "A", key=b"evaluation-secret")]
+    assert a.resets != [controller_seed(11, "A")]

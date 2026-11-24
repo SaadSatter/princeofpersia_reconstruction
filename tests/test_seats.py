@@ -87,3 +87,14 @@ def test_controller_seed_is_per_seat_and_not_the_episode_seed():
     assert controller_seed(5, "A") != controller_seed(5, "B")
     assert controller_seed(5, "A") != controller_seed(6, "A")
     assert all(controller_seed(s, seat) != s for s in range(50) for seat in "AB")
+
+
+def test_keyed_controller_seed_differs_from_unkeyed_and_by_key():
+    assert controller_seed(5, "A", key=b"k1") != controller_seed(5, "A")
+    assert controller_seed(5, "A", key=b"k1") != controller_seed(5, "A", key=b"k2")
+    assert controller_seed(5, "A", key=b"k1") == controller_seed(5, "A", key=b"k1")
+
+
+def test_keyed_controller_seed_is_not_recoverable_without_the_key():
+    s = controller_seed(4242, "B", key=b"held-by-the-evaluator")
+    assert all(controller_seed(c, seat) != s for c in range(20_000) for seat in "AB")
