@@ -169,7 +169,8 @@ def _runs(motions):
     """Run-length list of (effect, length) with None for no motion."""
     out = []
     for m in motions:
-        key = None if m is None else m["effect"]
+        # Another seat sees only guard-like motions; any other move reads as standing still.
+        key = None if m is None or m["effect"] == "waited" else m["effect"]
         if out and out[-1][0] == key and not (m and m["frame"] == 1 and key):
             out[-1][1] += 1
         else:

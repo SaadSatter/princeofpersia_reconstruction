@@ -42,6 +42,7 @@ def factory(starts, posts=None, limit=3600):
 def duel(baseline_ctrl, other, starts, seed, swap, posts=None, **kw):
     """One duel. `swap` puts the baseline in seat B (and its start there too)."""
     a, b = starts
+    kw.setdefault("clock", lambda: 0.0)        # latency_ms is wall time; fix it for equality
     pair = ((b, a) if swap else (a, b))
     ctrls = {"A": baseline_ctrl, "B": other}
     runner = VersusRunner(factory(pair, posts), ctrls, swap_seats=False, **kw)
@@ -52,6 +53,19 @@ def duel(baseline_ctrl, other, starts, seed, swap, posts=None, **kw):
 
 def baseline_won(result, swap) -> bool:
     return result["outcome"]["reason"] == ("won:B" if swap else "won:A")
+
+
+class Staged(VersusEpisode):
+    """An episode whose reset applies a test setup (the runner resets before play)."""
+
+    def __init__(self, *args, setup=None, **kw):
+        self._setup = setup
+        super().__init__(*args, **kw)
+
+    def reset(self, seed):
+        super().reset(seed)
+        if self._setup:
+            self._setup(self._duel)
 
 
 # --- 1. determinism ------------------------------------------------------
@@ -178,23 +192,21 @@ def test_baseline_takes_the_nearest_visible_uniform_before_anything_else():
     ep_factory = lambda: _with_body()                              # noqa: E731
 
     def _with_body():
-        ep = VersusEpisode(arena.situation("A"),
-                           {"A": (1, 2, 2, +1), "B": (3, 2, 7, -1)}, 0, 3600,
-                           {"g": (1, 2, (6, 6), +1)})
-        ep._duel.guards["g"].knock_out()
-        return ep
-    res = VersusRunner(ep_factory, {"A": make_baseline(), "B": WaitController()},
-                       limits=VersusLimits(max_frames=300)).run(0)
-    snap = res["final_snapshot"]
-    assert snap["disguised"]["A"] is True
+        return Staged(arena.situation("A"), {"A": (1, 2, 2, +1), "B": (3, 2, 7, -1)}, 0, 3600,
+                      {"g": (1, 2, (6, 6), +1)},
+                      setup=lambda duel: duel.guards["g"].knock_out())
+    seen = []
+    VersusRunner(ep_factory, {"A": make_baseline(), "B": WaitController()},
+                 limits=VersusLimits(max_frames=300),
+                 on_frame=lambda f, view: seen.append(view.observe("A")["me"]["disguised"])).run(0)
+    assert any(seen) and not seen[0]
 
 
-def test_baseline_strikes_the_disguised_rival_and_does_not_pick_a_fight_with_a_real_guard():
+def test_baseline_identifies_and_strikes_a_rival_that_arrives_disguised():
     def make():
-        ep = VersusEpisode(arena.situation("A"),
-                           {"A": (1, 2, 1, +1), "B": (1, 2, 7, -1)}, 0, 3600, {})
-        ep._duel.rivals["B"].disguised = True       # test setup: B arrives already disguised
-        return ep
+        # Test setup: B arrives already disguised.
+        return Staged(arena.situation("A"), {"A": (1, 2, 1, +1), "B": (1, 2, 7, -1)}, 0, 3600,
+                      {}, setup=lambda duel: setattr(duel.rivals["B"], "disguised", True))
     res = VersusRunner(make, {"A": make_baseline(), "B": WaitController()},
                        limits=VersusLimits(max_frames=900)).run(0)
     assert res["outcome"]["reason"] == "won:A", res["status"]
