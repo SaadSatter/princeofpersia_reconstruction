@@ -39,7 +39,7 @@ paths and are historical.
 | Branch | Head | Class | Content |
 | --- | --- | --- | --- |
 | `main` | see `git log` | Saad's merged work + orchestration records | gameplay as of 721b3e6; orchestration docs |
-| `orch/reviewed` | 2180fea | reviewed integration candidate | T01 chain, T02, T04 chain (except T04-fix3), T11 + fix1, **T05 + T05-fix1** (2026-11-24) |
+| `orch/reviewed` | 199f858 | reviewed integration candidate | T01 chain, T02, T04 chain (except T04-fix3), T11 + fix1, T05 + T05-fix1, **T15** (2026-11-24) |
 | `int/preview-T05-fix1` | b52d145 | parked integration | `orch/preview` + `orch/reviewed` 2180fea. One T07 test fails (fixture relied on the mirror deadlock). Becomes `orch/preview` after T07-fix1 |
 | `task/T05-fix1`, `gate/T05-fix1-qa`, `gate/T05-fix1-eval` | 161a841, 12c11bd, 1b303ff | worker branches (closed task) | merged into `orch/reviewed` |
 | `orch/preview` | 87606b9 | preview / demo build; some gates pending | `orch/reviewed` + T05, T14, T14-fix1, T06a/T06b, T07, 2026-11-24 records. Suite there: 959 passed, 12 skipped, 3 xfailed (sandbox, Python 3.13, as recorded by the previous orchestrator; not re-run 2026-11-24) |
@@ -63,8 +63,8 @@ No `rc/*` (approved release candidate) branch exists.
 | under review | T07 | PPO encoder, trainer, stdlib policy. **Full training not started** | G1, G2 pending (GATE-wave3) | `orch/preview` 1e34cf2 | none |
 | under review | T14 + fix1 | hosted web build (Pyodide + Phaser) | T14 G1/G2 accept w/ notes; fix1 G1/G2 pending (GATE-wave3) | `orch/preview` ca3667b | none |
 | closed (Gate 3, 2026-11-24) | T05 + T05-fix1 | macros + baseline; CLIMB both ways (#31), descent, lone-guard rule 5, mirror no longer deadlocked | G1 ACCEPT w/ notes (12c11bd), G2 ACCEPT w/ notes (1b303ff), G3 closed | `orch/reviewed` 2180fea; preview merge parked on `int/preview-T05-fix1` b52d145 (breaks one T07 test, see REVIEW_LOG) | issue #7 |
-| **active** (Gate 1 running) | T04-fix3 (resumed, amended #33) | refuse shared controller (QA-5), keyed seed (eval-1), in-flight race | G1 running, G2 pending | `task/T04-fix3` 60ef7d5, report 6830232 | issue #8 |
-| **active** (tech-lead running) | T15 | numpy as optional `train` extra (#34) | G1 pending; G2 n/a | `task/T15` from 2180fea (brief@1a5840a) | issue #9 |
+| **active** (Gate 2 running) | T04-fix3 (resumed, amended #33) | refuse shared controller (QA-5), keyed seed (eval-1), in-flight race | G1 ACCEPT w/ notes (ab7fcba); G2 running | `task/T04-fix3` 60ef7d5, report 6830232 | issue #8 |
+| closed (Gate 3, 2026-11-24) | T15 | numpy as optional `train` extra (#34) | G1 ACCEPT (f2ac18b); G2 n/a; G3 closed | `orch/reviewed` 199f858 | issue #9 |
 | approved, not started | T13 | online play: authoritative server on Saad's laptop (LAN, #36), `websockets` online extra (#37), pause 15 s then forfeit (#38); overturns #1 deferral (#35) | QA + Eval | after T04-fix3 and T15; alongside GATE-wave3 (#39) | — |
 | unreviewed WIP | T08 | scenario suite D1/B2/I3/F5 + held-out H6, CLI, analysis | — | `orch/wip-T08` 25e4587 | none |
 | blocked | T07 full training run | ~85 min PPO run | T05-fix1 closed 2026-11-24; still needs T07 gates (GATE-wave3), T07-fix1, numpy declared, **and** Saad's go-ahead | — | none |
@@ -75,7 +75,7 @@ No `rc/*` (approved release candidate) branch exists.
 
 ## Next eligible task
 
-**Running:** T04-fix3 Gate 1 and T15 tech-lead. **Then (decision #39):** T13 online play (tech-lead) at the same time as **GATE-wave3** (T06b, T07, T14-fix1 on `orch/preview`), folding in **T07-fix1**: the T07 test fixture collects 200 observations from one mirror duel, and that breaks after the T05-fix1 merge. Decision #32: one chain at a time.
+**Running:** T04-fix3 Gate 2. T15 closed. **Then (decision #39):** T13 online play (tech-lead) at the same time as **GATE-wave3** (T06b, T07, T14-fix1 on `orch/preview`), folding in **T07-fix1**: the T07 test fixture collects 200 observations from one mirror duel, and that breaks after the T05-fix1 merge. Decision #32: one chain at a time.
 
 T05-fix1 follow-ups (minor, docs and tests; not blocking):
 - F-E3: MACROS.md must state that the planner assumes a floor below a bottom-row pit.
@@ -88,7 +88,7 @@ Deadline pressure: G2/G3 recording and the official-repository move are due **Sa
 
 ## Waiting on Saad
 
-- **numpy is not a declared dependency.** T07 (PPO trainer and tests) and one T04-fix1 QA probe import it, so a clean `uv` environment fails to collect `tests/test_rl_policy.py` and `tests/test_rl_train.py` on `orch/preview`. Adding it (an optional `train` extra in `pyproject.toml` + `uv.lock`) needs Saad's approval.
+- ~~numpy~~ decided #34, done in T15 (closed). Open: also add numpy to the `dev` group so plain `uv run pytest -q` passes? (asked 2026-11-24). Previously: **numpy is not a declared dependency.** T07 (PPO trainer and tests) and one T04-fix1 QA probe import it, so a clean `uv` environment fails to collect `tests/test_rl_policy.py` and `tests/test_rl_train.py` on `orch/preview`. Adding it (an optional `train` extra in `pyproject.toml` + `uv.lock`) needs Saad's approval.
 
 - ~~SMOKE-01 minor finding~~ resolved 2026-11-24 in the orchestration refactor (Saad authorized `CLAUDE.md` edits for it): the AI-rival row in `CLAUDE.md` now says the paths are on `orch/preview`, not yet on `main`.
 - **SMOKE-01 branches:** `task/SMOKE-01` and `gate/SMOKE-01-qa` hold only the two reports. Merge them, keep them, or delete them (deleting needs you). The two worker worktrees are still registered.
