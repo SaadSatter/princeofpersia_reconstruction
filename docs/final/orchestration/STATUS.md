@@ -67,7 +67,8 @@ No `rc/*` (approved release candidate) branch exists.
 | blocked | T07 full training run | ~85 min PPO run | needs T05-fix1 closed **and** Saad's go-ahead | — | none |
 | closed | SMOKE-01 | orchestration smoke test: every path in README Files + CLAUDE.md Roles tables, and agent procedure pointers, exist on `main` | G1 ACCEPT WITH NOTES (1 minor), G2 n/a, G3 closed | `task/SMOKE-01` fc16525, `gate/SMOKE-01-qa` 3bb36f5 (not merged) | none |
 | not started | T03 | official-repository move (decision #6), `python -m team init` | — | — | — |
-| not started | T10 | "Changes since the last gate": GDD/Configuration still describe the LLM rival (Haiku 4.5, ~4 s decisions), which decision #3 replaced | — | — | — |
+| closed (Gate 3); **PR #6 awaiting Saad's merge** | T10a (+fix1, fix2) | docs in line with decisions #1–#30: Changes since G1 in GDD and Configuration, PPO rival, orchestration, checklist, plan, README | G1 accept w/ notes ×3; G2 n/a; G3 closed | `orch/T10a` a1b9738 | issue #5, PR #6 |
+| not started | T10b | T10a follow-ups: GDD §2 and §6 labels, `LINGER_AFTER` location (GDD:105), `EVIDENCE_INDEX.md` pass (after Saad commits his edits), tracker `docs/final/TRACKER.md`, scope lock | — | — | — |
 
 ## Next eligible task
 
@@ -96,6 +97,7 @@ Deadline pressure: G2/G3 recording and the official-repository move are due
 - ~~Pushing~~ decided 2026-11-24 (#27, #28): pushes, issues and PRs need no per-push approval; merging stays Saad's.
 - **Course registration:** spawn the native `tech-lead`/`qa`, or the course-rendered `team-tech`/`team-qa`, once `agent-team/` exists (`COURSE_ROLE_MAP.md`).
 - ~~FINAL_REQUIREMENTS copy~~ published with `main` on 2026-11-24 (#26).
+- **PR #6 (T10a docs):** review and merge. Confirm CQ-7 closed by `agent-config.json` (commit 2d40972).
 - Cloud sessions: the `agent` setting is not yet verified in Claude Code on the web.
 - Official-repository move (decision #6) before Sat Nov 28, 11:59 p.m.
 
