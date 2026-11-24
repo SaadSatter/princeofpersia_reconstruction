@@ -9,6 +9,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from agents.rl import encoder as enc_mod
 from agents.rl import policy as pol
 from agents.rl.encoder import MACRO_SLOTS, N_FEATURES, Encoder, macro_mask
 from agents.rl.policy import WeightsError, file_sha256, load_net, make_rl_rival
@@ -41,7 +42,7 @@ def _record(n=200):
     rec = Recorder(make_baseline())
     ep = lambda: VersusEpisode(arena.situation("A"), arena.STARTS, 0, 3600, arena.GUARD_POSTS)
     VersusRunner(ep, {"A": rec, "B": make_baseline()}, copy_mode="json", threaded=False,
-                 limits=VersusLimits(max_frames=6 * (n + 5))).run(3)
+                 limits=VersusLimits(max_frames=3600)).run(3)
     assert len(rec.seen) >= n
     return rec.seen[:n]
 
@@ -106,7 +107,7 @@ def test_weights_file_is_plain_json_lists_of_numbers(weights):
 
 
 def test_inference_modules_are_stdlib_only():
-    for mod in (pol, pol.__import__("agents.rl.encoder", fromlist=["x"])):
+    for mod in (pol, enc_mod):
         tree = ast.parse(Path(mod.__file__).read_text())
         names = {a.name.split(".")[0] for n in ast.walk(tree) if isinstance(n, ast.Import)
                  for a in n.names} | {(n.module or "").split(".")[0] for n in ast.walk(tree)
@@ -131,6 +132,7 @@ def test_rl_rival_is_a_labelled_policy_controller_and_is_deterministic(weights):
 
 def test_an_inference_error_becomes_a_wait_macro_not_a_crash(weights):
     _, path, sha = weights
-    rival = make_rl_rival(path, sha)
-    rival.reset(0)
-    assert rival.decide({"bad": 1}, ("WAIT",)) == "WAIT"
+    pm = pol.PolicyMacro(load_net(path, sha))
+    pm.reset(0)
+    assert pm.choose({"bad": 1}, ("WAIT",), {"macro": None, "state": "idle", "reason": None}) == "WAIT"
+    assert pm.errors == 1

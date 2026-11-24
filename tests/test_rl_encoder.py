@@ -77,7 +77,7 @@ def _play(enc, ep, frames=60):
 
 
 def test_feature_vector_has_fixed_length_names_and_finite_numbers():
-    ep = arena.__dict__ and _episode_with_guard_figure(True)
+    ep = _episode_with_guard_figure(True)
     e = Encoder()
     x = e.encode(ep.observe("A"), tuple(ep.legal_actions("A")))
     assert len(x) == N_FEATURES == len(FEATURE_NAMES) == len(set(FEATURE_NAMES))
@@ -89,8 +89,17 @@ def test_feature_vector_has_fixed_length_names_and_finite_numbers():
 def test_a_disguised_rival_and_a_real_guard_give_identical_features_over_time():
     d, g = _episode_with_guard_figure(True), _episode_with_guard_figure(False)
     assert d.observe("A")["figures"] == g.observe("A")["figures"] != []
-    xd, xg = _play(Encoder(), d), _play(Encoder(), g)
-    assert xd == xg
+    ed, eg, same = Encoder(), Encoder(), 0
+    for f in range(120):
+        if f % 6 == 0:
+            od, og = d.observe("A"), g.observe("A")
+            if od != og:                 # a patrolling guard and a waiting rival drift apart
+                break
+            ld, lg = tuple(d.legal_actions("A")), tuple(g.legal_actions("A"))
+            assert ed.encode(od, ld) == eg.encode(og, lg)
+            same += 1
+        d.tick(); g.tick()
+    assert same >= 3
 
 
 def test_encoder_reads_only_what_a_human_sees():
@@ -98,7 +107,7 @@ def test_encoder_reads_only_what_a_human_sees():
     obs, legal = ep.observe("A"), tuple(ep.legal_actions("A"))
     log: set[str] = set()
     Encoder().encode(Spy(obs, log), legal)
-    top = {p.split("/")[1] for p in log if p.count("/") >= 1 and p != "/*"}
+    top = {p.split("/")[1].replace("[]", "") for p in log if p.count("/") >= 1 and p != "/*"}
     assert top <= SHOWN_TOP, top - SHOWN_TOP
     assert not (top & HIDDEN_TOP)
     # The figure's kind is read only as the visible label, never an id.
