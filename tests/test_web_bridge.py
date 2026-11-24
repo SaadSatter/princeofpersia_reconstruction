@@ -283,7 +283,7 @@ def test_bridge_imports_only_the_standard_library_pop_and_render():
     import ast
     from pathlib import Path
     src = Path(bridge.__file__).read_text()
-    allowed = {"__future__", "json", "random", "pathlib", "pop", "render", "sys"}
+    allowed = {"__future__", "json", "random", "pathlib", "pop", "render", "sys", "agents"}  # agents: the shipped baseline (T14-fix1)
     for node in ast.walk(ast.parse(src)):
         if isinstance(node, ast.Import):
             mods = [a.name for a in node.names]

@@ -18,8 +18,10 @@ Modes:
 
 * `human_vs_ai`: one human seat, keys as in `play.py --versus` for that seat;
   the other seat is driven by `rival(observation, legal_actions)`, which sees
-  only its own seat. Until the trained rival lands (T05/T07) the default is
-  a clearly labelled placeholder (`IdleRival`).
+  only its own seat. The page's default rival is the scripted baseline
+  (`SeatControllerRival` around `agents/versus_baseline.make_baseline()`, made
+  by `make_game`); `WebGame` itself defaults to the labelled `IdleRival`. The
+  trained rival (T07) plugs in the same way: a `SeatController` in the adapter.
 * `local_two_players`: both seats on one keyboard, one payload per seat, two
   panels. A local test mode, like `play.py ARENA --versus`: both players see
   both panels.
@@ -33,6 +35,7 @@ from pathlib import Path
 
 from pop import physics as P
 from pop.versus import SEATS, TICKS_PER_SECOND, VersusEpisode, arena_episode
+from pop.seats import WAIT
 from render import draw_list
 
 MODES = ("human_vs_ai", "local_two_players")
@@ -111,6 +114,81 @@ class RandomRival:
         return self.rng.choice(sorted(legal))
 
 
+class SeatControllerRival:
+    """Adapts a `SeatController` (pop/seats.py, e.g. agents.macros.MacroController) to the hook.
+
+    The hook is called every tick; a controller decides once per runner
+    decision (T04: every 6 ticks, 0.5 s) and answers WAIT for "no input". So:
+    `decide(obs, tuple(legal))` on ticks 0, every, 2*every, ...; WAIT becomes
+    None; the ticks between submit nothing (as `run_versus` between decisions).
+    An answer that is not a legal action string, or an exception, is replaced
+    by no input and counted in `fallbacks`, and the label says so.
+
+    One controller per game (GATE-T04-QA-5): `make_game` builds a fresh one,
+    and the controller is never also used for the human seat. This bypasses
+    the T04 runner (no limits, timeouts or traces in the web build)."""
+
+    def __init__(self, controller, every: int = 6):
+        if every < 1:
+            raise ValueError("every must be at least 1")
+        self.controller, self.every = controller, every
+        self.fallbacks = 0
+        self._tick = 0
+
+    @property
+    def label(self) -> str:
+        name = getattr(self.controller, "name", "controller")
+        kind = getattr(self.controller, "kind", "unknown")
+        note = f"; {self.fallbacks} fallback(s) to no input" if self.fallbacks else \
+            "; any failed answer falls back to no input"
+        return f"AI rival: {name} ({kind}){note}"
+
+    def reset(self, seed: int) -> None:
+        self._tick = 0
+        self.fallbacks = 0
+        if hasattr(self.controller, "reset"):
+            self.controller.reset(seed)
+
+    def __call__(self, observation: dict, legal: list[str]) -> str | None:
+        due = self._tick % self.every == 0
+        self._tick += 1
+        if not due:
+            return None
+        legal = tuple(legal)
+        try:
+            action = self.controller.decide(observation, legal)
+        except Exception:                       # a failing controller must not stop the page
+            self.fallbacks += 1
+            return None
+        if action == WAIT:
+            return None
+        if not isinstance(action, str) or action not in legal:
+            self.fallbacks += 1
+            return None
+        return action
+
+
+NEUTRAL_LABEL = "Rival"
+RIVALS = ("baseline", "idle", "random")
+
+
+def make_game(mode: str = "human_vs_ai", seat: str = "A", seed: int = 0,
+              rival: str = "baseline", neutral: bool = False) -> "WebGame":
+    """What the page calls (web/main.js). `rival` is baseline (default), idle or
+    random; anything else is the baseline. neutral shows the label "Rival"
+    for every kind (blind playtest sessions); it changes no play."""
+    if rival == "random":
+        r = RandomRival(seed)
+    elif rival == "idle":
+        r = IdleRival()
+    else:
+        from agents.versus_baseline import make_baseline    # shipped in game.zip
+        r = SeatControllerRival(make_baseline())
+    g = WebGame(mode=mode, seed=seed, human_seat=seat, rival=r)
+    g.neutral = bool(neutral)
+    return g
+
+
 # --- art sizes ----------------------------------------------------------------------
 _ART: dict | None = None
 
@@ -149,6 +227,7 @@ class WebGame:
         self._keys: dict[str, bool] = {}
         self._caches = {seat: {} for seat in SEATS}
         self.display_tick = 0
+        self.neutral = False                   # make_game: label the rival just "Rival"
 
     # --- input --------------------------------------------------------------
     def press(self, keys: dict) -> dict:
@@ -219,5 +298,5 @@ class WebGame:
             return {"mode": self.mode, "label": LOCAL_LABEL, "seats": seats,
                     "outcome": {k: v for k, v in seats["A"]["outcome"].items() if k != "result"}}
         p = self._seat_payload(self.human_seat)
-        return {"mode": self.mode, "seat": self.human_seat,
-                "rival": getattr(self.rival, "label", "AI rival"), **p}
+        label = NEUTRAL_LABEL if self.neutral else getattr(self.rival, "label", "AI rival")
+        return {"mode": self.mode, "seat": self.human_seat, "rival": label, **p}

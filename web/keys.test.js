@@ -54,12 +54,23 @@ test("stepClock runs 12 ticks per second and caps catch-up", () => {
 });
 
 test("parseOptions defaults to human vs AI as seat A", () => {
-  assert.deepEqual(K.parseOptions(""), { mode: "human_vs_ai", seat: "A", seed: 0, rival: "idle" });
+  assert.deepEqual(K.parseOptions(""),
+    { mode: "human_vs_ai", seat: "A", seed: 0, rival: "baseline", neutral: false });
   assert.deepEqual(K.parseOptions("?mode=local&seed=7"),
-    { mode: "local_two_players", seat: "A", seed: 7, rival: "idle" });
+    { mode: "local_two_players", seat: "A", seed: 7, rival: "baseline", neutral: false });
   assert.deepEqual(K.parseOptions("?seat=B&seed=-3&rival=random"),
-    { mode: "human_vs_ai", seat: "B", seed: 0, rival: "random" });
+    { mode: "human_vs_ai", seat: "B", seed: 0, rival: "random", neutral: false });
+  assert.equal(K.parseOptions("?rival=idle").rival, "idle");
+  assert.equal(K.parseOptions("?rival=zzz").rival, "baseline");
+  assert.equal(K.parseOptions("?label=neutral").neutral, true);
   assert.equal(K.parseOptions("?seed=abc").seed, 0);
+});
+
+test("key hints name the seat played", () => {
+  assert.match(K.keyHints("human_vs_ai", "A"), /seat A\. A\/D/);
+  assert.match(K.keyHints("human_vs_ai", "B"), /seat B\. Arrow/);
+  assert.doesNotMatch(K.keyHints("human_vs_ai", "B"), /A\/D/);
+  assert.match(K.keyHints("local_two_players", "A"), /Seat A: A\/D.*Seat B: Arrow/);
 });
 
 console.log(`keys.test.js: ${passed} passed`);

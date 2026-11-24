@@ -19,6 +19,8 @@
   const outcomeEl = document.getElementById("outcome");
   const labelEl = document.getElementById("label");
   const rivalEl = document.getElementById("rival");
+  const buildEl = document.getElementById("build");
+  const keysEl = document.getElementById("keys");
 
   let held = {};
   let frames = 0;
@@ -64,12 +66,11 @@
     pyodide.unpackArchive(zip, "zip", { extractDir: "/home/pyodide/game" });
     pyodide.runPython("import sys\nsys.path.insert(0, '/home/pyodide/game')");
     const make = pyodide.runPython(
-      "from web.bridge import WebGame, RandomRival\n" +
-      "def make(mode, seat, seed, rival):\n" +
-      "    r = RandomRival(seed) if rival == 'random' else None\n" +
-      "    return WebGame(mode=mode, seed=seed, human_seat=seat, rival=r)\n" +
+      "from web.bridge import make_game\n" +
+      "def make(mode, seat, seed, rival, neutral):\n" +
+      "    return make_game(mode, seat, seed, rival, neutral)\n" +
       "make");
-    game = make(opts.mode, opts.seat, opts.seed, opts.rival);
+    game = make(opts.mode, opts.seat, opts.seed, opts.rival, opts.neutral);
     make.destroy();
   }
 
@@ -80,6 +81,14 @@
     payload = JSON.parse(game.tick_json());
     frames += 1;
     framesEl.textContent = String(frames);
+    exposeForTests();
+  }
+
+  // Test-only readout for tools/web/smoke.cjs: proves a held key reached the
+  // engine. Position of the human seat (seat A in local mode), taken from the payload.
+  function exposeForTests() {
+    const v = payload.mode === "local_two_players" ? payload.seats.A.seat_view : payload.seat_view;
+    window.__smLast = { frame: frames, me: { room: v.room, row: v.me.row, col: v.me.col } };
   }
 
   // --- drawing: pooled Phaser objects, one per draw entry, depth = list order ---
@@ -177,6 +186,8 @@
 
   async function main() {
     const manifest = await (await fetch("manifest.json")).json();
+    buildEl.textContent = manifest.build;
+    keysEl.textContent = SMKeys.keyHints(opts.mode, opts.seat);
     setStatus("loading Python", "loading");
     await startPython();
     const panels = opts.mode === "local_two_players" ? 2 : 1;
