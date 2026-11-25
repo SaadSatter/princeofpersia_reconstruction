@@ -28,6 +28,14 @@
     return keyName(code) !== null;
   }
 
+  // Decision #55: every game key of both sets, sorted, that is held (the online page
+  // sends this; the server steers the sender's own seat with either set).
+  function gameKeys(held) {
+    return Object.keys(held).filter(function (k) {
+      return held[k] && Object.values(CODE_TO_KEY).indexOf(k) >= 0 && k !== "r";
+    }).sort();
+  }
+
   // A new held-key object after one keydown/keyup; unknown keys change nothing.
   function applyKey(held, code, down) {
     const name = keyName(code);
@@ -73,7 +81,9 @@
   }
 
   // The key hints for the seat actually played (text only; the keys themselves
-  // are mapped by KEY_MAP in web/bridge.py).
+  // are mapped by KEY_MAP in web/bridge.py). Outside local two-player both sets work.
+  const EITHER_A = " The ←↑↓→ keys, . / ' and right Shift work too (the WASD set is shown above).";
+  const EITHER_B = " WASD, F, G, T and left Shift work too (the arrow set is shown above).";
   const HINT_A = "A/D run (Shift: careful step), W up / jump, S down, F attack " +
     "(with W: throw, with S: sweep; in the air: dive kick), G draw or sheathe, T take a uniform.";
   const HINT_B = "Arrow keys move (right Shift: careful step; up: jump), . attack " +
@@ -83,12 +93,14 @@
     if (mode === "local_two_players") {
       return "Seat A: " + HINT_A + " Seat B: " + HINT_B + " R or Enter: rematch when the duel ends.";
     }
-    return "You are seat " + seat + ". " + (seat === "B" ? HINT_B : HINT_A) + " R or Enter: rematch when the duel ends.";
+    return "You are seat " + seat + ". " + (seat === "B" ? HINT_B + EITHER_B : HINT_A + EITHER_A) +
+      " R or Enter: rematch when the duel ends.";
   }
 
   return Object.freeze({
     keyHints: keyHints,
     CODE_TO_KEY: CODE_TO_KEY,
+    gameKeys: gameKeys,
     keyName: keyName,
     shouldPrevent: shouldPrevent,
     applyKey: applyKey,

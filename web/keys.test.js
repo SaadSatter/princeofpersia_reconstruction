@@ -73,4 +73,32 @@ test("key hints name the seat played", () => {
   assert.match(K.keyHints("local_two_players", "A"), /Seat A: A\/D.*Seat B: Arrow/);
 });
 
+// T19, decision #55: either control scheme outside local two-player.
+test("T19: gameKeys keeps held keys of both sets, sorted, and drops the rest", () => {
+  assert.deepEqual(K.gameKeys({ left: true, a: true, w: true, "'": true, rshift: true }),
+    ["'", "a", "left", "rshift", "w"]);
+  assert.deepEqual(K.gameKeys({ d: true, right: true, lshift: true, r: true, zzz: true }),
+    ["d", "lshift", "right"]);
+  assert.deepEqual(K.gameKeys({}), []);
+});
+
+test("T19: gameKeys covers every key of both seats and no more", () => {
+  const all = Object.values(K.CODE_TO_KEY).filter((k) => k !== "r").sort();
+  const held = {};
+  all.forEach((k) => { held[k] = true; });
+  assert.deepEqual(K.gameKeys(held), all);
+  assert.equal(all.length, 16);
+});
+
+test("T19: human vs AI and online hints name both sets; local two-player keeps the split", () => {
+  for (const seat of ["A", "B"]) {
+    const h = K.keyHints("human_vs_ai", seat);
+    assert.match(h, /work too/);
+    assert.match(h, seat === "A" ? /right Shift work too/ : /WASD, F, G, T and left Shift work too/);
+  }
+  const local = K.keyHints("local_two_players", "A");
+  assert.doesNotMatch(local, /work too/);
+  assert.match(local, /Seat A: A\/D.*Seat B: Arrow/);
+});
+
 console.log(`keys.test.js: ${passed} passed`);

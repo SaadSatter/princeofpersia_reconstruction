@@ -89,10 +89,11 @@ def test_a_running_flip_clears_spikes():
     assert (me(ep, "A")["col"], me(ep, "A")["hp"], me(ep, "A")["posture"]) == (5, 3, "standing")
 
 
-def test_a_standing_jump_with_nobody_to_pass_does_not_flip():
+def test_a_standing_jump_with_nobody_to_pass_flips_too():
+    # T19, decision #53 (Saad, 2026-11-24): was `== "jumped"` (a plain jump over nobody).
     ep = episode((1, 0, 2, +1), (3, 2, 7, -1))
     motion = jump_and_land(ep, "A", "JUMP_RIGHT", P.JUMP)
-    assert motion["effect"] == "jumped"
+    assert motion["effect"] == "flipped"
 
 
 def test_regression_running_jump_flight_counts_its_own_frames():
@@ -119,10 +120,11 @@ def test_a_jump_flips_over_a_standing_guard():
     assert me(ep, "A")["col"] == 6 and ep._duel.guards["g"].col == 4
 
 
-def test_a_jump_with_nobody_in_the_way_is_an_ordinary_jump():
+def test_a_jump_with_nobody_in_the_way_is_a_flip_with_the_same_distance():
+    # T19, decision #53: was `== "jumped"`; the 3-cell distance is unchanged.
     ep = episode((2, 0, 1, +1), (3, 2, 7, -1))
     motion = jump_and_land(ep, "A", "JUMP_RIGHT", P.JUMP)
-    assert motion["effect"] == "jumped" and me(ep, "A")["col"] == 4
+    assert motion["effect"] == "flipped" and me(ep, "A")["col"] == 4
 
 
 def test_a_flip_never_lands_on_the_rival_nor_passes_a_wall():
@@ -142,11 +144,12 @@ def test_a_rival_in_the_next_room_does_not_stop_the_jump():
     assert that A's jump stopped at the room edge (motion.to [0, 9]), which the
     independent review of 2026-11-18 showed reveals B. R-V23 (Saad, 2026-11-23):
     a body out of sight never stops a move. A's jump is the same as with nobody
-    there, never a flip, and A lands in the next room, where it now sees B."""
+    there (a flip since T19, decision #53, 2026-11-24; it was a plain jump), and A
+    lands in the next room, where it now sees B."""
     ep = episode((1, 0, 9, +1), (2, 0, 0, -1))
     room = ep.observe("A")["room"]
     motion = jump_and_land(ep, "A", "JUMP_RIGHT", P.JUMP)
-    assert motion["effect"] == "jumped" and motion["to"] is None
+    assert motion["effect"] == "flipped" and motion["to"] is None   # T19 #53: was "jumped"
     run(ep, 1)
     assert (me(ep, "A")["row"], me(ep, "A")["col"]) == (0, 2)
     assert ep.observe("A")["room"] != room

@@ -14,11 +14,8 @@
   const TOKEN_KEY = "sm-seat-token"; // sessionStorage: one seat per tab
   const CODE_KEY = "sm-room-code";   // sessionStorage: the room that seat belongs to
 
-  // Physical key names of each seat (web/bridge.py KEY_MAP); the server enforces them.
-  const SEAT_KEYS = {
-    A: ["a", "d", "w", "s", "f", "g", "t", "lshift"],
-    B: ["left", "right", "up", "down", ".", "/", "'", "rshift"],
-  };
+  // Decision #55: either control set steers the player's own seat; the server accepts
+  // the same 16 names (web/bridge.py ALL_KEY_NAMES) and renames them into the seat's set.
 
   const statusEl = document.getElementById("status");
   const hudEl = document.getElementById("hud");
@@ -98,8 +95,7 @@
   }
 
   function sendKeys() {
-    const mine = SEAT_KEYS[seat] || [];
-    const names = Object.keys(held).filter(function (k) { return mine.indexOf(k) >= 0; }).sort();
+    const names = SMKeys.gameKeys(held);
     const text = names.join(",");
     if (text !== sentKeys) {
       sentKeys = text;

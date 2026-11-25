@@ -101,11 +101,11 @@ def test_keys_move_your_own_rival_and_each_client_gets_only_its_own_payload(site
             a0 = r.match.episode.observe("A")["me"]["col"]
             b0 = r.match.episode.observe("B")["me"]["col"]
             await wa.send(json.dumps({"type": "keys", "keys": ["d"]}))
-            await wb.send(json.dumps({"type": "keys", "keys": ["a"]}))     # A's key: ignored
+            await wb.send(json.dumps({"type": "keys", "keys": ["a"]}))     # #55: WASD moves B's own seat
             await settle()
             await r.ticks(24)
             assert r.match.episode.observe("A")["me"]["col"] != a0
-            assert r.match.episode.observe("B")["me"]["col"] == b0
+            assert r.match.episode.observe("B")["me"]["col"] != b0      # T19 #72: was == b0 (ignored)
             ma, mb = await drain(wa), await drain(wb)
             sa = [x for x in ma if x["type"] == "state"]
             sb = [x for x in mb if x["type"] == "state"]

@@ -103,8 +103,12 @@ def versus_input(held: set[str], shift: bool, armed: bool = False,
     a sweep (and in the air a dive kick, chosen by the caller when KICK is legal);
     while the sword is drawn, Up/Down change stance. Up + direction out of a run
     in that direction (`running`, see running_dir) is a running jump, as in the
-    original game; from a standstill it is a standing jump unless Shift is held
-    (Saad's playtest, 2026-11-17: a run never turned into a flip, R-V22)."""
+    original game; from a standstill it is a standing jump unless Shift is held.
+    Every directional jump is a flip (Saad #53, 2026-11-24, R-V22). A direction and
+    a jump pressed within 2 ticks of each other need nothing here: the engine joins
+    them into one flip (R-V35, `Duel._grace_jump`), the same for every front end.
+    This local test mode keeps seat A on the WASD set and seat B on the arrows (#55);
+    the hosted page and the online game accept either set for the player's own seat."""
     if "take" in held:
         return "TAKE"                                     # a downed guard's uniform (R-V17)
     if "draw" in held:

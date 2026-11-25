@@ -6,14 +6,15 @@ inject time and wall time never reaches the engine. `server/app.py` moves its
 messages over WebSockets.
 
 What a client may do (and all it may do): `join` (with an optional seat
-token), send `{"type": "keys", "keys": [...]}` (physical key names from its
-own seat's map) and `{"type": "rematch"}`. Everything else is ignored. What a
+token), send `{"type": "keys", "keys": [...]}` (physical key names from either
+control set; they steer the sender's own seat only) and `{"type": "rematch"}`. Everything else is ignored. What a
 client receives is one seat's payload (`web/bridge.py` `_seat_payload`:
 `seat_view`, `draw`, `hud`, `outcome`) and fixed status text; nothing else
 (docs/final/ONLINE_PLAY.md).
 
 Input resolution is `web/bridge.py` `WebGame.tick`: this module only feeds it
-the held keys of each seat, filtered to that seat's own key map.
+the held keys of each seat: either control set (decision #55), renamed into
+that seat's own set for the two-seat game.
 """
 
 from __future__ import annotations
@@ -24,7 +25,7 @@ import secrets
 from typing import Callable
 
 from pop.versus import SEATS, TICKS_PER_SECOND, VersusEpisode
-from web.bridge import KEY_MAP, WebGame, make_game
+from web.bridge import ALL_KEY_NAMES, WebGame, make_game, to_seat_keys
 
 from .rival import DEFAULT_BUDGET_S, TimeLimitedRival
 from .trace import state_hash
@@ -178,8 +179,8 @@ class Match:
     def _set_keys(self, seat: str, keys: object) -> None:
         if not isinstance(keys, list) or len(keys) > MAX_KEYS:
             return
-        mine = set(KEY_MAP[seat].values())
-        self.held[seat] = {k for k in keys if isinstance(k, str) and k in mine}
+        # Decision #55: either control set drives the sender's own seat.
+        self.held[seat] = {k for k in keys if isinstance(k, str) and k in ALL_KEY_NAMES}
 
     def _press_rematch(self, seat: str, now: float) -> None:
         if self.state != "ended" or not self.connected.get(seat):
@@ -228,7 +229,11 @@ class Match:
         if self.episode.outcome()["status"] == "terminal":
             self._finish()
             return
-        keys = {name: True for seat in self.human_seats for name in self.held[seat]}
+        if self.rival:                    # one human seat: the bridge reads both sets itself
+            keys = {name: True for seat in self.human_seats for name in self.held[seat]}
+        else:                             # two seats: rename each seat's keys into its own set
+            keys = {name: True for seat in self.human_seats
+                    for name in to_seat_keys(seat, self.held[seat])}
         self.game.press(keys)
         before = len(self.episode.log)
         payload = self.game.tick()

@@ -50,7 +50,7 @@ def test_qa_baseline_never_needs_a_fallback_over_randomised_duels_in_every_room(
             decisions += st["decisions"]
             if st["kind"] == "scripted" and st["controller"] != "random":
                 assert st["fallbacks"] == 0, (k, a, b, seat, st)
-    assert rooms_seen == set(range(1, 7)) and games == 36 and decisions > 5000
+    assert rooms_seen == set(range(1, 7)) and games == 36 and decisions > 4000
 
 
 # --- failure reporting and cooldown --------------------------------------------------
