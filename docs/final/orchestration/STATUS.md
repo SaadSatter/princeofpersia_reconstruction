@@ -69,8 +69,8 @@ No `rc/*` (approved release candidate) branch exists.
 | **rejected at Gate 1**; T13-fix1 next (attempt 1 of 2) | T13 | online play: server on Saad's laptop (LAN, #36), `websockets` extra (#37), pause 15 s then forfeit (#38), game-styled rematch button (#41) | G1 REJECT (52ce850: QA-1 tick-loop freeze, QA-2 dead seat stays connected); G2 9a3feac ACCEPT w/ notes on the boundary (no leak); 4 majors to fix | `task/T13` 160135c, report dc28e18 (base ae90c8c) | issue #10 |
 | unreviewed WIP | T08 | scenario suite D1/B2/I3/F5 + held-out H6, CLI, analysis | — | `orch/wip-T08` 25e4587 | none |
 | **approved (#51), waits for T17** | T07 full training run | PPO run, `--seconds 4800`, 2 workers, from `orch/reviewed` after T17 | T17 Gate 3 | — | — |
-| **active** (tech-lead running) | T17 | withhold weights after a failed `final_check` (#50) | G1, G2 pending | `task/T17` from 2835928 | — |
-| **active** (tech-lead running) | T13-fix1 | online corrections: QA-1, QA-2, EVAL-1 to EVAL-6, keepalive 3+3 s (#48), log-only fallbacks (#49) | G1, G2 pending (attempt 1 of 2) | `task/T13-fix1` from 9a3feac | issue #10 |
+| **active** (Gate 1 running) | T17 | withhold weights after a failed `final_check` (#50) | G1, G2 pending | `task/T17` 54308c0, report bb773ea | — |
+| **active** (Gate 1 running) | T13-fix1 | online corrections: QA-1, QA-2, EVAL-1 to EVAL-6, keepalive 3+3 s (#48), log-only fallbacks (#49) | G1, G2 pending (attempt 1 of 2) | `task/T13-fix1` 385b3bf, report b75695f | issue #10 |
 | closed | SMOKE-01 | orchestration smoke test: every path in README Files + CLAUDE.md Roles tables, and agent procedure pointers, exist on `main` | G1 ACCEPT WITH NOTES (1 minor), G2 n/a, G3 closed | `task/SMOKE-01` fc16525, `gate/SMOKE-01-qa` 3bb36f5 (not merged) | none |
 | not started | T03 | official-repository move (decision #6), `python -m team init` | — | — | — |
 | closed (Gate 3); **PR #6 awaiting Saad's merge** | T10a (+fix1, fix2) | docs in line with decisions #1–#30: Changes since G1 in GDD and Configuration, PPO rival, orchestration, checklist, plan, README | G1 accept w/ notes ×3; G2 n/a; G3 closed | `orch/T10a` a1b9738 | issue #5, PR #6 |
