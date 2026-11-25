@@ -8,7 +8,7 @@ configured_model: claude-sonnet-5-5
 runtime_model: not visible to the agent (orchestrator records the verified id in REVIEW_LOG.md)
 consumed: docs/final/orchestration/tasks/T17.md@63ff5ea
 source_branch: task/T17
-source_commit: SEE_COMMIT
+source_commit: 54308c0e4c84f19f00ad4d28eeff663c71ca2c0f
 reviewed_commit: n/a
 verdict: n/a
 ---
@@ -47,7 +47,7 @@ New summary keys `weights_file` and `weights_failed` are absent from the `policy
 The test conflict above.
 
 ## Requested next action
-Commit to review: SEE_COMMIT on task/T17
+Commit to review: 54308c0e4c84f19f00ad4d28eeff663c71ca2c0f on task/T17
 What changed: a failed final check no longer leaves a file named weights.json; it is renamed weights.failed.json and the summary says so.
 How to check it: `uv run --frozen --extra play --extra train pytest -q tests/test_rl_t17_withhold.py`, then the full suite.
 What I am unsure about: whether the orchestrator wants the stale T16 QA test edited on this branch (needs permission) and whether the extra summary key names are acceptable.
