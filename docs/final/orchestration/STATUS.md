@@ -75,6 +75,7 @@ No `rc/*` (approved release candidate) branch exists.
 | closed (Gate 3, 2026-11-24) | T17 | withhold failed weights (#50) | G1 3943732, G2 55873a6 ACCEPT w/ notes; G3 closed | `orch/reviewed` f08c1a8 | — |
 | closed | SMOKE-01 | orchestration smoke test: every path in README Files + CLAUDE.md Roles tables, and agent procedure pointers, exist on `main` | G1 ACCEPT WITH NOTES (1 minor), G2 n/a, G3 closed | `task/SMOKE-01` fc16525, `gate/SMOKE-01-qa` 3bb36f5 (not merged) | none |
 | closed (Gate 3, 2026-11-24) | T18 | online room codes (#52), code-less default room HOME (#56), limits (#57) | G1 7f3525e, G2 f4dc475 ACCEPT w/ notes; G3 closed | `orch/reviewed` 6a4b8b5, then fc02687 (with T07-run1) | — |
+| brief ready, **not dispatched** (#63; the named workers are unavailable in session a45fface) | T18-fix1 | one room's error never stops the server (EVAL-T18-1) | — | brief `tasks/T18-fix1.md`; base fc02687 | — |
 | **running** (tech-lead dispatched, base fc02687) | T19 | either control scheme (#55), 2-tick input grace (#54), kneel pickups, flip by default (#53, amends R-V22) | G1, G2, G3 to come | base = `orch/reviewed` tip after T18; brief `tasks/T19.md`@53e7ece | — |
 | not started | T03 | official-repository move (decision #6), `python -m team init` | — | — | — |
 | closed (Gate 3); **PR #6 awaiting Saad's merge** | T10a (+fix1, fix2) | docs in line with decisions #1–#30: Changes since G1 in GDD and Configuration, PPO rival, orchestration, checklist, plan, README | G1 accept w/ notes ×3; G2 n/a; G3 closed | `orch/T10a` a1b9738 | issue #5, PR #6 |
@@ -97,7 +98,7 @@ Deadline pressure: G2/G3 recording and the official-repository move are due **Sa
 
 ## Waiting on Saad
 
-- **T18 follow-ups (minor; acting on them is your call):** EVAL-T18-1, where one room's trace-write error stops every room (fix: guard `pump`/`_record`); QA-T18-1, where the ligature "ﬀ" is read as "FF"; the room cap of 50 against a measured safe level of about 40 on the M4; creates are not rate-limited; "full" versus "No room" tells a guesser that a code exists.
+- ~~T18 follow-ups~~ decided (#62 keep as built, #63 crash fix = T18-fix1). Previously: EVAL-T18-1, where one room's trace-write error stops every room (fix: guard `pump`/`_record`); QA-T18-1, where the ligature "ﬀ" is read as "FF"; the room cap of 50 against a measured safe level of about 40 on the M4; creates are not rate-limited; "full" versus "No room" tells a guesser that a code exists.
 - **Note:** the main checkout is on `experiment/gcp-ppo-cpu` (the other session), which was cut from fc02687 and so includes T18. The orchestrator writes `main` records from `.claude/worktrees/orch-main`.
 
 - **Draft PR #11** (`orch/pr-main` 088c3fc → `main`): all reviewed gameplay (T01–T17), online play and the PPO stack. The suite on the merge commit is re-run after training. Merging is Saad's.

@@ -121,3 +121,10 @@ Recorded by the PPO-line orchestrator (session 8edb65a6), after T07-run1 closed.
 | 59 | D1 "Disguise": what is "on screen" | "Same room (Recommended)" | D1 succeeds only if the other rival is never in the agent's room at any frame of the scenario (and the agent kills a guard and takes the uniform) |
 | 60 | H6-4's B start equals tuning start (1,2,3,+1) (T07-fix1 Eval N1) | "Move the H6 cell (Recommended)" | Option A: T08 moves H6-4's B start to a cell no tuning start uses, chosen from the cell set and not from policy performance, then freezes H6 with a SHA-256 and a test proving it disjoint from the 8 `TUNING_STARTS`. Training data unchanged |
 | 61 | Start T08 now, alongside T19 | "Start T08 now (Recommended)" | T08 starts now from `orch/reviewed` fc02687. It writes only new evaluation files. No PPO run on the held-out split: T09 runs H6 once, on the post-T19 engine (T07-run1 Eval E1) |
+
+Saad, in chat after T18's Gate 3 (verbatim; numbered #62–#63 because a parallel session took #58–#61): "Its fine the way it is, let's add the server crash fix"
+
+| # | Topic | Saad's answer (verbatim excerpt) | Effect |
+|---|---|---|---|
+| 62 | T18 minors: room cap 50 (measured safe about 40), creates not rate-limited, "full" vs "No room", the ligature QA-T18-1 | "Its fine the way it is" | All stay as built; QA-T18-1 stays a strict xfail |
+| 63 | EVAL-T18-1: one room's `on_finish` error stops every room | "let's add the server crash fix" | Task T18-fix1: an error in one room's finish or trace write is logged and contained to that room; every other room keeps ticking; EVAL-T18-1's strict xfail then passes and its author removes the mark at Gate 2 |
