@@ -257,19 +257,12 @@ def _play(tmp, script):
     return [json.loads(x) for x in a_log(tmp).splitlines()[1:]]
 
 
-@pytest.mark.xfail(strict=True, reason="EVAL-T20F1-E2: a running jump starts as a 4-frame run "
-                   "(effect moved) and turns into the 8-frame flip inside the same move, with no "
-                   "second start, so the `move` row says moved and flip counts 0 (R-V22 amended: "
-                   "every directional jump is a flip)")
 def test_a_running_jump_is_counted_as_a_flip(tmp_path):
     rows = _play(tmp_path, [(["d"], 8), (["d", "w"], 1), ([], 14)])
     assert [e["move"] for e in rows if e["type"] == "move"][-1] == "RUN_JUMP_RIGHT"
     assert summarize.mechanics_used(rows)["flip"] == 1
 
 
-@pytest.mark.xfail(strict=True, reason="EVAL-T20F1-E3 (minor): a held g alternates DRAW and SHEATHE, "
-                   "which the repeat marker (same move name) cannot see, so one 2.5 s hold counts "
-                   "4 draws and 4 sheathes")
 def test_a_held_draw_key_is_one_use(tmp_path):
     rows = _play(tmp_path, [(["g"], 30)])
     used = summarize.mechanics_used(rows)
