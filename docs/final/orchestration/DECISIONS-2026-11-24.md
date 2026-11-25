@@ -103,3 +103,10 @@ His choices (AskUserQuestion), quoted verbatim:
 Item 3 (a kneel when picking up a dropped sword or a uniform) needed no choice: it reuses the existing rig kneel pose, keeps the frame counts (`PICKUP_FRAMES` 6, `TAKE` 12) and keeps what the other seat is shown (R-V25). Task T19.
 
 Order: decisions #32 and #39 allow one chain at a time, so T18 runs first and T19 follows it. The PPO run #51 is in its own worktree at f08c1a8 and is not affected. After T19 the PPO rival must be re-checked against the new jump rule (Gate 2 says how).
+
+Saad's choices on the T18 tech-lead report (`reports/T18-tech-lead.md`@d643007), AskUserQuestion, verbatim:
+
+| # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
+|---|---|---|---|
+| 56 | Old CLI test pins the code-less single-duel lobby (`tests/test_gate_t13_qa_online.py::test_cli_process_two_scripted_clients_real_clock_and_trace_dir`) | "Keep a code-less default room" | The server keeps one default room that a code-less `{"type":"join"}` enters: first = seat A, second = seat B, third refused as full, exactly as the T13 lobby did, including its reset when empty. It never expires and counts toward no code. The old test stays unchanged and must pass. Coded rooms work as built. The page keeps Create and Join; it offers no code-less button unless Saad asks |
+| 57 | T18 limits | "Accept all (Recommended)" | 10 failed joins per connection per minute; at most 50 rooms; a room expires 10 min after creation with no second player, or 15 s after both seats are gone. Per connection only (no per-IP limit) |
