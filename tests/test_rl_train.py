@@ -14,8 +14,9 @@ from tools.rl import env, ppo, train
 SIZES = (N_FEATURES, 64, 64, len(MACRO_SLOTS))
 
 
-def test_tuning_starts_are_only_the_two_midterm_tuning_starts():
-    assert len(env.TUNING_STARTS) == 2
+def test_tuning_starts_begin_with_the_two_midterm_tuning_starts():
+    # T07-fix1 (#44, #42 covers existing-test edits): six starts were added after them.
+    assert len(env.TUNING_STARTS) == 8
     assert all(a[0] != b[0] for a, b in env.TUNING_STARTS)        # different rooms
 
 

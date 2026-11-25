@@ -57,8 +57,8 @@ def test_the_command_line_exits_non_zero_on_a_policy_error(monkeypatch, tmp_path
     _break_features(monkeypatch)
     monkeypatch.setattr("sys.argv", ["train", "--out", str(tmp_path), "--seconds", "20",
                                      "--workers", "1"])
-    monkeypatch.setattr(train, "TrainConfig",
-                        lambda **kw: _cfg(tmp_path, max_iters=1, total_seconds=20))
+    cfg = _cfg(tmp_path, max_iters=1, total_seconds=20)
+    monkeypatch.setattr(train, "TrainConfig", lambda **kw: cfg)
     with pytest.raises(SystemExit) as exc:
         train.main()
     assert exc.value.code not in (0, None)
