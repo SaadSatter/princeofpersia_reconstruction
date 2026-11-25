@@ -72,15 +72,18 @@ def test_cause_is_wait_mapped_to_no_input(seed):
     assert res["final_snapshot"] == snapshot(_game_forwarding_wait(seed))
 
 
-@pytest.mark.xfail(strict=True, reason="EVAL-T22-1: SeatControllerRival turns the policy's WAIT "
-                   "into 'no input', which the engine treats differently from a WAIT step")
 @pytest.mark.parametrize("seed", SEEDS)
 def test_game_path_matches_runner_path_for_the_shipped_rival(seed):
     res = _runner(seed)
     ep, game_b, b = _game(seed)
+    # WAIT is filtered from BOTH lists: the runner skips a seat with no legal action, so its trace
+    # does not list every frame the game submits WAIT on; the whole final snapshot below is what
+    # proves that the WAITs themselves were equal.
     runner_b = [(r["frame"], r["input"]) for r in res["traces"]["B"]
-                if r["input"] not in (None, "WAIT")]   # the game sends WAIT as "no input"
+                if r["input"] not in (None, "WAIT")]
+    game_acts = [(f, a) for f, a in game_b if a != "WAIT"]
     assert runner_b, "the rival never acted: the comparison would be vacuous"
-    assert runner_b == game_b
+    assert any(a == "WAIT" for _, a in game_b), "the game must submit WAIT (EVAL-T22-1)"
+    assert runner_b == game_acts
     assert res["final_snapshot"] == snapshot(ep)
     assert b.policy_errors == 0 and b.fallback_log == []
