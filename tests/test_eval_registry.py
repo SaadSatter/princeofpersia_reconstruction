@@ -66,7 +66,7 @@ def test_heldout_split_is_one_full_duel_scenario_h6_with_four_starts():
     h = heldout()
     assert list(h) == ["H6"] and h["H6"].kind == "duel" and h["H6"].split == "heldout"
     assert h["H6"].duration_frames == 3600                        # the 5 minute duel, decision #5
-    assert [s.id for s in h["H6"].starts] == ["H6-1", "H6-2", "H6-3", "H6-4"]
+    assert [s.id for s in h["H6"].starts] == [f"H6-{i}" for i in range(1, 9)]
 
 
 def test_every_start_validates_and_is_a_walkable_cell_in_distinct_rooms_or_cells():

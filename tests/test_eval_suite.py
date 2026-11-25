@@ -61,9 +61,19 @@ def test_dry_run_writes_one_complete_row_for_every_start_of_every_scenario(dry_r
         assert r["dry_run"] is True and r["config"] == "SvS" and r["split"] == "tuning"
         assert r["aborted"] is False and r["harness_error"] is False and r["error"] is None
         assert r["termination"] in ("draw:time_up",) or r["termination"].startswith("won:")
-        assert r["controllers"]["A"]["kind"] == "scripted"
-        assert r["controllers"]["A"]["name"].startswith("versus-baseline")
-        assert r["controllers"]["A"]["version"].startswith("source:")
+        # decision #78: a mirrored seat-B start forces seat A to WAIT; the baseline is the subject in B
+        subject = "B" if r["start_id"].endswith("-B") else "A"
+        assert r["subject_seat"] == subject
+        if subject == "B":
+            stand_in = r["forced_controllers"]["A"]
+            assert stand_in in ("wait", "decoy") and r["controllers"]["A"]["name"] == stand_in
+            assert r["controllers"]["A"]["kind"] == ("fallback" if stand_in == "wait" else "scripted")
+        else:
+            assert r["controllers"]["A"]["kind"] == "scripted"
+            assert r["controllers"]["A"]["name"].startswith("versus-baseline")
+            assert r["controllers"]["A"]["version"].startswith("source:")
+        assert r["controllers"][subject]["kind"] == "scripted"
+        assert r["controllers"][subject]["name"].startswith("versus-baseline")
 
 
 def test_a_dry_run_records_commit_hash_seed_counts_latency_and_trace_paths(dry_run):
@@ -292,7 +302,7 @@ def test_heldout_dry_run_uses_wait_seats_checks_the_hash_and_claims_nothing(tmp_
     data = json.loads((out / "results.json").read_text())
     assert data["run"]["held_out_dry_run_wait_seats"] is True
     assert data["run"]["scenario_file_sha256"]["heldout"] == manifest.HELDOUT_SHA256
-    assert [r["start_id"] for r in data["rows"]] == ["H6-1", "H6-2", "H6-3", "H6-4"]
+    assert [r["start_id"] for r in data["rows"]] == [f"H6-{i}" for i in range(1, 9)]
     for r in data["rows"]:
         assert ROW_KEYS <= set(r) and r["split"] == "heldout"
         assert r["controllers"]["A"]["kind"] == "fallback" == r["controllers"]["B"]["kind"]

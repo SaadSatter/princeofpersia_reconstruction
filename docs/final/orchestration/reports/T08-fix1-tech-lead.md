@@ -167,3 +167,11 @@ Touches the knowledge boundary or AI seat: yes (scenarios, baseline/PPO comparis
 
 ## Student decision required
 none
+
+## Addendum: decision #78 test updates (pinned values only)
+| Test | Old assertion | New assertion |
+| --- | --- | --- |
+| `tests/test_eval_registry.py::test_heldout_split_is_one_full_duel_scenario_h6_with_four_starts` | start ids `== ["H6-1", "H6-2", "H6-3", "H6-4"]` | `== [f"H6-{i}" for i in range(1, 9)]` |
+| `tests/test_eval_suite.py::test_heldout_dry_run_uses_wait_seats_checks_the_hash_and_claims_nothing` | row start ids `== ["H6-1", "H6-2", "H6-3", "H6-4"]` | `== [f"H6-{i}" for i in range(1, 9)]` |
+| `tests/test_eval_suite.py::test_dry_run_writes_one_complete_row_for_every_start_of_every_scenario` | seat A is `scripted`, name `versus-baseline*`, version `source:*` on every row | normal starts: unchanged for seat A. Mirrored `-B` starts: `subject_seat == "B"`, seat A is the forced stand-in recorded in `forced_controllers["A"]` (`wait` gives kind `fallback`, `decoy` gives `scripted`, name equal to the stand-in), and the subject seat B is the scripted `versus-baseline`. Every row's subject seat is scripted baseline |
+Not touched: the QA hash probe and `tests/test_eval_T08_gate2.py`.
