@@ -79,3 +79,27 @@ Saad's choices (AskUserQuestion), quoted verbatim:
 | 49 | Online AI-seat fallbacks (EVAL-5) | "Log only, document (Recommended)" | A live human-vs-AI duel never aborts on fallbacks. Each fallback is logged server-side as `"source": "fallback"` and counted in the trace. `ONLINE_PLAY.md` says so. Evaluation keeps #24's abort rule |
 | 50 | Weights after a failed `final_check` (T16 QA F1) | "Withhold (Recommended)" | On a `final_check` policy error, `weights.json` is renamed `weights.failed.json`, alongside the existing exit 2 and `stopped`. This is a small task (T17) through QA and Eval before the run |
 | 51 | **Full PPO training run** | "Go, 4,800 s cap (Recommended)" | **Saad's go-ahead** for the full run from `orch/reviewed` 2835928 (plus T17 once closed), on Saad's Mac: 2 workers, the numpy `train` extra, `--seconds 4800`, the Mac kept awake. It starts after T17 passes Gate 3. It counts only with exit 0 and `stopped` in {`time_cap`, `max_iters`} |
+
+## Addendum: Tue 2026-11-24, night (gameplay clean-up, T18 and T19)
+
+Saad's request in chat (verbatim):
+
+> "Another claude code session is working on the PPO and RL agent. I want this to clean up the game play.
+> 1. When performing online play, let's use a room code,
+> 2. Each player can use either control system (ASWD vs ARROWS)
+> 3. let picking up dropped swords or disguises be a kneel animation
+> 4. Debouncing, sometimes actions like (left -> jump, or jump -> left) sometimes has a time lag.
+> 5. Flipping, let it be the default style of jump except when climbing. And Jumping then direction or direction then jumping both should cause flipping in that direction"
+
+His choices (AskUserQuestion), quoted verbatim:
+
+| # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
+|---|---|---|---|
+| 52 | Online room code | "Many rooms, 4-letter code (Recommended)" | Player 1 creates a room and gets a 4-letter code; player 2 types it to join. One server holds several duels at once; a code expires when its room empties. Task T18 |
+| 53 | Flip as the default jump | "Look and effect only (Recommended)" | Every directional jump, standing or running, in either input order, is a flip in that direction (motion and `last_result` effect `flipped`). Distances stay as now. `UP` under a ledge still climbs; `UP` on open floor with no direction is still a hop. Amends R-V22. Existing tests that encode the old "a standing jump flips only over someone" rule change only where they assert exactly that (the same kind of change as #21 and #33), each listed in the report. Task T19 |
+| 54 | Input lag (left→jump, jump→left) | "2-tick grace window (Recommended)" | A direction and a jump pressed within 2 ticks (about 170 ms at 12 Hz) of each other, in either order, become one directional jump (a flip, #53); a press during a move's last frames is buffered. The same for every seat and every front end (pygame, hosted page, online server). Task T19 |
+| 55 | Either control scheme | "Both schemes except local 2P (Recommended)" | Online and human-vs-AI: WASD + F/G/T/left Shift and arrows + `.` `/` `'` right Shift both drive the player's own seat. Local two-player on one keyboard keeps A = WASD, B = arrows. Task T19 |
+
+Item 3 (a kneel when picking up a dropped sword or a uniform) needed no choice: it reuses the existing rig kneel pose, keeps the frame counts (`PICKUP_FRAMES` 6, `TAKE` 12) and keeps what the other seat is shown (R-V25). Task T19.
+
+Order: decisions #32 and #39 allow one chain at a time, so T18 runs first and T19 follows it. The PPO run #51 is in its own worktree at f08c1a8 and is not affected. After T19 the PPO rival must be re-checked against the new jump rule (Gate 2 says how).
