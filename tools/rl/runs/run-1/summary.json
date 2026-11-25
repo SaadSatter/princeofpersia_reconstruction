@@ -1,0 +1,23 @@
+{
+ "commit": "f08c1a87acc70dc27465d422ff2ac6d0d3a7bfbf",
+ "seed": 0,
+ "updates": 1568,
+ "episodes": 25088,
+ "steps": 1487955,
+ "wall_seconds": 4812.6,
+ "stopped": "time_cap",
+ "policy_errors": 0,
+ "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+ "checkpoint_chosen_by_score": false,
+ "weights_file": "weights.json",
+ "weights_failed": false,
+ "final_check_vs_baseline_tuning_pure_python": {
+  "episodes": 128,
+  "wins": 120,
+  "draws": 8,
+  "losses": 0,
+  "win_rate": 0.9375,
+  "policy_errors": 0,
+  "failed": false
+ }
+}
