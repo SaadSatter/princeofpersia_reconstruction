@@ -73,7 +73,11 @@ The analyzer prints the totals table with 0 and "Odd rows: None." Consistent wit
 
 ## Tests
 New: `tests/test_eval_T08fix2_shipped_smoke.py` (1 test).
-SUITE_LINE_PLACEHOLDER
+`uv run --frozen --extra play --extra train --extra online pytest -q` at the smoke-test commit (tree clean apart from this untracked report):
+```
+1778 passed, 12 skipped, 6 xfailed, 2 warnings in 283.93s (0:04:43)
+```
+(QA: 1777/12/6 including its probes; the extra pass is my smoke test.)
 
 ## Requested next action
 Orchestrator: open T08-fix2-fix1 for Tech Lead with the F1 fix above, then QA re-check, Gate 3. No Student decision
