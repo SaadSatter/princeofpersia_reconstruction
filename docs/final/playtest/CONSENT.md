@@ -54,6 +54,16 @@ at any point. Nothing in this kit is filled in: no session has been run.
 >
 > Do you have any questions? Are you happy to take part?
 
+## Draft addition for option (b) (draft for Saad's approval)
+
+Not read aloud until Saad approves it. T20 added playtest telemetry
+(`docs/final/playtest/TELEMETRY.md`). Draft sentence for "What is recorded", option (b):
+
+> **(b)** ... The file lists each game action you take, which room you are in, when you
+> are hurt, when you pause or leave, and how the round ended, with the time of each.
+> It does not contain your name, any address or anything about the other player that
+> your own screen did not show you.
+
 ## Answers to record (on the observation sheet header, not here)
 
 | Question | Recorded as |

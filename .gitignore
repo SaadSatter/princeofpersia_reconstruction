@@ -41,3 +41,6 @@ screenshots/
 
 # Online play input traces (server only)
 traces/online/
+
+# Playtest telemetry (T20, host only)
+traces/playtest/

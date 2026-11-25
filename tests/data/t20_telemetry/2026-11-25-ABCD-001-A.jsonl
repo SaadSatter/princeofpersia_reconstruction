@@ -1,0 +1,17 @@
+{"type":"header","schema":1,"build":"fixture","seed":1,"rival":"human","room":"ABCD","duel":1,"duel_frames":3600,"ticks_per_second":12,"idle_threshold_s":3.0,"seat":"A"}
+{"t":0,"s":0.0,"seat":"A","type":"duel_start","room":"room-aaa","hearts":3,"armed":false,"traps_left":4}
+{"t":5,"s":0.417,"seat":"A","type":"action","action":"LUNGE","accepted":false,"error":"not legal now"}
+{"t":6,"s":0.5,"seat":"A","type":"action","action":"LUNGE","accepted":false,"error":"not legal now"}
+{"t":7,"s":0.583,"seat":"A","type":"action","action":"LUNGE","accepted":false,"error":"not legal now"}
+{"t":8,"s":0.667,"seat":"A","type":"action","action":"LUNGE","accepted":false,"error":"not legal now"}
+{"t":9,"s":0.75,"seat":"A","type":"action","action":"RIGHT","accepted":true,"effect":"moved"}
+{"t":14,"s":1.167,"seat":"A","type":"action","action":"DRAW","accepted":true,"effect":"drew"}
+{"t":50,"s":4.167,"seat":"A","type":"idle","phase":"start","since_t":14,"threshold_s":3.0}
+{"t":100,"s":8.333,"seat":"A","type":"action","action":"TAKE","accepted":true,"effect":"took_uniform"}
+{"t":100,"s":8.333,"seat":"A","type":"idle","phase":"end","seconds":7.167}
+{"t":100,"s":8.333,"seat":"A","type":"disguise_on"}
+{"t":200,"s":16.667,"seat":"A","type":"room","room":"room-bbb"}
+{"t":300,"s":25.0,"seat":"A","type":"action","action":"LUNGE","accepted":true,"effect":"lunged"}
+{"t":310,"s":25.833,"seat":"A","type":"action","action":"LUNGE","accepted":true,"effect":"lunged"}
+{"t":800,"s":66.667,"seat":"A","type":"duel_end","result":"won","reason":"won:A","frames":800}
+{"t":800,"s":66.667,"seat":"A","type":"rematch","pressed":true}
