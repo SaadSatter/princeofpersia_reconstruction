@@ -1,15 +1,40 @@
 ---
 task: T09
 from: evaluation-specialist
-to: orchestrator
-base: 0ea8d73
-status: STOPPED at step 1 (health re-check); H6 NOT run
-consumed: docs/final/orchestration/tasks/T09.md@8efab43
+to: qa
+base: 0ea8d73 (code); report head on eval/T09
+status: DONE. H6 run once; verdict NOT SUPPORTED (13 of 16 duels won, bar 14)
+consumed: docs/final/orchestration/tasks/T09.md@de7d393 (amended #80), DECISIONS-2026-11-24.md@de7d393 (#24, #61, #64, #74, #75, #77, #79, #80)
 ---
 
-# T09 evaluation report: stopped at step 1
+# T09 evaluation report
 
-**Verdict: no H6 verdict. The held-out comparison was not run.** The ledger has no claim.
+**Verdict (pre-registered, #77): NOT SUPPORTED.** 13 W / 2 D / 1 L in 16 held-out duels; the bar was at least 14 wins and no aborted duel. 0 aborted. Not shown; not "worse". Full results, per-start table and confounds: `docs/final/evaluation/RESULTS-T09.md`. Counts equal `analyze_results.py` on `evaluation/results/T09/results.json` (`analysis.txt`).
+
+## Environment, boundary, baseline, reward, checkpoint
+Not re-reviewed here (T07, T08, T19 Gate 2 reports stand). Checkpoint: weights SHA-256 80e4a110...ba4c matched `SHIPPED_SHA256` and loaded; net sizes (251, 64, 64, 9) match `N_FEATURES` and the 8 macros.
+
+## Held-out separation and the run
+Step 1 (tuning, scratch key): 141 rows, 0 aborted, 0 fallbacks, 0 invalid, 0 PPO-seat stale (baseline stale identical pre- and post-T19; see below). Step 2: `uv run --frozen --extra play --extra train --extra online pytest -q` on the clean tree (code = 0ea8d73, docs-only commits on top): **1767 passed, 11 skipped, 5 xfailed, 2 warnings in 281.56s**. `git status --porcelain --ignored` before the run listed only `.pytest_cache/`, `.venv/` and `__pycache__/` folders. Seed key made outside the repository (mode 0600, never printed or committed). Step 3: one invocation, exit 0, ledger has exactly one claim (run `20261125T085558Z`, commit 77bc2f7). No refusal, no second invocation.
+
+## Evaluation validity and honest reporting
+- The PPO seat had stale inputs on H6 (7 per trial in four cells: H6-2 MvS 1, H6-5 MvS 1, H6-6 SvM 3, H6-7 SvM 2; 21 over the 48 rows), unlike the 0 in the tuning split. Baseline stale 18. Reported per duel in RESULTS-T09.md. Not repeated; the verdict is unchanged. Flag for QA and Saad: the #80 reading "0 stale on the PPO seat" holds for step 1 but not for H6.
+- Trials agree in every cell (deterministic), so the #77 conservative counting rule changed nothing. Flagged for Saad as briefed.
+- Effective n near 8, so the Wilson interval (0.57 to 0.93) is optimistic. Robustness line without H6-1: 12 W / 1 D / 1 L in 14.
+
+## Latency and replay fidelity
+PPO seat, 7500 decisions: mean 0.27 ms, max 10.8 ms (H6-3 SvM t2). `--replay` of trial 0 of all 16 cells: ok. Replays are not evidence.
+
+## Fallback
+0 fallbacks, 0 refused, 0 errors, 0 timeouts, 0 busy, 0 invalid in all 48 rows.
+
+## Odd
+The one loss is H6-8 SvM (frame 519, hearts 0/1); two draws (H6-1 MvS, H6-2 SvM). The baseline entered the falling posture more often than the PPO seat (37 against 25 over trial 0 of each cell), a descriptive count.
+
+# Earlier record: step-1 stop and stale diagnostic (written before decision #80)
+
+
+(Superseded: H6 was later run once; see above.)
 
 ## Step 1 result (tuning split, scratch key and scratch out outside the repository)
 
