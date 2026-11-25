@@ -1,0 +1,3 @@
+# Run outputs (results, traces, seed keys) stay local.
+*
+!.gitignore
