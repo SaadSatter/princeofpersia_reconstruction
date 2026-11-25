@@ -15,10 +15,17 @@ Per seat and per duel:
 * mechanics never used or used once: TAKE, RIG, flip, block, draw, sheathe, sword pickup
   (plus the strikes and the disguise, for context).
 
-Mechanics are read from what the seat's own log shows. `block` is a stance change while
-armed (STANCE_UP or STANCE_DOWN), the choice that blocks; a block that actually stopped a
-blow is not a fact a seat's own view carries. `flip` is an accepted action whose effect
-is "flipped".
+Mechanics are read from what the seat's own log shows. A use is counted once, when the
+engine started the move (a `move` row, schema 2). A key held down is one use: the engine
+starts the input queued while a move runs once that move ends, and that start carries
+`repeat` (same held key as the last start of the same move) and is not counted. A key
+queued while a move runs is the move it starts, never the running move. `block` is a stance change while armed (STANCE_UP or
+STANCE_DOWN), the choice that blocks; a block that actually stopped a blow is not a fact
+a seat's own view carries. `flip` is a started move whose own effect is "flipped" (a jump,
+a running jump or a hop turned into a flip). A direction that a jump cancelled inside the
+R-V35 grace window (the jump's `grace` marker) is dropped from `moves`. "Accepted" is not
+"executed": the engine drops a few accepted inputs unstarted, and they are not uses. Logs
+of schema 1 (no `move` rows) are read the old way, per accepted action.
 """
 
 from __future__ import annotations
@@ -28,8 +35,10 @@ import json
 import sys
 from pathlib import Path
 
-# Proposals for Saad: how long counts as stuck, and how many refusals in a row are a run.
-REFUSED_RUN_MIN = 3
+# Decision #83 (Saad): a run of at least this many refused ticks in a row is a stall signal
+# (12 ticks = 1 s; a shorter run is the engine's fixed 3-tick window, not a stall); the
+# idle spell is 3 s (server/telemetry.py IDLE_THRESHOLD_S); "stuck" is 60 s in one room.
+REFUSED_RUN_MIN = 12
 STUCK_ROOM_S = 60.0
 
 # name -> (how it is counted from an event, required by the brief)
@@ -58,8 +67,41 @@ def read_logs(directory: Path) -> list[tuple[str, list[dict]]]:
     return out
 
 
+def moves_started(events: list[dict]) -> dict[str, int]:
+    """Moves the engine started, by name, minus a direction a grace jump cancelled (R-V35,
+    decision #82). The log stays append-only: the direction row is there, the jump row
+    carries `grace`, and the nearest earlier same-side direction is dropped here."""
+    started = [e for e in events if e["type"] == "move"]
+    dropped: set[int] = set()
+    for i, e in enumerate(started):
+        if e.get("grace"):
+            side = e["move"][len("JUMP_"):]
+            for j in range(i - 1, -1, -1):
+                if started[j]["move"] in (side, "STEP_" + side) and j not in dropped:
+                    dropped.add(j)
+                    break
+    counts: dict[str, int] = {}
+    for i, e in enumerate(started):
+        if i not in dropped:
+            counts[e["move"]] = counts.get(e["move"], 0) + 1
+    return dict(sorted(counts.items()))
+
+
 def mechanics_used(events: list[dict]) -> dict[str, int]:
     used = {name: 0 for name in MECHANICS}
+    if any(e["type"] == "move" for e in events):       # schema 2: count starts, once each
+        for e in events:
+            if e["type"] == "move" and not e.get("repeat"):
+                name = _BY_ACTION.get(e["move"])
+                if name:
+                    used[name] += 1
+                if e.get("effect") == "flipped":
+                    used["flip"] += 1
+            elif e["type"] == "sword_pickup":
+                used["sword_pickup"] += 1
+            elif e["type"] == "disguise_on":
+                used["disguise"] += 1
+        return used
     for e in events:
         if e["type"] == "action" and e.get("accepted"):
             name = _BY_ACTION.get(e["action"])
@@ -142,6 +184,7 @@ def summarize_seat(name: str, rows: list[dict]) -> dict:
             "no_duel_end": end is None,
         },
         "mechanics": used,
+        "moves": moves_started(events),
         "events": {t: sum(1 for e in events if e["type"] == t)
                    for t in sorted({e["type"] for e in events})},
     }
@@ -179,8 +222,8 @@ def summarize(directory: Path) -> dict:
 
 def markdown(doc: dict) -> str:
     out = ["# Playtest telemetry summary", "",
-           f"{doc['logs']} seat log(s). Thresholds (proposals for Saad): "
-           f"{doc['thresholds']['refused_run_min']} refused actions in a row, "
+           f"{doc['logs']} seat log(s). Thresholds (decision #83):"
+           f"{doc['thresholds']['refused_run_min']} refused ticks in a row, "
            f"{doc['thresholds']['stuck_room_s']:g} s in one room.", "",
            "## Mechanics, all logs", "", "| mechanic | uses | seat logs using it |", "|---|---|---|"]
     m = doc["mechanics"]
@@ -217,6 +260,9 @@ def markdown(doc: dict) -> str:
         never = ", ".join(n for n, v in s["mechanics"].items() if v == 0 and MECHANICS[n]) or "none"
         once = ", ".join(n for n, v in s["mechanics"].items() if v == 1 and MECHANICS[n]) or "none"
         out.append(f"- Mechanics used: {used}. Never used: {never}. Used once: {once}.")
+        if s["moves"]:
+            out.append("- Moves started (a grace-cancelled direction dropped): "
+                       + ", ".join(f"{n} {v}" for n, v in s["moves"].items()) + ".")
         out.append("")
     return "\n".join(out).rstrip() + "\n"
 

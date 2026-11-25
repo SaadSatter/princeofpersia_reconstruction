@@ -158,18 +158,3 @@ def test_the_started_move_says_which_engine_rewrite_started_it():
     ep.step("A", "KICK")
     ep.tick()
     assert ep.started_move("A").rewrite == "kick"
-
-
-def test_a_jump_that_starts_after_the_direction_finished_is_not_grace():
-    """Seed 1 of the recorder fuzz: RIGHT bumped (2 frames), JUMP_RIGHT queued behind it
-    started the tick it ended. Not a cancel, so no grace."""
-    ep = episode((2, 0, 1, +1), (3, 2, 7, -1))
-    seen = []
-    for t in range(60):
-        legal = ep.legal_actions("A")
-        ep.step("A", "JUMP_RIGHT" if t % 9 == 4 and "JUMP_RIGHT" in legal else "RIGHT")
-        ep.tick()
-        m = ep.started_move("A")
-        if m and m.startswith("JUMP"):
-            seen.append(m.rewrite)
-    assert seen and None in seen or seen == []

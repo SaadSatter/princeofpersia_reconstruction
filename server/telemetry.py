@@ -1,8 +1,11 @@
 """Playtest telemetry (T20, decisions #67 and #68): one JSON Lines log per room, duel and seat.
 
-Off by default. It is a pure reader: it calls only `observe`, `legal_actions` and
-`outcome` of the episode (the same reads the frontend makes), never `step` or
-`tick`, and never touches the engine RNG or `GameState`. Wall-clock seconds come from
+Off by default. It is a pure reader: it calls only `observe`, `legal_actions`,
+`outcome` and (T20-fix1, decision #81) `started_move` of the episode, never `step` or
+`tick`, and never touches the engine RNG or `GameState`. `started_move(seat)` is the one
+read beyond the frontend's: the move the engine actually started for a seat on the last
+tick, after its own rewrites (R-V10, R-V22, R-V35) and stale drops. It is the seat's own
+input as resolved by the engine; it carries nothing about the other seat. Wall-clock seconds come from
 the clock the caller passes in (the server's), never from the engine. So a duel's
 trace and state hash are the same with and without it (tests/test_t20_telemetry.py).
 
@@ -19,6 +22,12 @@ are host-side only and never sent to a client. The one combined summary per duel
 File: `<date>-<room>-<duel n>-<seat>.jsonl`. Line 1 is a header, then one event per
 line: {"t": tick, "s": seconds since duel start, "seat", "type", ...}. The tick is
 the duel's frame count after the tick that produced the event (0 at the start).
+
+Inputs and moves are different things. An `action` row is an input the seat asked for
+(accepted into the queue, or refused): a held key makes one per tick. A `move` row is
+the move the engine started, once per start, and is the only source of "how often was
+this used". A `move` row's `effect` is that move's own planned effect. An `action` row
+has no effect field.
 """
 
 from __future__ import annotations
@@ -33,14 +42,14 @@ from pop.versus import BREAKS_DISGUISE, DUEL_FRAMES, SEATS, TICKS_PER_SECOND
 
 log = logging.getLogger("server.telemetry")
 
-SCHEMA = 1
+SCHEMA = 2        # 2: `move` rows; `action` rows lose `effect` (T20-fix1)
 # Proposal for Saad (decision #68): a spell with no accepted action for this long is an
 # `idle` event. Measured in duel ticks, so a pause never counts as idle time.
 IDLE_THRESHOLD_S = 3.0
 IDLE_TICKS = int(IDLE_THRESHOLD_S * TICKS_PER_SECOND)
 RECENT_TICKS = 12      # a sword that leaves the hand within this long of THROW/SHEATHE/TAKE was that
 
-EVENT_TYPES = ("duel_start", "action", "room", "disguise_on", "disguise_broken", "sword_drop",
+EVENT_TYPES = ("duel_start", "action", "move", "room", "disguise_on", "disguise_broken", "sword_drop",
                "sword_pickup", "trap_rigged", "trap_sprung", "hit", "heart_lost", "idle", "pause",
                "disconnect", "reconnect", "forfeit", "duel_end", "rematch")
 
@@ -93,6 +102,13 @@ class DuelRecorder:
         self._counts: dict[str, dict[str, int]] = {s: {} for s in self.seats}
         self._ended_by = None
         self._forfeit_seat = None
+        self._paused = False
+        # A held key: [id, action, last tick it was asked]; and the (hold id, move) of the
+        # last start. A start fed by the same hold as the last start of that move is a
+        # repeat of one held key (the engine honours an input queued while a move runs).
+        self._hold: dict[str, list | None] = {s: None for s in self.seats}
+        self._holds = 0
+        self._start_hold: dict[str, tuple[int, str] | None] = {s: None for s in self.seats}
 
     # --- writing ---------------------------------------------------------------
     def _write(self, seat: str, obj: dict) -> None:
@@ -136,17 +152,42 @@ class DuelRecorder:
             old = self._prev[seat]
             v = _view(self.ep.observe(seat))
             mine = [a for s, a in accepted if s == seat]
+            started = self.ep.started_move(seat)
+            self._note_asked(seat, [a for a in mine] + [a for s, a, _ in refused if s == seat])
+            # R-V35: the engine cancelled a direction for this jump; the summary drops it
+            grace = {"grace": True} if started is not None and started.rewrite == "grace" else {}
             for a in mine:
-                self._emit(seat, "action", now, action=a, accepted=True,
-                           effect=v["motion"] or v["last_effect"])
+                self._emit(seat, "action", now, action=a, accepted=True, started=started, **grace)
             for s, a, err in refused:
                 if s == seat:
                     self._emit(seat, "action", now, action=a, accepted=False, error=err)
+            if started is not None:
+                # the effect is the started move's own plan, never an earlier move's
+                repeat = {"repeat": True} if self._is_repeat(seat, started) else {}
+                self._emit(seat, "move", now, move=started, effect=v["motion"], **grace, **repeat)
             self._diff(seat, old, v, mine, now)
             self._idle(seat, bool(mine), now)
             self._recent[seat] = [(t, a) for t, a in self._recent[seat]
                                   if self.t - t <= RECENT_TICKS] + [(self.t, a) for a in mine]
             self._prev[seat] = v
+
+    def _note_asked(self, seat: str, asked: list[str]) -> None:
+        """Track the key the seat is holding: the same action asked on consecutive ticks
+        (accepted or refused, so a tick where the key was not legal does not break it)."""
+        if not asked:
+            return
+        cur, hold = asked[-1], self._hold[seat]
+        if hold is not None and hold[1] == cur and self.t - hold[2] <= 1:
+            hold[2] = self.t
+        else:
+            self._holds += 1
+            self._hold[seat] = [self._holds, cur, self.t]
+
+    def _is_repeat(self, seat: str, started: str) -> bool:
+        hold = self._hold[seat]
+        hid = hold[0] if hold else None
+        last, self._start_hold[seat] = self._start_hold[seat], (hid, started)
+        return hid is not None and last == (hid, started)
 
     def _diff(self, seat: str, old: dict, v: dict, mine: list[str], now: float) -> None:
         if v["room"] != old["room"]:
@@ -201,10 +242,14 @@ class DuelRecorder:
             self._emit(seat, "reconnect", now)
 
     def pause(self, starting: bool, now: float) -> None:
+        if starting == self._paused:
+            return
+        self._paused = starting
         for seat in self.seats:          # both clients are shown the paused text
             self._emit(seat, "pause", now, phase="start" if starting else "end")
 
     def forfeit(self, loser: str, now: float) -> None:
+        self.pause(False, now)           # a paused duel that ends by forfeit closes its pause (F3)
         self._forfeit_seat, self._ended_by = loser, "forfeit"
         for seat in self.seats:          # both clients are told the result
             self._emit(seat, "forfeit", now, by="me" if seat == loser else "rival")
@@ -214,6 +259,7 @@ class DuelRecorder:
         if self.ended:
             return
         self.ended = True
+        self.pause(False, now)           # an abandoned paused duel closes its pause too
         self._ended_by = self._ended_by or reason or "outcome"
         for seat in self.seats:
             if self._idle_open[seat]:
