@@ -37,12 +37,31 @@ class TimeLimitedRival:
         return f"AI rival: {getattr(c, 'name', 'controller')} ({getattr(c, 'kind', 'unknown')})"
 
     def reset(self, seed: int) -> None:
-        if hasattr(self.inner, "reset") and not self._busy.is_set():
+        """Take effect even while the worker is busy: queued behind the running question,
+        so it runs before any later question (the late answer is dropped anyway)."""
+        if not hasattr(self.inner, "reset"):
+            return
+        if self._busy.is_set():
+            self._jobs.put(("reset", seed))
+        else:
             self.inner.reset(seed)
+
+    def close(self) -> None:
+        """Stop the worker thread (a sentinel); safe to call twice."""
+        self._jobs.put(None)
 
     def _work(self) -> None:
         while True:
-            obs, legal, box, done = self._jobs.get()
+            job = self._jobs.get()
+            if job is None:
+                return
+            if job[0] == "reset":
+                try:
+                    self.inner.reset(job[1])
+                except Exception:
+                    pass
+                continue
+            obs, legal, box, done = job
             try:
                 box.append(self.inner(obs, legal))
             except Exception:

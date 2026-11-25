@@ -147,7 +147,13 @@
     ws.addEventListener("message", function (e) {
       onMessage(JSON.parse(e.data));
     });
-    ws.addEventListener("close", function () {
+    ws.addEventListener("close", function (e) {
+      if (e.code === 1000 && e.reason === "replaced") {
+        // The server gave this seat to a newer tab with the same token. Do not fight for it.
+        stopped = true;
+        setStatus("This seat was opened in another tab", "error");
+        return;
+      }
       if (stopped) {
         return;
       }

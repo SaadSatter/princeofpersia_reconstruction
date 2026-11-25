@@ -75,6 +75,9 @@ option through and cannot learn the AI seat's kind. The AI seat's fallbacks
 (a slow answer replaced by WAIT, or a failed controller) are counted in the
 server-side trace as `{"source": "fallback", "seat": "B", ...}` and
 summarised in the server log; they are never sent to the human's client.
+Online play only logs these fallbacks (`"source": "fallback"`) and never aborts a
+live duel because of one (decision #49). Each duel's trace (including after a
+rematch) carries exactly its own fallbacks. `traces/online/` is git-ignored.
 
 ## Disconnect and rematch
 
@@ -85,6 +88,19 @@ summarised in the server log; they are never sent to the human's client.
   loses; the end screens read "Rival disconnected" (winner) and "You
   disconnected" (loser). Rule row: `docs/RULE_SOURCE_MAP.md` R-S01 (`design`,
   decision #38). A wrong token never takes a seat.
+* A silent drop (Wi-Fi gone, lid shut) is noticed by an explicit keepalive: a
+  ping every 3 s, 3 s to answer (decision #48), so about 6 s. The seat's held
+  keys are cleared at once, then the 15 s grace starts. A client that stops
+  reading is handled the same way: each seat has its own outgoing queue, stale
+  frames are dropped, and a send that takes over 2 s closes only that socket
+  (a disconnect). The tick loop and the other seat never wait on a socket.
+* A reconnect with the token gets its `hello` immediately; the old socket is
+  closed in the background. If the new socket dies before it hears `hello`, the
+  seat is released as a disconnect. A tab whose seat was taken by a newer tab
+  with the same token shows "This seat was opened in another tab" and does not
+  reconnect.
+* A WebSocket whose `Origin` host differs from the `Host` header is refused
+  (403); this is a LAN-only server. Clients with no `Origin` are accepted.
 * When the duel ends a **Rematch** button pops up on each screen (click, R or
   Enter). The first press shows "Waiting for rival…"; the other player sees
   "Rival wants a rematch". When both have pressed, the duel restarts with the

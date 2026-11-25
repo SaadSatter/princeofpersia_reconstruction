@@ -632,7 +632,6 @@ def test_http_serves_only_the_allow_list_and_never_source_or_the_engine(site):
 
 # --- the two reproduced defects ---------------------------------------------------------
 
-@pytest.mark.xfail(strict=True, reason="T13-QA-1: a client that stops reading freezes the shared tick loop")
 def test_a_client_that_stops_reading_must_not_freeze_the_other_seat(site):
     async def go():
         async with Rig(site) as r:
@@ -648,7 +647,6 @@ def test_a_client_that_stops_reading_must_not_freeze_the_other_seat(site):
     run(go(), 120)
 
 
-@pytest.mark.xfail(strict=True, reason="T13-QA-2: a seat whose hello could not be sent stays connected forever")
 def test_a_seat_whose_socket_died_during_join_must_not_stay_connected(site):
     async def go():
         async with Rig(site) as r:

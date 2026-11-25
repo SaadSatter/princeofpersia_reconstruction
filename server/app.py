@@ -21,7 +21,9 @@ import mimetypes
 import time
 from http import HTTPStatus
 from pathlib import Path
+from collections import deque
 from typing import Callable
+from urllib.parse import urlsplit
 
 from websockets.asyncio.server import serve
 from websockets.datastructures import Headers
@@ -30,6 +32,11 @@ from websockets.http11 import Response
 from .match import TICK_S, Match
 
 JOIN_TIMEOUT_S = 5.0
+SEND_TIMEOUT_S = 2.0         # a client that cannot take one message in this long is dropped
+MAX_QUEUED = 48              # per seat; older `state` messages are dropped first (stale frames)
+PING_INTERVAL_S = 3.0        # decision #48: a silent drop is noticed in about 6 s
+PING_TIMEOUT_S = 3.0
+CLOSE_TIMEOUT_S = 1.0        # the library default (10 s) would delay the notice
 ERROR_TEXT = {"full": "The duel is full.", "bad_token": "That seat token is not valid."}
 INDEX = "online.html"
 ONLINE_FILES = frozenset({"online.html", "online.js", "keys.js", "draw.js", "ui.js"})
@@ -43,14 +50,64 @@ def error_message(code: str) -> dict:
     return {"type": "error", "code": code, "text": ERROR_TEXT.get(code, "Cannot join.")}
 
 
+class SeatLink:
+    """One seat's outgoing queue and its writer task.
+
+    The tick loop only appends here and never awaits a socket, so a client that
+    stops reading cannot stall the loop or the other seat. If one send does not
+    finish within `send_timeout` that socket alone is aborted (a disconnect, #38).
+    """
+
+    def __init__(self, ws, send_timeout: float):
+        self.ws = ws
+        self.send_timeout = send_timeout
+        self.q: deque[str] = deque()
+        self.wake = asyncio.Event()
+        self.task: asyncio.Task | None = None
+
+    def start(self) -> None:
+        self.task = asyncio.create_task(self._write())
+
+    def put(self, text: str, stale_ok: bool) -> None:
+        self.q.append(text)
+        if len(self.q) > MAX_QUEUED:
+            for i, t in enumerate(self.q):         # drop the oldest state frame, keep statuses
+                if t.startswith('{"type":"state"'):
+                    del self.q[i]
+                    break
+        self.wake.set()
+
+    async def _write(self) -> None:
+        try:
+            while True:
+                await self.wake.wait()
+                self.wake.clear()
+                while self.q:
+                    await asyncio.wait_for(self.ws.send(self.q.popleft()), self.send_timeout)
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            self.ws.transport.abort()               # only this socket; its handler then ends
+
+    def stop(self) -> None:
+        if self.task is not None:
+            self.task.cancel()
+
+
 class OnlineServer:
     def __init__(self, match: Match, clock: Callable[[], float] = time.monotonic,
-                 site_dir: Path | None = None):
+                 site_dir: Path | None = None, send_timeout: float = SEND_TIMEOUT_S,
+                 ping_interval: float = PING_INTERVAL_S, ping_timeout: float = PING_TIMEOUT_S,
+                 close_timeout: float = CLOSE_TIMEOUT_S):
         self.match = match
         self.clock = clock
+        self.send_timeout = send_timeout
+        self.ping_interval, self.ping_timeout = ping_interval, ping_timeout
+        self.close_timeout = close_timeout
+        self.links: dict[str, SeatLink] = {}
+        self._bg: set[asyncio.Task] = set()
         self.site_dir = Path(site_dir) if site_dir is not None else None
         self.conns: dict[str, object] = {}
-        self._flush_lock = asyncio.Lock()
         self._files: dict[str, Path] = {}
         if self.site_dir is not None:
             manifest = json.loads((self.site_dir / "manifest.json").read_text())
@@ -63,10 +120,18 @@ class OnlineServer:
 
     # --- serving ------------------------------------------------------------------
     async def start(self, host: str, port: int):
-        return await serve(self.handler, host, port, process_request=self._http)
+        return await serve(self.handler, host, port, process_request=self._http,
+                           ping_interval=self.ping_interval, ping_timeout=self.ping_timeout,
+                           close_timeout=self.close_timeout)
 
     def _http(self, connection, request):
         if request.headers.get("Upgrade", "").lower() == "websocket":
+            # LAN-only server: a page from another site must not open a seat.
+            origin = request.headers.get("Origin")
+            if origin is not None:
+                host = (request.headers.get("Host") or "").lower()
+                if urlsplit(origin).netloc.lower() != host:
+                    return self._reply(HTTPStatus.FORBIDDEN, b"forbidden\n", "text/plain")
             return None
         path = request.path.split("?", 1)[0]
         f = self._files.get(path)
@@ -97,8 +162,27 @@ class OnlineServer:
         finally:
             if seat is not None and self.conns.get(seat) is ws:
                 del self.conns[seat]
+                self._drop_link(seat)
                 self.match.connection_lost(seat, self.clock())
                 await self.flush()
+
+    def _drop_link(self, seat: str) -> None:
+        link = self.links.pop(seat, None)
+        if link is not None:
+            link.stop()
+
+    def _background(self, coro) -> None:
+        task = asyncio.create_task(coro)
+        self._bg.add(task)
+        task.add_done_callback(self._bg.discard)
+
+    @staticmethod
+    async def _close_quietly(ws) -> None:
+        try:
+            await ws.close(1000, "replaced")        # same token, new socket
+        except Exception:
+            pass
+        ws.transport.abort()                         # a half-open old socket must not linger
 
     async def _join(self, ws) -> str | None:
         try:
@@ -117,22 +201,31 @@ class OnlineServer:
         seat = res["seat"]
         old = self.conns.get(seat)
         self.conns[seat] = ws
+        self._drop_link(seat)
+        link = self.links[seat] = SeatLink(ws, self.send_timeout)
         if old is not None and old is not ws:
-            await old.close(1000, "replaced")      # same token, new socket
-        label = None
-        await ws.send(json.dumps(hello_message(seat, res["token"], label)))
+            self._background(self._close_quietly(old))   # never wait on the old socket
+        try:
+            await asyncio.wait_for(
+                ws.send(json.dumps(hello_message(seat, res["token"], None))), self.send_timeout)
+        except Exception:
+            # The new socket died before it heard hello: free the seat now (pause, grace).
+            if self.conns.get(seat) is ws:
+                del self.conns[seat]
+                self._drop_link(seat)
+                self.match.connection_lost(seat, self.clock())
+                await self.flush()
+            return None
+        link.start()
         await self.flush()
         return seat
 
     # --- the clock --------------------------------------------------------------------
     async def flush(self) -> None:
-        async with self._flush_lock:
-            for seat, ws in list(self.conns.items()):
-                for msg in self.match.drain(seat):
-                    try:
-                        await ws.send(json.dumps(msg, separators=(",", ":")))
-                    except Exception:
-                        break
+        """Move the match's outgoing messages onto each seat's queue. Never awaits a socket."""
+        for seat, link in list(self.links.items()):
+            for msg in self.match.drain(seat):
+                link.put(json.dumps(msg, separators=(",", ":")), msg.get("type") == "state")
 
     async def pump(self) -> None:
         """One step of the tick loop: advance the match to `clock()` and send."""

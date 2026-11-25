@@ -57,7 +57,6 @@ def test_ai_seat_receives_only_its_own_observation_and_legal_list():
     assert all(isinstance(c[1], tuple) and all(isinstance(a, str) for a in c[1]) for c in spy.calls)
 
 
-@pytest.mark.xfail(strict=True, reason="T13-EVAL-1: the first failed decision of a rematch is not logged and duel 1 entries stay in the trace")
 def test_fallbacks_of_a_second_duel_are_logged_and_not_mixed_with_the_first():
     spy = Spy(fail=True)
     m = ai_match(spy)

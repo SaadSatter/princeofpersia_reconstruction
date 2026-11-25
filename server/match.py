@@ -73,7 +73,14 @@ class Match:
         self._fresh_episode = None
         return g
 
+    def close(self) -> None:
+        """Stop the AI seat's worker thread (called on lobby reset and server exit)."""
+        rival = getattr(getattr(self, "game", None), "rival", None)
+        if hasattr(rival, "close"):
+            rival.close()
+
     def _reset_lobby(self) -> None:
+        self.close()
         self.game = self._new_game()
         self.state = "waiting"                    # waiting | playing | paused | ended
         self.tokens: dict[str, str] = {}          # seat -> token
@@ -88,6 +95,7 @@ class Match:
         self._finished = False
         self._fallbacks: list[dict] = []           # the AI seat's fallbacks (server only)
         self._seen_fallbacks = (0, 0)
+        self._duel_fallbacks_from = 0
 
     @property
     def episode(self) -> VersusEpisode:
@@ -187,6 +195,8 @@ class Match:
         self.past_traces.append(self.trace())      # same seed again (decision #25)
         self.game.rematch()
         self._ticks = []
+        self._duel_fallbacks_from = len(self._fallbacks)   # each duel's trace carries only its own
+        self._seen_fallbacks = self._fallback_counts()
         self.forfeit = None
         self.rematch_pressed = set()
         self.held = {s: set() for s in SEATS}
@@ -231,13 +241,19 @@ class Match:
         if ended:
             self._finish()
 
+    def _fallback_counts(self) -> tuple[int, int]:
+        rival = self.game.rival if self.rival else None
+        return (getattr(rival, "slow", 0), getattr(getattr(rival, "inner", None), "fallbacks", 0))
+
     def _note_fallbacks(self) -> None:
         """Log each fallback of the server's AI seat as it happens, labelled as such.
         Kept in the trace and read by the server log; never sent to a client."""
         rival = self.game.rival if self.rival else None
         if rival is None:
             return
-        now = (getattr(rival, "slow", 0), getattr(getattr(rival, "inner", None), "fallbacks", 0))
+        now = self._fallback_counts()
+        # a rival reset (rematch) may restart its own counters: count from the new zero
+        self._seen_fallbacks = tuple(min(a, b) for a, b in zip(self._seen_fallbacks, now))
         for i, reason in enumerate(("slow_answer_replaced_by_wait", "controller_failed_no_input")):
             for _ in range(now[i] - self._seen_fallbacks[i]):
                 self._fallbacks.append({"frame": self.episode.outcome()["frames"], "seat": "B",
@@ -309,6 +325,6 @@ class Match:
     def trace(self) -> dict:
         return {"seed": self.seed, "rival": self.rival,
                 "ticks": [[list(x) for x in t] for t in self._ticks],
-                "fallbacks": list(self._fallbacks),
+                "fallbacks": list(self._fallbacks[self._duel_fallbacks_from:]),
                 "forfeit": self.forfeit, "outcome": self.episode.outcome(),
                 "state_hash": state_hash(self.episode)}
