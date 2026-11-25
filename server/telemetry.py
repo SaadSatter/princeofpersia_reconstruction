@@ -55,6 +55,20 @@ EVENT_TYPES = ("duel_start", "action", "move", "room", "disguise_on", "disguise_
 
 DEFAULT_DIR = "traces/playtest"
 
+# One physical key can resolve to two actions in turn: the draw key is DRAW when unarmed and
+# SHEATHE when armed, and up plus a direction is JUMP_x until the rival is running, then
+# RUN_JUMP_x (web/bridge.py seat_input). Holding such a key changes the action it asks for,
+# so for "is this the same held key" those are one key (T20-fix2, E3).
+_SAME_KEY = {"SHEATHE": "DRAW", "RUN_JUMP_LEFT": "JUMP_LEFT", "RUN_JUMP_RIGHT": "JUMP_RIGHT"}
+# A stance change is never an engine move start (it begins at once beside any move, R-V03), so
+# it has no `move` row. Its accepted `action` row is the use, and carries `repeat` while the
+# key stays held (T20-fix2, item 4: `block` was counted from `move` rows and read 0).
+_STANCES = ("STANCE_UP", "STANCE_DOWN")
+
+
+def _key(action: str) -> str:
+    return _SAME_KEY.get(action, action)
+
 
 def _today() -> str:
     return datetime.date.today().isoformat()
@@ -153,11 +167,13 @@ class DuelRecorder:
             v = _view(self.ep.observe(seat))
             mine = [a for s, a in accepted if s == seat]
             started = self.ep.started_move(seat)
-            self._note_asked(seat, [a for a in mine] + [a for s, a, _ in refused if s == seat])
+            held = self._note_asked(seat, [a for a in mine] + [a for s, a, _ in refused if s == seat])
             # R-V35: the engine cancelled a direction for this jump; the summary drops it
             grace = {"grace": True} if started is not None and started.rewrite == "grace" else {}
             for a in mine:
-                self._emit(seat, "action", now, action=a, accepted=True, started=started, **grace)
+                again = {"repeat": True} if held and a in _STANCES else {}
+                self._emit(seat, "action", now, action=a, accepted=True, started=started,
+                           **grace, **again)
             for s, a, err in refused:
                 if s == seat:
                     self._emit(seat, "action", now, action=a, accepted=False, error=err)
@@ -171,23 +187,25 @@ class DuelRecorder:
                                   if self.t - t <= RECENT_TICKS] + [(self.t, a) for a in mine]
             self._prev[seat] = v
 
-    def _note_asked(self, seat: str, asked: list[str]) -> None:
+    def _note_asked(self, seat: str, asked: list[str]) -> bool:
         """Track the key the seat is holding: the same action asked on consecutive ticks
-        (accepted or refused, so a tick where the key was not legal does not break it)."""
+        (accepted or refused, so a tick where the key was not legal does not break it).
+        True if this tick continues a hold that began earlier."""
         if not asked:
-            return
+            return False
         cur, hold = asked[-1], self._hold[seat]
-        if hold is not None and hold[1] == cur and self.t - hold[2] <= 1:
+        if hold is not None and _key(hold[1]) == _key(cur) and self.t - hold[2] <= 1:
             hold[2] = self.t
-        else:
-            self._holds += 1
-            self._hold[seat] = [self._holds, cur, self.t]
+            return True
+        self._holds += 1
+        self._hold[seat] = [self._holds, cur, self.t]
+        return False
 
     def _is_repeat(self, seat: str, started: str) -> bool:
         hold = self._hold[seat]
         hid = hold[0] if hold else None
         last, self._start_hold[seat] = self._start_hold[seat], (hid, started)
-        return hid is not None and last == (hid, started)
+        return hid is not None and last is not None and last[0] == hid and _key(last[1]) == _key(started)
 
     def _diff(self, seat: str, old: dict, v: dict, mine: list[str], now: float) -> None:
         if v["room"] != old["room"]:

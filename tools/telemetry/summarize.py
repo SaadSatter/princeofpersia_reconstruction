@@ -20,9 +20,13 @@ engine started the move (a `move` row, schema 2). A key held down is one use: th
 starts the input queued while a move runs once that move ends, and that start carries
 `repeat` (same held key as the last start of the same move) and is not counted. A key
 queued while a move runs is the move it starts, never the running move. `block` is a stance change while armed (STANCE_UP or
-STANCE_DOWN), the choice that blocks; a block that actually stopped a blow is not a fact
-a seat's own view carries. `flip` is a started move whose own effect is "flipped" (a jump,
-a running jump or a hop turned into a flip). A direction that a jump cancelled inside the
+STANCE_DOWN), the choice that blocks. A stance change starts no engine move (R-V03), so it is
+counted from its accepted `action` row, once per held key (`repeat`); a block that actually stopped a blow is not a fact
+a seat's own view carries. `flip` is one per started JUMP_*, RUN_JUMP_* or `_HOP_FLIP_*` move (a
+running jump's row reads "moved", it turns into the flip inside the same move), or any start
+whose own effect is "flipped"; a jump that bumped does not count. A held draw key toggles DRAW
+and SHEATHE and is one use. `moves` is every engine start; `repeats` is how many of them were
+a held key running on, so `moves - repeats` is new uses. A direction that a jump cancelled inside the
 R-V35 grace window (the jump's `grace` marker) is dropped from `moves`. "Accepted" is not
 "executed": the engine drops a few accepted inputs unstarted, and they are not uses. Logs
 of schema 1 (no `move` rows) are read the old way, per accepted action.
@@ -47,6 +51,7 @@ MECHANICS = {
     "sword_pickup": True, "lunge": False, "throw": False, "kick": False, "sweep": False,
     "disguise": False,
 }
+_STANCES = ("STANCE_UP", "STANCE_DOWN")
 _BY_ACTION = {"TAKE": "TAKE", "RIG": "RIG", "DRAW": "draw", "SHEATHE": "sheathe",
               "STANCE_UP": "block", "STANCE_DOWN": "block", "LUNGE": "lunge", "THROW": "throw",
               "KICK": "kick", "SWEEP": "sweep"}
@@ -67,10 +72,11 @@ def read_logs(directory: Path) -> list[tuple[str, list[dict]]]:
     return out
 
 
-def moves_started(events: list[dict]) -> dict[str, int]:
-    """Moves the engine started, by name, minus a direction a grace jump cancelled (R-V35,
-    decision #82). The log stays append-only: the direction row is there, the jump row
-    carries `grace`, and the nearest earlier same-side direction is dropped here."""
+def _starts(events: list[dict]) -> list[dict]:
+    """The `move` rows that count as engine starts: all of them, minus a direction a grace
+    jump cancelled (R-V35, decision #82). The log stays append-only: the direction row is
+    there, the jump row carries `grace`, and the nearest earlier same-side direction is
+    dropped here."""
     started = [e for e in events if e["type"] == "move"]
     dropped: set[int] = set()
     for i, e in enumerate(started):
@@ -80,11 +86,41 @@ def moves_started(events: list[dict]) -> dict[str, int]:
                 if started[j]["move"] in (side, "STEP_" + side) and j not in dropped:
                     dropped.add(j)
                     break
+    return [e for i, e in enumerate(started) if i not in dropped]
+
+
+def moves_started(events: list[dict]) -> dict[str, int]:
+    """Engine starts by name (repeats of a held key included), see `_starts`."""
     counts: dict[str, int] = {}
-    for i, e in enumerate(started):
-        if i not in dropped:
+    for e in _starts(events):
+        counts[e["move"]] = counts.get(e["move"], 0) + 1
+    return dict(sorted(counts.items()))
+
+
+def repeats_by_move(events: list[dict]) -> dict[str, int]:
+    """Of `moves_started`, the starts that were a held key running on (`repeat`). So
+    `moves - repeats` is the starts that were a new use. It equals the uses of a mechanic
+    only where one move is one mechanic (see mechanics_used)."""
+    counts: dict[str, int] = {}
+    for e in _starts(events):
+        if e.get("repeat"):
             counts[e["move"]] = counts.get(e["move"], 0) + 1
     return dict(sorted(counts.items()))
+
+
+# Moves that are a flip. A running jump begins as a 4-frame run (effect "moved") and becomes
+# the 8-frame flip inside the same engine move, so its `move` row never reads "flipped"; the
+# name says what it is (R-V22 as amended by #53: every directional jump is a flip). The name
+# is the engine's own started move (`started_move`), so a kick that replaced a jump is KICK
+# here, and a hop turned into a flip is `_HOP_FLIP_*`. A standing jump that bumped a wall
+# (effect "bumped") never left the ground and is not a flip.
+_FLIP_PREFIXES = ("JUMP_", "RUN_JUMP_", "_HOP_FLIP_")
+
+
+def is_flip(move_row: dict) -> bool:
+    if move_row.get("effect") == "flipped":
+        return True
+    return move_row["move"].startswith(_FLIP_PREFIXES) and move_row.get("effect") != "bumped"
 
 
 def mechanics_used(events: list[dict]) -> dict[str, int]:
@@ -95,8 +131,11 @@ def mechanics_used(events: list[dict]) -> dict[str, int]:
                 name = _BY_ACTION.get(e["move"])
                 if name:
                     used[name] += 1
-                if e.get("effect") == "flipped":
+                if is_flip(e):
                     used["flip"] += 1
+            elif (e["type"] == "action" and e.get("accepted") and e["action"] in _STANCES
+                  and not e.get("repeat")):
+                used["block"] += 1                    # a stance change starts no engine move
             elif e["type"] == "sword_pickup":
                 used["sword_pickup"] += 1
             elif e["type"] == "disguise_on":
@@ -185,6 +224,8 @@ def summarize_seat(name: str, rows: list[dict]) -> dict:
         },
         "mechanics": used,
         "moves": moves_started(events),
+        "repeats": sum(repeats_by_move(events).values()),
+        "repeats_by_move": repeats_by_move(events),
         "events": {t: sum(1 for e in events if e["type"] == t)
                    for t in sorted({e["type"] for e in events})},
     }
@@ -262,7 +303,8 @@ def markdown(doc: dict) -> str:
         out.append(f"- Mechanics used: {used}. Never used: {never}. Used once: {once}.")
         if s["moves"]:
             out.append("- Moves started (a grace-cancelled direction dropped): "
-                       + ", ".join(f"{n} {v}" for n, v in s["moves"].items()) + ".")
+                       + ", ".join(f"{n} {v}" for n, v in s["moves"].items())
+                       + f". Of these, {s['repeats']} were a held key running on.")
         out.append("")
     return "\n".join(out).rstrip() + "\n"
 

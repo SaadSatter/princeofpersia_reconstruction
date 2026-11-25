@@ -36,6 +36,20 @@ What the summary numbers mean (read this before using them):
   same move). A key pressed while a flip runs is the move it starts later, never the flip.
   A jump that follows a direction within the R-V35 grace window cancels that direction:
   the jump row has `grace`, and the summary drops the direction from `moves`.
+- **Flip.** One per started `JUMP_*`, `RUN_JUMP_*` or `_HOP_FLIP_*` move (every directional
+  jump is a flip, R-V22 as amended by #53). A running jump's `move` row reads `moved`
+  because it begins as a 4-frame run and turns into the flip inside the same move, so the
+  name decides, not the row's effect. A standing jump that bumped a wall (effect `bumped`)
+  is not a flip. A running jump that bumps after its run-up cannot be told from a flip at
+  its start and counts as one (known limit). A kick that replaced a jump is `KICK`.
+- **A held draw key** toggles DRAW and SHEATHE. It is one use (the first toggle); the later
+  toggles carry `repeat`.
+- **`moves` and `repeats`.** `moves` is every engine start, per move name. `repeats` (and
+  `repeats_by_move`) is how many of them were a held key running on. So `moves - repeats`
+  is new uses. It equals a mechanic's uses where one move is one mechanic (TAKE, RIG,
+  lunge, throw, kick, sweep, draw plus sheathe). It does not for `flip` (JUMP_*, RUN_JUMP_*
+  and `_HOP_FLIP_*` all map to it, and a bumped jump maps to none), `block` (STANCE_UP and
+  STANCE_DOWN), `sword_pickup` and `disguise` (events, not moves).
 - **"Accepted" is not "executed".** The engine drops a few accepted inputs unstarted
   (about 2.6 percent in scripted play). `action` rows are inputs asked for; only `move`
   rows say what ran.
