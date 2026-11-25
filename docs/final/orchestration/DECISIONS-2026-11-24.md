@@ -110,3 +110,14 @@ Saad's choices on the T18 tech-lead report (`reports/T18-tech-lead.md`@d643007),
 |---|---|---|---|
 | 56 | Old CLI test pins the code-less single-duel lobby (`tests/test_gate_t13_qa_online.py::test_cli_process_two_scripted_clients_real_clock_and_trace_dir`) | "Keep a code-less default room" | The server keeps one default room that a code-less `{"type":"join"}` enters: first = seat A, second = seat B, third refused as full, exactly as the T13 lobby did, including its reset when empty. It never expires and counts toward no code. The old test stays unchanged and must pass. Coded rooms work as built. The page keeps Create and Join; it offers no code-less button unless Saad asks |
 | 57 | T18 limits | "Accept all (Recommended)" | 10 failed joins per connection per minute; at most 50 rooms; a room expires 10 min after creation with no second player, or 15 s after both seats are gone. Per connection only (no per-IP limit) |
+
+## Addendum: Tue 2026-11-24, late night (PPO line: T08 scenarios)
+
+Recorded by the PPO-line orchestrator (session 8edb65a6), after T07-run1 closed. Saad's choices (AskUserQuestion), quoted verbatim:
+
+| # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
+|---|---|---|---|
+| 58 | B2 "Blend": what is "low suspicion" | "Below 50/100 (Recommended)" | B2 succeeds if the watching guard's suspicion stays below 50 of 100 for the whole scenario. A named parameter in the scenario registry. Closes the "pending Saad" note in `tasks/T08.md` |
+| 59 | D1 "Disguise": what is "on screen" | "Same room (Recommended)" | D1 succeeds only if the other rival is never in the agent's room at any frame of the scenario (and the agent kills a guard and takes the uniform) |
+| 60 | H6-4's B start equals tuning start (1,2,3,+1) (T07-fix1 Eval N1) | "Move the H6 cell (Recommended)" | Option A: T08 moves H6-4's B start to a cell no tuning start uses, chosen from the cell set and not from policy performance, then freezes H6 with a SHA-256 and a test proving it disjoint from the 8 `TUNING_STARTS`. Training data unchanged |
+| 61 | Start T08 now, alongside T19 | "Start T08 now (Recommended)" | T08 starts now from `orch/reviewed` fc02687. It writes only new evaluation files. No PPO run on the held-out split: T09 runs H6 once, on the post-T19 engine (T07-run1 Eval E1) |
