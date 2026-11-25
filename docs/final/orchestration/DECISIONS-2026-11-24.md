@@ -215,3 +215,10 @@ Saad's choice on `reports/T09-rules-reviewer.md` finding 1 (AskUserQuestion), qu
 | # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
 |---|---|---|---|
 | 84 | PPO inference errors (swallowed into WAIT, counted in `policy_errors()`) were not written into the H6 rows | "Reword only (Recommended)" | No policy runs on H6 again. T09-fix1 (docs only) states that the rival's own inference errors were not recorded in the held-out rows, alongside the other review wording fixes. A separate task (T08-fix2) writes `policy_errors` into every evaluation row for future runs |
+
+Saad's choices on the T20-fix1 tech-lead report (`reports/T20-fix1-tech-lead.md`@394ca4f), AskUserQuestion, verbatim (numbered from #85; a parallel session took #84):
+
+| # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
+|---|---|---|---|
+| 85 | Existing T20 tests that assert the pre-#83 / pre-F3 behaviour | "Authors update them (Recommended)" | Only those assertions change, each listed old → new in its author's report. The Tech Lead updates `tests/test_t20_summarize.py::test_stalls` and `tests/test_t20_telemetry.py::test_connection_events_and_forfeit`. QA updates `tests/test_t20_qa_probes.py::test_real_scripted_duel_summarizes_deterministically`, its F1 xfail mark and its F2 test (to the #82 marker form). Eval removes its E1 xfail mark |
+| 86 | Reporting-only engine label `_rewrite` (kick, grace, hop_turn) set in `Duel._start` | "Accept the label (Recommended)" | Kept. It is read only through `VersusEpisode.started_move`. No rule reads it. Gate 2 checks that it changes no trace, hash or observation and that no seat can see it |
