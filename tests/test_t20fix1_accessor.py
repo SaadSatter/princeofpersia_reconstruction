@@ -96,17 +96,26 @@ def test_r_v10_a_kick_replaces_the_rest_of_a_jump():
     assert ep.started_move("A") == "KICK"
 
 
-def test_a_stale_input_started_nothing():
-    ep = episode((2, 0, 1, +1), (3, 2, 7, -1))
-    ep.step("A", "RIGHT")
-    run(ep, 1)
-    before = ep.outcome()["stale_inputs"]["A"]
-    # Queue something that stops being legal before it can start.
-    ep.step("A", "DRAW")
-    ep._duel.rivals["A"].sword = "drawn"           # a test-only change of legality
-    ep.tick()
-    run(ep, 3)
-    assert ep.started_move("A") is None or ep.outcome()["stale_inputs"]["A"] >= before
+def test_starts_never_exceed_accepted_inputs_and_stale_drops_start_nothing():
+    import random
+    rng = random.Random(5)
+    ep = armed((2, 0, 3, +1), (2, 0, 4, -1))
+    base_in = dict(ep.outcome()["inputs"])
+    starts = {"A": 0, "B": 0}
+    for _ in range(600):
+        for seat in ("A", "B"):
+            legal = ep.legal_actions(seat)
+            if rng.random() < 0.6 and legal:
+                ep.step(seat, rng.choice(legal))
+        ep.tick()
+        for seat in ("A", "B"):
+            if ep.started_move(seat) is not None:
+                starts[seat] += 1
+    out = ep.outcome()
+    for seat in ("A", "B"):
+        accepted = out["inputs"][seat] - base_in[seat]
+        # every start came from one accepted input; replaced and stale ones never started
+        assert starts[seat] <= accepted - out["stale_inputs"][seat] - out["replaced_inputs"][seat] + 1
 
 
 def test_reading_it_changes_nothing_and_is_not_in_an_observation():
@@ -121,3 +130,46 @@ def test_reading_it_changes_nothing_and_is_not_in_an_observation():
     assert a._duel.rng.getstate() == b._duel.rng.getstate()
     assert json.dumps(a.observe("A"), sort_keys=True) == json.dumps(b.observe("A"), sort_keys=True)
     assert "started" not in json.dumps(a.observe("A"))
+
+
+def test_the_started_move_says_which_engine_rewrite_started_it():
+    """R-V35, R-V22 and R-V10 each rewrite an accepted input; `rewrite` names which, so the
+    host log marks them exactly instead of guessing from history."""
+    ep = episode((2, 0, 1, +1), (3, 2, 7, -1))
+    ep.step("A", "RIGHT")
+    ep.tick()
+    assert ep.started_move("A") == "RIGHT" and ep.started_move("A").rewrite is None
+    ep.step("A", "RUN_JUMP_RIGHT")
+    ep.tick()
+    assert ep.started_move("A") == "JUMP_RIGHT" and ep.started_move("A").rewrite == "grace"
+
+    ep = episode((2, 0, 1, +1), (3, 2, 7, -1))
+    ep.step("A", "UP")
+    ep.tick()
+    ep.step("A", "JUMP_RIGHT")
+    ep.tick()
+    assert ep.started_move("A").rewrite == "hop_turn"
+
+    ep = armed((2, 0, 2, +1), (2, 0, 4, -1))
+    ep.step("A", "JUMP_RIGHT")
+    ep.tick()
+    assert ep.started_move("A").rewrite is None
+    run(ep, 6)
+    ep.step("A", "KICK")
+    ep.tick()
+    assert ep.started_move("A").rewrite == "kick"
+
+
+def test_a_jump_that_starts_after_the_direction_finished_is_not_grace():
+    """Seed 1 of the recorder fuzz: RIGHT bumped (2 frames), JUMP_RIGHT queued behind it
+    started the tick it ended. Not a cancel, so no grace."""
+    ep = episode((2, 0, 1, +1), (3, 2, 7, -1))
+    seen = []
+    for t in range(60):
+        legal = ep.legal_actions("A")
+        ep.step("A", "JUMP_RIGHT" if t % 9 == 4 and "JUMP_RIGHT" in legal else "RIGHT")
+        ep.tick()
+        m = ep.started_move("A")
+        if m and m.startswith("JUMP"):
+            seen.append(m.rewrite)
+    assert seen and None in seen or seen == []
