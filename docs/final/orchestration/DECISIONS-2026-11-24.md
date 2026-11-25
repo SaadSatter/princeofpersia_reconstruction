@@ -163,3 +163,14 @@ Saad's choices on the T19 tech-lead report (`reports/T19-tech-lead.md`@597e181),
 | 71 | A jump away from the facing: instant turn, or 4-tick turn first | "Keep instant turn (Recommended)" | `JUMP_*` faces and jumps at once (`Rival._directional`); runs and steps still turn first (R-D20). The QA probe `tests/test_gate_t05_qa_probes.py::test_qa_baseline_never_needs_a_fallback_over_randomised_duels_in_every_room` has its volume floor lowered by its author (QA) at Gate 1; the zero-fallback assertion stays. Gate 2 checks the macro planner (it still prices a turn) and the shipped PPO rival |
 | 72 | `tests/test_server_ws.py::test_keys_move_your_own_rival_and_each_client_gets_only_its_own_payload` expects seat B's `a` to be ignored | "Update it to #55 (Recommended)" | Only that assertion changes: seat B's WASD keys move seat B, and never seat A. The T19 tech-lead makes the change |
 | 73 | Kneel art | "Crouch is fine for now (Recommended)" | The crouch strip is drawn for sword pickup, uniform take and rigging. A dedicated kneel sprite is not planned |
+
+## Addendum: Wed 2026-11-25, after midnight (PPO line: T08 Gate 2 items)
+
+Saad's choices on `reports/T08-evaluation-specialist.md`@059aea5 (AskUserQuestion), quoted verbatim. Recorded by the PPO-line orchestrator (session 8edb65a6):
+
+| # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
+|---|---|---|---|
+| 67 | Held-out size | "Extend to 8 starts (Recommended)" | T08-fix1 adds 4 held-out starts (H6-5 to H6-8; 16 duels with seats swapped), chosen by a rule written down before any cell is picked and never from policy results, then re-freezes `H6.json` with a new SHA-256. H6 has never been run, so nothing is voided |
+| 68 | QA F-3, guard patrols overlap | "Accept and document (Recommended)" | The held-out claim is "unseen start pairs and guard layouts", not "unseen cells". T09 reports each start and labels the most training-like starts |
+| 69 | B2 and the disguise | "Yes, disguise must last (Recommended)" | Amends #58: B2 succeeds only if the rival is still disguised at the end and the guard's suspicion stayed below 50 throughout. `success_active` stays reported, not scored (#66) |
+| 70 | Pre-registered T09 bar | "Approve the bar (Recommended)" | Written into PROTOCOL.md before the run: the rival is called better than the scripted baseline on H6 only with at least 14 wins of the 16 held-out duels (7 of 8 per 4 starts) and no aborted duel. Anything below is reported as "not supported", with the full numbers |
