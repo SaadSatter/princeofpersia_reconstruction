@@ -132,5 +132,10 @@ def make_rl_rival(path, sha256: str, name: str | None = None, decision_every: in
                   macro_every: int = MACRO_EVERY) -> MacroController:
     net = load_net(path, sha256)
     pm = PolicyMacro(net, macro_every, decision_every)
-    return MacroController(pm, name=name or f"ppo-{sha256[:8]}", kind="policy",
+    ctrl = MacroController(pm, name=name or f"ppo-{sha256[:8]}", kind="policy",
                            decision_every=decision_every, macro_every=1)
+    # T07-E4: an inference error is answered with WAIT (the seat must not stop), so the count
+    # has to be readable by whoever runs the seat; a silent WAIT would look like a passive policy.
+    ctrl.policy_macro = pm
+    ctrl.policy_errors = lambda: pm.errors
+    return ctrl

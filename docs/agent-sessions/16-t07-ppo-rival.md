@@ -1,4 +1,4 @@
-# Session 11: T07 PPO rival (orchestrated Tech Lead subagent)
+# Session 16: T07 (renumbered from 11 in T07-fix1; 11 was taken by the art download record) PPO rival (orchestrated Tech Lead subagent)
 
 Role: Tech Lead subagent, Claude Sonnet 5.5, task `docs/final/orchestration/tasks/T07.md`,
 branch `task/T07` from `int/wave2-t05`. Session link: https://claude.ai/code/session_01DktSfuWQ416LWvPbT3AoAS

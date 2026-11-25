@@ -16,6 +16,7 @@ import argparse
 import json
 import multiprocessing as mp
 import subprocess
+import sys
 import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -25,6 +26,11 @@ import numpy as np
 from agents.rl.encoder import MACRO_SLOTS, N_FEATURES
 from agents.rl.policy import file_sha256, load_net, make_rl_rival
 from tools.rl import env, ppo
+
+
+class TrainingError(RuntimeError):
+    """A policy or encoder error during training (T07-E4): the run stops instead of
+    continuing on silent WAITs that look like a policy which likes to wait."""
 
 
 @dataclass
@@ -51,6 +57,7 @@ class TrainConfig:
     eval_episodes: int = 8                 # greedy episodes vs the baseline per update
     final_eval_seeds: int = 4              # seeds per combo for the pure-Python final check
     shaping: bool = True
+    fail_on_policy_error: bool = True      # proposed for Saad (T07-fix1); False only for diagnosis
 
 
 def _run(task):
@@ -127,6 +134,7 @@ def train(cfg: TrainConfig) -> dict:
     steps = episodes = update = 0
     log_f = (out / "log.jsonl").open("w")
     stopped = "time_cap"
+    policy_errors = 0
     try:
         while True:
             if cfg.max_iters is not None and update >= cfg.max_iters:
@@ -148,6 +156,17 @@ def train(cfg: TrainConfig) -> dict:
             eps = mapper(tasks)
             episodes += len(eps)
             steps += sum(len(e["actions"]) for e in eps)
+            errs = int(sum(e["policy_errors"] for e in eps))
+            if errs and cfg.fail_on_policy_error:
+                # Stop before the update: a rollout that hit an error is not trained on.
+                update += 1
+                log_f.write(json.dumps({"update": update, "steps": steps, "episodes": episodes,
+                                        "policy_errors": errs, "stopped": "policy_error",
+                                        "elapsed_s": round(time.time() - t0, 1)}) + "\n")
+                log_f.flush()
+                policy_errors += errs
+                stopped = "policy_error"
+                break
             batch = _batch(eps, cfg.gamma, cfg.lam)
             stats = ppo.update(params, batch, cfg.lr, cfg.clip, cfg.epochs, cfg.minibatch,
                                cfg.vf, cfg.ent, seed=cfg.seed * 31 + update)
@@ -176,8 +195,10 @@ def train(cfg: TrainConfig) -> dict:
                    "win_rate_vs_baseline_tuning": None if ev is None else ev["wins"] / ev["n"],
                    "eval_vs_baseline_tuning": ev, "opponent_mix": mix,
                    "fallbacks": int(sum(e["fallbacks"] for e in eps)),
+                   "policy_errors": int(sum(e["policy_errors"] for e in eps)),
                    "elapsed_s": round(time.time() - t0, 1), **{k: round(v, 5) for k, v in stats.items()}}
             log_f.write(json.dumps(row) + "\n"); log_f.flush()
+            policy_errors += row["policy_errors"]
             if update % cfg.snapshot_every == 0:
                 pool.append(ppo.actor_dict(params))
                 pool = pool[-cfg.snapshot_pool:]
@@ -185,11 +206,21 @@ def train(cfg: TrainConfig) -> dict:
         log_f.close()
         if pw:
             pw.close(); pw.join()
+    if stopped == "policy_error":
+        summary = {"commit": _git_head(), "seed": cfg.seed, "updates": update, "episodes": episodes,
+                   "steps": steps, "wall_seconds": round(time.time() - t0, 1), "stopped": stopped,
+                   "policy_errors": policy_errors, "weights_sha256": None,
+                   "checkpoint_chosen_by_score": False,
+                   "final_check_vs_baseline_tuning_pure_python": None}
+        (out / "summary.json").write_text(json.dumps(summary, indent=1))
+        raise TrainingError(f"policy or encoder error: {policy_errors} error(s) in update "
+                            f"{update}; the run was stopped and no weights were exported. "
+                            f"See {out / 'log.jsonl'}.")
     sha = ppo.export_json(params, out / "weights.json")
     final = final_check(out / "weights.json", sha, cfg.final_eval_seeds) if cfg.final_eval_seeds else None
     summary = {"commit": _git_head(), "seed": cfg.seed, "updates": update, "episodes": episodes,
                "steps": steps, "wall_seconds": round(time.time() - t0, 1), "stopped": stopped,
-               "weights_sha256": sha, "checkpoint_chosen_by_score": False,
+               "policy_errors": policy_errors, "weights_sha256": sha, "checkpoint_chosen_by_score": False,
                "final_check_vs_baseline_tuning_pure_python": final}
     (out / "summary.json").write_text(json.dumps(summary, indent=1))
     return summary
@@ -203,8 +234,13 @@ def main() -> None:
     ap.add_argument("--workers", type=int, default=2)
     ap.add_argument("--no-shaping", action="store_true")
     a = ap.parse_args()
-    print(json.dumps(train(TrainConfig(seed=a.seed, total_seconds=a.seconds, workers=a.workers,
-                                       out_dir=a.out, shaping=not a.no_shaping)), indent=1))
+    try:
+        summary = train(TrainConfig(seed=a.seed, total_seconds=a.seconds, workers=a.workers,
+                                    out_dir=a.out, shaping=not a.no_shaping))
+    except TrainingError as e:
+        print(f"TRAINING STOPPED: {e}", file=sys.stderr)
+        sys.exit(2)
+    print(json.dumps(summary, indent=1))
 
 
 if __name__ == "__main__":

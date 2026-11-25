@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import copy
 import json
 from pathlib import Path
 
@@ -38,13 +39,24 @@ class Recorder:
         return self.inner.decide(obs, legal)
 
 
+def _record_duels(seeds=range(6)):
+    """One list of (obs, legal) per duel. A baseline duel now ends after about 145
+    decisions (T05-fix1 ended the mirror deadlock), so 200 observations need several
+    seeds; each duel is encoded with its own Encoder (T07-QA-1, decision #42)."""
+    duels = []
+    for seed in seeds:
+        rec = Recorder(make_baseline())
+        ep = lambda: VersusEpisode(arena.situation("A"), arena.STARTS, 0, 3600, arena.GUARD_POSTS)
+        VersusRunner(ep, {"A": rec, "B": make_baseline()}, copy_mode="json", threaded=False,
+                     limits=VersusLimits(max_frames=3600)).run(seed)
+        duels.append([(copy.deepcopy(o), l) for o, l in rec.seen])
+    return duels
+
+
 def _record(n=200):
-    rec = Recorder(make_baseline())
-    ep = lambda: VersusEpisode(arena.situation("A"), arena.STARTS, 0, 3600, arena.GUARD_POSTS)
-    VersusRunner(ep, {"A": rec, "B": make_baseline()}, copy_mode="json", threaded=False,
-                 limits=VersusLimits(max_frames=3600)).run(3)
-    assert len(rec.seen) >= n
-    return rec.seen[:n]
+    seen = [x for duel in _record_duels() for x in duel]
+    assert len(seen) >= n
+    return seen[:n]
 
 
 @pytest.fixture()
@@ -58,12 +70,16 @@ def weights(tmp_path):
 def test_pure_python_logits_equal_the_numpy_forward_pass_on_200_observations(weights):
     params, path, sha = weights
     net = load_net(path, sha)
-    enc, worst = Encoder(), 0.0
-    for obs, legal in _record(200):
-        x = enc.encode(obs, legal)
-        want = ppo.actor_logits(params, np.array([x]))[0]
-        got = net.logits(x)
-        worst = max(worst, float(np.max(np.abs(want - np.array(got)))))
+    worst, n = 0.0, 0
+    for duel in _record_duels():
+        enc = Encoder()                          # fresh history for each duel
+        for obs, legal in duel:
+            x = enc.encode(obs, legal)
+            want = ppo.actor_logits(params, np.array([x]))[0]
+            got = net.logits(x)
+            worst = max(worst, float(np.max(np.abs(want - np.array(got)))))
+            n += 1
+    assert n >= 200, n
     assert worst < 1e-9, worst
 
 
