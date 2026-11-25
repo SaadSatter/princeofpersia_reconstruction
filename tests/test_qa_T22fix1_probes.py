@@ -328,8 +328,6 @@ def test_cache_rechecks_when_mtime_changes_at_the_same_size(weights_copy):
         modes.make_controller("ai", weights=weights_copy)
 
 
-@pytest.mark.xfail(strict=True, reason="QA-T22fix1-1 (minor): cache key is (path, sha, mtime_ns, size); "
-                                       "a same-size edit with the mtime restored is served from the cache")
 def test_cache_rechecks_a_same_size_edit_with_the_mtime_restored(weights_copy):
     modes.make_controller("ai", weights=weights_copy)
     st = weights_copy.stat()
@@ -408,9 +406,6 @@ def test_no_win_rate_or_strength_figure_in_menu_hud_or_end_screen():
         assert not re.search(r"win[ _-]?rate|win %|% win", t), p.name
 
 
-@pytest.mark.xfail(strict=True, reason="QA-T22fix1-2 (minor, docs): WEB_BUILD.md ?mode=ai row still says the "
-                                       "baseline is labelled \"AI rival: versus-baseline (scripted)\"; the page "
-                                       "passes honest=true, so it shows \"Baseline (scripted)\"")
 def test_web_build_mode_ai_row_names_the_label_the_page_shows():
     wb = (ROOT / "docs/final/WEB_BUILD.md").read_text()
     assert 'labelled "AI rival: versus-baseline (scripted)"' not in wb

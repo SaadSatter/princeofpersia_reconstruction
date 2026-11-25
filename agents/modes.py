@@ -22,6 +22,7 @@ the baseline. A wrong or missing weights hash is an error (decision
 from __future__ import annotations
 
 from dataclasses import dataclass
+import hashlib
 from pathlib import Path
 
 
@@ -81,17 +82,20 @@ def verify_shipped() -> str:
 
 
 # The loaded network is immutable (a controller's state lives in PolicyMacro, not in Net), so
-# it is parsed and hash-checked once per process and shared by every room (EVAL-T22-3). The key
-# holds the file's identity, so another path, hash or changed file is checked again.
+# it is parsed once per distinct file content and shared by every room (EVAL-T22-3). The file
+# is hashed on every call (about 0.3 ms) and the cache is keyed on the path and that SHA-256 digest, so any
+# edit is caught whatever its size or mtime (QA-T22fix1-1, T22-fix2).
 _NET_CACHE: dict = {}
 
 
 def _shared_net(policy, path: Path, sha256: str):
-    st = path.stat()
-    key = (str(path.resolve()), str(sha256).lower(), st.st_mtime_ns, st.st_size)
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    if digest != str(sha256).lower():
+        return policy.load_net(path, sha256)         # raises WeightsError on a wrong hash
+    key = (str(path.resolve()), digest)
     net = _NET_CACHE.get(key)
     if net is None:
-        net = policy.load_net(path, sha256)          # raises WeightsError on a wrong hash
+        net = policy.load_net(path, sha256)
         _NET_CACHE[key] = net
     return net
 
