@@ -110,7 +110,7 @@ Deadline pressure: G2/G3 recording and the official-repository move are due **Sa
 - ~~T18 follow-ups~~ decided (#62 keep as built, #63 crash fix = T18-fix1). Previously: EVAL-T18-1, where one room's trace-write error stops every room (fix: guard `pump`/`_record`); QA-T18-1, where the ligature "ﬀ" is read as "FF"; the room cap of 50 against a measured safe level of about 40 on the M4; creates are not rate-limited; "full" versus "No room" tells a guesser that a code exists.
 - **Note:** the main checkout is on `experiment/gcp-ppo-cpu` (the other session), which was cut from fc02687 and so includes T18. The orchestrator writes `main` records from `.claude/worktrees/orch-main`.
 
-- **Draft PR #11** (`orch/pr-main` 088c3fc → `main`): all reviewed gameplay (T01–T17), online play and the PPO stack. The suite on the merge commit is re-run after training. Merging is Saad's.
+- **Draft PR #11** (`orch/pr-main` accf8a5 → `main`, refreshed 2026-11-25): all reviewed work through T19, T07-run1 (trained weights), T08 + fixes, T09 (not supported, 13 of 16). Suite on the merge: `1821 passed, 11 skipped, 5 xfailed`. Merging is Saad's.
 - **Two-machine playtest of T13** (online play), and a first browser run of the hosted page. Neither has been verified yet.
 
 - ~~numpy~~ decided #34, done in T15 (closed). Not in `dev` (#40). Previously: **numpy is not a declared dependency.** T07 (PPO trainer and tests) and one T04-fix1 QA probe import it, so a clean `uv` environment fails to collect `tests/test_rl_policy.py` and `tests/test_rl_train.py` on `orch/preview`. Adding it (an optional `train` extra in `pyproject.toml` + `uv.lock`) needs Saad's approval.
