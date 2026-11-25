@@ -72,7 +72,7 @@ No `rc/*` (approved release candidate) branch exists.
 | **running** (tech-lead dispatched) | T07-run1 | commit the run-1 weights and evidence, RL_POLICY update | G1, G2, G3 to come | `task/T07-run1` from f08c1a8; brief `tasks/T07-run1.md` | — |
 | closed (Gate 3, 2026-11-24) | T17 | withhold failed weights (#50) | G1 3943732, G2 55873a6 ACCEPT w/ notes; G3 closed | `orch/reviewed` f08c1a8 | — |
 | closed | SMOKE-01 | orchestration smoke test: every path in README Files + CLAUDE.md Roles tables, and agent procedure pointers, exist on `main` | G1 ACCEPT WITH NOTES (1 minor), G2 n/a, G3 closed | `task/SMOKE-01` fc16525, `gate/SMOKE-01-qa` 3bb36f5 (not merged) | none |
-| **running** (tech-lead, amendment #56) | T18 | online room codes, many rooms per server (#52) | G1, G2, G3 to come | `task/T18` from `orch/reviewed` f08c1a8; brief `tasks/T18.md`@53e7ece | — |
+| **Gate 1** (qa dispatched) | T18 | online room codes, many rooms per server (#52) | G1, G2, G3 to come | `task/T18` from `orch/reviewed` f08c1a8; brief `tasks/T18.md`@53e7ece | — |
 | queued (after T18 closes; #32/#39 one chain at a time) | T19 | either control scheme (#55), 2-tick input grace (#54), kneel pickups, flip by default (#53, amends R-V22) | G1, G2, G3 to come | base = `orch/reviewed` tip after T18; brief `tasks/T19.md`@53e7ece | — |
 | not started | T03 | official-repository move (decision #6), `python -m team init` | — | — | — |
 | closed (Gate 3); **PR #6 awaiting Saad's merge** | T10a (+fix1, fix2) | docs in line with decisions #1–#30: Changes since G1 in GDD and Configuration, PPO rival, orchestration, checklist, plan, README | G1 accept w/ notes ×3; G2 n/a; G3 closed | `orch/T10a` a1b9738 | issue #5, PR #6 |
