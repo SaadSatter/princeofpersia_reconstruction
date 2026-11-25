@@ -61,7 +61,8 @@ async def serve_forever(args) -> None:
 
     with tempfile.TemporaryDirectory() as site:
         manifest = build.build(Path(site))
-        srv = OnlineServer(site_dir=Path(site), match_factory=make_match)
+        # The code-less default room (decision #56): a join with no code enters it.
+        srv = OnlineServer(make_match("HOME"), site_dir=Path(site), match_factory=make_match)
         server = await srv.start(args.host, args.port)
         port = server.sockets[0].getsockname()[1]
         print(f"Shadow Masque online, build {manifest['build']}", flush=True)

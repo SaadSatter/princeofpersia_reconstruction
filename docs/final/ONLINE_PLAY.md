@@ -56,9 +56,16 @@ holds at most 50 rooms (*proposal for Saad*; Create then says "The server is
 full"). The code comes from the operating system's random source
 (`random.SystemRandom`), never from the duel's seed. The page and the server
 tell a client nothing about any other room: no list, no count.
-A server without room support (no `match_factory`, used by the T13 tests) keeps the
-old single duel: the first join gets seat A, the second seat B, the third is
-told the room is full.
+**The default room (decision #56).** `python -m server` also keeps one room with
+no code, for scripted clients and the T13 flow. A `{"type":"join"}` with no
+code and no `create` flag enters it: first is seat A, second seat B, the third is
+told "That room is full", and it resets when everyone has left. It never
+expires, has no code, and does not count toward the 50 rooms. The page has no
+button for it (Create and Join only); coded rooms and the default room share
+nothing (separate seats, tokens and messages). Its traces are named
+`duel-HOME-NNN-seed<seed>.json`. A token from one is refused by the other.
+Limits as built are approved (#57): 10 failed joins per connection per minute,
+50 rooms, expiry 10 min or 15 s, no per-IP limit.
 
 **Internet is needed.** The page loads Phaser from the pinned CDN
 (`web/versions.json`, decision #25), so the host's players and the page's
