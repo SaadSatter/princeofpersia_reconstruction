@@ -121,13 +121,16 @@ new pair or cell repeats another. `tests/test_rl_fix1_starts.py` checks
 disjointness from the lists on the base, and from the candidate H6 cells written
 into the test as facts. **T08 must re-check against the H6 it actually freezes.**
 Training cycles through the 8 starts x 2 seats x 2 orders = 32 combinations. The
-per-update evaluation uses the first 8 combinations, so it covers only the two
-midterm starts; `final_check` does the same. Eight starts are still few:
+per-update evaluation uses the first 8 combinations (`_combo(0..7)`,
+`tools/rl/train.py`), so the in-loop curve covers start pairs 0 and 1 only, the two
+midterm starts. `final_check` loops over **all 32 combinations**
+(`for i in range(len(env.COMBOS))`), 128 pure-Python duels with the default 4 seeds,
+so it covers all eight starts. Eight starts are still few:
 expect some over-fitting, and report tuning-start numbers as such, not as
 general strength.
 
 Note for T08 (not changed here): the existing midterm tuning start
-`(1, 2, 3, +1)` equals the A start of candidate H6-4 as a cell.
+`(1, 2, 3, +1)` equals the **B** slot of candidate H6-4 as a cell.
 
 **Logging and stopping.** One JSON line per update in `<out>/log.jsonl` (steps,
 episodes, mean return, mean terminal reward, win rate vs the baseline on
@@ -150,11 +153,19 @@ treat any total as an estimate until the run's `summary.json` reports wall time.
 **Errors are visible and fatal (T07-E4).** `TrainPolicy` counts any exception in
 `choose` (it answers WAIT and carries on for that episode), a snapshot opponent's
 `PolicyMacro.errors` is added, and `play_episode` returns `policy_errors`. Each
-`log.jsonl` row and `summary.json` carry `policy_errors`. **Proposed, for Saad:**
+`log.jsonl` row and `summary.json` carry `policy_errors`. **Decided (#47, Saad):**
 the run stops on the first update with any such error, writes no weights, and
 `python -m tools.rl.train` exits with status 2 and a message on stderr
 (`TrainConfig.fail_on_policy_error`, default true). The shipped rival's
 controller exposes `policy_errors()` (the count of swallowed inference errors).
+The per-update greedy evaluation episodes are counted too: each row has
+`eval_policy_errors`, included in `policy_errors`, and with the switch on an error
+there stops the run as well. `final_check` reads `policy_errors()` of the exported
+policy on every duel and writes `policy_errors` and `failed` into the
+`final_check_vs_baseline_tuning_pure_python` block of `summary.json`; a count above 0
+sets `stopped` to `final_check_policy_error` and the command exits with status 2.
+With `fail_on_policy_error` off (diagnosis only) an update whose episodes are all
+empty skips the PPO update instead of crashing.
 
 ## Weights and inference
 
@@ -182,6 +193,6 @@ loop runs, logs, exports and reloads; they say nothing about strength.
   nearest-figure target rule (CQ-1).
 - Decided: eight tuning starts (#44), train without traps (#43). T08 must confirm
   the frozen H6 shares no start cell with the eight.
-- Proposed: stop the full run on the first policy or encoder error (above).
+- Decided (#47): the full run stops on the first policy or encoder error (above).
 - Whether training may randomise the duel limit (the encoder already has no
   clock, so this is not needed for the leak rule).

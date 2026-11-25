@@ -57,7 +57,7 @@ class TrainConfig:
     eval_episodes: int = 8                 # greedy episodes vs the baseline per update
     final_eval_seeds: int = 4              # seeds per combo for the pure-Python final check
     shaping: bool = True
-    fail_on_policy_error: bool = True      # proposed for Saad (T07-fix1); False only for diagnosis
+    fail_on_policy_error: bool = True      # decision #47; False only for diagnosis
 
 
 def _run(task):
@@ -77,6 +77,20 @@ def _git_head() -> str:
         return "unknown"
 
 
+def _error_total(episodes) -> int:
+    return int(sum(e["policy_errors"] for e in episodes))
+
+
+def _swallowed(rival) -> int:
+    """Inference errors the exported-policy controller swallowed (agents/rl/policy.py)."""
+    return int(rival.policy_errors())
+
+
+def _final_errors(n: int) -> dict:
+    """The exported-policy error fields (decision #47: any error fails the check)."""
+    return {"policy_errors": int(n), "failed": n > 0}
+
+
 def _batch(episodes, gamma, lam):
     xs, ms, acts, lps, advs, rets = [], [], [], [], [], []
     for ep in episodes:
@@ -85,6 +99,8 @@ def _batch(episodes, gamma, lam):
         adv, ret = ppo.gae(np.array(ep["rewards"]), np.array(ep["values"]), 0.0, gamma, lam)
         xs.append(ep["features"]); ms.append(ep["masks"]); acts += ep["actions"]
         lps += ep["logps"]; advs.append(adv); rets.append(ret)
+    if not advs:                      # every episode was empty (e.g. all inference errors)
+        return None
     adv = np.concatenate(advs)
     adv = (adv - adv.mean()) / (adv.std() + 1e-8)
     return {"x": np.concatenate(xs), "mask": np.concatenate(ms), "a": np.array(acts),
@@ -99,6 +115,7 @@ def final_check(path, sha, seeds: int) -> dict:
     from agents.versus_baseline import make_baseline
     from pop import arena
     w = d = l = 0
+    errors = 0
     for i in range(len(env.COMBOS)):
         (starts, seat, first) = _combo(i)
         for s in range(seeds):
@@ -111,11 +128,12 @@ def final_check(path, sha, seeds: int) -> dict:
                                                      arena.GUARD_POSTS),
                                {seat: rival, other: make_baseline()}, copy_mode="json",
                                threaded=False, clock=lambda: 0.0).run(10_000 + s)
+            errors += _swallowed(rival)          # inference errors the shipped path answered with WAIT
             r = env.terminal_reward(res["outcome"]["reason"], seat)
             w += r > 0; l += r < 0; d += r == 0
     n = w + d + l
     return {"episodes": n, "wins": int(w), "draws": int(d), "losses": int(l),
-            "win_rate": w / n if n else None}
+            "win_rate": w / n if n else None, **_final_errors(errors)}
 
 
 def train(cfg: TrainConfig) -> dict:
@@ -156,7 +174,7 @@ def train(cfg: TrainConfig) -> dict:
             eps = mapper(tasks)
             episodes += len(eps)
             steps += sum(len(e["actions"]) for e in eps)
-            errs = int(sum(e["policy_errors"] for e in eps))
+            errs = _error_total(eps)
             if errs and cfg.fail_on_policy_error:
                 # Stop before the update: a rollout that hit an error is not trained on.
                 update += 1
@@ -168,13 +186,15 @@ def train(cfg: TrainConfig) -> dict:
                 stopped = "policy_error"
                 break
             batch = _batch(eps, cfg.gamma, cfg.lam)
-            stats = ppo.update(params, batch, cfg.lr, cfg.clip, cfg.epochs, cfg.minibatch,
-                               cfg.vf, cfg.ent, seed=cfg.seed * 31 + update)
+            # An empty batch (only possible with fail_on_policy_error off) skips the update.
+            stats = {} if batch is None else ppo.update(
+                params, batch, cfg.lr, cfg.clip, cfg.epochs, cfg.minibatch, cfg.vf, cfg.ent,
+                seed=cfg.seed * 31 + update)
             update += 1
             returns = [sum(e["rewards"]) for e in eps]
             vs_base = [e for e in eps if e["opponent"] == "baseline"]
             train_wr = (sum(e["terminal"] > 0 for e in vs_base) / len(vs_base)) if vs_base else None
-            ev = None
+            ev, eval_errs = None, 0
             if cfg.eval_episodes:
                 etasks = []
                 for k in range(cfg.eval_episodes):
@@ -185,6 +205,7 @@ def train(cfg: TrainConfig) -> dict:
                                        learner_first=first, reward=env.RewardConfig(shaping=False),
                                        greedy=True))
                 evs = mapper(etasks)
+                eval_errs = _error_total(evs)
                 ev = {"wins": sum(e["terminal"] > 0 for e in evs),
                       "draws": sum(e["terminal"] == 0 for e in evs),
                       "losses": sum(e["terminal"] < 0 for e in evs), "n": len(evs)}
@@ -195,10 +216,13 @@ def train(cfg: TrainConfig) -> dict:
                    "win_rate_vs_baseline_tuning": None if ev is None else ev["wins"] / ev["n"],
                    "eval_vs_baseline_tuning": ev, "opponent_mix": mix,
                    "fallbacks": int(sum(e["fallbacks"] for e in eps)),
-                   "policy_errors": int(sum(e["policy_errors"] for e in eps)),
+                   "policy_errors": errs + eval_errs, "eval_policy_errors": eval_errs,
                    "elapsed_s": round(time.time() - t0, 1), **{k: round(v, 5) for k, v in stats.items()}}
             log_f.write(json.dumps(row) + "\n"); log_f.flush()
             policy_errors += row["policy_errors"]
+            if eval_errs and cfg.fail_on_policy_error:       # #47 covers the evaluation episodes too
+                stopped = "policy_error"
+                break
             if update % cfg.snapshot_every == 0:
                 pool.append(ppo.actor_dict(params))
                 pool = pool[-cfg.snapshot_pool:]
@@ -218,6 +242,9 @@ def train(cfg: TrainConfig) -> dict:
                             f"See {out / 'log.jsonl'}.")
     sha = ppo.export_json(params, out / "weights.json")
     final = final_check(out / "weights.json", sha, cfg.final_eval_seeds) if cfg.final_eval_seeds else None
+    if final and final["failed"]:
+        stopped = "final_check_policy_error"             # #47: an error in the shipped path fails the check
+        policy_errors += final["policy_errors"]
     summary = {"commit": _git_head(), "seed": cfg.seed, "updates": update, "episodes": episodes,
                "steps": steps, "wall_seconds": round(time.time() - t0, 1), "stopped": stopped,
                "policy_errors": policy_errors, "weights_sha256": sha, "checkpoint_chosen_by_score": False,
@@ -241,6 +268,10 @@ def main() -> None:
         print(f"TRAINING STOPPED: {e}", file=sys.stderr)
         sys.exit(2)
     print(json.dumps(summary, indent=1))
+    if summary["stopped"] == "final_check_policy_error":
+        print("TRAINING FAILED THE FINAL CHECK: the exported policy raised inference errors.",
+              file=sys.stderr)
+        sys.exit(2)
 
 
 if __name__ == "__main__":

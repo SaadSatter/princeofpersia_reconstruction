@@ -31,10 +31,10 @@ def test_training_code_cannot_reach_the_heldout_set():
         assert not re.search(r"heldout|held_out|evaluation/|H6", code), f
 
 
-def test_training_starts_are_exactly_the_two_tuning_starts_and_all_combos_use_only_them():
+def test_training_starts_are_exactly_the_eight_tuning_starts_and_all_combos_use_only_them():
     from tools.rl import env
-    assert len(env.TUNING_STARTS) == 2
-    assert {c[0] for c in env.COMBOS} == {0, 1} and len(env.COMBOS) == 8
+    assert len(env.TUNING_STARTS) == 8
+    assert {c[0] for c in env.COMBOS} == set(range(8)) and len(env.COMBOS) == 32
 
 
 def test_heldout_starts_if_present_are_disjoint_from_tuning_starts():

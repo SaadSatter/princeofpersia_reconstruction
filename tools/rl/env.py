@@ -44,7 +44,7 @@ TUNING_STARTS = [
     ((6, 2, 3, +1), (3, 2, 0, +1)),
 ]
 COMBOS = [(p, seat, first) for p in range(len(TUNING_STARTS)) for seat in ("A", "B")
-          for first in (True, False)]          # 8 (start pair, learner seat, which start)
+          for first in (True, False)]          # 8 pairs x 2 seats x 2 orders = 32 (start pair, learner seat, which start)
 
 
 @dataclass(frozen=True)

@@ -108,7 +108,6 @@ def test_a_single_late_error_is_still_caught(monkeypatch, tmp_path):
     assert json.loads((tmp_path / "summary.json").read_text())["policy_errors"] >= 1
 
 
-@pytest.mark.xfail(strict=True, reason="T07-fix1-QA-1: _batch crashes when every episode is empty")
 def test_fail_on_policy_error_false_keeps_running_but_still_counts(monkeypatch, tmp_path):
     from agents.rl import encoder as enc_mod
 
