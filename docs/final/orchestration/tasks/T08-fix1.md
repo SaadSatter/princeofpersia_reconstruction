@@ -26,3 +26,7 @@ Base: `gate/T08-eval` 059aea5 (T08 + QA probes + Eval test). `git switch -c task
 Permitted writes: `evaluation/**`, `tools/eval/**`, new tests `tests/test_eval_t08fix1_*.py`, the two test files above as stated, `docs/final/evaluation/**`, `docs/agent-sessions/` (one new file), `docs/final/orchestration/reports/T08-fix1-tech-lead.md`. Not `pop/`, `agents/`, `tools/rl/`, `play.py`, `render/`, `web/`, `server/` (T19 is changing the engine and front ends in another session). No training, no `--live`, no PPO run on H6, no write to the real ledger.
 
 Gates: QA (`gate/T08-fix1-qa`), Eval (`gate/T08-fix1-eval`: the new H6 starts and rule, the ledger, the bar), Gate 3. T09 runs only after T08-fix1 and T19 close.
+
+## Amended 2026-11-25 (#78)
+
+Saad allowed the six tests broken by #74 and #65 to be updated by their authors, pinned values only (old and new listed in each report). Tech Lead now: the three tests in `tests/test_eval_registry.py` and `tests/test_eval_suite.py` named in #78. QA at Gate 1: its hash probe. Evaluation Specialist at Gate 2: its two tests in `tests/test_eval_T08_gate2.py`. No other existing-test edit.

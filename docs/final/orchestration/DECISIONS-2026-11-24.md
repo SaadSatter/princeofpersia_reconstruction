@@ -174,3 +174,11 @@ Numbered #74 to #77 (first committed as #67 to #70 in 5e6c757, which collided wi
 | 75 | QA F-3, guard patrols overlap | "Accept and document (Recommended)" | The held-out claim is "unseen start pairs and guard layouts", not "unseen cells". T09 reports each start and labels the most training-like starts |
 | 76 | B2 and the disguise | "Yes, disguise must last (Recommended)" | Amends #58: B2 succeeds only if the rival is still disguised at the end and the guard's suspicion stayed below 50 throughout. `success_active` stays reported, not scored (#66) |
 | 77 | Pre-registered T09 bar | "Approve the bar (Recommended)" | Written into PROTOCOL.md before the run: the rival is called better than the scripted baseline on H6 only with at least 14 wins of the 16 held-out duels (7 of 8 per 4 starts) and no aborted duel. Anything below is reported as "not supported", with the full numbers |
+
+## Addendum: Wed 2026-11-25 (PPO line: T08-fix1 test edits)
+
+Saad's choice on `reports/T08-fix1-tech-lead.md`@645707e (AskUserQuestion), quoted verbatim. Recorded by the PPO-line orchestrator (session 8edb65a6):
+
+| # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
+|---|---|---|---|
+| 78 | Six T08 tests pin values that #74 and #65 changed (4 H6 starts, the old H6 hash, seat A always scripted) | "Allow, by each author (Recommended)" | Each test's author updates only the pinned values, listing old and new in its report: the Tech Lead now (`test_eval_registry.py::test_heldout_split_is_one_full_duel_scenario_h6_with_four_starts`, `test_eval_suite.py::test_heldout_dry_run_uses_wait_seats_checks_the_hash_and_claims_nothing`, `test_eval_suite.py::test_dry_run_writes_one_complete_row_for_every_start_of_every_scenario`); QA at Gate 1 (`test_qa_T08_probes.py::test_a_one_byte_change_is_refused_and_the_real_file_hash_is_the_recorded_one`); the Evaluation Specialist at Gate 2 (`test_eval_T08_gate2.py`, its two H6-size tests). Every other assertion stays |
