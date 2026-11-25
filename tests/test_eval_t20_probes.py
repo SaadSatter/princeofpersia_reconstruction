@@ -106,8 +106,11 @@ def test_recorder_source_only_reads():
     called = {n.func.attr for n in ast.walk(tree)
               if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)}
     assert not called & {"step", "tick", "reset", "rematch", "press"}, called
+    # T20-fix1 (#81, #85): the one added read is the seat's own resolved move
+    assert "started_move" in called
     attrs = {n.attr for n in ast.walk(tree) if isinstance(n, ast.Attribute)}
     assert not any(a.startswith("_duel") or a == "rivals" for a in attrs)
+    assert not attrs & {"_move_action", "_rewrite", "_started"}, attrs
     imported = {a.name for n in ast.walk(tree) if isinstance(n, ast.Import) for a in n.names}
     assert not imported & {"random", "time"}, imported
 
@@ -133,8 +136,6 @@ def test_tap_counts_one_use_not_one_per_tick(tmp_path):
     assert res["TAKE"]["TAKE"] <= 1 and res["RIG"]["RIG"] <= 1 and res["flip"]["flip"] <= 1
 
 
-@pytest.mark.xfail(strict=True, reason="EVAL-T20-E1: a key queued during a running move is logged "
-                   "with that move's effect, so one flip plus three LEFT ticks counts 4 flips")
 def test_a_queued_direction_is_not_credited_with_the_running_flip(tmp_path):
     m = mk(tmp_path)
     m.join(None, 0.0), m.join(None, 0.0)
@@ -166,3 +167,119 @@ def test_grace_resolved_action_is_not_in_the_public_read_surface(tmp_path):
         effects.append((m.episode.observe("A")["me"]["motion"] or {}).get("effect"))
         assert m.episode.legal_actions("A") is not None
     assert effects[0] == effects[1] == "flipped"
+
+
+# --- T20-fix1 Gate 2 (decision #86): the reporting-only `_rewrite` label and StartedMove ---
+def test_rewrite_label_is_written_in_start_and_read_only_by_started_move():
+    """Every use of `_rewrite` in pop/, agents/ and server/ (ast): one init, one write in
+    `Duel._start`, one read in `VersusEpisode.started_move`. No rule, observation or
+    snapshot reads it."""
+    import ast
+    uses = []
+    paths = (sorted(Path("pop").glob("*.py")) + sorted(Path("agents").rglob("*.py"))
+             + sorted(Path("server").glob("*.py")))
+    for path in paths:
+        tree = ast.parse(path.read_text())
+        for fn in ast.walk(tree):
+            if isinstance(fn, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                for n in ast.walk(fn):
+                    if isinstance(n, ast.Attribute) and n.attr == "_rewrite":
+                        uses.append((str(path), fn.name, type(n.ctx).__name__))
+    uses = sorted(set(uses))
+    # `self._rewrite[seat] = x` is a Load of the dict attribute; only the __init__ line stores it
+    assert uses == [("pop/versus.py", "__init__", "Store"),
+                    ("pop/versus.py", "_start", "Load"),
+                    ("pop/versus.py", "started_move", "Load")], uses
+    src = Path("pop/versus.py").read_text()
+    snap = src[src.index("def snapshot"):src.index("# --- what one seat sees")]
+    assert "rewrite" not in snap
+
+
+def _drive(seed, rival, ticks=700, blind=False):
+    """A fuzz duel through the server Match; `blind` makes Duel._start drop the label."""
+    from pop import versus
+    orig = versus.Duel._start
+    if blind:
+        versus.Duel._start = lambda self, seat, action, rewrite=None: orig(self, seat, action, None)
+    try:
+        m = mk(None, seed, rival)
+        m.join(None, 0.0)
+        if rival is None:
+            m.join(None, 0.0)
+        rng = random.Random(seed)
+        keysets = [[], ["d"], ["a"], ["w", "d"], ["w", "a"], ["w"], ["f"], ["g"], ["t"], ["s"],
+                   ["lshift", "d"], ["."], ["/"]]
+        now, sent, obs, labelled = 0.0, [], [], 0
+        for i in range(ticks):
+            if i % 3 == 0:
+                for s in m.human_seats:
+                    m.receive(s, json.dumps({"type": "keys", "keys": rng.choice(keysets)}), now)
+            now += TICK_S
+            m.advance(now)
+            for s in ("A", "B"):
+                sent += [(s, x) for x in m.drain(s)]
+                obs.append(json.dumps([m.episode.observe(s), m.episode.legal_actions(s)],
+                                      sort_keys=True))
+                sm = m.episode.started_move(s)
+                labelled += bool(sm is not None and sm.rewrite)
+        return m.trace(), json.dumps(sent), obs, labelled
+    finally:
+        versus.Duel._start = orig
+
+
+@pytest.mark.parametrize("seed", [1, 7, 4242])
+@pytest.mark.parametrize("rival", [None, "baseline"])
+def test_rewrite_label_changes_no_trace_hash_observation_or_message(seed, rival):
+    """Same duel with the label and with `_start` forced to drop it: trace, state hash,
+    every client message, every observation and legal-action list are identical."""
+    a = _drive(seed, rival)
+    b = _drive(seed, rival, blind=True)
+    assert a[0] == b[0] and a[0]["state_hash"] == b[0]["state_hash"]
+    assert a[1] == b[1]
+    assert a[2] == b[2]
+    assert b[3] == 0           # the blind run really had no labels
+
+
+def test_labelled_run_actually_exercises_labels():
+    assert sum(_drive(s, None)[3] for s in (1, 7, 4242, 99, 5)) > 0
+
+
+def _play(tmp, script):
+    m = mk(tmp)
+    m.join(None, 0.0), m.join(None, 0.0)
+    now = 0.0
+    for keys, n in script:
+        m.receive("A", json.dumps({"type": "keys", "keys": keys}), now)
+        for _ in range(n):
+            now += TICK_S
+            m.advance(now)
+    m.close()
+    return [json.loads(x) for x in a_log(tmp).splitlines()[1:]]
+
+
+@pytest.mark.xfail(strict=True, reason="EVAL-T20F1-E2: a running jump starts as a 4-frame run "
+                   "(effect moved) and turns into the 8-frame flip inside the same move, with no "
+                   "second start, so the `move` row says moved and flip counts 0 (R-V22 amended: "
+                   "every directional jump is a flip)")
+def test_a_running_jump_is_counted_as_a_flip(tmp_path):
+    rows = _play(tmp_path, [(["d"], 8), (["d", "w"], 1), ([], 14)])
+    assert [e["move"] for e in rows if e["type"] == "move"][-1] == "RUN_JUMP_RIGHT"
+    assert summarize.mechanics_used(rows)["flip"] == 1
+
+
+@pytest.mark.xfail(strict=True, reason="EVAL-T20F1-E3 (minor): a held g alternates DRAW and SHEATHE, "
+                   "which the repeat marker (same move name) cannot see, so one 2.5 s hold counts "
+                   "4 draws and 4 sheathes")
+def test_a_held_draw_key_is_one_use(tmp_path):
+    rows = _play(tmp_path, [(["g"], 30)])
+    used = summarize.mechanics_used(rows)
+    assert used["draw"] <= 1 and used["sheathe"] <= 1
+
+
+def test_no_seat_surface_names_a_rewrite():
+    """Observation, legal actions and client messages never carry rewrite/grace/started/hop."""
+    for seed in (1, 7):
+        _, sent, obs, _ = _drive(seed, None)
+        blob = sent + "".join(obs)
+        for word in ("rewrite", "grace", "hop_turn", "_HOP_FLIP", "started_move", "StartedMove"):
+            assert word not in blob, word
