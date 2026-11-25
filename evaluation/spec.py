@@ -42,7 +42,15 @@ class Start:
     hearts: dict            # seat -> 1..3
     disguised: dict         # seat -> bool
     guards: dict            # name -> (room, row, (c0, c1), facing)
-    other_controller: str | None = None   # forced controller for seat B (None: configured)
+    other_controller: str | None = None   # forced stand-in for the seat that is not the subject
+    subject: str = "A"                    # the seat being measured (seat B in a mirrored start)
+
+    @property
+    def forced_seat(self) -> str | None:
+        """The seat `other_controller` plays (the one that is not the subject), or None."""
+        if self.other_controller is None:
+            return None
+        return "B" if self.subject == "A" else "A"
 
     def episode_starts(self) -> dict:
         return {s: tuple(v) for s, v in self.rivals.items()}
@@ -82,7 +90,8 @@ def parse_start(raw: dict, where: str = "") -> Start:
                   for n, g in raw.get("guards", {}).items()}
     except (KeyError, IndexError, TypeError, ValueError) as exc:
         raise SpecError(f"{where}{raw.get('id', '?')}: malformed start ({exc!r})") from exc
-    start = Start(raw["id"], rivals, hearts, disguised, guards, raw.get("other_controller"))
+    start = Start(raw["id"], rivals, hearts, disguised, guards, raw.get("other_controller"),
+                  raw.get("subject", "A"))
     validate_start(start, where)
     return start
 
@@ -91,8 +100,10 @@ def validate_start(start: Start, where: str = "") -> None:
     tag = f"{where}{start.id}"
     if start.other_controller not in OTHER_CONTROLLERS:
         raise SpecError(f"{tag}: other_controller must be one of {OTHER_CONTROLLERS}")
+    if start.subject not in SEATS:
+        raise SpecError(f"{tag}: subject must be one of {SEATS}")
     cells = []
-    for seat, (room, row, col, facing) in start.rivals.items():
+    for seat,(room, row, col, facing) in start.rivals.items():
         if room not in arena.ROOMS or facing not in (-1, 1) or not _floor_ok(room, row, col):
             raise SpecError(f"{tag}: rival {seat} start {(room, row, col, facing)} is not "
                             "a walkable cell of arena A")
@@ -167,5 +178,6 @@ def episode_factory(scenario: Scenario, start_id: str):
 def make_monitor(scenario: Scenario, start: Start, **overrides):
     params = {**scenario.params, **overrides}
     if scenario.kind == "identify":
-        params.setdefault("rival_hp_start", start.hearts["B"])
-    return MONITORS[scenario.kind](scenario.subject, **params)
+        rival = "B" if start.subject == "A" else "A"
+        params.setdefault("rival_hp_start", start.hearts[rival])
+    return MONITORS[scenario.kind](start.subject, **params)

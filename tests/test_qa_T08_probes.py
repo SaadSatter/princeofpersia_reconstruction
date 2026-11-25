@@ -37,7 +37,6 @@ def state(a, b, guards, suspicion=None):
 
 
 # --- F-1: D1 attributes a guard the OTHER rival downed earlier to the agent -----------------
-@pytest.mark.xfail(strict=True, reason="F-1: D1 credits a guard downed by the other rival")
 def test_d1_does_not_credit_a_guard_the_other_rival_downed_before_leaving():
     """The other rival downs the guard in room 4 while the agent is in room 3, walks on to
     room 5, then the agent enters room 4 and takes the uniform. The other rival is never in the
@@ -64,7 +63,6 @@ def _exception_row(scenario="F5", kind="fight", start="F5-c", config="MvS"):
             "error": "RuntimeError: cannot build", "success": None, "success_reason": None}
 
 
-@pytest.mark.xfail(strict=True, reason="F-2: duel_results indexes controllers['A'] of a row with none")
 def test_analysis_summarises_a_run_where_every_row_aborted_before_controllers_existed():
     rows = [_exception_row(), _exception_row(scenario="D1", kind="disguise", start="D1-a",
                                              config="SvS")]
@@ -215,8 +213,6 @@ def test_hearts_set_by_the_start_survive_a_second_reset_and_do_not_leak_between_
 
 
 # --- replay ---------------------------------------------------------------------------------------------
-@pytest.mark.xfail(strict=True, reason="F-4: --replay of a held-out trace needs --split heldout and "
-                   "crashes with a KeyError otherwise")
 def test_replaying_a_heldout_trace_without_the_heldout_split_fails_cleanly(tmp_path, capsys):
     out = tmp_path / "h"
     assert cli.main(["--dry-run", "--split", "heldout", "--trials", "1", "--max-frames", "30",

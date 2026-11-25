@@ -13,8 +13,11 @@ S = scripted baseline, M = the PPO rival from the shipped weights
 (`agents/rl/policy.py` SHIPPED_WEIGHTS, hash checked at load, recorded in
 every row). SvS, MvS, SvM and MvM (test only; refused on the held-out split).
 MvS against SvM is the seat swap. The held-out file is hash-checked before it
-is read and is run once per frozen policy (evaluation/manifest.py); a dry run
-on it uses WAIT seats only and never a policy.
+is read and is run once per (weights SHA-256, engine commit) pair (decision #64,
+evaluation/manifest.py). A real held-out run is refused on an unknown commit or
+a dirty tree, and every refusal is recorded beside the ledger. A dry run on the
+held-out set uses WAIT seats only and never a policy. `--replay` takes the split
+from the trace's meta.json.
 """
 
 from __future__ import annotations
@@ -69,10 +72,39 @@ def make_seed_key(path: Path) -> int:
     return 0
 
 
+def replay(trace_dir: Path, default_split: str) -> int:
+    """Re-feed a two-seat trace. The split comes from the trace's own `meta.json` (QA F-4),
+    so a held-out trace replays without `--split heldout`; `--split` is only the fallback
+    for a meta file that predates the field."""
+    try:
+        split = json.loads((trace_dir / "meta.json").read_text()).get("split", default_split)
+    except (OSError, ValueError) as exc:
+        print(f"error: cannot read {trace_dir / 'meta.json'}: {exc}", file=sys.stderr)
+        return 2
+    try:
+        if split == "heldout":
+            scenarios = manifest.load_heldout()
+        elif split == "tuning":
+            scenarios = manifest.load_tuning()
+        else:
+            print(f"error: the trace's split is {split!r}; expected tuning or heldout",
+                  file=sys.stderr)
+            return 2
+    except (manifest.FreezeError, SpecError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+    report = suite.replay_dir(trace_dir, scenarios)
+    print(json.dumps(report))
+    return 0 if report["ok"] else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     if args.make_seed_key:
         return make_seed_key(Path(args.make_seed_key))
+
+    if args.replay:
+        return replay(Path(args.replay), args.split)
 
     try:
         scenarios = manifest.load_heldout() if args.split == "heldout" else manifest.load_tuning()
@@ -85,11 +117,6 @@ def main(argv: list[str] | None = None) -> int:
             print(f"{sc.id} [{sc.kind}] {sc.duration_frames} frames: " +
                   ", ".join(s.id for s in sc.starts))
         return 0
-
-    if args.replay:
-        report = suite.replay_dir(args.replay, scenarios)
-        print(json.dumps(report))
-        return 0 if report["ok"] else 1
 
     ids = args.scenarios.split(",") if args.scenarios else list(scenarios)
     unknown = [i for i in ids if i not in scenarios]
@@ -137,12 +164,15 @@ def main(argv: list[str] | None = None) -> int:
         # The frozen policy: the shipped weights if any seat is M, else the scripted sources.
         policy_key = (C.make_shipped_policy().weights_sha256 if needs_policy
                       else "scripted:" + C.source_sha256())
+        info = {"run_id": run_id, "commit": git["commit"], "dirty": git["dirty"],
+                "configs": configs}
         try:
             manifest.verify_heldout()
-            ledger_row = manifest.claim_heldout_run(
-                policy_key, {"run_id": run_id, "commit": git["commit"], "configs": configs})
+            manifest.require_known_clean_tree(git)
+            ledger_row = manifest.claim_heldout_run(policy_key, info)
         except manifest.FreezeError as exc:
             print(f"error: {exc}", file=sys.stderr)
+            manifest.record_refusal(policy_key, info, str(exc))     # decision #64
             return 2
 
     limits = VersusLimits(timeout_s=args.timeout, max_fallbacks=args.max_fallbacks,

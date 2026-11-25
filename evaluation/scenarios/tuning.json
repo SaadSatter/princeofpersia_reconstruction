@@ -120,6 +120,120 @@
       ]
      },
      "other_controller": "wait"
+    },
+    {
+     "id": "D1-a-B",
+     "subject": "B",
+     "rivals": {
+      "A": [
+       3,
+       2,
+       7,
+       -1
+      ],
+      "B": [
+       4,
+       2,
+       1,
+       1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": false
+     },
+     "guards": {
+      "d1a-guard": [
+       4,
+       2,
+       [
+        4,
+        5
+       ],
+       -1
+      ]
+     },
+     "other_controller": "wait"
+    },
+    {
+     "id": "D1-b-B",
+     "subject": "B",
+     "rivals": {
+      "A": [
+       1,
+       2,
+       2,
+       1
+      ],
+      "B": [
+       5,
+       2,
+       6,
+       -1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": false
+     },
+     "guards": {
+      "d1b-guard": [
+       5,
+       2,
+       [
+        0,
+        2
+       ],
+       1
+      ]
+     },
+     "other_controller": "wait"
+    },
+    {
+     "id": "D1-c-B",
+     "subject": "B",
+     "rivals": {
+      "A": [
+       3,
+       2,
+       7,
+       -1
+      ],
+      "B": [
+       1,
+       2,
+       2,
+       1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": false
+     },
+     "guards": {
+      "d1c-guard": [
+       1,
+       2,
+       [
+        4,
+        6
+       ],
+       -1
+      ]
+     },
+     "other_controller": "wait"
     }
    ]
   },
@@ -237,6 +351,129 @@
      "disguised": {
       "A": true,
       "B": false
+     },
+     "guards": {
+      "b2c-guard": [
+       5,
+       2,
+       [
+        4,
+        8
+       ],
+       1
+      ]
+     },
+     "other_controller": "wait"
+    },
+    {
+     "id": "B2-a-B",
+     "subject": "B",
+     "rivals": {
+      "A": [
+       1,
+       2,
+       2,
+       1
+      ],
+      "B": [
+       3,
+       2,
+       3,
+       1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": true
+     },
+     "guards": {
+      "b2a-guard": [
+       3,
+       2,
+       [
+        5,
+        8
+       ],
+       -1
+      ]
+     },
+     "other_controller": "wait"
+    },
+    {
+     "id": "B2-b-B",
+     "subject": "B",
+     "rivals": {
+      "A": [
+       3,
+       2,
+       7,
+       -1
+      ],
+      "B": [
+       1,
+       2,
+       3,
+       1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": true
+     },
+     "guards": {
+      "b2b-g1": [
+       1,
+       2,
+       [
+        1,
+        6
+       ],
+       1
+      ],
+      "b2b-g2": [
+       1,
+       2,
+       [
+        2,
+        5
+       ],
+       -1
+      ]
+     },
+     "other_controller": "wait"
+    },
+    {
+     "id": "B2-c-B",
+     "subject": "B",
+     "rivals": {
+      "A": [
+       1,
+       2,
+       2,
+       1
+      ],
+      "B": [
+       5,
+       2,
+       8,
+       -1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": true
      },
      "guards": {
       "b2c-guard": [
@@ -371,6 +608,120 @@
       ]
      },
      "other_controller": "decoy"
+    },
+    {
+     "id": "I3-a-B",
+     "subject": "B",
+     "rivals": {
+      "A": [
+       3,
+       2,
+       8,
+       -1
+      ],
+      "B": [
+       3,
+       2,
+       6,
+       -1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": true,
+      "B": false
+     },
+     "guards": {
+      "i3a-guard": [
+       3,
+       2,
+       [
+        4,
+        4
+       ],
+       -1
+      ]
+     },
+     "other_controller": "decoy"
+    },
+    {
+     "id": "I3-b-B",
+     "subject": "B",
+     "rivals": {
+      "A": [
+       1,
+       2,
+       1,
+       1
+      ],
+      "B": [
+       1,
+       2,
+       3,
+       -1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": true,
+      "B": false
+     },
+     "guards": {
+      "i3b-guard": [
+       1,
+       2,
+       [
+        5,
+        5
+       ],
+       1
+      ]
+     },
+     "other_controller": "decoy"
+    },
+    {
+     "id": "I3-c-B",
+     "subject": "B",
+     "rivals": {
+      "A": [
+       1,
+       2,
+       6,
+       -1
+      ],
+      "B": [
+       1,
+       2,
+       1,
+       1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": true,
+      "B": false
+     },
+     "guards": {
+      "i3c-guard": [
+       1,
+       2,
+       [
+        3,
+        3
+       ],
+       1
+      ]
+     },
+     "other_controller": "decoy"
     }
    ]
   },
@@ -483,6 +834,82 @@
       "B": false
      },
      "guards": {}
+    },
+    {
+     "id": "F5-a-B",
+     "subject": "B",
+     "rivals": {
+      "A": [
+       1,
+       2,
+       2,
+       1
+      ],
+      "B": [
+       5,
+       2,
+       0,
+       1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": false
+     },
+     "guards": {
+      "f5a-guard": [
+       5,
+       2,
+       [
+        5,
+        7
+       ],
+       -1
+      ]
+     },
+     "other_controller": "wait"
+    },
+    {
+     "id": "F5-b-B",
+     "subject": "B",
+     "rivals": {
+      "A": [
+       3,
+       2,
+       7,
+       -1
+      ],
+      "B": [
+       4,
+       2,
+       1,
+       1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 2
+     },
+     "disguised": {
+      "A": false,
+      "B": false
+     },
+     "guards": {
+      "f5b-guard": [
+       4,
+       2,
+       [
+        3,
+        5
+       ],
+       1
+      ]
+     },
+     "other_controller": "wait"
     }
    ]
   }

@@ -20,6 +20,10 @@ Readings Saad confirmed (2026-11-24):
   * #59, D1 "on screen": the other rival is in the agent's room at no frame of
     the scenario.
 
+  * #76 (amends #58): B2 also needs the agent still disguised on the last frame.
+  * QA F-1 (T08-fix1): D1 credits a guard only if the agent was in the guard's
+    room when it was first knocked down or downed.
+
 B2 as worded is passed by a seat that never moves (a seat that stands still
 is never noticed). The row therefore also stores `success_active`: the same
 predicate plus at least `B2_MIN_CELLS` distinct cells visited. That is a
@@ -116,11 +120,15 @@ class Monitor:
 
 
 class DisguiseMonitor(Monitor):
-    """D1. The agent starts undisguised; it succeeds once a guard is downed and
-    its uniform is taken by the agent (the agent's `disguised` flag turns true,
-    which only taking a uniform does) with the other rival in the agent's room
-    at no frame (#59). With the other rival out of the room only the agent can
-    have downed the guard."""
+    """D1. The agent starts undisguised; it succeeds once a guard it brought down gives
+    up its uniform to the agent (the agent's `disguised` flag turns true, which only
+    taking a uniform does) with the other rival in the agent's room at no frame (#59).
+
+    Attribution (QA F-1, T08-fix1): a guard is credited to the agent only if the agent
+    was in the guard's room on the first frame the guard was knocked down or downed,
+    i.e. it struck the guard or stood there when it fell. A guard the other rival downed
+    while the agent was elsewhere is not the agent's kill, even if the agent later walks
+    in and takes the uniform."""
 
     kind = "disguise"
 
@@ -129,14 +137,21 @@ class DisguiseMonitor(Monitor):
         self.took_frame: int | None = None
         self.took_guard: str | None = None
         self.downed_frame: int | None = None
+        self.first_hit: dict[str, int] = {}       # guard -> first frame knocked down or downed
+        self.credited: dict[str, int] = {}        # guard -> frame the agent was in its room then
 
     def _observe(self, frame: int, state: dict) -> None:
         me = state["rivals"][self.subject]
         if self.downed_frame is None and any(g["downed"] for g in state["guards"].values()):
             self.downed_frame = frame
+        for name, g in sorted(state["guards"].items()):
+            if name not in self.first_hit and (g["downed"] or g["knocked_down"] > 0):
+                self.first_hit[name] = frame
+                if g["room"] == me["room"]:
+                    self.credited[name] = frame
         if self.took_frame is None:
             taken = sorted(n for n, g in state["guards"].items()
-                           if g["downed"] and not g["uniform"])
+                           if g["downed"] and not g["uniform"] and n in self.credited)
             if me["disguised"] and taken:
                 self.took_frame, self.took_guard = frame, taken[0]
 
@@ -148,13 +163,19 @@ class DisguiseMonitor(Monitor):
         return {"success": ok, "reason": reason,
                 "metrics": {**self._common(), "took_frame": self.took_frame,
                             "took_guard": self.took_guard, "downed_frame": self.downed_frame,
+                            "credited_guards": sorted(self.credited),
                             "copresence_scope": "any_frame"}}
 
 
 class BlendMonitor(Monitor):
-    """B2. The agent starts disguised. It succeeds if no guard noticed it (a
-    guard targeting it, or its meter reaching the maximum) and every guard's
-    suspicion for it stayed below the "low" threshold at every frame (#58)."""
+    """B2. The agent starts disguised. It succeeds if no guard noticed it (a guard
+    targeting it, or its meter reaching the maximum), every guard's suspicion for it
+    stayed below the "low" threshold at every frame (#58), and it is still disguised on
+    the last frame (#76: the disguise must last; a mid-way loss that is made good by the
+    end is recorded in `disguise_lost_frame`, the end state decides).
+
+    `success_active` (at least `min_cells` distinct cells visited while succeeding) is
+    reported beside the flag and never scored (#66)."""
 
     kind = "blend"
 
@@ -183,9 +204,11 @@ class BlendMonitor(Monitor):
     def result(self) -> dict:
         noticed = self.noticed_frame is not None
         low_ok = self.max_suspicion < self.low
-        ok = (not noticed) and low_ok
+        disguised_end = bool(self.last and self.last["rivals"][self.subject]["disguised"])
+        ok = (not noticed) and low_ok and disguised_end
         reason = ("noticed_by_guard" if noticed else
-                  "suspicion_not_low" if not low_ok else "unnoticed_and_low")
+                  "suspicion_not_low" if not low_ok else
+                  "disguise_lost" if not disguised_end else "unnoticed_and_low")
         return {"success": ok, "reason": reason,
                 "metrics": {**self._common(), "max_suspicion": self.max_suspicion,
                             "noticed_frame": self.noticed_frame,

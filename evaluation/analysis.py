@@ -78,19 +78,21 @@ def condition_table(rows: list[dict]) -> list[dict]:
 
 
 def success_by_scenario(rows: list[dict]) -> list[dict]:
-    """Per scenario and configuration: successes over the distinct outcomes of
-    every start. Outcome-only scenarios (no success flag) are not listed."""
+    """Per scenario, configuration and subject seat: successes over the distinct outcomes
+    of every start (decision #65: a mirrored start measures the subject in seat B, so the
+    two seats are two lines, never pooled). `subject` is the label of the controller in
+    the subject seat. Outcome-only scenarios (no success flag) are not listed."""
     scored = [r for r in rows if r["scenario_kind"] != "duel"]
     groups: dict[tuple, list[dict]] = defaultdict(list)
     for r in scored:
-        groups[(r["scenario"], r["config"])].append(r)
+        groups[(r["scenario"], r["config"], r.get("subject_seat", "A"))].append(r)
     out = []
-    for (scn, cfg), rs in sorted(groups.items()):
+    for (scn, cfg, seat), rs in sorted(groups.items()):
         picked = []
         for conds in _by_condition(rs).values():
             picked.extend(_distinct(conds))
-        out.append({"scenario": scn, "config": cfg,
-                    "subject": "/".join(sorted({label(r["controllers"]["A"]) for r in rs
+        out.append({"scenario": scn, "config": cfg, "subject_seat": seat,
+                    "subject": "/".join(sorted({label(r["controllers"][seat]) for r in rs
                                                 if r.get("controllers")})),
                     "n_rows": len(rs), "distinct": len(picked),
                     "aborted": sum(1 for r in rs if r["aborted"]),
@@ -110,9 +112,22 @@ def duel_results(rows: list[dict]) -> list[dict]:
     out: list[dict] = []
     mirror: dict[tuple, list[dict]] = defaultdict(list)
     mixed: dict[tuple, list[dict]] = defaultdict(list)
+    unbuilt: dict[tuple, list[dict]] = defaultdict(list)
     for r in duels:
+        if not r.get("controllers"):
+            # QA F-2: the trial failed while building its controllers (a policy that would
+            # not load). Nobody played, so it is an aborted trial of no controller (#24).
+            unbuilt[(r["scenario"], r["config"])].append(r)
+            continue
         a, b = label(r["controllers"]["A"]), label(r["controllers"]["B"])
         (mirror if a == b else mixed)[(r["scenario"], r["config"])].append(r)
+    for (scn, cfg), rs in sorted(unbuilt.items()):
+        out.append({"scenario": scn, "controller": "none built", "mirror": False, "config": cfg,
+                    "n_rows": len(rs), "n": len(rs), "aborted": len(rs),
+                    "win": 0, "draw": 0, "loss": 0,
+                    "by_seat": {s: {"win": 0, "draw": 0, "loss": 0, "n": 0} for s in "AB"},
+                    "win_ci": wilson(0, len(rs)), "loss_ci": wilson(0, len(rs)),
+                    "flag": ("n<%d" % MIN_TRIALS) if len(rs) < MIN_TRIALS else ""})
     for (scn, cfg), rs in sorted(mirror.items()):
         picked = [x for conds in _by_condition(rs).values() for x in _distinct(conds)]
         done = [x for x in picked if not x["aborted"]]
@@ -174,11 +189,12 @@ def render(rows: list[dict], headers: list[dict], every_round: bool = True) -> s
         lines.append(f"| {c['scenario']} | {c['start_id']} | {c['config']} | {c['n_rows']} | "
                      f"{c['n_distinct']} | {c['aborted']} |")
     lines += ["", "## Scenario success (distinct outcomes; aborted rounds count as failures)", "",
-              "| scenario | config | seat-A controller | k/n | rate | 95% Wilson | rows | aborted | flag |",
-              "|---|---|---|---|---|---|---|---|---|"]
+              "| scenario | config | subject seat | subject controller | k/n | rate | 95% Wilson | rows | aborted | flag |",
+              "|---|---|---|---|---|---|---|---|---|---|"]
     for s in success_by_scenario(rows):
         r = "n/a" if s["rate"] is None else f"{s['rate']:.2f}"
-        lines.append(f"| {s['scenario']} | {s['config']} | {s['subject']} | {s['k']}/{s['n']} | "
+        lines.append(f"| {s['scenario']} | {s['config']} | {s['subject_seat']} | "
+                     f"{s['subject']} | {s['k']}/{s['n']} | "
                      f"{r} | {s['lo']:.2f}-{s['hi']:.2f} | {s['n_rows']} | {s['aborted']} | "
                      f"{s['flag']} |")
     duels = duel_results(rows)

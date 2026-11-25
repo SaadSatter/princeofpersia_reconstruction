@@ -47,15 +47,50 @@ def parse_config(config: str) -> tuple[str, str]:
     return config[0], config[2]
 
 
+LEDGER_FILES = ("evaluation/heldout/ledger.jsonl", "evaluation/heldout/refusals.jsonl")
+EVALUATOR_DIRS = ("evaluation/", "tools/eval/")
+
+
+def _dirty(porcelain_z: str) -> bool:
+    """True if `status --porcelain -z` shows a tracked change anywhere, or an untracked
+    file under the evaluator directories (decision #64: such a file is code the run would
+    use but the commit does not name). The ledger files are written by the run itself and
+    never count."""
+    parts = porcelain_z.split("\0")
+    i = 0
+    while i < len(parts):
+        entry = parts[i]
+        i += 1
+        if len(entry) < 4:
+            continue
+        code, path = entry[:2], entry[3:]
+        if "R" in code or "C" in code:
+            i += 1                                   # the rename's old path follows
+        if path in LEDGER_FILES:
+            continue
+        if code == "??":
+            if path.startswith(EVALUATOR_DIRS):
+                return True
+        else:
+            return True
+    return False
+
+
 def git_state(root: Path = ROOT) -> dict:
+    """The engine commit and whether the tree is dirty; commit "unknown" and dirty None
+    when git cannot say (a held-out run refuses both, `manifest.require_known_clean_tree`)."""
     def run(*args):
-        return subprocess.run(["git", *args], cwd=root, capture_output=True, text=True,
-                              timeout=20).stdout.strip()
+        done = subprocess.run(["git", *args], cwd=root, capture_output=True, text=True,
+                              timeout=20)
+        return done.stdout if done.returncode == 0 else None
     try:
-        return {"commit": run("rev-parse", "HEAD") or "unknown",
-                "dirty": bool(run("status", "--porcelain", "--untracked-files=no"))}
+        head = run("rev-parse", "HEAD")
+        status = run("status", "--porcelain", "-z", "--untracked-files=all")
     except (OSError, subprocess.SubprocessError):
         return {"commit": "unknown", "dirty": None}
+    if not head or not head.strip() or status is None:
+        return {"commit": "unknown", "dirty": None}
+    return {"commit": head.strip(), "dirty": _dirty(status)}
 
 
 def seed_key_id(key: bytes) -> str:
@@ -108,8 +143,8 @@ class Trial:
         built, forced = {}, {}
         for seat, letter in zip("AB", letters):
             kind = "wait" if self.force_wait else CONFIG_LETTERS[letter]
-            if seat == "B" and start.other_controller and not self.force_wait:
-                kind, forced["B"] = start.other_controller, start.other_controller
+            if seat == start.forced_seat and not self.force_wait:
+                kind, forced[seat] = start.other_controller, start.other_controller
             built[seat] = C.build(kind, self.policy_factory)
             if kind == "policy" and getattr(built[seat], "kind", None) != "policy":
                 raise ValueError("a policy factory must build kind='policy' controllers")
@@ -124,7 +159,7 @@ def run_trial(t: Trial, out_dir: Path, *, seed_key: bytes, key_id: str, run_id: 
     row = {"schema": SCHEMA_VERSION, "run_id": run_id, "row_id": t.row_id,
            "scenario": sc.id, "scenario_kind": sc.kind, "split": sc.split,
            "start_id": t.start_id, "config": t.config, "trial": t.trial, "seed": t.seed,
-           "subject_seat": sc.subject, "duration_frames": sc.duration_frames,
+           "subject_seat": start.subject, "duration_frames": sc.duration_frames,
            "commit": git["commit"], "dirty": git["dirty"], "game_version": GAME_VERSION,
            "dry_run": dry_run, "test_only": t.test_only, "forced_controllers": {},
            "decision_every": decision_every, "seed_key_id": key_id, "controllers": {},
@@ -163,7 +198,7 @@ def run_trial(t: Trial, out_dir: Path, *, seed_key: bytes, key_id: str, run_id: 
         outcome={"status": res["status"], "reason": reason, "frames": res["frames"],
                  "winner_seat": res["winner_seat"], "winner_slot": res["winner_slot"],
                  "result_A": result_for(reason, "A"), "result_B": result_for(reason, "B"),
-                 "result_subject": result_for(reason, sc.subject)},
+                 "result_subject": result_for(reason, start.subject)},
         termination=res["status"], aborted=aborted, abort_reason=abort_reason,
         harness_error=bool(busy),
         error=(f"controller busy in seat(s) {','.join(busy)}: an earlier call had not returned"
@@ -199,15 +234,17 @@ def replay_dir(trace_dir: str | Path, scenarios: dict[str, Scenario]) -> dict:
 
 def plan_trials(scenarios: dict[str, Scenario], ids: list[str], configs: list[str], trials: int,
                 seed_base: int, **kw) -> list[Trial]:
-    """Every (scenario, start, configuration, trial). A start that forces seat B's
-    controller runs only the configurations whose B letter is S: SvM would repeat
-    SvS exactly, and MvM would repeat MvS."""
+    """Every (scenario, start, configuration, trial). A start that forces the other
+    seat's controller runs only the configurations whose letter for that seat is S: for
+    a subject in seat A, SvM would repeat SvS exactly and MvM would repeat MvS; for a
+    mirrored start (subject in seat B, seat A forced) MvS repeats SvS and MvM repeats SvM."""
     out = []
     for sid in ids:
         sc = scenarios[sid]
         for start in sc.starts:
             for config in configs:
-                if start.other_controller and parse_config(config)[1] != "S":
+                if start.other_controller and \
+                        parse_config(config)["AB".index(start.subject) ^ 1] != "S":
                     continue
                 for n in range(trials):
                     out.append(Trial(sc, start.id, config, n, seed_base + n,
