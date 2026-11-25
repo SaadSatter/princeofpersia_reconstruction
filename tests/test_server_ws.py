@@ -224,6 +224,7 @@ def test_the_server_serves_the_online_page_and_art_and_nothing_else(site):
                 assert (await http_get(r.port, path))[0] == 200, path
             for path in ("/nope", "/../pyproject.toml", "/%2e%2e/pyproject.toml",
                          "/art/../../pyproject.toml", "/server/match.py", "/pop/versus.py",
-                         "//etc/passwd"):
+                         "//etc/passwd",
+                         "/game.zip", "/index.html", "/main.js"):      # engine code stays home
                 assert (await http_get(r.port, path))[0] == 404, path
     run(go())

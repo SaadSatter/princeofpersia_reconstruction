@@ -1,7 +1,7 @@
 // Shadow Masque web page (T14): load Pyodide, run web/bridge.py, blit its draw list with Phaser.
 // No game logic here: keys go to the bridge as physical key names, and every
 // picture, number and message drawn comes from the bridge's payload.
-/* global loadPyodide, Phaser, SMKeys */
+/* global loadPyodide, Phaser, SMKeys, SMUi */
 "use strict";
 
 (function () {
@@ -29,6 +29,14 @@
   let payload = null;
   let acc = 0;
 
+  // The shared Rematch button (web/ui.js, decision #41): one press restarts here,
+  // with the same seed (#25). Absent (null) where ui.js is not loaded.
+  const rematchButton = (typeof SMUi !== "undefined" && document.body)
+    ? SMUi.createRematch(document, document.body, function () {
+      game.rematch();
+      frames = 0;
+    }) : null;
+
   function setStatus(text, state) {
     statusEl.textContent = text;
     statusEl.dataset.state = state;
@@ -49,6 +57,9 @@
     if (SMKeys.keyName(e.code) === "r" && !e.repeat && game !== null) {
       game.rematch();
       frames = 0;
+      return;
+    }
+    if (e.code === "Enter" && !e.repeat && rematchButton !== null && rematchButton.press()) {
       return;
     }
     held = SMKeys.applyKey(held, e.code, true);
@@ -180,6 +191,9 @@
       outcomeEl.textContent = (words[r] || r) + " (" + p.outcome.reason + "). Press R for a rematch.";
     } else {
       outcomeEl.textContent = "";
+    }
+    if (rematchButton !== null) {
+      rematchButton.update(SMUi.rematchView(p.outcome, "none"));
     }
     return panels;
   }

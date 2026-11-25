@@ -52,7 +52,7 @@ def test_online_js_holds_no_game_logic_and_sends_no_outcomes():
     sends = re.findall(r"send\(([^;]*)\)", src)
     assert sends
     for s in sends:
-        assert "type" in s or "msg" in s or "JSON" in s
+        assert "type" in s or "msg" in s.lower() or "JSON" in s
 
 
 def test_the_page_sends_only_keys_a_join_and_a_rematch_request():
@@ -102,10 +102,14 @@ def test_the_local_page_uses_the_same_button():
     assert "SMUi" in online and "SMDraw" in online
 
 
-def test_both_pages_share_one_drawer():
-    main = (WEB / "main.js").read_text()
-    assert "makeDrawer" not in main or "SMDraw.makeDrawer" in main
-    assert "function makeDrawer" in (WEB / "draw.js").read_text()
+def test_the_online_page_draws_with_draw_js():
+    """draw.js is main.js's drawer, copied (tests/test_gate_t14_qa_main_contract.py pins
+    main.js as one self-contained file, so it was not refactored to share it)."""
+    drawer = (WEB / "draw.js").read_text()
+    assert "function makeDrawer" in drawer
+    for fragment in ("setDisplaySize(d.w, d.h)", "setFillStyle(colour(d.color))",
+                     "setStrokeStyle(1, colour(d.color))"):
+        assert fragment in drawer and fragment in (WEB / "main.js").read_text()
 
 
 def test_the_build_ships_the_online_page_and_its_scripts(tmp_path):
@@ -119,3 +123,10 @@ def test_the_build_ships_the_online_page_and_its_scripts(tmp_path):
 def test_the_key_hints_cover_both_seats_in_online_mode():
     online = (WEB / "online.js").read_text()
     assert "keyHints" in online
+
+
+def test_the_page_cannot_choose_or_learn_the_rival_kind():
+    """E1: the server picks the rival (--rival); the page passes no query option through."""
+    js = (WEB / "online.js").read_text()
+    assert "location.search" not in js and "parseOptions" not in js
+    assert "agents/" not in js and ".zip" not in js

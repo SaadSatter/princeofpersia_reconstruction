@@ -7,7 +7,8 @@
 Writes:
 
 * index.html  web/index.html with the pinned CDN URLs from web/versions.json
-* main.js, keys.js  the page's JavaScript (copied)
+* online.html  the online page (T13): no Pyodide, served by `python -m server`
+* main.js, keys.js, draw.js, ui.js, online.js  the pages' JavaScript (copied)
 * game.zip    the Python the page runs in Pyodide: pop/ (all of it), the
               pygame-free render/ modules the draw list needs, web/bridge.py,
               and web/art.json (the art pack's measured sizes)
@@ -53,7 +54,7 @@ RENDER_MODULES = ("__init__.py", "anim.py", "genart.py", "versus_view.py", "draw
 WEB_MODULES = ("__init__.py", "bridge.py")
 # The scripted rival the page plays against; stdlib only (tests/test_web_rival.py).
 AGENT_MODULES = ("__init__.py", "baseline.py", "macros.py", "versus_baseline.py")
-PAGE_FILES = ("main.js", "keys.js")
+PAGE_FILES = ("main.js", "keys.js", "draw.js", "ui.js", "online.js")
 ZIP_TIME = (1980, 1, 1, 0, 0, 0)
 
 
@@ -101,12 +102,12 @@ def art_files() -> list[tuple[str, bytes]]:
     return sorted(out)
 
 
-def page(v: dict) -> bytes:
-    src = (WEB / "index.html").read_text()
+def page(v: dict, name: str = "index.html") -> bytes:
+    src = (WEB / name).read_text()
     html = (src.replace("{{PYODIDE_URL}}", v["pyodide_url"])
             .replace("{{PHASER_URL}}", v["phaser_url"]))
     if "{{" in html:
-        raise SystemExit("web/index.html: unknown placeholder left")
+        raise SystemExit(f"web/{name}: unknown placeholder left")
     return html.encode()
 
 
@@ -122,7 +123,8 @@ def build(out: Path = DEFAULT_OUT) -> dict:
         shutil.rmtree(out)
     out.mkdir(parents=True)
     v = versions()
-    files: list[tuple[str, bytes]] = [("index.html", page(v))]
+    files: list[tuple[str, bytes]] = [("index.html", page(v)),
+                                      ("online.html", page(v, "online.html"))]
     files += [(n, (WEB / n).read_bytes()) for n in PAGE_FILES]
     files.append(("game.zip", game_zip(python_files())))
     files += art_files()

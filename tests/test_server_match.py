@@ -150,7 +150,7 @@ def test_twelve_ticks_a_second_and_none_before_the_second_player_joins():
     m.join(None, 10.0)
     m.advance(10.0)
     assert frames(m) == 0
-    m.advance(10.0 + 1.0)
+    run(m, 10.0, 12)
     assert frames(m) == 12
 
 
@@ -362,3 +362,50 @@ def test_forfeit_rule_has_a_rule_source_map_row():
     text = (Path(__file__).resolve().parent.parent / "docs" / "RULE_SOURCE_MAP.md").read_text()
     row = next(line for line in text.splitlines() if line.startswith("| R-S01 "))
     assert "`design`" in row and "#38" in row and "server/match.py" in row
+
+
+# --- inherited GATE-wave3 QA findings (T14-fix1) ------------------------------------
+def test_a_slow_ai_rival_never_stalls_the_tick_loop_and_is_labelled():
+    import time
+    from server.rival import TimeLimitedRival
+
+    class Slow:
+        label = "AI rival: slow (test)"
+
+        def __call__(self, obs, legal):
+            time.sleep(0.6)
+            return legal[0] if legal else None
+
+    m = Match(seed=1, rival="baseline", rival_budget_s=0.01)
+    m.game.rival = TimeLimitedRival(Slow(), 0.01)
+    m.join(None, 0.0)
+    t0 = time.perf_counter()
+    run(m, 0.0, 30)
+    assert time.perf_counter() - t0 < 0.5            # 30 ticks, one 0.6 s answer pending
+    assert frames(m) == 30
+    st = [x for x in m.drain("A") if x["type"] == "state"][-1]
+    assert "WAIT" not in st["rival"] and "fallback" not in st["rival"].lower().replace("fallback(s)", "")
+    assert all(s != "B" for t in m.trace()["ticks"] for s, _ in t)   # labelled WAIT, no input
+    fb = m.trace()["fallbacks"]
+    assert fb and all(f["source"] == "fallback" and f["seat"] == "B" for f in fb)
+    assert "fallback" not in json.dumps(m.drain("A"))                # never sent to the human
+
+
+def test_labels_human_vs_human_has_no_rival_kind_and_neutral_hides_the_ai_kind():
+    m, _, _ = two()
+    run(m, 0.0, 3)
+    assert all("rival" not in x for x in m.drain("A") if x["type"] == "state")
+    n = Match(seed=1, rival="baseline", neutral=True)
+    n.join(None, 0.0)
+    run(n, 0.0, 3)
+    assert [x for x in n.drain("A") if x["type"] == "state"][-1]["rival"] == "Rival"
+    k = Match(seed=1, rival="baseline")
+    k.join(None, 0.0)
+    run(k, 0.0, 3)
+    assert "AI rival" in [x for x in k.drain("A") if x["type"] == "state"][-1]["rival"]
+
+
+def test_online_page_publishes_no_test_hook():
+    from pathlib import Path
+    src = (Path(__file__).resolve().parent.parent / "web" / "online.js").read_text()
+    assert "__smLast" not in src and "exposeForTests" not in src

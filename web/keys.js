@@ -81,9 +81,9 @@
 
   function keyHints(mode, seat) {
     if (mode === "local_two_players") {
-      return "Seat A: " + HINT_A + " Seat B: " + HINT_B + " R: rematch.";
+      return "Seat A: " + HINT_A + " Seat B: " + HINT_B + " R or Enter: rematch when the duel ends.";
     }
-    return "You are seat " + seat + ". " + (seat === "B" ? HINT_B : HINT_A) + " R: rematch.";
+    return "You are seat " + seat + ". " + (seat === "B" ? HINT_B : HINT_A) + " R or Enter: rematch when the duel ends.";
   }
 
   return Object.freeze({
