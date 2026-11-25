@@ -98,7 +98,6 @@ def test_zero_and_null_rows_are_not_odd():
     assert "None." in text and "harness error" not in text
 
 
-@pytest.mark.xfail(strict=True, reason="F1: totals table prints 0 for unrecorded old rows")
 def test_old_rows_are_not_printed_as_zero_in_the_totals_table():
     """Brief: old rows re-analyse as "not recorded" and not 0 (finding F1: the table prints 0)."""
     text = "\n".join(analysis.policy_error_lines([_row("o1", "heldout", None, None, has_field=False)]))

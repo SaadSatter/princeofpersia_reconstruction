@@ -78,7 +78,7 @@ def test_the_analysis_sums_per_condition_and_lists_odd_rows():
 def test_old_rows_without_the_field_are_read_as_not_recorded():
     old = {"row_id": "r", "scenario": "H6", "start_id": "s", "config": "MvS", "split": "heldout",
            "aborted": False, "seats": {"A": {"errors": 0}}}
-    assert analysis.policy_error_totals([old])[0]["policy_errors"] == 0
+    assert analysis.policy_error_totals([old])[0]["policy_errors"] is None
     assert "not recorded" in "\n".join(analysis.policy_error_lines([old]))
 
 
