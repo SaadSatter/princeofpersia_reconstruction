@@ -1,0 +1,52 @@
+# Browser smoke test for the hosted build (T14). On a pull request: build
+# web/dist, serve it, load it in Chromium with Playwright, wait for "ready",
+# hold a key for 2 s, check the frame counter advanced and the console has no
+# errors, and keep a screenshot. Read-only token, no secrets.
+name: Web smoke (Playwright)
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build web/dist
+        run: python3 tools/web/build.py
+      - name: Page JavaScript parses and its unit tests pass
+        run: |
+          node --check web/main.js
+          node --check web/keys.js
+          node web/keys.test.js
+      - name: Install Playwright (version pinned in web/versions.json)
+        run: |
+          PW=$(python3 -c "import json; print(json.load(open('web/versions.json'))['playwright'])")
+          npm install --no-save --prefix "$RUNNER_TEMP/pw" "playwright@$PW"
+          "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Serve web/dist and run the smoke test
+        run: |
+          python3 -m http.server 8000 --directory web/dist > "$RUNNER_TEMP/http.log" 2>&1 &
+          sleep 1
+          NODE_PATH="$RUNNER_TEMP/pw/node_modules" node tools/web/smoke.cjs \
+            http://localhost:8000/ "$RUNNER_TEMP/web-smoke.png"
+      - name: Keep the screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-smoke-screenshot
+          path: ${{ runner.temp }}/web-smoke.png
+          if-no-files-found: warn
