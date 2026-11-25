@@ -127,9 +127,11 @@ static page cannot meet that. It is acceptable for:
 * the local test mode, where both panels are visible anyway.
 
 It is **not** acceptable for online human vs human on two machines. That
-still needs the authoritative server (`server/`, deferred by decision #1),
-which sends each client only its own seat's payload. The bridge's payload is
-already the shape a server would send.
+uses the authoritative server (`server/`, built in T13, decision #35), which
+holds the only `GameState` and sends each client only its own seat's payload,
+in the shape of the bridge's. See [`ONLINE_PLAY.md`](ONLINE_PLAY.md) for how
+to run it, what each player receives and how the boundary is tested. The
+hosted page on this document is for human vs AI and local play only.
 
 ## Playtest notes (read before a session)
 
@@ -142,7 +144,7 @@ already the shape a server would send.
 * **Developer tools stay closed** in playtests, and the facilitator watches the
   screen (see Knowledge boundary: with devtools open a player can read the
   whole state).
-* **Rematch keeps the seed** (DECISIONS #25): R replays the same arena and the
+* **Rematch keeps the seed** (DECISIONS #25): the Rematch button (or R / Enter, once the duel has ended) replays the same arena and the
   same scripted guards, and resets the rival. The baseline is deterministic, so
   a second round against it can be learned. This is a learning confound across
   rounds; the protocol should say so and, if needed, change `seed` between

@@ -38,3 +38,6 @@ screenshots/
 .DS_Store
 .idea/
 .vscode/
+
+# Online play input traces (server only)
+traces/online/

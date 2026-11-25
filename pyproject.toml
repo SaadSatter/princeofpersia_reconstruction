@@ -9,6 +9,7 @@ dependencies = []
 play = ["pygame>=2.6,<3"]
 model = ["anthropic>=0.84,<1"]
 train = ["numpy>=2,<3"]
+online = ["websockets>=13,<16"]
 
 [dependency-groups]
 dev = ["pytest>=8,<9"]
