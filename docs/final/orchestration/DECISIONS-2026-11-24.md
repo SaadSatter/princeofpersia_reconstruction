@@ -128,3 +128,13 @@ Saad, in chat after T18's Gate 3 (verbatim; numbered #62–#63 because a paralle
 |---|---|---|---|
 | 62 | T18 minors: room cap 50 (measured safe about 40), creates not rate-limited, "full" vs "No room", the ligature QA-T18-1 | "Its fine the way it is" | All stay as built; QA-T18-1 stays a strict xfail |
 | 63 | EVAL-T18-1: one room's `on_finish` error stops every room | "let's add the server crash fix" | Task T18-fix1: an error in one room's finish or trace write is logged and contained to that room; every other room keeps ticking; EVAL-T18-1's strict xfail then passes and its author removes the mark at Gate 2 |
+
+## Addendum: Tue 2026-11-24, late night (PPO line: T08 tech-lead questions)
+
+Saad's choices on `reports/T08-tech-lead.md`@deb8718 (AskUserQuestion), quoted verbatim. Recorded by the PPO-line orchestrator (session 8edb65a6):
+
+| # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
+|---|---|---|---|
+| 64 | Held-out run-once key | "Weights + engine commit (Recommended)" | The run-once ledger allows one held-out (H6) run per (weights SHA-256, engine commit). Every run is still recorded and reported, so a re-run after a rule change is allowed but visible. T08-fix1 |
+| 65 | Seat-B coverage of D1, B2, I3, F5-a/b | "Add mirrored seat-B starts (Recommended)" | Each tuning skill scenario also gets mirrored starts with the rival in seat B, so every scenario reports per-seat results. Tuning split only; H6 is not changed. T08-fix1 |
+| 66 | B2 "active blend" reading | "Report it, don't score it (Recommended)" | B2 success stays as #58. `success_active` (at least 6 distinct cells while under 50) is reported beside it and is never scored. As built; documented in PROTOCOL.md |
