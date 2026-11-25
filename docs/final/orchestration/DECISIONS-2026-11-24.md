@@ -182,3 +182,11 @@ Saad's choice on `reports/T08-fix1-tech-lead.md`@645707e (AskUserQuestion), quot
 | # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
 |---|---|---|---|
 | 78 | Six T08 tests pin values that #74 and #65 changed (4 H6 starts, the old H6 hash, seat A always scripted) | "Allow, by each author (Recommended)" | Each test's author updates only the pinned values, listing old and new in its report: the Tech Lead now (`test_eval_registry.py::test_heldout_split_is_one_full_duel_scenario_h6_with_four_starts`, `test_eval_suite.py::test_heldout_dry_run_uses_wait_seats_checks_the_hash_and_claims_nothing`, `test_eval_suite.py::test_dry_run_writes_one_complete_row_for_every_start_of_every_scenario`); QA at Gate 1 (`test_qa_T08_probes.py::test_a_one_byte_change_is_refused_and_the_real_file_hash_is_the_recorded_one`); the Evaluation Specialist at Gate 2 (`test_eval_T08_gate2.py`, its two H6-size tests). Every other assertion stays |
+
+## Addendum: Wed 2026-11-25 (PPO line: T09 go)
+
+Saad's choice (AskUserQuestion), quoted verbatim. Recorded by the PPO-line orchestrator (session 8edb65a6):
+
+| # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
+|---|---|---|---|
+| 79 | Run the one held-out comparison (T09) now | "Go, run it once (Recommended)" | The Evaluation Specialist first re-checks the shipped weights on the tuning starts on the post-T19 engine; only if that is clean, it runs H6 once on a clean committed tree from `orch/reviewed` 0ea8d73 and commits the results with the ledger. Then QA (Gate 1), an independent read by the rules reviewer, and Gate 3. Not repeated |
