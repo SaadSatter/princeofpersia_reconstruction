@@ -208,3 +208,10 @@ Saad's choices after the T20 Gate 1 REJECT (`reports/T20-qa.md`@8139bae) and Gat
 | 81 | How the logger learns what the engine actually did | "Small public read-only accessor (Recommended)" | One read-only method in `pop/` (the move a seat actually started this tick, after R-V10, R-V22 and R-V35 rewrites and stale drops), failing test first. It changes no rule and is never part of a seat's observation. The recorder's "resolved action" column comes only from it |
 | 82 | How a grace-cancelled direction appears | "Marker + summary discounts it (Recommended)" | The log stays append-only and real-time. The direction row is written; the jump row carries `"grace": true`; the summarizer drops the superseded direction. QA updates its own F2 xfail to this form at Gate 1 |
 | 83 | Summary thresholds | "Idle 3 s, refused 12 ticks, stuck 60 s (Recommended)" | `IDLE_THRESHOLD_S = 3`, `REFUSED_RUN_MIN = 12` (ticks), `STUCK_ROOM_S = 60`; named constants |
+## Addendum: Wed 2026-11-25 (PPO line: T09 evidence gap)
+
+Saad's choice on `reports/T09-rules-reviewer.md` finding 1 (AskUserQuestion), quoted verbatim. Recorded by the PPO-line orchestrator (session 8edb65a6):
+
+| # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
+|---|---|---|---|
+| 84 | PPO inference errors (swallowed into WAIT, counted in `policy_errors()`) were not written into the H6 rows | "Reword only (Recommended)" | No policy runs on H6 again. T09-fix1 (docs only) states that the rival's own inference errors were not recorded in the held-out rows, alongside the other review wording fixes. A separate task (T08-fix2) writes `policy_errors` into every evaluation row for future runs |
