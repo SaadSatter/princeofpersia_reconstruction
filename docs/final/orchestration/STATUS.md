@@ -72,15 +72,15 @@ No `rc/*` (approved release candidate) branch exists.
 | closed (Gate 3, 2026-11-24) | T07-run1 | run-1 weights `agents/rl/weights/ppo-run-1.json` (SHA-256 80e4a110…ba4c) and evidence `tools/rl/runs/run-1/`; rerun of the final check matches (120/8/0, tuning, not held-out) | G1 ACCEPT b3d1361; G2 ACCEPT w/ notes 65a3d2c; G3 closed | `orch/reviewed` = `orch/preview` eba8bb1 | — |
 | closed (Gate 3, 2026-11-24) | T17 | withhold failed weights (#50) | G1 3943732, G2 55873a6 ACCEPT w/ notes; G3 closed | `orch/reviewed` f08c1a8 | — |
 | closed | SMOKE-01 | orchestration smoke test: every path in README Files + CLAUDE.md Roles tables, and agent procedure pointers, exist on `main` | G1 ACCEPT WITH NOTES (1 minor), G2 n/a, G3 closed | `task/SMOKE-01` fc16525, `gate/SMOKE-01-qa` 3bb36f5 (not merged) | none |
-| **Gate 2** (evaluation-specialist dispatched; G1 ACCEPT w/ notes 7f3525e) | T18 | online room codes, many rooms per server (#52) | G1, G2, G3 to come | `task/T18` from `orch/reviewed` f08c1a8; brief `tasks/T18.md`@53e7ece | — |
-| queued (after T18 closes; #32/#39 one chain at a time) | T19 | either control scheme (#55), 2-tick input grace (#54), kneel pickups, flip by default (#53, amends R-V22) | G1, G2, G3 to come | base = `orch/reviewed` tip after T18; brief `tasks/T19.md`@53e7ece | — |
+| closed (Gate 3, 2026-11-24) | T18 | online room codes (#52), code-less default room HOME (#56), limits (#57) | G1 7f3525e, G2 f4dc475 ACCEPT w/ notes; G3 closed | `orch/reviewed` 6a4b8b5, then fc02687 (with T07-run1) | — |
+| **running** (tech-lead dispatched, base fc02687) | T19 | either control scheme (#55), 2-tick input grace (#54), kneel pickups, flip by default (#53, amends R-V22) | G1, G2, G3 to come | base = `orch/reviewed` tip after T18; brief `tasks/T19.md`@53e7ece | — |
 | not started | T03 | official-repository move (decision #6), `python -m team init` | — | — | — |
 | closed (Gate 3); **PR #6 awaiting Saad's merge** | T10a (+fix1, fix2) | docs in line with decisions #1–#30: Changes since G1 in GDD and Configuration, PPO rival, orchestration, checklist, plan, README | G1 accept w/ notes ×3; G2 n/a; G3 closed | `orch/T10a` a1b9738 | issue #5, PR #6 |
 | not started | T10b | T10a follow-ups: GDD §2 and §6 labels, `LINGER_AFTER` location (GDD:105), `EVIDENCE_INDEX.md` pass (after Saad commits his edits), tracker `docs/final/TRACKER.md`, scope lock | — | — | — |
 
 ## Next eligible task
 
-**Now (2026-11-24, night):** T18 (room codes) is with the tech-lead; then T18 QA, Eval, Gate 3; then T19 from the new `orch/reviewed` tip. Saad's request and decisions #52–#55 are in `DECISIONS-2026-11-24.md`. Another Claude session works on PPO (`agents/rl/`, `tools/rl/`); T18 and T19 do not write there. After T19 the PPO rival is re-checked against the new jump rule.
+**Now (2026-11-24, night):** T18 closed at Gate 3 (`orch/reviewed` fc02687). T19 (controls, grace window, kneel, flip; brief `tasks/T19.md`) is with the tech-lead from base fc02687; then QA, Eval, Gate 3. Saad's request and decisions #52–#55 are in `DECISIONS-2026-11-24.md`. Another Claude session works on PPO (`agents/rl/`, `tools/rl/`); T18 and T19 do not write there. After T19 the PPO rival is re-checked against the new jump rule.
 
 Earlier note: **Running (decision #39):** T13 tech-lead (brief `tasks/T13.md`) and GATE-wave3 QA (then Eval), in parallel. Both were interrupted by the usage limit (about 17:00 ET 2026-11-24) and resumed in place after the reset. Their worktrees hold their work: `.claude/worktrees/agent-a4b0b80a203cad97e` (T13) and `.claude/worktrees/agent-a73f794fc81291219` (wave3 QA). Do not delete them. T04-fix3 and T15 closed. Next after GATE-wave3: T07-fix1 (fixture plus T07 findings), then T08 (scenario suite; must carry the T04-fix3 Eval note "one controller per worker and seat; busy = harness error; strong `seed_key`" and the T05-fix1 note on per-seat reporting). **Then (decision #39):** T13 online play (tech-lead) at the same time as **GATE-wave3** (T06b, T07, T14-fix1 on `orch/preview`), folding in **T07-fix1**: the T07 test fixture collects 200 observations from one mirror duel, and that breaks after the T05-fix1 merge. Decision #32: one chain at a time.
 
@@ -94,6 +94,9 @@ T05-fix1 follow-ups (minor, docs and tests; not blocking):
 Deadline pressure: G2/G3 recording and the official-repository move are due **Sat 2026-11-28, 11:59 p.m.** (T03, `COURSE_ROLE_MAP.md`).
 
 ## Waiting on Saad
+
+- **T18 follow-ups (minor; acting on them is your call):** EVAL-T18-1, where one room's trace-write error stops every room (fix: guard `pump`/`_record`); QA-T18-1, where the ligature "ﬀ" is read as "FF"; the room cap of 50 against a measured safe level of about 40 on the M4; creates are not rate-limited; "full" versus "No room" tells a guesser that a code exists.
+- **Note:** the main checkout is on `experiment/gcp-ppo-cpu` (the other session), which was cut from fc02687 and so includes T18. The orchestrator writes `main` records from `.claude/worktrees/orch-main`.
 
 - **Draft PR #11** (`orch/pr-main` 088c3fc → `main`): all reviewed gameplay (T01–T17), online play and the PPO stack. The suite on the merge commit is re-run after training. Merging is Saad's.
 - **Two-machine playtest of T13** (online play), and a first browser run of the hosted page. Neither has been verified yet.
