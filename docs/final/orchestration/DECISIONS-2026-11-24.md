@@ -62,3 +62,9 @@ Saad, in chat (verbatim): "Yes both press rematch, keep going through the gates"
 | # | Topic | Saad's answer (verbatim excerpt) | Effect |
 |---|---|---|---|
 | 46 | #41 "both press" reading | "Yes both press rematch" | Confirmed. Online, the rematch starts only after both players have pressed the Rematch button. The flag on #41 is cleared |
+
+Saad, in chat (verbatim): "Yes stop on first error, keep going through the gates"
+
+| # | Topic | Saad's answer (verbatim excerpt) | Effect |
+|---|---|---|---|
+| 47 | T07-fix1 proposed fail-fast | "Yes stop on first error" | Training stops on the first update with any policy or encoder error, writes no weights, and exits with status 2 and a message on stderr (`TrainConfig.fail_on_policy_error`, on by default). The flag on this proposal is cleared |
