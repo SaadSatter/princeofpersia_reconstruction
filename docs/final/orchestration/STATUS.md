@@ -80,8 +80,8 @@ No `rc/*` (approved release candidate) branch exists.
 | closed (Gate 3, 2026-11-24) | T18 | online room codes (#52), code-less default room HOME (#56), limits (#57) | G1 7f3525e, G2 f4dc475 ACCEPT w/ notes; G3 closed | `orch/reviewed` 6a4b8b5, then fc02687 (with T07-run1) | — |
 | closed (Gate 3, 2026-11-25; `orch/reviewed` b2203c3) | T18-fix1 | one room's error never stops the server (EVAL-T18-1) | — | brief `tasks/T18-fix1.md`; base fc02687 | — |
 | closed (Gate 3, 2026-11-25; `orch/reviewed` bdc3c76) | T19 | either control scheme (#55), 2-tick input grace (#54), kneel pickups, flip by default (#53, amends R-V22) | G1, G2, G3 to come | base = `orch/reviewed` tip after T18; brief `tasks/T19.md`@53e7ece | — |
-| **T20-fix2 Gate 2** (evaluation-specialist dispatched; G1 ACCEPT 0f5983c) | T20 | playtest telemetry (#67, #68) | G1, G2, G3 | brief `tasks/T20.md` | — |
-| queued (after T20) | T21 | telemetry-analyst agent (#69) | G1, G3 | brief `tasks/T21.md` | — |
+| closed (Gate 3, 2026-11-25; `orch/reviewed` 72066f1) | T20 + fix1 + fix2 | playtest telemetry (#67, #68) | G1, G2, G3 | brief `tasks/T20.md` | — |
+| **running** (tech-lead dispatched, base 72066f1) | T21 | telemetry-analyst agent (#69) | G1, G3 | brief `tasks/T21.md` | — |
 | not started | T03 | official-repository move (decision #6), `python -m team init` | — | — | — |
 | closed (Gate 3); **PR #6 awaiting Saad's merge** | T10a (+fix1, fix2) | docs in line with decisions #1–#30: Changes since G1 in GDD and Configuration, PPO rival, orchestration, checklist, plan, README | G1 accept w/ notes ×3; G2 n/a; G3 closed | `orch/T10a` a1b9738 | issue #5, PR #6 |
 | not started | T10b | T10a follow-ups: GDD §2 and §6 labels, `LINGER_AFTER` location (GDD:105), `EVIDENCE_INDEX.md` pass (after Saad commits his edits), tracker `docs/final/TRACKER.md`, scope lock | — | — | — |
@@ -104,6 +104,8 @@ T05-fix1 follow-ups (minor, docs and tests; not blocking):
 Deadline pressure: G2/G3 recording and the official-repository move are due **Sat 2026-11-28, 11:59 p.m.** (T03, `COURSE_ROLE_MAP.md`).
 
 ## Waiting on Saad
+
+- **T20:** approve the draft sentence in `docs/final/playtest/CONSENT.md` ("What is recorded") before the first playtest with `--playtest`.
 
 - **EVAL-T18-2 (minor):** a room that fails mid-tick ends without telling its two players (their screens freeze), and a persistent error logs every tick. Fix it in a small follow-up? (Recommended by Gate 2.)
 - **T19:** (a) the 4–8 suspicion surcharge on discarded run frames: accept it and state it in R-V35, or stop charging them; (b) keep `ppo-run-1.json` without retraining (Gate 2 recommends keeping it; T09 is not held); (c) the planner still prices a turn before an against-facing jump (no behaviour effect today; fixing it changes the rival, so it would be its own task).
