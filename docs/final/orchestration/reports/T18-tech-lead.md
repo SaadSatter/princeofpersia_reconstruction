@@ -6,16 +6,16 @@ from: tech-lead
 to: qa
 configured_model: claude-sonnet-5-5
 runtime_model: not visible to the agent (orchestrator records the verified id in REVIEW_LOG.md)
-consumed: docs/final/orchestration/tasks/T18.md@53e7ece
+consumed: docs/final/orchestration/tasks/T18.md@5e0025e
 source_branch: task/T18
-source_commit: e30d868286624ca52b03c459d14e23e81af34766
+source_commit: 6bb906a (default room, #56; first pass e30d868, report d643007)
 reviewed_commit: n/a
 verdict: n/a
 ---
 
 # T18: tech-lead report
 
-Status: partial. The feature is built. Acceptance item 8 is not met: two existing tests pin the single-duel lobby (see Findings). The brief says to stop and report rather than edit them, so I did not.
+Status: done. Amended after decisions #56 and #57: the code-less default room is back (tests de044ee, wiring 6bb906a), `tests/test_gate_t13_qa_online.py` is unchanged and passes. The 'blocker' under Findings is resolved; acceptance 8 and 9 are now met.
 
 ## Work completed
 Online play now has rooms. The page offers Create room and Join room (4-letter code). The server keeps many rooms, each with its own `Match`, seat links, sockets, tick, pause/forfeit, rematch and trace file. Codes come from `random.SystemRandom`. Rooms expire, tokens are per room, and failed joins are rate limited. Tests were committed first (24320d0, they fail on the base because `server.rooms` does not exist), then the code (e30d868).
@@ -40,7 +40,14 @@ Online play now has rooms. The page offers Create room and Join room (4-letter c
 | item 7 of "What to build" (`--rival baseline`) | yes | `test_baseline_room_gives_seat_b_to_the_ai_at_once_and_join_is_full` |
 | trace name includes code | yes | `test_the_trace_name_carries_the_room_code` (the helper only; the file write itself was not exercised in a test) |
 
-## Tests run
+## Tests run (amended, final)
+```
+uv run --frozen --extra play --extra train --extra online pytest -q
+1350 passed, 12 skipped, 2 xfailed, 2 warnings in 278.02s (0:04:38)
+```
+Default room: `python -m server` passes `make_match("HOME")` as the code-less default `Match` (never expires, not in the 50 cap, traces `duel-HOME-...`). Three new tests (20 in `tests/test_online_rooms.py`): default A/B/full, never expires and not counted in the cap, no leaks either way. The limits are approved (#57). The first-pass run below is kept for history.
+
+## Tests run (first pass)
 ```
 uv run --frozen --extra play --extra train --extra online pytest -q
 2 failed, 1345 passed, 12 skipped, 2 xfailed, 2 warnings in 297.17s (0:04:57)
@@ -66,7 +73,7 @@ Manual check: `python -m server` on localhost with six scripted WebSocket client
 The two CLI tests above.
 
 ## Requested next action
-Commit to review: e30d868286624ca52b03c459d14e23e81af34766 on task/T18 (tests first at 24320d0)
+Commit to review: 6bb906a (plus this report's commit) on task/T18 (first pass e30d868, tests first 24320d0 and de044ee)
 What changed: online play has rooms. Create room returns a 4-letter code and seat A; Join room with the code (any case) takes seat B. Rooms are independent, expire (10 min with no second player; 15 s with nobody connected), keep tokens per room, and failed joins are limited to 10 a minute per connection. `--rival baseline` rooms start at once with the AI on seat B.
 How to check it: `uv run --frozen --extra play --extra train --extra online pytest -q tests/test_online_rooms.py`; then the full suite; `uv run --extra online python -m server` and open the page in two browsers (not done by me).
 What I am unsure about: the two pinned CLI tests (orchestrator decision); the `create` spelling; creator refresh while waiting; per-connection limit being weak; browser look and flow untested.
