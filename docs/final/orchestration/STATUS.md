@@ -90,6 +90,9 @@ Deadline pressure: G2/G3 recording and the official-repository move are due **Sa
 
 ## Waiting on Saad
 
+- **Draft PR #11** (`orch/pr-main` 088c3fc → `main`): all reviewed gameplay (T01–T17), online play and the PPO stack. The suite on the merge commit is re-run after training. Merging is Saad's.
+- **Two-machine playtest of T13** (online play), and a first browser run of the hosted page. Neither has been verified yet.
+
 - ~~numpy~~ decided #34, done in T15 (closed). Not in `dev` (#40). Previously: **numpy is not a declared dependency.** T07 (PPO trainer and tests) and one T04-fix1 QA probe import it, so a clean `uv` environment fails to collect `tests/test_rl_policy.py` and `tests/test_rl_train.py` on `orch/preview`. Adding it (an optional `train` extra in `pyproject.toml` + `uv.lock`) needs Saad's approval.
 
 - ~~SMOKE-01 minor finding~~ resolved 2026-11-24 in the orchestration refactor (Saad authorized `CLAUDE.md` edits for it): the AI-rival row in `CLAUDE.md` now says the paths are on `orch/preview`, not yet on `main`.
