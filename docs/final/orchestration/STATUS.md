@@ -76,7 +76,7 @@ No `rc/*` (approved release candidate) branch exists.
 | closed (Gate 3, 2026-11-24) | T17 | withhold failed weights (#50) | G1 3943732, G2 55873a6 ACCEPT w/ notes; G3 closed | `orch/reviewed` f08c1a8 | — |
 | closed | SMOKE-01 | orchestration smoke test: every path in README Files + CLAUDE.md Roles tables, and agent procedure pointers, exist on `main` | G1 ACCEPT WITH NOTES (1 minor), G2 n/a, G3 closed | `task/SMOKE-01` fc16525, `gate/SMOKE-01-qa` 3bb36f5 (not merged) | none |
 | closed (Gate 3, 2026-11-24) | T18 | online room codes (#52), code-less default room HOME (#56), limits (#57) | G1 7f3525e, G2 f4dc475 ACCEPT w/ notes; G3 closed | `orch/reviewed` 6a4b8b5, then fc02687 (with T07-run1) | — |
-| **Gate 2** (evaluation-specialist dispatched; G1 ACCEPT w/ notes 3124e13) | T18-fix1 | one room's error never stops the server (EVAL-T18-1) | — | brief `tasks/T18-fix1.md`; base fc02687 | — |
+| closed (Gate 3, 2026-11-25; `orch/reviewed` b2203c3) | T18-fix1 | one room's error never stops the server (EVAL-T18-1) | — | brief `tasks/T18-fix1.md`; base fc02687 | — |
 | **Gate 2** (evaluation-specialist dispatched; G1 ACCEPT w/ notes 48915d4) | T19 | either control scheme (#55), 2-tick input grace (#54), kneel pickups, flip by default (#53, amends R-V22) | G1, G2, G3 to come | base = `orch/reviewed` tip after T18; brief `tasks/T19.md`@53e7ece | — |
 | queued (after T19, T18-fix1) | T20 | playtest telemetry (#67, #68) | G1, G2, G3 | brief `tasks/T20.md` | — |
 | queued (after T20) | T21 | telemetry-analyst agent (#69) | G1, G3 | brief `tasks/T21.md` | — |
@@ -102,6 +102,9 @@ T05-fix1 follow-ups (minor, docs and tests; not blocking):
 Deadline pressure: G2/G3 recording and the official-repository move are due **Sat 2026-11-28, 11:59 p.m.** (T03, `COURSE_ROLE_MAP.md`).
 
 ## Waiting on Saad
+
+- **EVAL-T18-2 (minor):** a room that fails mid-tick ends without telling its two players (their screens freeze), and a persistent error logs every tick. Fix it in a small follow-up? (Recommended by Gate 2.)
+- **T19 QA minor 1:** a disguised rival pays run suspicion for the 1–2 run frames that the grace window discards. Should those frames count?
 
 - ~~T18 follow-ups~~ decided (#62 keep as built, #63 crash fix = T18-fix1). Previously: EVAL-T18-1, where one room's trace-write error stops every room (fix: guard `pump`/`_record`); QA-T18-1, where the ligature "ﬀ" is read as "FF"; the room cap of 50 against a measured safe level of about 40 on the M4; creates are not rate-limited; "full" versus "No room" tells a guesser that a code exists.
 - **Note:** the main checkout is on `experiment/gcp-ppo-cpu` (the other session), which was cut from fc02687 and so includes T18. The orchestrator writes `main` records from `.claude/worktrees/orch-main`.
