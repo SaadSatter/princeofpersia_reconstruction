@@ -190,3 +190,11 @@ Saad's choice (AskUserQuestion), quoted verbatim. Recorded by the PPO-line orche
 | # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
 |---|---|---|---|
 | 79 | Run the one held-out comparison (T09) now | "Go, run it once (Recommended)" | The Evaluation Specialist first re-checks the shipped weights on the tuning starts on the post-T19 engine; only if that is clean, it runs H6 once on a clean committed tree from `orch/reviewed` 0ea8d73 and commits the results with the ledger. Then QA (Gate 1), an independent read by the rules reviewer, and Gate 3. Not repeated |
+
+## Addendum: Wed 2026-11-25 (PPO line: T09 health criterion)
+
+Saad's choice on `reports/T09-evaluation-specialist.md`@77bc2f7 (AskUserQuestion), quoted verbatim. Recorded by the PPO-line orchestrator (session 8edb65a6):
+
+| # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
+|---|---|---|---|
+| 80 | T09 health check: stale inputs on the scripted seat (identical before and after T19; inputs stranded when a baseline jump ends in a fall) | "PPO seat 0 stale; report baseline (Recommended)" | The T09 health check passes with 0 aborted, 0 fallbacks, 0 invalid on both seats and 0 stale on the PPO seat. The baseline's stale inputs and its falls are reported per duel as a confound. T09 continues to steps 2 and 3 (H6 once). PROTOCOL H-c's "0 for both" is brought in line by a later docs task, not by T09 |
