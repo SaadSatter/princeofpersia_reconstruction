@@ -6,7 +6,7 @@ from: tech-lead
 to: qa
 configured_model: claude-sonnet-5-5
 runtime_model: not visible to the agent (orchestrator records the verified id in REVIEW_LOG.md)
-consumed: docs/final/orchestration/tasks/T19.md@447f298c44829e90e03ab55a69a7764eda809905
+consumed: docs/final/orchestration/tasks/T19.md@447f298; docs/final/orchestration/DECISIONS-2026-11-24.md@36d7576 (rows #71-#73)
 source_branch: task/T19
 source_commit: 7bbab99770e5d17b22ccf1d78c58bfff50174baf
 reviewed_commit: n/a
@@ -15,8 +15,9 @@ verdict: n/a
 
 # T19: tech-lead report
 
-Status: partial. The work is complete and committed, but **two existing tests fail** and the brief says to stop
-and report when a test outside #53 breaks (section "Findings"). I did not edit them.
+Status: done, with one known failure owned by QA. Amended after Saad's answers #71-#73 (36d7576): #71 keep the
+instant turn (the T05 probe's volume floor is lowered by QA at Gate 1; I did not edit it); #72 the one
+`test_server_ws.py` assertion is updated (below); #73 crouch is fine (Finding 3 closed).
 
 ## Work completed
 Tests first (commit `4eb0da4`, 45 Python tests failing on `fc02687`, plus new Node cases), then the changes:
@@ -85,6 +86,19 @@ window were run by hand. `play.py --versus` is local two-player and was not touc
 | `tests/test_flip.py::test_a_jump_with_nobody_in_the_way_is_an_ordinary_jump` (renamed `..._is_a_flip_with_the_same_distance`) | `effect == "jumped"` and col 4 | `effect == "flipped"` and col 4 |
 | `tests/test_flip.py::test_a_rival_in_the_next_room_does_not_stop_the_jump` | `effect == "jumped"`, `to is None` | `effect == "flipped"`, `to is None`; docstring says so |
 | `tests/test_flip_review.py::test_last_result_names_the_same_effect_as_the_motion[JUMP_RIGHT-...]` | param `"jumped"` | param `"flipped"` |
+
+## Amendment after #71-#73 (2026-11-25)
+```
+uv run --frozen --extra play --extra train --extra online pytest -q
+FAILED tests/test_gate_t05_qa_probes.py::test_qa_baseline_never_needs_a_fallback_over_randomised_duels_in_every_room
+1 failed, 1445 passed, 12 skipped, 4 xfailed, 2 warnings in 361.08s (0:06:01)
+```
+The T05 probe is the only failure (Finding 1, decision #71: QA lowers its floor at Gate 1).
+Changed assertion (decision #72), `tests/test_server_ws.py::test_keys_move_your_own_rival_and_each_client_gets_only_its_own_payload`:
+- old: `assert r.match.episode.observe("B")["me"]["col"] == b0` (comment on the send: `# A's key: ignored`)
+- new: `assert r.match.episode.observe("B")["me"]["col"] != b0` (comment: `# #55: WASD moves B's own seat`)
+Nothing else in that test changed. The "never seat A" half is not asserted in this test, because A also sends `d`
+there; `tests/test_t19_controls.py::test_online_either_set_drives_the_senders_own_seat_only` asserts it.
 
 ## Findings
 1. **[major] `tests/test_gate_t05_qa_probes.py::test_qa_baseline_never_needs_a_fallback_over_randomised_duels_in_every_room`
