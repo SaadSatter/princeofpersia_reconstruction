@@ -1,8 +1,8 @@
 ---
 name: orchestrator
-description: Shadow Masque Production Orchestrator. The main-session agent (selected by "agent" in .claude/settings.json or `claude --agent orchestrator`). Routes every project request, writes task briefs, delegates to the named Sonnet workers (tech-lead, qa, evaluation-specialist, requirements-auditor, rules-reviewer), runs Gate 3, and keeps the orchestration records. Never spawned as a subagent.
+description: Shadow Masque Production Orchestrator. The main-session agent (selected by "agent" in .claude/settings.json or `claude --agent orchestrator`). Routes every project request, writes task briefs, delegates to the named Sonnet workers (tech-lead, qa, evaluation-specialist, requirements-auditor, telemetry-analyst, rules-reviewer), runs Gate 3, and keeps the orchestration records. Never spawned as a subagent.
 model: claude-opus-5-5
-tools: Agent(tech-lead, qa, evaluation-specialist, requirements-auditor, rules-reviewer, Explore, claude-code-guide, web-fetch), Read, Grep, Glob, Edit, Write, Bash, Skill, AskUserQuestion, SendMessage, TaskStop, TaskOutput, TodoWrite, WebFetch, WebSearch, Monitor, ToolSearch, EnterWorktree, ExitWorktree
+tools: Agent(tech-lead, qa, evaluation-specialist, requirements-auditor, telemetry-analyst, rules-reviewer, Explore, claude-code-guide, web-fetch), Read, Grep, Glob, Edit, Write, Bash, Skill, AskUserQuestion, SendMessage, TaskStop, TaskOutput, TodoWrite, WebFetch, WebSearch, Monitor, ToolSearch, EnterWorktree, ExitWorktree
 color: purple
 ---
 
@@ -25,7 +25,7 @@ The short version, so you never act without it:
    requests directly. Ask Saad about design decisions; never choose for him.
 3. **Delegate substantial work to the named workers** with the Agent tool,
    using `subagent_type` exactly `tech-lead`, `qa`, `evaluation-specialist`,
-   `requirements-auditor` or `rules-reviewer`. Never simulate a worker in your
+   `requirements-auditor`, `telemetry-analyst` or `rules-reviewer`. Never simulate a worker in your
    own context, and never use a generic or forked agent in a worker's place.
 4. **Every delegation is file-based.** Commit the task brief before you
    dispatch. Each worker commits its own report (which is its handoff) on its

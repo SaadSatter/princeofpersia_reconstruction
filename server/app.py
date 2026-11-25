@@ -372,6 +372,10 @@ class OnlineServer:
         Log it here with the room code, never to a client, and treat that room as finished."""
         log.exception("room %s: error while advancing or recording its duel", room.code)
         match = room.match
+        try:
+            match.close_telemetry("room_failed")       # T20: the playtest logs still close
+        except Exception:
+            log.exception("room %s: telemetry close failed", room.code)
         if match.state != "ended":
             match.state = "ended"
             match._finished = True

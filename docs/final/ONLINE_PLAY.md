@@ -17,7 +17,9 @@ uv run --extra online python -m server --rival baseline   # you alone vs the scr
 Options: `--host` (default `0.0.0.0`), `--port` (default 8765), `--seed`
 (default 0; the seed is never sent to a client), `--rival baseline`,
 `--neutral` (label the AI seat just "Rival"), `--trace-dir` (default
-`traces/online/`).
+`traces/online/`), `--playtest` (off by default: one telemetry log per room, duel and
+seat, host side only, in `--telemetry-dir`, default `traces/playtest/`; no client message
+changes; see `docs/final/playtest/TELEMETRY.md`).
 
 It prints the URL to give the players, for example
 `http://192.168.1.23:8765/`.

@@ -1,0 +1,10 @@
+{"type":"header","schema":1,"build":"fixture","seed":1,"rival":"human","room":"ABCD","duel":1,"duel_frames":3600,"ticks_per_second":12,"idle_threshold_s":3.0,"seat":"B"}
+{"t":0,"s":0.0,"seat":"B","type":"duel_start","room":"room-ccc","hearts":3,"armed":false,"traps_left":4}
+{"t":20,"s":1.667,"seat":"B","type":"action","action":"UP","accepted":true,"effect":"flipped"}
+{"t":30,"s":2.5,"seat":"B","type":"action","action":"STANCE_UP","accepted":true,"effect":null}
+{"t":400,"s":33.333,"seat":"B","type":"disconnect"}
+{"t":400,"s":33.333,"seat":"B","type":"pause","phase":"start"}
+{"t":430,"s":35.833,"seat":"B","type":"reconnect"}
+{"t":430,"s":35.833,"seat":"B","type":"pause","phase":"end"}
+{"t":800,"s":66.667,"seat":"B","type":"duel_end","result":"lost","reason":"won:A","frames":800}
+{"t":800,"s":66.667,"seat":"B","type":"rematch","pressed":false}

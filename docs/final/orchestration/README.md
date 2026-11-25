@@ -26,6 +26,7 @@ These are **orchestration** files, not course `team` role files. See
 | `qa` | worker, own worktree | `claude-sonnet-5-5` | `.claude/agents/qa.md` | `agents/qa.md` |
 | `evaluation-specialist` | worker, own worktree | `claude-sonnet-5-5` | `.claude/agents/evaluation-specialist.md` | `agents/evaluation-specialist.md` |
 | `requirements-auditor` | worker, own worktree, read-only | `claude-sonnet-5-5` | `.claude/agents/requirements-auditor.md` | `agents/requirements-auditor.md` |
+| `telemetry-analyst` | worker, own worktree, writes its report only | `claude-sonnet-5-5` | `.claude/agents/telemetry-analyst.md` | `agents/telemetry-analyst.md` |
 | `rules-reviewer` | worker, read-only, no shell | `claude-sonnet-5-5` | `.claude/agents/rules-reviewer.md` | itself |
 
 - Each native definition holds only identity, model, tools, inputs, outputs
