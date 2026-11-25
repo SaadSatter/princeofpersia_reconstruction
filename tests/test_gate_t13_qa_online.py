@@ -717,7 +717,7 @@ def test_cli_process_two_scripted_clients_real_clock_and_trace_dir(tmp_path, riv
         blob = json.dumps(ms)
         assert "fallback" not in blob and "seed" not in blob
         if rival == "baseline":
-            assert any("AI rival" in str(m.get("rival")) for m in states)
+            assert any("Baseline (scripted)" in str(m.get("rival")) for m in states)
         wa.transport.abort()
         if wb:
             wb.transport.abort()

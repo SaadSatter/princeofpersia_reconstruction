@@ -28,6 +28,8 @@
   let pyodide = null;
   let payload = null;
   let acc = 0;
+  let fallbackJson = null; // Python helper over ModeRival.fallback_log, or undefined
+  let loggedFallbacks = 0;
 
   // The shared Rematch button (web/ui.js, decision #41): one press restarts here,
   // with the same seed (#25). Absent (null) where ui.js is not loaded.
@@ -35,6 +37,7 @@
     ? SMUi.createRematch(document, document.body, function () {
       game.rematch();
       frames = 0;
+      loggedFallbacks = 0;
     }) : null;
 
   function setStatus(text, state) {
@@ -57,6 +60,7 @@
     if (SMKeys.keyName(e.code) === "r" && !e.repeat && game !== null) {
       game.rematch();
       frames = 0;
+      loggedFallbacks = 0;
       return;
     }
     if (e.code === "Enter" && !e.repeat && rematchButton !== null && rematchButton.press()) {
@@ -83,6 +87,24 @@
       "make");
     game = make(opts.mode, opts.seat, opts.seed, opts.rival, opts.neutral, true);   // honest names (#88)
     make.destroy();
+    // The AI seat's labelled fallbacks (agents/modes.py ModeRival.fallback_log) go to the browser
+    // console only: never to the page's text and never to the other seat (EVAL-T22-2, #49).
+    // Guarded: a build or a test stub without the log just reports nothing.
+    fallbackJson = pyodide.runPython(
+      "import json\n" +
+      "def fallback_json(g):\n" +
+      "    return json.dumps(list(getattr(g.rival, 'fallback_log', [])))\n" +
+      "fallback_json");
+  }
+
+  function reportFallbacks() {
+    if (typeof fallbackJson !== "function" || game === null) {
+      return;
+    }
+    const entries = JSON.parse(fallbackJson(game));
+    for (; loggedFallbacks < entries.length; loggedFallbacks += 1) {
+      console.warn("AI seat fallback (source: fallback)", entries[loggedFallbacks]);
+    }
   }
 
   function stepGame() {
@@ -92,6 +114,9 @@
     payload = JSON.parse(game.tick_json());
     frames += 1;
     framesEl.textContent = String(frames);
+    if (frames % 12 === 0) {
+      reportFallbacks();
+    }
     exposeForTests();
   }
 
@@ -213,7 +238,7 @@
     if (!box || !Array.isArray(list)) {
       return;
     }
-    const now = SMKeys.currentPlay(opts);
+    const now = SMKeys.needsChooser(window.location.search) ? null : SMKeys.currentPlay(opts);
     box.innerHTML = list.map(function (m) {
       return '<a class="mode' + (m.id === now ? " current" : "") + '" href="?play=' +
         esc(m.id) + '">' + esc(m.label) + "</a>";
@@ -224,6 +249,13 @@
     const manifest = await (await fetch("manifest.json")).json();
     buildEl.textContent = manifest.build;
     showModes(manifest.modes);
+    if (SMKeys.needsChooser(window.location.search)) {
+      // Decision #92: open on the mode chooser. Python and Phaser start only after a choice
+      // (each mode button reloads the page with ?play=<id>).
+      keysEl.textContent = "Choose a mode to start.";
+      setStatus("choose a mode", "choose");
+      return;
+    }
     keysEl.textContent = SMKeys.keyHints(opts.mode, opts.seat);
     setStatus("loading Python", "loading");
     await startPython();

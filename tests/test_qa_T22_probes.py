@@ -71,7 +71,6 @@ def _copies():
                    if lab in p.read_text()})
 
 
-@pytest.mark.xfail(strict=True, reason="QA-T22-1 (cosmetic): play.py --mode help repeats the labels")
 def test_no_file_but_agents_modes_spells_a_mode_label():
     assert _copies() == []
 

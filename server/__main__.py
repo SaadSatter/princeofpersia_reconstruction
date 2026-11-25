@@ -59,12 +59,8 @@ async def serve_forever(args) -> None:
             path.write_text(json.dumps(trace, separators=(",", ":")))
 
         rival = {"none": "human"}.get(args.rival, args.rival) if mode is None else mode
-        # `--rival baseline` (the default room, no mode chosen) keeps the T13 label "AI rival: ..."
-        # that tests/test_gate_t13_qa_online.py pins; flip to honest labels (#88) by deleting
-        # `legacy` once that test is updated. Rooms made with a chosen mode, and `--rival ai`, are honest.
-        legacy = mode is None and args.rival == "baseline"
         return room_modes.make_match(rival, seed=args.seed, on_finish=write_trace,
-                                     neutral=args.neutral, honest=not legacy)
+                                     neutral=args.neutral)
 
     with tempfile.TemporaryDirectory() as site:
         manifest = build.build(Path(site))

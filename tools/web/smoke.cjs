@@ -1,6 +1,6 @@
 // Browser smoke test for the built page (T14), run by .github/workflows/web-smoke.yml.
 //   NODE_PATH=<dir with playwright> node tools/web/smoke.cjs http://localhost:8000/ shot.png
-// Loads the page in Chromium, waits for "ready" (Pyodide and Phaser loaded,
+// Loads the page in Chromium, picks a mode on the chooser (T22-fix1, #92), waits for "ready" (Pyodide and Phaser loaded,
 // first frame drawn), holds D (seat A runs right) for 2 s, and checks that
 // the frame counter advanced, that the console logged no errors, and that the
 // key reached the engine: the human seat's position (window.__smLast, the
@@ -18,6 +18,17 @@ async function main() {
   page.on("console", (m) => { if (m.type() === "error") errors.push("console: " + m.text()); });
   page.on("pageerror", (e) => errors.push("page: " + e.message));
   await page.goto(url);
+  // Decision #92: the page opens on the mode chooser. Check it lists the three modes, then pick
+  // the baseline: the click reloads the page with ?play=baseline and the game starts.
+  await page.waitForSelector("#modes a.mode", { timeout: 60000 });
+  const modeCount = await page.locator("#modes a.mode").count();
+  if (modeCount !== 3) {
+    errors.push(`the mode chooser lists ${modeCount} modes, expected 3`);
+  }
+  await Promise.all([
+    page.waitForURL(/[?&]play=baseline/),
+    page.click('#modes a.mode[href="?play=baseline"]'),
+  ]);
   await page.waitForSelector('#status[data-state="ready"], #status[data-state="error"]',
     { timeout: 180000 });
   const state = await page.getAttribute("#status", "data-state");

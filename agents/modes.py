@@ -10,10 +10,12 @@ list, so they offer the same modes under the same names. Standard library only
 
 An AI seat is driven through `SeatControllerRival` (web/bridge.py), the same hook
 the hosted page and the server use: it sees only its own seat's observation and
-legal tuple. `ModeRival` adds a fallback log. A failed or illegal answer, and an
-inference error the policy answered with WAIT, is "no input" for that decision
-and is recorded as `{"source": "fallback"}`; it is never hidden and never
-replaced by the baseline. A wrong or missing weights hash is an error (decision
+legal tuple. `ModeRival` submits the controller's WAIT as `"WAIT"` on a decision
+tick, exactly as `pop/versus_runner.py` does (the engine treats a WAIT step and
+"no input" differently, EVAL-T22-1), and nothing between decisions. It adds a
+fallback log. A failed or illegal answer is "no input" for that decision and is
+recorded as `{"source": "fallback"}`; it is never hidden and never replaced by
+the baseline. A wrong or missing weights hash is an error (decision
 #3: the in-game rival is the trained policy).
 """
 
@@ -78,6 +80,34 @@ def verify_shipped() -> str:
     return got
 
 
+# The loaded network is immutable (a controller's state lives in PolicyMacro, not in Net), so
+# it is parsed and hash-checked once per process and shared by every room (EVAL-T22-3). The key
+# holds the file's identity, so another path, hash or changed file is checked again.
+_NET_CACHE: dict = {}
+
+
+def _shared_net(policy, path: Path, sha256: str):
+    st = path.stat()
+    key = (str(path.resolve()), str(sha256).lower(), st.st_mtime_ns, st.st_size)
+    net = _NET_CACHE.get(key)
+    if net is None:
+        net = policy.load_net(path, sha256)          # raises WeightsError on a wrong hash
+        _NET_CACHE[key] = net
+    return net
+
+
+def _rl_rival(policy, path: Path, sha256: str):
+    """`policy.make_rl_rival` with the shared network: same macro policy and controller."""
+    net = _shared_net(policy, path, sha256)
+    decision_every = 6
+    pm = policy.PolicyMacro(net, policy.MACRO_EVERY, decision_every)
+    ctrl = policy.MacroController(pm, name=f"ppo-{sha256[:8]}", kind="policy",
+                                  decision_every=decision_every, macro_every=1)
+    ctrl.policy_macro = pm
+    ctrl.policy_errors = lambda: pm.errors
+    return ctrl
+
+
 def make_controller(mode_id: str, weights=None, sha256: str | None = None):
     """A fresh seat controller for an AI mode. The weights default to the shipped file and
     the shipped hash; a wrong hash or a missing file raises `WeightsError` (no fallback)."""
@@ -91,11 +121,12 @@ def make_controller(mode_id: str, weights=None, sha256: str | None = None):
     path = Path(weights) if weights is not None else Path(policy.SHIPPED_WEIGHTS)
     if not path.is_file():
         raise policy.WeightsError(f"weights are missing: {path}")
-    return policy.make_rl_rival(path, sha256 if sha256 is not None else policy.SHIPPED_SHA256)
+    return _rl_rival(policy, path, sha256 if sha256 is not None else policy.SHIPPED_SHA256)
 
 
 def _rival_class():
     from web.bridge import SeatControllerRival
+    from pop.seats import WAIT
 
     class ModeRival(SeatControllerRival):
         """SeatControllerRival plus a log of every fallback, labelled as one."""
@@ -119,9 +150,30 @@ def _rival_class():
         def reset(self, seed: int) -> None:
             super().reset(seed)
             self._calls, self._seen = 0, (0, self.policy_errors)
+            self.fallback_log = []                    # a restart is a new duel (EVAL-T22-2)
+
+        def _answer(self, observation, legal):
+            """SeatControllerRival's cadence and checks, except that the controller's WAIT is
+            submitted as "WAIT" (as `pop/versus_runner.py` does) instead of "no input"."""
+            due = self._tick % self.every == 0
+            self._tick += 1
+            if not due:
+                return None
+            legal = tuple(legal)
+            try:
+                action = self.controller.decide(observation, legal)
+            except Exception:                       # a failing controller must not stop the seat
+                self.fallbacks += 1
+                return None
+            if action == WAIT:
+                return WAIT                         # the runner submits it without a legality check
+            if not isinstance(action, str) or action not in legal:
+                self.fallbacks += 1
+                return None
+            return action
 
         def __call__(self, observation, legal):
-            out = super().__call__(observation, legal)
+            out = self._answer(observation, legal)
             self._calls += 1
             now = (self.fallbacks, self.policy_errors)
             for i, reason in enumerate(("controller_failed_no_input", "policy_error")):

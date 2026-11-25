@@ -3,6 +3,8 @@
 Working directory: the project folder.
 
     uv sync --extra play
+    uv run python play.py                         # the three-mode menu (agents/modes.py)
+    uv run python play.py --classic               # the old single-prince level (S3)
     uv run python play.py S3                      # play with the keyboard (bundled original art)
     uv run python play.py S3 --art generated      # Shadow Masque's own dungeon art
     uv run python play.py S3 --placeholder        # placeholder shapes instead
@@ -508,15 +510,20 @@ def start_watch(kind: str, situation: str, seed: int, provider: str, model: str 
 # --- window ------------------------------------------------------------------
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.add_argument("situation", nargs="?", default="S3",
-                    choices=sorted(SITUATIONS) + list(levels.EXHIBITION_IDS))
+    ap.add_argument("situation", nargs="?", default=None,
+                    choices=sorted(SITUATIONS) + list(levels.EXHIBITION_IDS),
+                    help="a single-player situation (default S3); with no situation and no flag "
+                         "the three-mode menu opens")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--placeholder", action="store_true", help="draw placeholder shapes")
     ap.add_argument("--versus", action="store_true",
                     help="two rivals on one keyboard, one panel each (ARENA only; testing)")
     ap.add_argument("--mode", choices=modes.MODE_IDS,
-                    help="start the ARENA duel in a mode, skipping the menu: ai = AI Model "
-                         "(trained), baseline = Baseline (scripted), human = Human vs Human")
+                    help="start the ARENA duel in a mode, skipping the menu: "
+                         + "; ".join(f"{m.id} = {m.label}" for m in modes.MODES))
+    ap.add_argument("--classic", action="store_true",
+                    help="the single-prince level (situation S3 unless one is named), "
+                         "without the menu")
     ap.add_argument("--menu", action="store_true", help="show the start menu (the three modes)")
     ap.add_argument("--menu-keys", default="", help=argparse.SUPPRESS)   # scripted menu keys for checks
     ap.add_argument("--art", choices=("original", "generated", "placeholder"),
@@ -532,6 +539,15 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--keys", default="", help=argparse.SUPPRESS)   # scripted input for checks
     args = ap.parse_args(argv)
 
+    # Decision #92: a bare `play.py` opens the three-mode menu. Naming a situation, or any of
+    # --classic/--versus/--watch/--replay (or scripted --keys/--screenshot without menu keys),
+    # keeps the single-player behaviour.
+    if args.situation is None:
+        if not (args.mode or args.menu or args.classic or args.versus or args.watch or args.replay
+                or ((args.keys or args.screenshot) and not args.menu_keys)):
+            args.menu = True
+        else:
+            args.situation = "S3"
     if args.mode or args.menu:
         return mode_main(ap, args)
     if args.versus:

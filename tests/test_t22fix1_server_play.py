@@ -96,4 +96,4 @@ def test_main_js_does_not_start_python_while_the_chooser_is_up():
 def test_smoke_script_picks_a_mode_first():
     s = (ROOT / "tools" / "web" / "smoke.cjs").read_text()
     assert re.search(r'#modes a|a\.mode|\?play=', s)
-    assert s.index("#modes") < s.index('waitForSelector')
+    assert s.index("#modes") < s.index('waitForSelector(\'#status')

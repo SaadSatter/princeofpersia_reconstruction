@@ -83,6 +83,13 @@
     return { mode: mode, seat: seat, seed: seed, rival: rival, neutral: q.get("label") === "neutral" };
   }
 
+  // Decision #92: the page opens on the mode chooser unless the address already names a game
+  // (play=, mode=, rival=). Seed and seat alone do not choose a mode.
+  function needsChooser(search) {
+    const q = new URLSearchParams(search || "");
+    return !(q.has("play") || q.has("mode") || q.has("rival"));
+  }
+
   // Which of the three modes (ids of manifest.modes) the page is playing, or null for a
   // test placeholder rival. Used only to mark the current mode button.
   function currentPlay(opts) {
@@ -110,6 +117,7 @@
   return Object.freeze({
     keyHints: keyHints,
     currentPlay: currentPlay,
+    needsChooser: needsChooser,
     CODE_TO_KEY: CODE_TO_KEY,
     gameKeys: gameKeys,
     keyName: keyName,

@@ -144,3 +144,20 @@ def test_the_mode_help_is_built_from_the_list():
     text = " ".join(out.stdout.split())
     for m in modes.MODES:
         assert f"{m.id} = {m.label}" in text
+
+
+# --- EVAL-T22-1: the game path equals the runner path for the shipped rival ----------------------
+@pytest.mark.parametrize("seed", (0, 3))
+def test_game_path_equals_runner_path_for_the_shipped_rival_wait_included(seed):
+    """The comparison of tests/test_eval_T22_parity.py, with the game now submitting WAIT. The runner
+    does not trace the frames where it makes no decision, so inputs are compared without WAIT
+    and the final snapshot (which is what a dropped WAIT changed) is compared whole."""
+    from tests.test_eval_T22_parity import _game, _runner
+    from pop.versus_runner import snapshot
+    res = _runner(seed)
+    ep, game_b, b = _game(seed)
+    runner_b = [(r["frame"], r["input"]) for r in res["traces"]["B"] if r["input"] not in (None, "WAIT")]
+    assert runner_b and runner_b == [x for x in game_b if x[1] != "WAIT"]
+    assert any(a == "WAIT" for _, a in game_b), "the game must submit the policy's WAIT"
+    assert res["final_snapshot"] == snapshot(ep)
+    assert b.policy_errors == 0 and b.fallback_log == []

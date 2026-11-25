@@ -110,8 +110,10 @@ only in the hosted page).
 
 Labels (#88): in human vs human the opponent is just "Rival". In an AI room the human sees
 "AI Model (trained)" or "Baseline (scripted)" on the rival line and the end screen, unless
-the server was started with `--neutral`. (`Match` built without `honest=True`, as the older
-tests do, keeps the T13 label "AI rival: ...".)
+the server was started with `--neutral`. This includes the default room of `--rival baseline`
+(T22-fix1, #91): the old "AI rival: ..." label is gone from the server command. (A `Match`
+built directly without `honest=True`, as some older tests do, still has it; no running server
+does.)
 
 ## The tick loop
 

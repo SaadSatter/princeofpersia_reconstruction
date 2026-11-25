@@ -54,7 +54,7 @@ class Match:
         if rival not in (None, "baseline", "ai"):
             raise ValueError("rival must be None, 'baseline' or 'ai'")
         self.rival = rival
-        self.honest = honest                       # T22 (#88): "Baseline (scripted)", not the legacy label
+        self.honest = honest                       # T22 (#88): honest mode names (agents/modes.py), not "AI rival: ..."
         self.neutral = neutral                     # label the AI seat just "Rival"
         self._rival_budget_s = rival_budget_s
         self.seed = episode.seed if episode is not None else seed
