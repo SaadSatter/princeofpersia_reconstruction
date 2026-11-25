@@ -53,14 +53,15 @@ def test_one_late_error_in_the_exported_policy_is_still_counted(tmp_path, monkey
     assert calls["n"] > 40 and r["policy_errors"] == 1 and r["failed"] is True
 
 
-def test_final_check_error_keeps_weights_marks_summary_and_main_exits_2(tmp_path, monkeypatch):
+def test_final_check_error_withholds_weights_marks_summary_and_main_exits_2(tmp_path, monkeypatch):
     monkeypatch.setattr(env, "COMBOS", env.COMBOS[:2])
 
     def boom(self, x, mask):
         raise RuntimeError("injected")
     monkeypatch.setattr(pol.Net, "act", boom)
     s = train.train(_cfg(tmp_path, final_eval_seeds=1))
-    assert (tmp_path / "weights.json").exists()          # fact: weights are still written
+    assert (tmp_path / "weights.failed.json").exists()   # decision #50: withheld under another name
+    assert not (tmp_path / "weights.json").exists()
     assert s["stopped"] == "final_check_policy_error"
     assert s["policy_errors"] >= s["final_check_vs_baseline_tuning_pure_python"]["policy_errors"] > 0
     monkeypatch.setattr(train, "train", lambda cfg: s)
