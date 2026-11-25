@@ -4,6 +4,7 @@ Nothing crosses rooms or seats, codes never derive from the duel RNG, the code-l
 room is isolated from coded rooms, and each room's `--rival baseline` seat sees only its own
 observation. Localhost sockets and an injected clock only; no network, no keys.
 Tests marked xfail(strict=True) reproduce a finding; whoever fixes it removes the mark.
+(EVAL-T18-1 was fixed in T18-fix1 and its mark removed at Gate 2.)
 """
 
 from __future__ import annotations
@@ -337,8 +338,6 @@ def test_expired_baseline_rooms_stop_their_worker_threads():
 
 # --- one room must not be able to stop the others --------------------------------------------------
 
-@pytest.mark.xfail(strict=True, reason="EVAL-T18-1: an exception from one room's on_finish (for example "
-                   "an unwritable trace dir) escapes pump() and ends the tick loop of every room")
 def test_a_failing_trace_write_in_one_room_does_not_stop_the_other_rooms():
     def boom(trace):
         raise OSError("disk full")
