@@ -1,10 +1,11 @@
 # PPO rival: encoder, trainer, inference (task T07)
 
-Status: **built and tested; full training run NOT started** (waiting for the
-macro fix `T05-fix1`: GATE-T05-eval found that the vocabulary cannot take a
-seat down a floor, so a policy trained now would learn on a broken action
-set). No weights are committed yet; the hash table below is empty until the
-full run. Awaiting QA (Gate 1) and the Evaluation Specialist (Gate 2).
+Status: **built, tested, and the full run finished (run 1, decision #51)**; its
+weights are committed as `agents/rl/weights/ppo-run-1.json` (constants
+`SHIPPED_WEIGHTS`, `SHIPPED_SHA256` in `agents/rl/policy.py`) with the evidence in
+`tools/rl/runs/run-1/`. Not yet wired into `play.py`, the web build or the server
+(follows T19). Awaiting QA and the Evaluation Specialist re-check; no held-out (H6)
+result exists yet.
 
 Decisions followed: DECISIONS #3 (small PPO policy we train, PR #64 pattern),
 #23 (macro vocabulary), #24 (6-frame cadence, labelled `WAIT` fallback);
@@ -141,7 +142,7 @@ no checkpoint is chosen by score. `summary.json` records the commit, seed,
 steps, wall time, the weights hash, and a final check of the exported file
 through the pure-Python rival against the baseline.
 
-Command (to run later, as a background process, polled):
+Command as first written (run 1 used the command in `orchestration/reports/T17-evaluation-specialist.md`: seed 0, 4,800 s cap, out `tools/rl/logs/run-1`):
 `python -m tools.rl.train --out tools/rl/logs/run-0 --seed 0 --seconds 5100`
 
 Speed (estimate, not a measurement of the full run): Gate 2 measured 8 untrained,
@@ -182,13 +183,22 @@ forward pass to 1e-9 on 200 recorded observations.
 
 | Weights file | SHA-256 | Commit | Steps | Wall time |
 | --- | --- | --- | --- | --- |
-| (none yet: waiting for Saad's go-ahead) | | | | |
+| `agents/rl/weights/ppo-run-1.json` | `80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c` | `f08c1a87acc70dc27465d422ff2ac6d0d3a7bfbf` | 1,487,955 (1568 updates, 25,088 episodes) | 4812.6 s (stopped at the 4,800 s cap) |
 
 ## Results
 
-Full training run: **not started, waiting for Saad's go-ahead.** The smoke runs in
-`tests/test_rl_train.py` (under 60 s, 900-frame duels) only check that the
-loop runs, logs, exports and reloads; they say nothing about strength.
+Run 1 (decision #51, "Go, 4,800 s cap"), seed 0, from commit f08c1a8, on Saad's Mac,
+2026-11-24 20:40:05 to 22:00:26 EST, exit 0, `stopped: time_cap`, 4812.6 s wall,
+1568 updates, 25,088 episodes, 1,487,955 steps, `policy_errors` 0, no failed weights
+file, last weights exported (`checkpoint_chosen_by_score: false`). Evidence:
+`tools/rl/runs/run-1/` (`config.json`, `summary.json`, `log.jsonl`, `run-1.meta`,
+`run-1.stdout`).
+
+Final check through the pure-Python rival against the scripted baseline (**tuning
+starts, 128 duels, seat-swapped; not held-out**): 120 wins, 8 draws, 0 losses
+(win rate 0.9375), 0 policy errors. This is a smoke check on the starts the policy
+trained on. It is not a strength claim; the held-out H6 result is T09's and does not
+exist yet. The rival does not set traps (#43).
 
 ## Open items for Saad
 
