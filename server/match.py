@@ -49,10 +49,12 @@ class Match:
                  episode: VersusEpisode | None = None,
                  token_factory: Callable[[], str] = lambda: secrets.token_urlsafe(24),
                  on_finish: Callable[[dict], None] | None = None,
-                 neutral: bool = False, rival_budget_s: float = DEFAULT_BUDGET_S):
-        if rival not in (None, "baseline"):
-            raise ValueError("rival must be None or 'baseline'")
+                 neutral: bool = False, rival_budget_s: float = DEFAULT_BUDGET_S,
+                 honest: bool = False):
+        if rival not in (None, "baseline", "ai"):
+            raise ValueError("rival must be None, 'baseline' or 'ai'")
         self.rival = rival
+        self.honest = honest                       # T22 (#88): "Baseline (scripted)", not the legacy label
         self.neutral = neutral                     # label the AI seat just "Rival"
         self._rival_budget_s = rival_budget_s
         self.seed = episode.seed if episode is not None else seed
@@ -64,8 +66,9 @@ class Match:
 
     # --- construction ---------------------------------------------------------
     def _new_game(self) -> WebGame:
-        if self.rival == "baseline":
-            g = make_game("human_vs_ai", "A", self.seed, "baseline", neutral=self.neutral)
+        if self.rival in ("baseline", "ai"):
+            g = make_game("human_vs_ai", "A", self.seed, self.rival, neutral=self.neutral,
+                          honest=self.honest)
             # The bridge calls its rival synchronously with no limit: bound it so a
             # slow controller never stalls the 12 Hz loop for the human seat.
             g.rival = TimeLimitedRival(g.rival, self._rival_budget_s)
@@ -95,7 +98,7 @@ class Match:
         self._outbox: dict[str, list[dict]] = {s: [] for s in SEATS}
         self._finished = False
         self._fallbacks: list[dict] = []           # the AI seat's fallbacks (server only)
-        self._seen_fallbacks = (0, 0)
+        self._seen_fallbacks = (0, 0, 0)
         self._duel_fallbacks_from = 0
 
     @property
@@ -246,9 +249,11 @@ class Match:
         if ended:
             self._finish()
 
-    def _fallback_counts(self) -> tuple[int, int]:
+    def _fallback_counts(self) -> tuple[int, int, int]:
         rival = self.game.rival if self.rival else None
-        return (getattr(rival, "slow", 0), getattr(getattr(rival, "inner", None), "fallbacks", 0))
+        inner = getattr(rival, "inner", None)
+        return (getattr(rival, "slow", 0), getattr(inner, "fallbacks", 0),
+                getattr(inner, "policy_errors", 0))
 
     def _note_fallbacks(self) -> None:
         """Log each fallback of the server's AI seat as it happens, labelled as such.
@@ -259,7 +264,8 @@ class Match:
         now = self._fallback_counts()
         # a rival reset (rematch) may restart its own counters: count from the new zero
         self._seen_fallbacks = tuple(min(a, b) for a, b in zip(self._seen_fallbacks, now))
-        for i, reason in enumerate(("slow_answer_replaced_by_wait", "controller_failed_no_input")):
+        for i, reason in enumerate(("slow_answer_replaced_by_wait", "controller_failed_no_input",
+                                    "policy_error")):
             for _ in range(now[i] - self._seen_fallbacks[i]):
                 self._fallbacks.append({"frame": self.episode.outcome()["frames"], "seat": "B",
                                         "source": "fallback", "reason": reason})

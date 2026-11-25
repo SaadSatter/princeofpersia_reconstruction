@@ -12,11 +12,13 @@ On the host machine (Saad's Mac):
 ```sh
 uv run --extra online python -m server            # two humans
 uv run --extra online python -m server --rival baseline   # you alone vs the scripted baseline on seat B
+uv run --extra online python -m server --rival ai         # you alone vs the trained AI Model on seat B
 ```
 
 Options: `--host` (default `0.0.0.0`), `--port` (default 8765), `--seed`
 (default 0; the seed is never sent to a client), `--rival baseline`,
-`--neutral` (label the AI seat just "Rival"), `--trace-dir` (default
+`--rival ai` (the shipped PPO rival; the server checks its weights by hash at start and
+refuses to start on a wrong file), `--neutral` (label the AI seat just "Rival"), `--trace-dir` (default
 `traces/online/`).
 
 It prints the URL to give the players, for example
@@ -41,7 +43,15 @@ Many duels can run on one server at once, one per room.
    has two players says "That room is full". You can retry. After 10 failed
    joins in a minute on one connection the server refuses and closes it ("Too
    many tries"). *Proposal for Saad:* the number 10 a minute.
-5. With `--rival baseline`, **Create room** gives you seat A at once and the
+5. **Game mode (T22, #87):** before pressing Create room the creator picks **AI Model
+   (trained)**, **Baseline (scripted)** or **Human vs Human** (default Human vs Human; the
+   list is the one in `manifest.json`). An AI room gives the creator seat A and puts the
+   rival on seat B; the duel starts when the creator is in. A Human vs Human room waits for
+   a second player. The chosen mode is one extra field of the create message
+   (`{"type":"join","create":true,"mode":"ai"}`); an unknown one is refused (`bad_mode`).
+   Without it a room follows the server's `--rival`. Rematch: one press in an AI room, both
+   players in a human room (#41, #46).
+6. With `--rival baseline`, **Create room** gives you seat A at once and the
    scripted baseline is seat B. Nobody needs to join (a Join is told the room is
    full).
 
@@ -98,10 +108,10 @@ its own key hints, the build hash and the outcome. It sends only the keys held
 It contains no game rules and publishes no test hook (`window.__smLast` is
 only in the hosted page).
 
-Labels: in human vs human the opponent is just "Rival". With `--rival baseline`
-the web build's label is kept ("AI rival: ...") unless `--neutral`.
-*Flag for Saad:* whether the default for `--rival baseline` should be neutral
-is his call.
+Labels (#88): in human vs human the opponent is just "Rival". In an AI room the human sees
+"AI Model (trained)" or "Baseline (scripted)" on the rival line and the end screen, unless
+the server was started with `--neutral`. (`Match` built without `honest=True`, as the older
+tests do, keeps the T13 label "AI rival: ...".)
 
 ## The tick loop
 
@@ -117,8 +127,8 @@ WAIT, so a slow controller never stalls the human's loop.
 The server serves only `online.html`, its four scripts, `art/*` and
 `manifest.json`. It never serves `game.zip`, `index.html`, `main.js` or any
 engine or agent code (the arena layout and guard scripts are in `game.zip`).
-The rival is chosen by `--rival` on the command line only; the page passes no
-option through and cannot learn the AI seat's kind. The AI seat's fallbacks
+The rival is chosen by the room's creator (the mode field) or by `--rival`; the page
+never receives the controller, only its honest label. The AI seat's fallbacks
 (a slow answer replaced by WAIT, or a failed controller) are counted in the
 server-side trace as `{"source": "fallback", "seat": "B", ...}` and
 summarised in the server log; they are never sent to the human's client.

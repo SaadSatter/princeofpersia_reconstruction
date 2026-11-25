@@ -78,10 +78,10 @@
     pyodide.runPython("import sys\nsys.path.insert(0, '/home/pyodide/game')");
     const make = pyodide.runPython(
       "from web.bridge import make_game\n" +
-      "def make(mode, seat, seed, rival, neutral):\n" +
-      "    return make_game(mode, seat, seed, rival, neutral)\n" +
+      "def make(mode, seat, seed, rival, neutral, honest):\n" +
+      "    return make_game(mode, seat, seed, rival, neutral, honest)\n" +
       "make");
-    game = make(opts.mode, opts.seat, opts.seed, opts.rival, opts.neutral);
+    game = make(opts.mode, opts.seat, opts.seed, opts.rival, opts.neutral, true);   // honest names (#88)
     make.destroy();
   }
 
@@ -188,7 +188,8 @@
     if (p.outcome.status === "terminal") {
       const r = local ? p.outcome.reason : p.outcome.result;
       const words = { won: "You win", lost: "You lose", draw: "Draw" };
-      outcomeEl.textContent = (words[r] || r) + " (" + p.outcome.reason + "). Press R for a rematch.";
+      const vs = local || !p.rival ? "" : " vs " + p.rival;   // the honest mode name (#88)
+      outcomeEl.textContent = (words[r] || r) + vs + " (" + p.outcome.reason + "). Press R for a rematch.";
     } else {
       outcomeEl.textContent = "";
     }
@@ -198,9 +199,31 @@
     return panels;
   }
 
+  // The mode buttons: the shared list from manifest.json, the same three modes and names as
+  // the menu and the online lobby. The current one is marked. Built as one string (the labels
+  // are the build's own fixed text, escaped anyway).
+  function esc(t) {
+    return String(t).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function showModes(list) {
+    const box = document.getElementById("modes");
+    if (!box || !Array.isArray(list)) {
+      return;
+    }
+    const now = SMKeys.currentPlay(opts);
+    box.innerHTML = list.map(function (m) {
+      return '<a class="mode' + (m.id === now ? " current" : "") + '" href="?play=' +
+        esc(m.id) + '">' + esc(m.label) + "</a>";
+    }).join("");
+  }
+
   async function main() {
     const manifest = await (await fetch("manifest.json")).json();
     buildEl.textContent = manifest.build;
+    showModes(manifest.modes);
     keysEl.textContent = SMKeys.keyHints(opts.mode, opts.seat);
     setStatus("loading Python", "loading");
     await startPython();

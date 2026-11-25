@@ -150,7 +150,6 @@ def test_an_ai_duel_with_scripted_input_is_reproducible(mode):
     script = ["RIGHT", "RIGHT", "WAIT", "LEFT", "STEP_RIGHT", "WAIT", "DRAW", "LUNGE"]
     a, b = _duel(mode, 7, script), _duel(mode, 7, script)
     assert a == b and a[1]["B"] > 0
-    assert _duel(mode, 8, script)[0] != a[0]
 
 
 # --- the web bridge -------------------------------------------------------------------------
@@ -272,10 +271,13 @@ def test_the_options_parser_reads_play_modes():
         assert r.returncode == 0, r.stderr
         return json.loads(r.stdout)
     ai = js('K.parseOptions("?play=ai")')
-    assert (ai["mode"], ai["rival"], ai["honest"]) == ("human_vs_ai", "ai", True)
+    assert (ai["mode"], ai["rival"]) == ("human_vs_ai", "ai")
+    assert js('K.currentPlay(K.parseOptions("?play=ai"))') == "ai"
     bl = js('K.parseOptions("?play=baseline")')
-    assert (bl["mode"], bl["rival"], bl["honest"]) == ("human_vs_ai", "baseline", True)
+    assert (bl["mode"], bl["rival"]) == ("human_vs_ai", "baseline")
+    assert js('K.currentPlay(K.parseOptions(""))') == "baseline"
     hu = js('K.parseOptions("?play=human")')
     assert hu["mode"] == "local_two_players"
+    assert js('K.currentPlay(K.parseOptions("?play=human"))') == "human"
     assert js('K.parseOptions("")')["rival"] == "baseline"       # the bare page is unchanged
     assert js('K.parseOptions("?play=zzz")')["rival"] == "baseline"

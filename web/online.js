@@ -40,6 +40,7 @@
   let latest = null;
   let stopped = false;
   let everJoined = false;
+  let chosenMode = null; // one of manifest.modes: picked by the room's creator
   let firstMsg = null; // what to send when a socket opens: create, or join with a typed code
 
   const rematchButton = SMUi.createRematch(document, document.body, function () {
@@ -137,7 +138,8 @@
     rivalEl.textContent = p.rival || "Rival";
     if (p.outcome.status === "terminal") {
       const why = END_REASONS[p.outcome.reason] || p.outcome.reason;
-      outcomeEl.textContent = (END_WORDS[p.outcome.result] || p.outcome.result) + " (" + why + ")";
+      const vs = p.rival ? " vs " + p.rival : "";     // the honest mode name (#88)
+      outcomeEl.textContent = (END_WORDS[p.outcome.result] || p.outcome.result) + vs + " (" + why + ")";
     } else {
       outcomeEl.textContent = "";
     }
@@ -235,12 +237,35 @@
     }
   }
 
+  // The creator's choice: the shared mode list from manifest.json (the shared mode list). The AI
+  // modes start as soon as the creator is in; the human mode waits for a second player.
+  function showModePicker(list) {
+    const box = document.getElementById("mode-pick");
+    chosenMode = list[list.length - 1].id;   // the human mode, as before
+    function mark() {
+      Array.prototype.forEach.call(box.children, function (b) {
+        b.setAttribute("aria-pressed", String(b.dataset.mode === chosenMode));
+      });
+    }
+    list.forEach(function (m) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "sm-rematch-btn";
+      b.dataset.mode = m.id;
+      b.textContent = m.label;
+      b.addEventListener("click", function () { chosenMode = m.id; mark(); });
+      box.appendChild(b);
+    });
+    mark();
+  }
+
   async function main() {
     const manifest = await (await fetch("manifest.json")).json();
     buildEl.textContent = manifest.build;
     keysEl.textContent = SMKeys.keyHints("human_vs_ai", "A");
+    showModePicker(manifest.modes);
     createBtn.addEventListener("click", function () {
-      begin({ type: "join", create: true });
+      begin({ type: "join", create: true, mode: chosenMode });
     });
     joinBtn.addEventListener("click", function () {
       const code = codeInput.value.trim();

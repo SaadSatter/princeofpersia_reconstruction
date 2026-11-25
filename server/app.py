@@ -30,6 +30,8 @@ from websockets.asyncio.server import serve
 from websockets.datastructures import Headers
 from websockets.http11 import Response
 
+from agents.modes import MODE_IDS
+
 from .match import TICK_S, Match
 from .rooms import (MAX_FAILED_JOINS, MAX_ROOMS, FailedJoins, Room, RoomFactory,
                     make_code, normalize_code)
@@ -46,7 +48,7 @@ LOBBY_IDLE_S = 60.0          # a client choosing Create or Join may think this l
 ERROR_TEXT = {"full": "That room is full", "bad_token": "That seat token is not valid.",
               "no_room": "No room with that code", "expired": "That room has expired",
               "rate_limited": "Too many tries. Wait a minute.", "busy": "The server is full. Try later.",
-              "no_rooms": "This server has no rooms."}
+              "no_rooms": "This server has no rooms.", "bad_mode": "That game mode is not offered."}
 INDEX = "online.html"
 ONLINE_FILES = frozenset({"online.html", "online.js", "keys.js", "draw.js", "ui.js"})
 
@@ -268,7 +270,7 @@ class OnlineServer:
                 if fails.blocked(now):
                     await self._refuse(ws, "rate_limited")
                     return None
-                room, res = (self._create(now) if kind == "create"
+                room, res = (self._create(now, msg.get("mode")) if kind == "create"
                              else self._join_code(msg, now))
                 if not res["ok"]:
                     if kind == "join":
@@ -278,16 +280,20 @@ class OnlineServer:
                     continue
             return await self._seat_up(room, ws, res)
 
-    def _create(self, now: float) -> tuple[Room | None, dict]:
+    def _create(self, now: float, mode: object = None) -> tuple[Room | None, dict]:
+        """`mode` (T22): ai, baseline or human, chosen by the creator; absent keeps the
+        server's own default. The factory is asked for it only when one was sent."""
         if self.match_factory is None:
             return None, {"ok": False, "code": "no_rooms"}
+        if mode is not None and mode not in MODE_IDS:
+            return None, {"ok": False, "code": "bad_mode"}
         self._reap(now)
         if len(self.rooms) >= self.max_rooms:
             return None, {"ok": False, "code": "busy"}
         code = self.code_factory()
         while code in self.rooms:                    # a code is reused only after its room expired
             code = self.code_factory()
-        match = self.match_factory(code)
+        match = self.match_factory(code) if mode is None else self.match_factory(code, mode)
         room = self.rooms[code] = Room(code, match, created=now, second_joined=match.rival is not None)
         return room, match.join(None, now)           # the creator takes seat A
 

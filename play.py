@@ -34,6 +34,7 @@ import threading
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from agents import modes
 from pop import levels
 from pop.interface import PLAYER_ID, SITUATION_DEFAULT, Episode
 from pop.situations import SITUATIONS
@@ -132,8 +133,23 @@ def versus_input(held: set[str], shift: bool, armed: bool = False,
     return None
 
 
-def versus_main(args) -> int:
-    """Two seats on real-time ticks (pop/versus.py), one panel per seat."""
+def menu_entries() -> list[tuple[str, str]]:
+    """(mode id, label) for the start menu: the shared list of agents/modes.py."""
+    return [(m.id, m.label) for m in modes.MODES]
+
+
+def ai_key_names() -> dict:
+    """pygame key code -> ("A", logical key) for both key sets: against an AI the human's own
+    seat accepts WASD and the arrows alike (decision #89, reading #55)."""
+    import pygame
+    return {pygame.key.key_code(v): ("A", k) for m in VERSUS_KEYS.values()
+            for k, v in m.items() if k != "shift"}
+
+
+def versus_main(args, rival=None) -> int:
+    """Two seats on real-time ticks (pop/versus.py), one panel per seat. With `rival` (T22:
+    an AI mode, agents/modes.py) seat A is the human on either key set, seat B is the rival
+    (it sees only its own observation) and there is one panel: the human's."""
     import os
     if args.screenshot:
         os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
@@ -142,13 +158,18 @@ def versus_main(args) -> int:
     from render import draw, versus_view
 
     ep = arena_episode(args.seed)
+    if rival is not None:
+        rival.reset(args.seed)
+    shown_seats = ("A",) if rival is not None else SEATS
     pygame.init()
     scale = max(1, args.scale)
     gap = 4 * scale
     panel_w, panel_h = draw.SCREEN_W * scale, draw.SCREEN_H * scale
     info_h = 22 * scale // 3
-    window = pygame.display.set_mode((2 * panel_w + gap, panel_h + info_h))
-    pygame.display.set_caption("Shadow Masque: local versus test")
+    n_panels = len(shown_seats)
+    window = pygame.display.set_mode((n_panels * panel_w + (n_panels - 1) * gap, panel_h + info_h))
+    pygame.display.set_caption("Shadow Masque: " + (
+        f"you vs {rival.mode_label}" if rival is not None else "local versus test"))
     # Shadow Masque's own art by default: the versus game never uses the original images.
     art = "placeholder" if args.placeholder else (args.art or "generated")
     renderer = draw.Renderer(original=art == "original", art=art)
@@ -160,8 +181,9 @@ def versus_main(args) -> int:
     scripted = [k for k in args.keys.split(",") if k]       # "A:RIGHT" tokens, one per frame
     frames_left = None if not args.screenshot else max(60, 2 * len(scripted) + 40)
     tick = 0
-    names = {pygame.key.key_code(v): (seat, k) for seat, m in VERSUS_KEYS.items()
-             for k, v in m.items() if k != "shift"}
+    names = ai_key_names() if rival is not None else {
+        pygame.key.key_code(v): (seat, k) for seat, m in VERSUS_KEYS.items()
+        for k, v in m.items() if k != "shift"}
 
     counts = ({k: v["n"] for k, v in renderer.dungeon.meta["rival"].items()}
               if renderer.dungeon else {})
@@ -225,11 +247,14 @@ def versus_main(args) -> int:
                 running = False
             elif e.type == pygame.KEYDOWN and e.key == pygame.K_r:
                 ep.reset(args.seed)
+                if rival is not None:
+                    rival.reset(args.seed)             # one press restarts against an AI (#41)
         pressed = pygame.key.get_pressed()
         mods = pygame.key.get_mods()
-        for seat in SEATS:
+        for seat in shown_seats:
             held = {k for code, (s_, k) in names.items() if s_ == seat and pressed[code]}
-            shift = bool(mods & (pygame.KMOD_LSHIFT if seat == "A" else pygame.KMOD_RSHIFT))
+            shift = bool(mods & (pygame.KMOD_SHIFT if rival is not None else
+                                 pygame.KMOD_LSHIFT if seat == "A" else pygame.KMOD_RSHIFT))
             legal = ep.legal_actions(seat)
             mine = ep.observe(seat)["me"]
             act = versus_input(held, shift, armed=mine["armed"], running=running_dir(mine))
@@ -240,10 +265,12 @@ def versus_main(args) -> int:
         if scripted:
             seat, _, act = scripted.pop(0).partition(":")
             ep.step(seat, act)
+        if rival is not None:
+            modes.step_ai_seat(ep, rival)              # its own observation and legal list only
         ep.tick()
 
         window.fill((0, 0, 0))
-        for i, seat in enumerate(SEATS):
+        for i, seat in enumerate(shown_seats):
             obs = ep.observe(seat)
             panel = pygame.Surface((draw.SCREEN_W, draw.SCREEN_H))
             renderer.draw_room(panel, obs, tick)
@@ -264,10 +291,14 @@ def versus_main(args) -> int:
             window.blit(pygame.transform.scale(panel, (panel_w, panel_h)), (x, 0))
             label = (f"rival {seat} ({colours[seat]})  hearts {obs['me']['hp']}"
                      + ("  DISGUISED" if obs["me"]["disguised"] else ""))
+            if rival is not None:
+                label = f"you (A) vs {rival.mode_label}   hearts {obs['me']['hp']}" + (
+                    "  DISGUISED" if obs["me"]["disguised"] else "")
             window.blit(font.render(label, True, (200, 200, 200)), (x + 6, panel_h + 2))
         out = ep.outcome()
         if out["status"] == "terminal":
-            msg = font.render(f"{out['reason']}   R to restart, Esc to quit", True, (240, 220, 120))
+            vs = f" vs {rival.mode_label}" if rival is not None else ""
+            msg = font.render(f"{out['reason']}{vs}   R to restart, Esc to quit", True, (240, 220, 120))
             window.blit(msg, (panel_w - msg.get_width() // 2, panel_h + 2))
         pygame.display.flip()
         tick += 1
@@ -279,7 +310,46 @@ def versus_main(args) -> int:
             continue
         clock.tick(FPS * args.speed)
     pygame.quit()
+    if rival is not None and rival.fallback_log:
+        print(f"AI seat B: {len(rival.fallback_log)} fallback(s) to no input (source: fallback)")
     return 0
+
+
+def mode_main(ap, args) -> int:
+    """`--mode ai|baseline|human` and `--menu` (T22, decisions #87 to #89). The mode list is
+    agents/modes.py; the menu is render/menu.py. AI modes play the ARENA against that
+    controller; human is the local two-player game (`--versus`)."""
+    if args.watch or args.replay:
+        ap.error("--mode and --menu play the ARENA: not with --watch or --replay")
+    try:
+        import pygame
+    except ImportError:
+        print("pygame is not installed. Run: uv sync --extra play", file=sys.stderr)
+        return 2
+    import os
+    if args.screenshot or args.menu_keys:
+        os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
+    args.situation = "ARENA"
+    if args.menu:
+        from render import draw, menu
+        pygame.init()
+        scale = max(1, args.scale)
+        window = pygame.display.set_mode((draw.SCREEN_W * scale, draw.SCREEN_H * scale))
+        pygame.display.set_caption("Shadow Masque")
+        scripted = [k for k in args.menu_keys.split(",") if k] if args.menu_keys else None
+        args.mode = menu.run_menu(window, scale, menu_entries(), scripted)
+        pygame.quit()
+        if args.mode is None:
+            return 0
+    rival = None
+    if modes.get(args.mode).ai:
+        from agents.rl.policy import WeightsError
+        try:
+            rival = modes.make_seat_rival(args.mode)     # by hash; a wrong file is an error
+        except WeightsError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 2
+    return versus_main(args, rival)
 
 
 # --- driving the episode (pure) ----------------------------------------------
@@ -444,6 +514,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--placeholder", action="store_true", help="draw placeholder shapes")
     ap.add_argument("--versus", action="store_true",
                     help="two rivals on one keyboard, one panel each (ARENA only; testing)")
+    ap.add_argument("--mode", choices=modes.MODE_IDS,
+                    help="start the ARENA duel in a mode, skipping the menu: ai = AI Model "
+                         "(trained), baseline = Baseline (scripted), human = Human vs Human")
+    ap.add_argument("--menu", action="store_true", help="show the start menu (the three modes)")
+    ap.add_argument("--menu-keys", default="", help=argparse.SUPPRESS)   # scripted menu keys for checks
     ap.add_argument("--art", choices=("original", "generated", "placeholder"),
                     help="art to draw (default: original if bundled, else generated)")
     ap.add_argument("--scale", type=int, default=3)
@@ -457,6 +532,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--keys", default="", help=argparse.SUPPRESS)   # scripted input for checks
     args = ap.parse_args(argv)
 
+    if args.mode or args.menu:
+        return mode_main(ap, args)
     if args.versus:
         if args.situation != "ARENA" or args.watch or args.replay:
             ap.error("--versus plays the ARENA only, without --watch or --replay")

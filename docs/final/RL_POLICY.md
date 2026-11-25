@@ -185,6 +185,20 @@ forward pass to 1e-9 on 200 recorded observations.
 | --- | --- | --- | --- | --- |
 | `agents/rl/weights/ppo-run-1.json` | `80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c` | `f08c1a87acc70dc27465d422ff2ac6d0d3a7bfbf` | 1,487,955 (1568 updates, 25,088 episodes) | 4812.6 s (stopped at the 4,800 s cap) |
 
+## In the game
+
+The shipped weights are the in-game AI (decisions #3, #87, #88; task T22). One mode list,
+`agents/modes.py`, offers **AI Model (trained)**, **Baseline (scripted)** and **Human vs
+Human** in `play.py`, the hosted page and the online server (`docs/final/GAME_MODES.md`).
+"AI Model" builds `make_rl_rival(SHIPPED_WEIGHTS, SHIPPED_SHA256)` and refuses a wrong or
+missing file with a `WeightsError` (never a quiet switch to the baseline); the hosted build
+ships the stdlib policy and the same weights file, so the page runs the same hash check. The
+AI seat gets its own seat's observation and legal tuple through the same seat hook as the
+baseline, on the 6-frame cadence. A failed answer or an inference error (counted by
+`policy_errors`) is "no input" for that decision, recorded as `"source": "fallback"`; online it
+stays in the server trace and log and has a 0.04 s answer budget (#45, #49). The in-game
+rival does not rig traps (#43).
+
 ## Results
 
 Run 1 (decision #51, "Go, 4,800 s cap"), seed 0, from commit f08c1a8, on Saad's Mac,

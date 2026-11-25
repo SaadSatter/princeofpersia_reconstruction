@@ -23,6 +23,7 @@
     box-shadow: 4px 0 0 #0d0e12, -4px 0 0 #0d0e12, 0 4px 0 #0d0e12, 0 -4px 0 #0d0e12,
       inset 4px 4px 0 #0d0e12, inset -4px -4px 0 #3a4256; }
   #code-input:focus { outline: 4px solid #f0c040; outline-offset: 4px; }
+  #mode-pick .sm-rematch-btn[aria-pressed="true"] { color: #fff; outline: 4px solid #f0c040; outline-offset: 4px; }
   #lobby-msg { color: #e08040; min-height: 1.4em; text-align: center; }
   #room { display: none; margin: 4px 0; }
   #room-code { font: bold 28px monospace; letter-spacing: 8px; color: #f0c040; }
@@ -37,6 +38,7 @@
 <h1>Shadow Masque</h1>
 <div id="status" data-state="loading">loading</div>
 <div id="lobby">
+  <div id="mode-pick" role="group" aria-label="Game mode"></div>
   <button type="button" id="create-room" class="sm-rematch-btn">Create room</button>
   <div class="or">or</div>
   <input id="code-input" maxlength="4" autocomplete="off" autocapitalize="characters"
