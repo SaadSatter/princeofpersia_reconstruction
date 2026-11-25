@@ -1,155 +1,199 @@
-# Shadow Masque — production orchestration
+# Shadow Masque: production orchestration
 
-How the central orchestrator delegates work to subagents, and how every
-finished feature gets an independent review before it is closed. Everything
-here is plain Markdown so any session (Claude Code, Codex, or a person) can
-reproduce a run from the files alone.
+How the Production Orchestrator (the main Claude Code session, Opus 5.5)
+delegates work to named Sonnet worker subagents, how work passes between them
+as files in git, and how every finished feature gets independent review
+before it is closed.
 
-Created 2026-11-23 at Saad's request ("for each sub agent make a separate md
-file for it to know its instructions and make it reproducible and perform
-independent reviews in between finished features"). These files are
-**orchestration instructions**, not course `team` role files. They do not
-count as formal production agents and are not rendered by `python -m team`.
-The formal Tech Lead and QA roles belong in the official repository's
-`agent-team/roles/`, created with `python -m team init` and rendered by
-`python -m team render` (see the plan's decision list).
+History. Created 2026-11-23 at Saad's request ("for each sub agent make a
+separate md file for it to know its instructions and make it reproducible
+and perform independent reviews in between finished features"). On
+2026-11-24 it became a native Claude Code agent hierarchy, with a file-based
+handoff chain, at Saad's request. Until then the orchestrator had run in a
+claude.ai sandbox and started generic subagents with these files as
+instructions. The task briefs from that period name sandbox paths
+(`/home/claude/sm/...`); they are historical records.
+
+These are **orchestration** files, not course `team` role files. See
+`COURSE_ROLE_MAP.md` for how they relate to the formal course roles.
+
+## The agents
+
+| Agent (`subagent_type`) | Runs as | Model (pinned) | Native definition | Procedure |
+| --- | --- | --- | --- | --- |
+| Production Orchestrator | main session | `claude-opus-5-5` | `.claude/agents/orchestrator.md` | `agents/orchestrator.md` |
+| `tech-lead` | worker, own worktree | `claude-sonnet-5-5` | `.claude/agents/tech-lead.md` | `agents/tech-lead.md` |
+| `qa` | worker, own worktree | `claude-sonnet-5-5` | `.claude/agents/qa.md` | `agents/qa.md` |
+| `evaluation-specialist` | worker, own worktree | `claude-sonnet-5-5` | `.claude/agents/evaluation-specialist.md` | `agents/evaluation-specialist.md` |
+| `requirements-auditor` | worker, own worktree, read-only | `claude-sonnet-5-5` | `.claude/agents/requirements-auditor.md` | `agents/requirements-auditor.md` |
+| `telemetry-analyst` | worker, own worktree, writes its report only | `claude-sonnet-5-5` | `.claude/agents/telemetry-analyst.md` | `agents/telemetry-analyst.md` |
+| `rules-reviewer` | worker, read-only, no shell | `claude-sonnet-5-5` | `.claude/agents/rules-reviewer.md` | itself |
+
+- Each native definition holds only identity, model, tools, inputs, outputs
+  and stop conditions. The detailed procedure lives once, in `agents/*.md`,
+  and the worker reads it at the coordination commit. This keeps the two
+  from drifting apart.
+- The orchestrator's tool list allows only the agents above, plus `Explore`,
+  `claude-code-guide` and `web-fetch` for lookups. A `general-purpose`,
+  `claude` or `fork` spawn is refused.
+- Workers have no Agent tool, so they cannot spawn agents or become
+  orchestrators. `CLAUDE.md` tells a worker to follow only its own role file.
+- There is no orchestration server, scheduler or database. The state is the
+  files in this folder and the branches in git.
+
+## Start and resume
+
+Local terminal, from the repository root:
+
+```sh
+claude                          # uses "agent": "orchestrator" from .claude/settings.json
+claude --agent orchestrator     # the same, explicit (overrides any other agent setting)
+claude --agent orchestrator --continue        # resume the most recent session in this folder
+claude --agent orchestrator --resume <id>     # resume a specific session
+```
+
+The project setting is checked in (`.claude/settings.json`):
+
+```json
+{ "agent": "orchestrator", "model": "claude-opus-5-5" }
+```
+
+A resumed or new session recovers task state from `STATUS.md`,
+`REVIEW_LOG.md`, the decision records and the branches, not from the old
+conversation (`agents/orchestrator.md`, section 1). A context compaction, a
+usage limit or a killed session therefore loses only uncommitted work in a
+worker's worktree. `git worktree list` shows any such worktree, and the
+orchestrator preserves it.
+
+**Claude Code on the web (cloud sessions).** A cloud session clones the
+repository, so `.claude/settings.json` and `.claude/agents/` come with it if
+they are on the branch the session starts from (push them first). Check the
+model the session reports in its first reply. If the cloud environment does
+not apply the `agent` setting, start the session's first message with:
+"Act as the Production Orchestrator: follow
+docs/final/orchestration/agents/orchestrator.md", and select Opus 5.5 in the
+model picker. The named workers still come from `.claude/agents/`, with their
+pinned Sonnet model. (Not yet verified in a cloud session; see `STATUS.md`.)
+
+## Checking which models actually ran
+
+Configured models are in the files above. Runtime models are in the session
+transcripts Claude Code writes under `~/.claude/projects/<project>/`:
+
+```sh
+python3 tools/orchestration/verify_models.py --latest
+python3 tools/orchestration/verify_models.py --session <session-id>
+claude -p --output-format stream-json --verbose "..."   # init line: "model"; result line: "modelUsage"
+```
+
+`verify_models.py` prints the main session's model ids and, for each
+subagent, its `agentType` (from `subagents/agent-<id>.meta.json`) and the
+model ids on its API responses. Inside an interactive session, `/status`
+shows the main model and `/agents` lists the registered agents.
+
+These override the configuration, so check them when a model looks wrong:
+`/model`, `--model`, `ANTHROPIC_MODEL`, `CLAUDE_CODE_SUBAGENT_MODEL` (with
+`CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` it overrides pinned worker models),
+`ANTHROPIC_DEFAULT_OPUS_MODEL` / `ANTHROPIC_DEFAULT_SONNET_MODEL`, managed
+settings (`availableModels`), and `.claude/settings.local.json`. On
+2026-11-24 none of them was set on Saad's Mac. The user setting
+`"model": "opus"` is overridden by the project's `claude-opus-5-5`.
 
 ## Files
 
 | Path | What it is |
 | --- | --- |
-| `agents/tech-lead.md` | Implementation subagent. Builds approved tasks, writes failing tests first, hands off to QA |
-| `agents/qa.md` | Independent QA subagent. Runs tests, writes tests, reproduces failures; never edits game code |
-| `agents/evaluation-specialist.md` | Reviews AI-rival changes and the evaluation harness; owns evaluation scenarios and analysis |
-| `agents/requirements-auditor.md` | Temporary read-only worker that checks the project against `FINAL_REQUIREMENTS.md` |
-| `tasks/<TASK-ID>.md` | One brief per delegated task: objective, write paths, acceptance criteria, required tests |
-| `reports/<TASK-ID>-<agent>.md` | The subagent's report as saved by the orchestrator (any condensing is stated at the top) |
-| `PLAN-YYYY-MM-DD.md` | Reconciled plan presented to Saad for approval (status stated at the top) |
+| `agents/<role>.md` | The procedure for each role (orchestrator and the four workers) |
+| `HANDOFF_PROTOCOL.md` | How work passes between agents as committed files; report fields; the chain |
+| `COURSE_ROLE_MAP.md` | Native agents mapped to the course's formal production roles (G2/G3, G4) |
+| `tasks/<TASK-ID>.md` | One brief per delegated task, committed to `main` before dispatch |
+| `tasks/_EXEC_COMMON.md` | Shared setup for execution tasks (local worktrees, branches, trailer, test command) |
+| `reports/<TASK-ID>-<role>.md` | A worker's report = its handoff, written and committed by the worker on its branch |
+| `reports/_TEMPLATE.md` | The report template |
+| `STATUS.md` | Current state: branches, tasks by state, next eligible task, waiting on Saad |
+| `REVIEW_LOG.md` | One row per gate or chain event: task, gate, reviewer, model, commit, verdict, evidence |
+| `PLAN-YYYY-MM-DD*.md` | Plans presented to Saad (status stated at the top) |
 | `DECISIONS-YYYY-MM-DD.md` | Saad's answers, verbatim, with the orchestrator's reading of each |
-| `tasks/_EXEC_COMMON.md` | Shared setup for execution tasks (sandbox clone, branch, commit trailer, test command) |
-| `handoff-drafts/` | Drafts of formal course handoffs, until `agent-team/` exists; Saad writes every Student decision |
-| `REVIEW_LOG.md` | One line per review gate: task, reviewer, verdict, evidence, follow-up |
-
-A subagent is always started with the same two-line prompt, so a run can be
-repeated:
-
-```
-Read docs/final/orchestration/agents/<role>.md and follow it.
-Your task brief is docs/final/orchestration/tasks/<TASK-ID>.md.
-```
-
-The orchestrator adds only facts that are not in the files (for example the
-path of a fresh worktree). Anything else it wants a subagent to know goes
-into the task brief first.
-
-## Sources every subagent reads
-
-1. `AGENTS.md`, `CLAUDE.md` (project invariants; they always win).
-2. `FINAL_REQUIREMENTS.md` (claude.ai Project doc; a copy is given with each
-   task).
-3. `docs/final/README.md`, `docs/final/REQUIREMENTS_CHECKLIST.md`,
-   `docs/final/EVIDENCE_INDEX.md`, `docs/final/VERSUS_SPEC.md`.
-4. Its own role file and task brief.
+| `handoff-drafts/` | Drafts of formal course handoffs until `agent-team/` exists. Saad writes every Student decision |
+| `inputs/FINAL_REQUIREMENTS.md` | Saad's working compliance checklist (2026-11-23), copied unchanged from his claude.ai Project doc |
 
 ## The feature cycle and its review gates
 
-No feature is closed on the implementer's word. Each one passes these gates
-in order; a gate is a separate subagent that did not write the change.
+No feature is closed on the implementer's word. A gate is a separate worker
+that did not write the change.
 
 ```
-Task brief ──> Tech Lead ──> [Gate 1: QA] ──> [Gate 2: Evaluation Specialist,  ──> [Gate 3: orchestrator ──> close, update
- (approved)    implements                       only if AI, observation,             re-runs the tests,       checklist and
-               + handoff                        action set, runner or harness        checks the evidence]     tracker
-                                                changed]
-                    ^                │                    │
-                    └── corrective task (max 2) ──────────┘
+brief @ main ─► tech-lead ─► [Gate 1: qa] ─► [Gate 2: evaluation-specialist] ─► [Gate 3: orchestrator] ─► close
+                   ▲          reads the         reads QA's report;             reads every report,
+                   │          tech-lead report  only for AI / boundary /       re-runs the tests,
+                   │                            baseline / training / eval     checks the chain
+                   └──── <ID>-fix<n> brief (at most 2, then escalate to Saad) ◄── any REJECT
 ```
 
-1. **Implement.** The Tech Lead works in its own worktree and branch,
-   writes failing tests first, commits locally, and returns the report in the
-   format below plus a handoff summary for QA (`what changed`, `how to
-   check it`, `what I am unsure about`).
-2. **Gate 1, QA.** QA checks out the exact commit, runs the full suite and
-   the task's required tests, tries to break the acceptance criteria, writes
-   any missing tests under `tests/` (in its own commit), and returns a verdict:
-   `ACCEPT`, `ACCEPT WITH NOTES` or `REJECT`, each finding with severity and
-   reproduction. A test QA adds that fails against the change is a finding,
-   not something QA fixes.
-3. **Gate 2, Evaluation Specialist** (when the change touches
-   `pop/observation.py`, `pop/interface.py`, `pop/runner.py`, `agents/`,
-   `evaluate.py`, the macro-action vocabulary, prompts, or anything a seat can
-   see). Same verdicts, focused on knowledge boundary, baseline fairness,
-   fallback and evaluation validity.
-4. **Gate 3, orchestrator.** Re-runs the test command on the merged-candidate
-   commit, reads both verdicts, and checks that every acceptance criterion
-   has evidence. Only then marks the task done in `REVIEW_LOG.md`, the
-   checklist and the tracker.
-5. **Corrective work.** A `REJECT` becomes a new brief `<TASK-ID>-fix<n>` for
-   the Tech Lead, then the gates run again on the fix. After two failed
-   corrective attempts the orchestrator stops and escalates to Saad with the
-   evidence.
+1. **Implement.** The Tech Lead works on `task/<ID>` in its own worktree,
+   commits failing tests first, then the change, then its report.
+2. **Gate 1, QA.** QA reads the Tech Lead's report at its sha, checks out
+   that exact commit on `gate/<ID>-qa`, runs and writes tests, and commits
+   its report with a verdict.
+3. **Gate 2, Evaluation Specialist**, when the change touches AI controllers,
+   PPO observations, rewards or actions, hidden information,
+   `pop/observation.py`, `pop/interface.py`, a runner, the scripted baseline,
+   the macro layer, training or evaluation code, scenario definitions,
+   replay or fallback. It reads QA's report first.
+4. **Gate 3, orchestrator.** It reads every report from git, integrates the
+   branches, re-runs the tests on the integrated commit, checks every
+   acceptance criterion and the chain, and only then marks the task closed
+   in `REVIEW_LOG.md`, `STATUS.md` and the checklist.
+5. **Corrective work.** A `REJECT` becomes `<ID>-fix<n>`, and all the gates
+   run again. After two rejected fixes the orchestrator escalates to Saad.
 
 A gate is not skipped because the change looks small. Documentation-only
-tasks go through Gate 1 with QA checking facts and links instead of code.
-
-## Formal course handoffs
-
-Internal gate reports are not automatically course handoffs. When Saad
-chooses a gate review to become a formal handoff, the receiving agent's
-findings are written to `agent-team/handoffs/YYYY-MM-DD-<from>-to-<to>.md`
-(in the official repository, from `team/defaults/handoff-template.md`), and
-Saad fills **Student decision** himself. Agents never write a student
-decision, an origin note's friction, or anything in Saad's voice.
+tasks go through Gate 1, with QA checking facts and links.
 
 ## Task brief template (`tasks/<TASK-ID>.md`)
 
 ```
 # <TASK-ID>: <objective>
-Assigned agent: <role file>
+Handoff id: HO-<TASK-ID>-orchestrator
+Assigned agent: <subagent_type> (procedure: agents/<role>.md)
 Requirements: <FINAL_REQUIREMENTS section / label, checklist rows, R-V ids>
-Context and dependencies: <what exists, what must land first>
+Decisions in force: <DECISIONS #n, quoted where they bind the task>
+Context and dependencies: <what exists, what must land first, overlapping WIP>
 Base: <branch and commit to start from>
+Branch: task/<TASK-ID>
 Permitted write paths: <explicit list; everything else is read-only>
 Acceptance criteria: <numbered, each checkable>
 Required tests: <names or behaviours; failing first>
+Required gates: Gate 1 QA; Gate 2 Evaluation <yes/no, why>; Gate 3
 Required evidence: <test output, trace, screenshot, report path>
-Approval needed before: <anything in the "ask Saad" list this task touches>
+Approval needed before: <anything in the approval list this task touches>
 ```
 
-## Report format (every subagent, every task)
+The orchestrator starts a worker with:
 
 ```
-Task ID / status: <done | partial | blocked> 
-Summary: <3–6 lines>
-Files changed: <paths>
-Commit or diff: <sha on branch, or "none (read-only)">
-Tests executed: <exact command> -> <actual result line>
-Evidence: <paths>
-Limitations and blockers:
-Recommended next action:
-Decisions requiring Saad:
+Read docs/final/orchestration/agents/<role>.md and follow it.
+Coordination commit: <sha on main>. Your task brief: docs/final/orchestration/tasks/<TASK-ID>.md at that commit.
+Consume: <report path> at <sha>          # reviewers only
 ```
-
-Plain rules: never report a test as passing that was not run in this
-session; separate what was observed from what is suspected; never treat a
-plan, a replay or a fixture as a live result.
 
 ## Test environment
 
-The project needs Python 3.11+ and `pytest`. Run the suite from the
-repository root:
-
 ```
-uv run pytest -q            # Saad's machine / CI
-python3 -m pytest -q -p no:cacheprovider   # orchestrator sandbox (Python 3.13, pytest 9; pygame absent, so frontend tests skip)
+uv run pytest -q                              # Saad's Mac and CI
+python3 -m pytest -q -p no:cacheprovider      # where uv is missing (say which was used)
 ```
 
-Record which one was used. A skipped test is reported as skipped, not passed.
+A skipped test is reported as skipped, not passed.
 
 ## What needs Saad's approval
 
 Changing design or scope; changing evaluation success criteria; any paid
-(`--live`) model call; destructive git operations; pushing or merging into the
-official repository; submitting graded work; release decisions; editing
-`.claude/agents/**`, `.claude/skills/**`, `.codex/agents/**`, `AGENTS.md`,
-existing tests, `pyproject.toml`/`uv.lock` or the frozen midterm suite.
+(`--live`) call; the full PPO training run; destructive git operations;
+merging a PR; merging into `main` (except orchestration records, decisions
+#11 and #29) or into the official repository; submitting graded work; release decisions;
+editing `.claude/**`, `.codex/**`, `AGENTS.md`, existing tests,
+`pyproject.toml`/`uv.lock` or the frozen midterm suite.
+
+Pre-approved (decisions #27 to #29): pushing branches (never force), issues
+and PRs for handoffs, and orchestration records committed to `main`.

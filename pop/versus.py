@@ -405,6 +405,8 @@ class Duel:
         self._move_frame: dict[str, int] = {seat: 0 for seat in SEATS}
         self._move_action: dict[str, str | None] = {seat: None for seat in SEATS}
         self._started: dict[str, int] = {seat: -1 for seat in SEATS}   # frame a move began
+        # Reporting only (T20-fix1): which rewrite of an accepted input began the move.
+        self._rewrite: dict[str, str | None] = {seat: None for seat in SEATS}
         # R-V35 (grace window): how the last move ended, and whether this one began a run.
         self._last_end: dict[str, tuple[str | None, str | None, int] | None] = {
             seat: None for seat in SEATS}                       # (action, effect, frame)
@@ -718,7 +720,7 @@ class Duel:
         if gen is not None and self.pending[seat] == "KICK" and self.airborne_jump(seat):
             self.pending[seat] = None        # R-V10: the kick replaces the rest of the jump
             self.cancel(seat)
-            if self._start(seat, "KICK"):
+            if self._start(seat, "KICK", "kick"):
                 return
             r._tick()
             return
@@ -726,7 +728,7 @@ class Duel:
         if jump is not None:                 # R-V35: a jump just after a direction is one flip
             self.pending[seat] = None
             self.cancel(seat)
-            if self._start(seat, jump):
+            if self._start(seat, jump, "grace"):
                 return
             r._tick()
             return
@@ -734,7 +736,7 @@ class Duel:
         if d is not None:                    # R-V22: a direction turns the hop into a flip
             self.pending[seat] = None
             self.cancel(seat)
-            if self._start(seat, "_HOP_FLIP_" + d):
+            if self._start(seat, "_HOP_FLIP_" + d, "hop_turn"):
                 return
             r._tick()
             return
@@ -788,8 +790,10 @@ class Duel:
             return "JUMP_" + d
         return None
 
-    def _start(self, seat: str, action: str) -> bool:
-        """Start a move and run its first frame; False if it had no frames."""
+    def _start(self, seat: str, action: str, rewrite: str | None = None) -> bool:
+        """Start a move and run its first frame; False if it had no frames. `rewrite`
+        names the engine rule that replaced the accepted input (reporting only)."""
+        self._rewrite[seat] = rewrite
         r = self.rivals[seat]
         last = self._last_end[seat]
         side = next((n for n in ("LEFT", "RIGHT") if n in action), None)
@@ -1184,6 +1188,14 @@ def observe(duel: Duel, seat: str) -> dict:
     return obs
 
 
+class StartedMove(str):
+    """The name of a move the engine started (see `VersusEpisode.started_move`). It is a
+    plain string; `rewrite` says which engine rule replaced the accepted input, if any:
+    "kick" (R-V10), "grace" (R-V35), "hop_turn" (R-V22) or None."""
+
+    rewrite: str | None = None
+
+
 class VersusEpisode:
     """The five operations per seat (VERSUS_SPEC 2.2), plus `tick` for the runner
     and server only. Seats never receive the Duel."""
@@ -1245,6 +1257,27 @@ class VersusEpisode:
     # runner and server only
     def tick(self) -> None:
         self._duel.tick()
+
+    def started_move(self, seat: str) -> str | None:
+        """T20-fix1 (decision #81): the move the engine started for `seat` on the last
+        tick, or None. It is the move after every rewrite the engine makes to an
+        accepted input (R-V10 kick swap, R-V22 hop turn, R-V35 grace cancel) and after
+        stale-input drops, so a held key or a queued input is not a start. Read-only
+        reporting for the host's playtest log: no rule reads it and no observation
+        carries it. The internal hop-flip keeps its engine name (`_HOP_FLIP_LEFT`). The
+        result is a str whose `.rewrite` names the rule that replaced the input."""
+        _check_seat(seat)
+        d = self._duel
+        if d._started[seat] != d.frames:
+            return None
+        action = d._move_action[seat]
+        # `_replan` puts a move cancelled on its first frame back in the queue: it
+        # starts again next tick, so it is counted then.
+        if action is not None and d.pending[seat] == action:
+            return None
+        move = StartedMove(action)
+        move.rewrite = d._rewrite[seat]
+        return move
 
     def _refuse(self, seat: str, error: str, count: bool = True) -> dict:
         if count:

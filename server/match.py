@@ -21,15 +21,19 @@ from __future__ import annotations
 
 import hmac
 import json
+import logging
 import secrets
 from typing import Callable
 
 from pop.versus import SEATS, TICKS_PER_SECOND, VersusEpisode
-from web.bridge import ALL_KEY_NAMES, WebGame, make_game, to_seat_keys
+from web.bridge import (ALL_KEY_NAMES, WebGame, make_game, running_dir, seat_input,
+                        to_seat_keys)
 
 from .rival import DEFAULT_BUDGET_S, TimeLimitedRival
+from .telemetry import DuelRecorder, Telemetry
 from .trace import state_hash
 
+log = logging.getLogger("server.match")
 TICK_S = 1.0 / TICKS_PER_SECOND
 MAX_CATCH_UP = 3                 # a stall never fast-forwards the duel
 FORFEIT_GRACE_S = 15.0           # decision #38
@@ -50,7 +54,7 @@ class Match:
                  token_factory: Callable[[], str] = lambda: secrets.token_urlsafe(24),
                  on_finish: Callable[[dict], None] | None = None,
                  neutral: bool = False, rival_budget_s: float = DEFAULT_BUDGET_S,
-                 honest: bool = False):
+                 honest: bool = False, telemetry: Telemetry | None = None):
         if rival not in (None, "baseline", "ai"):
             raise ValueError("rival must be None, 'baseline' or 'ai'")
         self.rival = rival
@@ -61,6 +65,9 @@ class Match:
         self._token_factory = token_factory
         self._on_finish = on_finish
         self._fresh_episode = episode
+        self.telemetry = telemetry                 # T20: playtest logs, None unless --playtest
+        self._rec: DuelRecorder | None = None
+        self._now = 0.0
         self.past_traces: list[dict] = []
         self._reset_lobby()
 
@@ -79,9 +86,62 @@ class Match:
 
     def close(self) -> None:
         """Stop the AI seat's worker thread (called on lobby reset and server exit)."""
+        self.close_telemetry("abandoned")
         rival = getattr(getattr(self, "game", None), "rival", None)
         if hasattr(rival, "close"):
             rival.close()
+
+    # --- playtest telemetry (T20): a reader; a failure here never reaches the duel ---------
+    def _tele(self, fn) -> None:
+        rec = self._rec
+        if rec is None:
+            return
+        try:
+            fn(rec)
+        except Exception:
+            log.exception("telemetry failed; it stops for this duel")
+            self._rec = None
+
+    def _start_rec(self, now: float) -> None:
+        self._rec = None
+        if self.telemetry is None:
+            return
+        try:
+            self._rec = self.telemetry.new_duel(self.episode, self.human_seats,
+                                                self.rival or "human", now)
+        except Exception:
+            log.exception("telemetry could not start")
+
+    def _seat_outcome(self, seat: str) -> dict:
+        if self.forfeit is not None:
+            lost = self.forfeit == seat
+            return {"result": "lost" if lost else "won",
+                    "reason": "you_disconnected" if lost else "rival_disconnected"}
+        o = self.game._outcome(seat)
+        return {"result": o["result"], "reason": o["reason"]}
+
+    def _end_rec(self, now: float) -> None:
+        self._tele(lambda r: r.end({s: self._seat_outcome(s) for s in self.human_seats}, now))
+
+    def close_telemetry(self, reason: str = "abandoned") -> None:
+        """The room closed, failed or went back to the lobby: finish its logs once."""
+        if getattr(self, "_rec", None) is None:
+            return
+        self._tele(lambda r: r.close(self._now, reason))
+        self._rec = None
+
+    def _note_refused(self, held: dict) -> None:
+        """Inputs a seat asked for that were not legal (the bridge drops them). The same
+        resolution as `WebGame.tick`, read before the tick; it steps nothing."""
+        ep = self.episode
+        for seat, k in held.items():
+            legal = ep.legal_actions(seat)
+            me = ep.observe(seat)["me"]
+            act = seat_input(set(k["held"]), k["shift"], armed=me["armed"], running=running_dir(me))
+            if act == "LUNGE" and "KICK" in legal:
+                act = "KICK"
+            if act and act not in legal:
+                self._rec.refused(seat, act)
 
     def _reset_lobby(self) -> None:
         self.close()
@@ -111,6 +171,7 @@ class Match:
 
     # --- joining and leaving ----------------------------------------------------
     def join(self, token: object, now: float) -> dict:
+        self._now = now
         if token is not None and token != "":
             seat = self._seat_of(token)
             if seat is None:
@@ -118,8 +179,10 @@ class Match:
             self.connected[seat] = True
             self.deadline.pop(seat, None)
             self.held[seat] = set()
+            self._tele(lambda r: r.reconnect(seat, now))
             if self.state == "paused" and all(self.connected.get(s) for s in self.tokens):
                 self.state, self._next_tick = "playing", now + TICK_S
+                self._tele(lambda r: r.pause(False, now))
             self._push_state(seat)
             self._announce()
             return {"ok": True, "seat": seat, "token": self.tokens[seat]}
@@ -130,6 +193,7 @@ class Match:
         self.connected[seat] = True
         if len(self.tokens) == len(self.human_seats) and self.state == "waiting":
             self.state, self._next_tick = "playing", now + TICK_S
+            self._start_rec(now)
         self._push_state(seat)
         self._announce()
         return {"ok": True, "seat": seat, "token": self.tokens[seat]}
@@ -146,9 +210,13 @@ class Match:
     def connection_lost(self, seat: str, now: float) -> None:
         if seat not in self.tokens or not self.connected.get(seat):
             return
+        self._now = now
         self.connected[seat] = False
         self.held[seat] = set()
         self.rematch_pressed.discard(seat)
+        self._tele(lambda r: r.disconnect(seat, now))
+        if self.state == "playing":
+            self._tele(lambda r: r.pause(True, now))
         if self.state == "waiting":
             del self.tokens[seat]                 # nothing started: the seat is free again
             del self.connected[seat]
@@ -165,6 +233,7 @@ class Match:
         """One client message. Anything unexpected is ignored without an error."""
         if seat not in self.tokens or not isinstance(raw, str) or len(raw) > MAX_MESSAGE_CHARS:
             return
+        self._now = now
         try:
             msg = json.loads(raw)
         except ValueError:
@@ -189,6 +258,7 @@ class Match:
         if self.state != "ended" or not self.connected.get(seat):
             return
         self.rematch_pressed.add(seat)
+        self._tele(lambda r: r.rematch(seat, True, now))
         everyone = all(s in self.rematch_pressed for s in self.human_seats)
         if everyone and all(self.connected.get(s) for s in self.human_seats):
             self._restart(now)
@@ -197,6 +267,7 @@ class Match:
 
     def _restart(self, now: float) -> None:
         self.past_traces.append(self.trace())      # same seed again (decision #25)
+        self.close_telemetry("restart")
         self.game.rematch()
         self._ticks = []
         self._duel_fallbacks_from = len(self._fallbacks)   # each duel's trace carries only its own
@@ -206,12 +277,14 @@ class Match:
         self.held = {s: set() for s in SEATS}
         self._finished = False
         self.state, self._next_tick = "playing", now + TICK_S
+        self._start_rec(now)
         for seat in self.human_seats:
             self._push_state(seat)
         self._announce()
 
     # --- the clock ----------------------------------------------------------------
     def advance(self, now: float) -> None:
+        self._now = now
         if self.state == "paused":
             lost = [s for s, t in sorted(self.deadline.items()) if now >= t]
             if lost:
@@ -237,10 +310,13 @@ class Match:
         else:                             # two seats: rename each seat's keys into its own set
             keys = {name: True for seat in self.human_seats
                     for name in to_seat_keys(seat, self.held[seat])}
-        self.game.press(keys)
+        held = self.game.press(keys)
+        self._tele(lambda r: self._note_refused(held))
         before = len(self.episode.log)
         payload = self.game.tick()
-        self._ticks.append([(seat, action) for _, seat, action in self.episode.log[before:]])
+        accepted = [(seat, action) for _, seat, action in self.episode.log[before:]]
+        self._ticks.append(list(accepted))
+        self._tele(lambda r: r.after_tick(accepted, self._now))
         self._note_fallbacks()
         ended = self.episode.outcome()["status"] == "terminal"
         for seat in self.human_seats:
@@ -273,6 +349,7 @@ class Match:
 
     def _finish(self) -> None:
         self.state = "ended"
+        self._end_rec(self._now)
         self._announce()
         self._record()
 
@@ -280,6 +357,8 @@ class Match:
         self.forfeit = seat
         self.deadline.clear()
         self.state = "ended"
+        self._tele(lambda r: r.forfeit(seat, self._now))
+        self._end_rec(self._now)
         for s in self.human_seats:
             self._push_state(s)
         self._announce()

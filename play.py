@@ -33,6 +33,7 @@ import json
 import queue
 import sys
 import threading
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -148,6 +149,38 @@ def ai_key_names() -> dict:
             for k, v in m.items() if k != "shift"}
 
 
+def new_recorder(args, ep, seats=None, kind="human"):
+    """T20: the local test's playtest logs (docs/final/playtest/TELEMETRY.md). One file
+    per human seat, room "LOCAL"; the same recorder the online server uses. Against an AI
+    (T22 modes) `seats` is just ("A",) and `kind` the mode id: the AI seat gets no log, and
+    its observation, inputs and fallbacks never reach one (T22-fix2)."""
+    from pop.versus import SEATS
+    from server.telemetry import Telemetry
+    args._rec_seats, args._rec_kind = tuple(seats or SEATS), kind
+    mode = "play.py --versus" if kind == "human" else f"play.py --mode {kind}"
+    args._telemetry = Telemetry(args.telemetry_dir, "LOCAL",
+                                info={"build": "local", "mode": mode})
+    return args._telemetry.new_duel(ep, args._rec_seats, kind, time.monotonic())
+
+
+def restart_recorder(args, ep, rec):
+    """R: the same duel again. The old logs close (abandoned if it had not ended)."""
+    if rec is not None:
+        rec.close(time.monotonic(), "restart" if rec.ended else "abandoned")
+    ep.reset(args.seed)
+    return args._telemetry.new_duel(ep, args._rec_seats, args._rec_kind, time.monotonic())
+
+
+def record_tick(rec, ep, logged_before: int) -> None:
+    """After `ep.tick()`: log this frame's accepted inputs and any result."""
+    from server.telemetry import seat_outcome
+    now = time.monotonic()
+    rec.after_tick([(seat, act) for _, seat, act in ep.log[logged_before:]], now)
+    out = ep.outcome()
+    if out["status"] == "terminal":
+        rec.end({s: seat_outcome(out["reason"], s) for s in rec.seats}, now)
+
+
 def versus_main(args, rival=None) -> int:
     """Two seats on real-time ticks (pop/versus.py), one panel per seat. With `rival` (T22:
     an AI mode, agents/modes.py) seat A is the human on either key set, seat B is the rival
@@ -163,6 +196,9 @@ def versus_main(args, rival=None) -> int:
     if rival is not None:
         rival.reset(args.seed)
     shown_seats = ("A",) if rival is not None else SEATS
+    # T20: off unless --playtest. Against an AI only the human seat is logged (T22-fix2).
+    rec = (new_recorder(args, ep, shown_seats, getattr(args, "mode", None) or "human")
+           if args.playtest else None)
     pygame.init()
     scale = max(1, args.scale)
     gap = 4 * scale
@@ -248,11 +284,15 @@ def versus_main(args, rival=None) -> int:
             if e.type == pygame.QUIT or (e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE):
                 running = False
             elif e.type == pygame.KEYDOWN and e.key == pygame.K_r:
-                ep.reset(args.seed)
+                if args.playtest:
+                    rec = restart_recorder(args, ep, rec)
+                else:
+                    ep.reset(args.seed)
                 if rival is not None:
                     rival.reset(args.seed)             # one press restarts against an AI (#41)
         pressed = pygame.key.get_pressed()
         mods = pygame.key.get_mods()
+        logged_before = len(ep.log)
         for seat in shown_seats:
             held = {k for code, (s_, k) in names.items() if s_ == seat and pressed[code]}
             shift = bool(mods & (pygame.KMOD_SHIFT if rival is not None else
@@ -264,12 +304,16 @@ def versus_main(args, rival=None) -> int:
                 act = "KICK"                                  # attack in the air: dive kick
             if act and act in legal:
                 ep.step(seat, act)
+            elif act and rec is not None:
+                rec.refused(seat, act)
         if scripted:
             seat, _, act = scripted.pop(0).partition(":")
             ep.step(seat, act)
         if rival is not None:
             modes.step_ai_seat(ep, rival)              # its own observation and legal list only
         ep.tick()
+        if rec is not None:
+            record_tick(rec, ep, logged_before)
 
         window.fill((0, 0, 0))
         for i, seat in enumerate(shown_seats):
@@ -311,6 +355,8 @@ def versus_main(args, rival=None) -> int:
                 break
             continue
         clock.tick(FPS * args.speed)
+    if rec is not None:
+        rec.close(time.monotonic())
     pygame.quit()
     if rival is not None and rival.fallback_log:
         print(f"AI seat B: {len(rival.fallback_log)} fallback(s) to no input (source: fallback)")
@@ -535,6 +581,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--provider", default="anthropic")
     ap.add_argument("--model", default=None)
     ap.add_argument("--replay", metavar="TRACE")
+    ap.add_argument("--playtest", action="store_true",
+                    help="with --versus: write playtest telemetry, one log per seat "
+                         "(docs/final/playtest/TELEMETRY.md)")
+    ap.add_argument("--telemetry-dir", default="traces/playtest",
+                    help="where --playtest logs go (git-ignored)")
     ap.add_argument("--screenshot", metavar="PNG", help=argparse.SUPPRESS)
     ap.add_argument("--keys", default="", help=argparse.SUPPRESS)   # scripted input for checks
     args = ap.parse_args(argv)
@@ -548,6 +599,8 @@ def main(argv: list[str] | None = None) -> int:
             args.menu = True
         else:
             args.situation = "S3"
+    if args.playtest and not (args.versus or args.mode or args.menu):
+        ap.error("--playtest goes with --versus or a --mode (the online server has its own --playtest)")
     if args.mode or args.menu:
         return mode_main(ap, args)
     if args.versus:
