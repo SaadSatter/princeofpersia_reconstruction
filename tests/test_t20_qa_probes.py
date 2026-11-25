@@ -106,7 +106,7 @@ def test_real_scripted_duel_summarizes_deterministically(tmp_path):
     now = hold(m, "A", [], 20, now)
     now = hold(m, "A", ["g"], 1, now)               # sheathe
     now = hold(m, "A", [], 40, now)                  # idle spell > 3 s
-    now = hold(m, "A", ["f"], 5, now)                # refused lunges (no sword)
+    now = hold(m, "A", ["f"], 14, now)               # refused lunges (no sword), over the #83 12-tick threshold
     m.close()
     outs = []
     for name in ("one", "two"):
@@ -140,20 +140,113 @@ def _flips(tmp_path, held_ticks):
     return next(s for s in doc["seats"] if s["seat"] == "A")["mechanics"]["flip"]
 
 
-@pytest.mark.xfail(strict=True, reason="QA-T20-F1: a held key counts one flip per tick")
 def test_one_held_jump_is_one_flip_not_one_per_tick(tmp_path):
     assert _flips(tmp_path, 10) == 1
 
 
-@pytest.mark.xfail(strict=True, reason="QA-T20-F2: R-V35 grace: the dropped direction is logged as accepted")
-def test_a_direction_cancelled_by_a_jump_within_grace_logs_as_the_jump_only(tmp_path):
+def _events(tmp_path, plan, seat="A"):
     m = mk(tmp_path)
     m.join(None, 0.0)
     m.join(None, 0.0)
-    now = hold(m, "A", ["d"], 1, 0.0)
-    now = hold(m, "A", ["d", "w"], 1, now)
-    hold(m, "A", [], 15, now)
+    now = 0.0
+    for keys, n in plan:
+        now = hold(m, "A", keys, n, now)
+    m.close()
+    return [json.loads(x) for x in (tmp_path / f"2026-11-25-QAQA-001-{seat}.jsonl").read_text().splitlines()[1:]]
+
+
+def _summary_seat(tmp_path, seat="A"):
+    r = subprocess.run([sys.executable, str(ROOT / "tools/telemetry/summarize.py"), str(tmp_path)],
+                       capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    doc = json.loads((tmp_path / "summary.json").read_text())
+    return next(s for s in doc["seats"] if s["seat"] == seat)
+
+
+def test_a_direction_cancelled_by_a_jump_within_grace_logs_as_the_jump_only(tmp_path):
+    """#82 marker form: the append-only log keeps the direction row, the jump rows carry
+    grace: true, and the summary drops the direction."""
+    ev = _events(tmp_path, [(["d"], 1), (["d", "w"], 1), ([], 15)])
+    acts = [e for e in ev if e["type"] == "action" and e["accepted"]]
+    assert [e["action"] for e in acts] == ["RIGHT", "RUN_JUMP_RIGHT"], acts      # direction row written
+    assert "grace" not in acts[0] and acts[1]["grace"] is True
+    moves = [e for e in ev if e["type"] == "move"]
+    assert [e["move"] for e in moves] == ["RIGHT", "JUMP_RIGHT"] and moves[1]["grace"] is True
+    assert "grace" not in moves[0]
+    s = _summary_seat(tmp_path)
+    assert s["moves"] == {"JUMP_RIGHT": 1}, s["moves"]                             # direction dropped
+    assert s["mechanics"]["flip"] == 1
+
+
+def test_no_grace_marker_when_the_direction_is_old_or_on_the_other_side(tmp_path):
+    ev = _events(tmp_path, [(["d"], 1), ([], 6), (["d", "w"], 1), ([], 20)])      # direction long over
+    assert not any(e.get("grace") for e in ev)
+    s = _summary_seat(tmp_path)
+    assert s["moves"].get("RIGHT") == 1 and s["moves"].get("JUMP_RIGHT") == 1, s["moves"]
+    d2 = tmp_path / "other"
+    d2.mkdir()
+    ev = _events(d2, [(["d"], 1), (["a", "w"], 1), ([], 20)])                     # other side
+    assert not any(e.get("grace") for e in ev)
+
+
+def test_grace_drops_only_the_nearest_direction_not_an_older_unrelated_one(tmp_path):
+    ev = _events(tmp_path, [(["d"], 1), ([], 30), (["d"], 1), (["d", "w"], 1), ([], 20)])
+    assert sum(1 for e in ev if e["type"] == "move" and e.get("grace")) == 1
+    s = _summary_seat(tmp_path)
+    assert s["moves"] == {"JUMP_RIGHT": 1, "RIGHT": 1}, s["moves"]
+
+
+def test_two_grace_jumps_drop_two_directions(tmp_path):
+    ev = _events(tmp_path, [(["d"], 1), (["d", "w"], 1), ([], 30), (["d"], 1), (["d", "w"], 1), ([], 20)])
+    assert sum(1 for e in ev if e["type"] == "move" and e.get("grace")) == 2
+    s = _summary_seat(tmp_path)
+    assert s["moves"] == {"JUMP_RIGHT": 2}, s["moves"]
+    assert s["mechanics"]["flip"] == 2
+
+
+def test_the_repeat_marker_marks_the_second_engine_flip_of_one_held_key(tmp_path):
+    ev = _events(tmp_path, [(["d", "w"], 10), ([], 25)])
+    mv = [e for e in ev if e["type"] == "move"]
+    assert [e["move"] for e in mv] == ["JUMP_RIGHT", "JUMP_RIGHT"]                # engine started two
+    assert not mv[0].get("repeat") and mv[1]["repeat"] is True
+    s = _summary_seat(tmp_path)
+    assert s["mechanics"]["flip"] == 1
+
+
+def test_a_very_long_hold_is_still_one_use(tmp_path):
+    ev = _events(tmp_path, [(["d", "w"], 40), ([], 30)])
+    assert sum(1 for e in ev if e["type"] == "move") >= 3
+    assert _summary_seat(tmp_path)["mechanics"]["flip"] == 1
+
+
+def test_a_release_and_a_new_press_is_a_new_use_even_if_the_engine_queue_ran_on(tmp_path):
+    ev = _events(tmp_path, [(["d", "w"], 1), ([], 1), (["d", "w"], 1), ([], 30)])
+    assert not any(e.get("repeat") for e in ev)
+    assert _summary_seat(tmp_path)["mechanics"]["flip"] == 2
+
+
+def test_two_taps_a_flip_apart_are_two_uses(tmp_path):
+    ev = _events(tmp_path, [(["d", "w"], 1), ([], 20), (["d", "w"], 1), ([], 30)])
+    assert not any(e.get("repeat") for e in ev)
+    assert _summary_seat(tmp_path)["mechanics"]["flip"] == 2
+
+
+def test_an_input_held_after_a_different_move_is_not_a_repeat(tmp_path):
+    # flip on a hold, then a different key is pressed, then the flip key again: new press
+    ev = _events(tmp_path, [(["d", "w"], 3), (["a"], 3), (["d", "w"], 3), ([], 40)])
+    s = _summary_seat(tmp_path)
+    assert s["mechanics"]["flip"] >= 2, (s["mechanics"], [e for e in ev if e["type"] == "move"])
+
+
+def test_f3_a_pause_that_ends_by_forfeit_is_closed(tmp_path):
+    m = mk(tmp_path)
+    m.join(None, 0.0)
+    m.join(None, 0.0)
+    now = hold(m, "A", [], 3, 0.0)
+    m.connection_lost("B", now)
+    m.advance(now + 30)                       # the reconnect window runs out: forfeit
     m.close()
     ev = [json.loads(x) for x in (tmp_path / "2026-11-25-QAQA-001-A.jsonl").read_text().splitlines()[1:]]
-    acc = [e["action"] for e in ev if e["type"] == "action" and e["accepted"]]
-    assert acc == ["RUN_JUMP_RIGHT"], acc
+    ph = [e["phase"] for e in ev if e["type"] == "pause"]
+    assert ph and ph.count("start") == ph.count("end"), ph
+    assert ph[-1] == "end"
