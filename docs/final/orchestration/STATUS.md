@@ -80,7 +80,7 @@ No `rc/*` (approved release candidate) branch exists.
 | closed (Gate 3, 2026-11-24) | T18 | online room codes (#52), code-less default room HOME (#56), limits (#57) | G1 7f3525e, G2 f4dc475 ACCEPT w/ notes; G3 closed | `orch/reviewed` 6a4b8b5, then fc02687 (with T07-run1) | — |
 | closed (Gate 3, 2026-11-25; `orch/reviewed` b2203c3) | T18-fix1 | one room's error never stops the server (EVAL-T18-1) | — | brief `tasks/T18-fix1.md`; base fc02687 | — |
 | closed (Gate 3, 2026-11-25; `orch/reviewed` bdc3c76) | T19 | either control scheme (#55), 2-tick input grace (#54), kneel pickups, flip by default (#53, amends R-V22) | G1, G2, G3 to come | base = `orch/reviewed` tip after T18; brief `tasks/T19.md`@53e7ece | — |
-| **T20-fix2 Gate 1** (qa dispatched; attempt 2 of 2, the last) | T20 | playtest telemetry (#67, #68) | G1, G2, G3 | brief `tasks/T20.md` | — |
+| **T20-fix2 Gate 2** (evaluation-specialist dispatched; G1 ACCEPT 0f5983c) | T20 | playtest telemetry (#67, #68) | G1, G2, G3 | brief `tasks/T20.md` | — |
 | queued (after T20) | T21 | telemetry-analyst agent (#69) | G1, G3 | brief `tasks/T21.md` | — |
 | not started | T03 | official-repository move (decision #6), `python -m team init` | — | — | — |
 | closed (Gate 3); **PR #6 awaiting Saad's merge** | T10a (+fix1, fix2) | docs in line with decisions #1–#30: Changes since G1 in GDD and Configuration, PPO rival, orchestration, checklist, plan, README | G1 accept w/ notes ×3; G2 n/a; G3 closed | `orch/T10a` a1b9738 | issue #5, PR #6 |
