@@ -45,3 +45,14 @@ Saad, in chat (verbatim): "add numpy as a train extra, also to call for a rematc
 |---|---|---|---|
 | 40 | numpy also in the `dev` group? | "add numpy as a train extra" | numpy stays an optional `train` extra only, as built in T15 (closed, `orch/reviewed` 199f858). It is not added to the `dev` group. The full suite is run with `--extra train` |
 | 41 | Rematch trigger (T13, and #25) | "to call for a rematch, a button in the style of the game should popup for rematch" | When a duel ends, a **Rematch** button pops up on each player's screen, drawn in the game's own pixel-art dungeon style (existing palette and art, no new generated asset). Pressing it requests a rematch; the duel restarts with the same seed (#25). Online, **both** players must press it, and the first to press sees "waiting for rival". The "both" part is the orchestrator's reading, flagged for Saad to confirm at review |
+
+## Addendum: Tue 2026-11-24, night (after GATE-wave3)
+
+Saad's choices (AskUserQuestion), quoted verbatim:
+
+| # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
+|---|---|---|---|
+| 42 | T07-fix1 edits T07's own parity test `tests/test_rl_policy.py` (not on `main`) | "Allow the fix (Recommended)" | T07-fix1 gathers the 200 parity observations over several seeds, with a fresh `Encoder` per duel. The check itself (pure-Python logits equal numpy to 1e-9) is unchanged |
+| 43 | T07-E1: PPO and RIG_TRAP | "Train without traps" | RIG_TRAP stays reserved and masked for the PPO rival. Training does not wait for traps. G2/G3 documents "the AI rival does not set traps; traps are human-only" (`RL_POLICY.md`, Changes since G1). Rigging by the AI rival would need a new run, after G2/G3 |
+| 44 | T07-E3: tuning starts | "Add tuning starts (Recommended)" | T07-fix1 adds about 6 tuning starts, including lower floors, disjoint from H6 by construction. T08 freezes H6 with a hash and proves the two sets disjoint before the full run |
+| 45 | T13 live AI-seat budget | "Accept 0.04 s live (Recommended)" | On the live server the AI seat gets at most 0.04 s per decision, then a labelled, server-logged WAIT fallback. Evaluation and training keep the 5 s runner timeout (#24) |
