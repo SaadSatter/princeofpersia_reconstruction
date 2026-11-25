@@ -83,7 +83,7 @@ def test_a_tampered_heldout_file_that_is_not_even_json_is_refused_by_hash_not_by
 
 def test_a_one_byte_change_is_refused_and_the_real_file_hash_is_the_recorded_one():
     data = (ROOT / "evaluation" / "heldout" / "H6.json").read_bytes()
-    assert manifest.HELDOUT_SHA256.startswith("44da40ec") and manifest.HELDOUT_SHA256.endswith("0847")
+    assert manifest.HELDOUT_SHA256.startswith("d013152a") and manifest.HELDOUT_SHA256.endswith("5266")
     import hashlib
     assert hashlib.sha256(data).hexdigest() == manifest.HELDOUT_SHA256
     assert hashlib.sha256(data + b"\n").hexdigest() != manifest.HELDOUT_SHA256
