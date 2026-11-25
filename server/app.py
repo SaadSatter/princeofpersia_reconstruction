@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import mimetypes
 import time
 from http import HTTPStatus
@@ -32,6 +33,8 @@ from websockets.http11 import Response
 from .match import TICK_S, Match
 from .rooms import (MAX_FAILED_JOINS, MAX_ROOMS, FailedJoins, Room, RoomFactory,
                     make_code, normalize_code)
+
+log = logging.getLogger("server")
 
 JOIN_TIMEOUT_S = 5.0
 SEND_TIMEOUT_S = 2.0         # a client that cannot take one message in this long is dropped
@@ -356,9 +359,22 @@ class OnlineServer:
         """One step of the tick loop: advance every room to `clock()` and send."""
         now = self.clock()
         for room in self.all_rooms():
-            room.match.advance(now)
+            try:
+                room.match.advance(now)
+            except Exception:
+                self._room_failed(room)
             await self._flush_room(room)
         self._reap(now)
+
+    @staticmethod
+    def _room_failed(room: Room) -> None:
+        """One room's error (an unwritable trace dir, say) must never stop the others (#63).
+        Log it here with the room code, never to a client, and treat that room as finished."""
+        log.exception("room %s: error while advancing or recording its duel", room.code)
+        match = room.match
+        if match.state != "ended":
+            match.state = "ended"
+            match._finished = True
 
     async def run_ticks(self, sleep=asyncio.sleep) -> None:
         while True:
