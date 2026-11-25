@@ -174,13 +174,13 @@ def test_other_seats_disguise_and_traps_never_appear_in_a_log(tmp_path):
     drive(m, 5)
     d.rivals["B"].disguised = True                     # B puts on a costume
     k = d.rivals["B"].kid
-    d.rigs[(k.room, k.row, k.col + 1)] = {"B": "loose"}       # and owns a trap
+    assert d.place_rig("B", (k.room, k.row, k.col - 1))       # and owns a trap
     d.traps_left["B"] -= 1
     drive(m, 120, start=0.5)
     text = (tmp_path / "2026-11-25-TEST-001-A.jsonl").read_text()
     kinds = {e["type"] for e in logs(tmp_path, "A")[1:]}
     assert not kinds & {"disguise_on", "disguise_broken", "trap_rigged", "trap_sprung"}
-    for word in ("disguise", "guard", "uniform", "rig", "trap", "owner"):
+    for word in ("disguise", "guard", "uniform", "rigged", '"rig"', "trap_", "owner"):
         assert word not in text.lower(), word
     assert any(e["type"] == "disguise_on" for e in logs(tmp_path, "B")[1:])   # its own, in its own log
 
@@ -189,12 +189,14 @@ def test_own_trap_is_logged_for_the_owner_only(tmp_path):
     m = make(tmp_path)
     join(m)
     d = m.episode._duel
-    drive(m, 3)
+    now = 0.0
     k = d.rivals["B"].kid
-    d.rigs[(k.room, k.row, k.col + 3)] = {"B": "loose"}
-    drive(m, 3, start=1.0)
-    d.rigs.clear()
-    drive(m, 3, start=2.0)
+    assert d.place_rig("B", (k.room, k.row, k.col - 1))
+    for step in range(9):
+        if step == 5:
+            d.rigs.clear()                              # the rig is gone: sprung or spent
+        now += TICK_S
+        m.advance(now)
     b = [e["type"] for e in logs(tmp_path, "B")[1:]]
     a = [e["type"] for e in logs(tmp_path, "A")[1:]]
     assert "trap_rigged" in b and "trap_sprung" in b
@@ -253,6 +255,8 @@ def test_telemetry_failure_never_reaches_the_duel(tmp_path):
 
 
 def test_room_failed_closes_the_logs(tmp_path):
+    import pytest
+    pytest.importorskip("websockets")
     from server.app import OnlineServer
     from server.rooms import Room
     m = make(tmp_path)
@@ -261,3 +265,34 @@ def test_room_failed_closes_the_logs(tmp_path):
     OnlineServer._room_failed(Room("ZZZZ", m))
     end = [e for e in logs(tmp_path, "A")[1:] if e["type"] == "duel_end"]
     assert end and end[0]["reason"] == "room_failed"
+
+
+def hold(m, seat, keys, ticks, now):
+    m.receive(seat, json.dumps({"type": "keys", "keys": keys}), now)
+    for _ in range(ticks):
+        now += TICK_S
+        m.advance(now)
+    return now
+
+
+def test_sword_drop_and_pickup_but_not_draw_or_sheathe(tmp_path):
+    m = make(tmp_path)
+    join(m)
+    d = m.episode._duel
+    now = hold(m, "A", ["g"], 1, 0.0)                   # DRAW
+    now = hold(m, "A", [], 8, now)
+    now = hold(m, "A", ["g"], 1, now)                   # SHEATHE
+    now = hold(m, "A", [], 8, now)
+    kinds = [e["type"] for e in logs(tmp_path, "A")[1:]]
+    assert "sword_drop" not in kinds and "sword_pickup" not in kinds
+    now = hold(m, "A", ["g"], 1, now)                   # DRAW again
+    now = hold(m, "A", [], 20, now)
+    d.drop_sword(d.rivals["A"], behind=True)            # knocked away by a rival
+    now = hold(m, "A", [], 2, now)
+    d.swords.append(d.rivals["A"].kid.cell)             # one lies at its feet
+    now = hold(m, "A", ["s"], 10, now)                  # DOWN picks it up
+    rows = logs(tmp_path, "A")[1:]
+    drops = [e for e in rows if e["type"] == "sword_drop"]
+    assert [e["cause"] for e in drops] == ["knocked_away"]
+    assert any(e["type"] == "sword_pickup" for e in rows)
+    assert not any(e["type"] in ("sword_drop", "sword_pickup") for e in logs(tmp_path, "B")[1:])

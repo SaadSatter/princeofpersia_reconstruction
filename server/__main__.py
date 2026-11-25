@@ -30,6 +30,17 @@ def lan_ip() -> str:
         s.close()
 
 
+def git_commit() -> str:
+    """The build's commit for telemetry headers; "unknown" outside a checkout."""
+    import subprocess
+    try:
+        out = subprocess.run(["git", "rev-parse", "--short=12", "HEAD"], cwd=ROOT,
+                             capture_output=True, text=True, timeout=5)
+        return out.stdout.strip() or "unknown"
+    except (OSError, subprocess.SubprocessError):
+        return "unknown"
+
+
 def trace_name(code: str, n: int, seed: int) -> str:
     """The input trace's file name: the room's code keeps rooms' traces apart (T18)."""
     return f"duel-{code}-{n:03d}-seed{seed}.json"
@@ -39,9 +50,12 @@ async def serve_forever(args) -> None:
     from tools.web import build
     from .app import OnlineServer
     from .match import Match
+    from .telemetry import Telemetry, _today
 
     trace_dir = Path(args.trace_dir) if args.trace_dir else None
     count = [0]
+    build_info: dict = {}
+    today = getattr(args, "today", None) or _today
 
     def make_match(code: str) -> Match:
         """One fresh `Match` per room; its trace file name carries the room's code."""
@@ -56,11 +70,18 @@ async def serve_forever(args) -> None:
             path = trace_dir / trace_name(code, count[0], trace["seed"])
             path.write_text(json.dumps(trace, separators=(",", ":")))
 
+        tele = (Telemetry(args.telemetry_dir, code, info=build_info, today=today)
+                if args.playtest else None)
         return Match(seed=args.seed, rival=None if args.rival == "none" else args.rival,
-                     on_finish=write_trace, neutral=args.neutral)
+                     on_finish=write_trace, neutral=args.neutral, telemetry=tele)
 
     with tempfile.TemporaryDirectory() as site:
         manifest = build.build(Path(site))
+        if args.playtest:                  # T20: the header's build and config versions
+            build_info.update(build=manifest["build"], commit=git_commit(),
+                              versions=manifest["versions"])
+            print(f"Playtest telemetry ON: one log per room, duel and seat in "
+                  f"{args.telemetry_dir}/ (host only; docs/final/playtest/TELEMETRY.md)", flush=True)
         # The code-less default room (decision #56): a join with no code enters it.
         srv = OnlineServer(make_match("HOME"), site_dir=Path(site), match_factory=make_match)
         server = await srv.start(args.host, args.port)
@@ -83,6 +104,10 @@ def main(argv: list[str] | None = None) -> int:
                     help="with --rival baseline, label the AI seat just \"Rival\" (blind playtests)")
     ap.add_argument("--trace-dir", default="traces/online",
                     help="where each finished duel's input trace is written (server only)")
+    ap.add_argument("--playtest", action="store_true",
+                    help="write playtest telemetry (one JSON Lines log per room, duel and seat)")
+    ap.add_argument("--telemetry-dir", default="traces/playtest",
+                    help="where --playtest logs go (host only, git-ignored)")
     args = ap.parse_args(argv)
     try:
         asyncio.run(serve_forever(args))

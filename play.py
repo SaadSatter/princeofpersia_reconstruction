@@ -31,6 +31,7 @@ import json
 import queue
 import sys
 import threading
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -132,6 +133,34 @@ def versus_input(held: set[str], shift: bool, armed: bool = False,
     return None
 
 
+def new_recorder(args, ep):
+    """T20: the local test's playtest logs (docs/final/playtest/TELEMETRY.md). One file
+    per seat, room "LOCAL"; the same recorder the online server uses."""
+    from pop.versus import SEATS
+    from server.telemetry import Telemetry
+    args._telemetry = Telemetry(args.telemetry_dir, "LOCAL",
+                                info={"build": "local", "mode": "play.py --versus"})
+    return args._telemetry.new_duel(ep, SEATS, "human", time.monotonic())
+
+
+def restart_recorder(args, ep, rec):
+    """R: the same duel again. The old logs close (abandoned if it had not ended)."""
+    if rec is not None:
+        rec.close(time.monotonic(), "restart" if rec.ended else "abandoned")
+    ep.reset(args.seed)
+    return args._telemetry.new_duel(ep, ("A", "B"), "human", time.monotonic())
+
+
+def record_tick(rec, ep, logged_before: int) -> None:
+    """After `ep.tick()`: log this frame's accepted inputs and any result."""
+    from server.telemetry import seat_outcome
+    now = time.monotonic()
+    rec.after_tick([(seat, act) for _, seat, act in ep.log[logged_before:]], now)
+    out = ep.outcome()
+    if out["status"] == "terminal":
+        rec.end({s: seat_outcome(out["reason"], s) for s in rec.seats}, now)
+
+
 def versus_main(args) -> int:
     """Two seats on real-time ticks (pop/versus.py), one panel per seat."""
     import os
@@ -142,6 +171,7 @@ def versus_main(args) -> int:
     from render import draw, versus_view
 
     ep = arena_episode(args.seed)
+    rec = new_recorder(args, ep) if args.playtest else None      # T20: off unless --playtest
     pygame.init()
     scale = max(1, args.scale)
     gap = 4 * scale
@@ -224,9 +254,13 @@ def versus_main(args) -> int:
             if e.type == pygame.QUIT or (e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE):
                 running = False
             elif e.type == pygame.KEYDOWN and e.key == pygame.K_r:
-                ep.reset(args.seed)
+                if args.playtest:
+                    rec = restart_recorder(args, ep, rec)
+                else:
+                    ep.reset(args.seed)
         pressed = pygame.key.get_pressed()
         mods = pygame.key.get_mods()
+        logged_before = len(ep.log)
         for seat in SEATS:
             held = {k for code, (s_, k) in names.items() if s_ == seat and pressed[code]}
             shift = bool(mods & (pygame.KMOD_LSHIFT if seat == "A" else pygame.KMOD_RSHIFT))
@@ -237,10 +271,14 @@ def versus_main(args) -> int:
                 act = "KICK"                                  # attack in the air: dive kick
             if act and act in legal:
                 ep.step(seat, act)
+            elif act and rec is not None:
+                rec.refused(seat, act)
         if scripted:
             seat, _, act = scripted.pop(0).partition(":")
             ep.step(seat, act)
         ep.tick()
+        if rec is not None:
+            record_tick(rec, ep, logged_before)
 
         window.fill((0, 0, 0))
         for i, seat in enumerate(SEATS):
@@ -278,6 +316,8 @@ def versus_main(args) -> int:
                 break
             continue
         clock.tick(FPS * args.speed)
+    if rec is not None:
+        rec.close(time.monotonic())
     pygame.quit()
     return 0
 
@@ -453,10 +493,17 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--provider", default="anthropic")
     ap.add_argument("--model", default=None)
     ap.add_argument("--replay", metavar="TRACE")
+    ap.add_argument("--playtest", action="store_true",
+                    help="with --versus: write playtest telemetry, one log per seat "
+                         "(docs/final/playtest/TELEMETRY.md)")
+    ap.add_argument("--telemetry-dir", default="traces/playtest",
+                    help="where --playtest logs go (git-ignored)")
     ap.add_argument("--screenshot", metavar="PNG", help=argparse.SUPPRESS)
     ap.add_argument("--keys", default="", help=argparse.SUPPRESS)   # scripted input for checks
     args = ap.parse_args(argv)
 
+    if args.playtest and not args.versus:
+        ap.error("--playtest goes with --versus (the online server has its own --playtest)")
     if args.versus:
         if args.situation != "ARENA" or args.watch or args.replay:
             ap.error("--versus plays the ARENA only, without --watch or --replay")

@@ -1,0 +1,5 @@
+{"type":"header","schema":1,"build":"fixture","seed":1,"rival":"human","room":"ABCD","duel":2,"duel_frames":3600,"ticks_per_second":12,"idle_threshold_s":3.0,"seat":"A"}
+{"t":0,"s":0.0,"seat":"A","type":"duel_start","room":"room-aaa","hearts":3,"armed":false,"traps_left":4}
+{"t":10,"s":0.833,"seat":"A","type":"action","action":"RIG","accepted":true,"effect":"rigged"}
+{"t":1000,"s":83.333,"seat":"A","type":"forfeit","by":"rival"}
+{"t":1000,"s":83.333,"seat":"A","type":"duel_end","result":"won","reason":"rival_disconnected","frames":1000}
