@@ -6,7 +6,7 @@ from: tech-lead
 to: qa
 configured_model: claude-sonnet-5-5
 runtime_model: not visible to the agent (orchestrator records the verified id in REVIEW_LOG.md)
-consumed: docs/final/orchestration/tasks/T20-fix1.md@6ba2ad4; reports/T20-qa.md and reports/T20-evaluation-specialist.md @a039283 (gate/T20-eval)
+consumed: docs/final/orchestration/tasks/T20-fix1.md@6ba2ad4; reports/T20-qa.md and reports/T20-evaluation-specialist.md @a039283 (gate/T20-eval); DECISIONS-2026-11-24.md@1f7fa10 (rows #85, #86)
 source_branch: task/T20-fix1
 source_commit: 000f86c9dd7952b843a0c9cdf85b28abd21d3f9f
 reviewed_commit: n/a
@@ -15,7 +15,7 @@ verdict: n/a
 
 # T20-fix1: tech-lead report
 
-Status: done (the suite is not all green: 5 failures, all expected consequences of the brief; listed below)
+Status: done (3 failures remain, all in QA- and Eval-owned tests, decision #85)
 
 ## Work completed
 Added the read-only accessor `VersusEpisode.started_move(seat)` (decision #81) with a failing test first (commits before the implementation). The recorder now logs a `move` row once per engine start and counts uses only from those rows. Grace gets a marker (#82), the refused-run threshold is 12 (#83), `pause` end is logged on forfeit (F3), and TELEMETRY.md carries the Gate 2 doc fixes. Schema is now 2. Old (schema 1) logs still summarize the old way.
@@ -40,12 +40,20 @@ Added the read-only accessor `VersusEpisode.started_move(seat)` (decision #81) w
 uv run --frozen --extra play --extra train --extra online pytest -q
 5 failed, 1611 passed, 12 skipped, 5 xfailed, 2 warnings in 285.71s (0:04:45)
 ```
-The 5 failures, each an existing test (not edited) that the brief's own changes break:
-1. `tests/test_eval_t20_probes.py::test_a_queued_direction_is_not_credited_with_the_running_flip`: strict xfail now XPASS (E1 fixed). Eval changes it.
-2. `tests/test_t20_qa_probes.py::test_one_held_jump_is_one_flip_not_one_per_tick`: strict xfail now XPASS (F1 fixed, held 10 ticks gives 1). QA changes it.
-3. `tests/test_t20_qa_probes.py::test_real_scripted_duel_summarizes_deterministically`: asserts a refused-run list from 5 refused LUNGE ticks; with `REFUSED_RUN_MIN = 12` (#83) there is none. QA changes it (hold 12 or more ticks).
-4. `tests/test_t20_summarize.py::test_stalls`: same cause, a 3-tick run in the schema 1 fixture. The tech-lead's T20 test; needs a 12-tick run in the fixture or a different expectation.
-5. `tests/test_t20_telemetry.py::test_connection_events_and_forfeit`: expects pause phases `["start","end","start"]`; F3 now correctly adds the closing `end` (`["start","end","start","end"]`).
+Amendment after decisions #85 and #86 (commit on top of 394ca4f): the suite now reads
+```
+uv run --frozen --extra play --extra train --extra online pytest -q
+3 failed, 1613 passed, 12 skipped, 5 xfailed, 2 warnings in 276.95s (0:04:36)
+```
+The 3 failures are the QA- and Eval-owned items, updated by their authors at their gates (#85):
+1. `tests/test_eval_t20_probes.py::test_a_queued_direction_is_not_credited_with_the_running_flip`: E1 strict xfail now XPASS. Eval removes the mark.
+2. `tests/test_t20_qa_probes.py::test_one_held_jump_is_one_flip_not_one_per_tick`: F1 strict xfail now XPASS. QA removes the mark.
+3. `tests/test_t20_qa_probes.py::test_real_scripted_duel_summarizes_deterministically`: asserts a refused run from 5 refused ticks; #83 needs 12. QA updates it.
+Changed by me (own T20 tests, only these assertions):
+- `tests/test_t20_summarize.py::test_stalls`: `a["refused_runs"] == [{"action": "LUNGE", "start_t": 5, "end_t": 8, "length": 4}]` -> `a["refused_runs"] == []` (the fixture's 4-tick run is under `REFUSED_RUN_MIN = 12`).
+- `tests/test_t20_telemetry.py::test_connection_events_and_forfeit`: pause phases `["start", "end", "start"]` -> `["start", "end", "start", "end"]` (F3: the forfeit closes the pause).
+The `_rewrite` label stays (#86). The earlier line before the amendment (5 failed, 1611 passed) is superseded.
+
 Still xfail, form to change by QA (decision #82): `test_a_direction_cancelled_by_a_jump_within_grace_logs_as_the_jump_only` (expects the log to hold only the jump; the log is append-only by decision, both rows exist, the jump row has `grace`).
 
 ## Findings

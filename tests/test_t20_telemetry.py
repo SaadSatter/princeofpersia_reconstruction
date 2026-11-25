@@ -122,7 +122,7 @@ def test_connection_events_and_forfeit(tmp_path):
     ta, tb = [e["type"] for e in a], [e["type"] for e in b]
     assert "disconnect" in tb and "reconnect" in tb
     assert "disconnect" in ta and "reconnect" not in ta
-    assert [e["phase"] for e in a if e["type"] == "pause"] == ["start", "end", "start"]
+    assert [e["phase"] for e in a if e["type"] == "pause"] == ["start", "end", "start", "end"]  # F3: forfeit closes the pause
     fa = next(e for e in a if e["type"] == "forfeit")
     fb = next(e for e in b if e["type"] == "forfeit")
     assert (fa["by"], fb["by"]) == ("me", "rival")

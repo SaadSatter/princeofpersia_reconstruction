@@ -24,7 +24,7 @@ def test_stalls(tmp_path):
     doc = run(tmp_path)
     a = seat(doc, "2026-11-25-ABCD-001-A.jsonl")["stalls"]
     assert a["idle_spells"] == 1 and a["idle_total_s"] == 7.167
-    assert a["refused_runs"] == [{"action": "LUNGE", "start_t": 5, "end_t": 8, "length": 4}]
+    assert a["refused_runs"] == []          # #83: the fixture's 4-tick run is under REFUSED_RUN_MIN = 12
     assert a["stuck_rooms"] == []
     b2 = seat(doc, "2026-11-25-ABCD-002-B.jsonl")["stalls"]
     assert b2["stuck_rooms"] == ["room-ccc"] and b2["longest_room_s"] == 83.333
