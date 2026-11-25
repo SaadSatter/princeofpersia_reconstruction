@@ -42,7 +42,7 @@ Many duels can run on one server at once, one per room.
 
 Each room has its own duel, tick loop, pause and forfeit (#38), rematch (#41)
 and trace file (`duel-<CODE>-NNN-seed<seed>.json`); a slow or stalled player in
-one room never delays another. Seat tokens belong to one room: a token from
+one room never delays another, and an error in one room (an unwritable `--trace-dir`, say) is logged on the server with the room code, never sent to a client, and ends only that room (decision #63). Seat tokens belong to one room: a token from
 room X is refused by room Y. Seat tokens and the room code live in the tab's
 `sessionStorage`, so a refreshed tab rejoins its room and seat, and two tabs on
 one machine are two seats. The one exception: if Player 1 refreshes before
