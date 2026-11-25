@@ -520,15 +520,16 @@ def test_rematch_keeps_fallbacks_per_duel_and_labelled():
     m.close()
 
 
-def test_label_honesty_is_missing_only_on_the_legacy_default_room_path():
-    """Tech Lead concern 1. Everything built with honest=True or a chosen mode is labelled by
-    agents.modes; the only path that still says "AI rival: ..." is `--rival baseline` with no
-    creator-chosen mode (server/__main__.py `legacy`), plus the class defaults used by old tests."""
+def test_legacy_label_path_is_gone_and_default_baseline_room_is_honest():
+    """T22-fix1 (#91). Renamed from `test_label_honesty_is_missing_only_on_the_legacy_default_room_path`.
+    OLD: asserted `legacy = mode is None and args.rival == "baseline"` was in server/__main__.py.
+    NEW: the `legacy` path is gone, and `--rival baseline` with no mode shows "Baseline (scripted)"."""
     from web.bridge import make_game
     for kind in ("ai", "baseline"):
         assert make_game("human_vs_ai", "A", 0, kind, honest=True).rival_label == modes.label(kind)
     assert make_game("human_vs_ai", "A", 0, "ai").rival_label == AI_LABEL      # ai is always honest
-    assert make_game("human_vs_ai", "A", 0, "baseline").rival_label is None    # legacy default
+    assert make_game("human_vs_ai", "A", 0, "baseline").rival_label is None    # class default only
     src = (ROOT / "server/__main__.py").read_text()
-    assert 'legacy = mode is None and args.rival == "baseline"' in src
+    assert "legacy" not in src and "honest=not" not in src
+    assert modes.label("baseline") == "Baseline (scripted)"
     assert smodes.make_match("baseline").honest is True
