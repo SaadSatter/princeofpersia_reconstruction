@@ -65,6 +65,8 @@ def test_a_take_with_no_uniform_left_kneels_the_same_way():
 
 def test_picking_up_a_sword_kneels_for_all_6_frames():
     ep = V.VersusEpisode(arena.situation("A"), dict(arena.STARTS, A=(2, 0, 7, +1), B=(1, 2, 2, +1)), 0)
+    ep.step("A", "DRAW")
+    run(ep, V.DRAW_FRAMES + 1)
     ep.step("A", "THROW")
     run(ep, V.THROW_RELEASE + V.THROW_RECOVERY + 4)
     ep._duel.rivals["A"].kid.col = 9                        # stand on the sword

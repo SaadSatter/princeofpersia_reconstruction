@@ -28,10 +28,15 @@ Many duels can run on one server at once, one per room.
 
 1. Both players open the URL. The page offers **Create room** and **Join room**.
 2. Player 1 presses **Create room**. The page shows a 4-letter code (capital
-   letters, no I and no O, for example `KTWM`) and Player 1 takes seat A (WASD,
-   F, G, T, left Shift). Read the code to Player 2.
+   letters, no I and no O, for example `KTWM`) and Player 1 takes seat A. Read the
+   code to Player 2.
 3. Player 2 types the code (any case) and presses **Join room**, and takes seat
-   B (arrows, `.`, `/`, `'`, right Shift). The duel starts.
+   B. The duel starts.
+   Either control set drives your own seat (decision #55, 2026-11-24): WASD, F,
+   G, T, left Shift **or** the arrows, `.`, `/`, `'`, right Shift, and keys from
+   both sets held together combine. The page's key hints say so. Local
+   two-player on one keyboard still gives seat A the WASD set and seat B the
+   arrows.
 4. A wrong or expired code says "No room with that code"; a room that already
    has two players says "That room is full". You can retry. After 10 failed
    joins in a minute on one connection the server refuses and closes it ("Too
@@ -102,7 +107,8 @@ is his call.
 
 The server steps the duel 12 times a second with an injectable clock (wall
 time is only used for pacing, never inside the engine). Each tick uses each
-seat's latest held keys (none held before a message). The inputs are resolved
+seat's latest held keys (none held before a message; the server accepts either
+control set and renames it into the seat's own, `web/bridge.py` `to_seat_keys`). The inputs are resolved
 by `web/bridge.py` (`seat_input`, the in-air LUNGE to KICK swap, the
 `legal_actions` filter), not copied. A stall catches up at most 3 ticks. With
 `--rival baseline` the AI seat answers within 0.04 s or its tick is a labelled

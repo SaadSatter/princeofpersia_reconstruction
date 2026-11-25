@@ -93,6 +93,7 @@ BREAKS_DISGUISE = ("DRAW", "LUNGE", "THROW", "KICK", "SWEEP")  # R-V21
 DIRECTIONAL = {d: (d, "STEP_" + d, "JUMP_" + d, "RUN_JUMP_" + d) for d in ("LEFT", "RIGHT")}
 HOPS = ("none", "bumped_ceiling")      # UP on open floor: a hop straight up (pop/engine.py _up)
 HOP_FLIPS = {"_HOP_FLIP_LEFT": -1, "_HOP_FLIP_RIGHT": +1}       # R-V22, started by the duel
+GRACE_TICKS = 2                       # R-V35, Saad #54 (2026-11-24): direction + jump window
 # R-V18 (T01, AUDIT-B F1): every motion a guard can show (pop/guards.py Guard.motion),
 # as (effect, frames). A disguised rival's move outside this set is shown to the
 # other seat only if it raises suspicion by rule (Duel.suspicious_rise); any
@@ -168,10 +169,19 @@ class Rival(Game):
                 and not Game.blocks(self, where))
 
     def _jump_look(self, running: bool, vaulted: bool) -> str:
-        """R-V22: a jump over someone is a flip, and so is every running jump
-        (Saad, 2026-11-17: over holes and spikes too) and a hop turned into a
-        jump. A standing jump over nobody stays a plain jump."""
-        return "flipped" if running or vaulted or self._hop_flip else "jumped"
+        """R-V22 (amended by Saad #53, 2026-11-24): every directional jump is a
+        flip, standing or running, over someone or nobody. Where it lands is
+        unchanged. (Before: only a jump over someone, a running jump or a hop
+        turned into a jump flipped.)"""
+        return "flipped"
+
+    def _directional(self, d: int, kind: str):
+        """A jump pointed the other way faces that way and jumps, with no separate
+        4-frame turn first (Saad #53/#54: a direction and a jump are one flip in
+        that direction). Runs and steps still turn first (R-D20)."""
+        if kind == "jump":
+            self.kid.facing = d
+        yield from super()._directional(d, kind)
 
     def _flip_from_hop(self, d: int):
         """R-V22 (Saad, 2026-11-17): a direction pointed while hopping straight up
@@ -395,6 +405,10 @@ class Duel:
         self._move_frame: dict[str, int] = {seat: 0 for seat in SEATS}
         self._move_action: dict[str, str | None] = {seat: None for seat in SEATS}
         self._started: dict[str, int] = {seat: -1 for seat in SEATS}   # frame a move began
+        # R-V35 (grace window): how the last move ended, and whether this one began a run.
+        self._last_end: dict[str, tuple[str | None, str | None, int] | None] = {
+            seat: None for seat in SEATS}                       # (action, effect, frame)
+        self._fresh: dict[str, bool] = {seat: True for seat in SEATS}
         # While the rivals advance, each plans against the other as it was when the
         # frame began, so the seat id never decides where a move goes (R-V00).
         self._view: dict[str, dict] | None = None
@@ -708,6 +722,14 @@ class Duel:
                 return
             r._tick()
             return
+        jump = self._grace_jump(seat) if gen is not None else None
+        if jump is not None:                 # R-V35: a jump just after a direction is one flip
+            self.pending[seat] = None
+            self.cancel(seat)
+            if self._start(seat, jump):
+                return
+            r._tick()
+            return
         d = self._hop_turn(seat) if gen is not None else None
         if d is not None:                    # R-V22: a direction turns the hop into a flip
             self.pending[seat] = None
@@ -742,9 +764,38 @@ class Duel:
             return None
         return next((d for d in ("LEFT", "RIGHT") if act in DIRECTIONAL[d]), None)
 
+    def _grace_jump(self, seat: str) -> str | None:
+        """R-V35 (Saad #54, 2026-11-24): the jump a seat meant, if a jump input
+        arrived within GRACE_TICKS of a plain direction (a run, a careful step or
+        a turn) that began a fresh run, and the jump would not be a climb.
+
+        Direction first, then jump: the pending input is a jump that way, a
+        running jump asked for by a front end that already saw the first run
+        frame, or a bare UP that hops. The unfinished direction move is dropped
+        (it places the kid only at its end, so nothing is lost) and a standing
+        jump that way starts now. A direction that began a run chain is left
+        alone: a jump mid-run is the ordinary running jump. Jump first, then
+        direction is the hop turn (`_hop_turn`, R-V22)."""
+        act, mv = self.pending[seat], self._move_action[seat]
+        if (act is None or mv is None or not self._fresh[seat]
+                or not 1 <= self._move_frame[seat] <= GRACE_TICKS):
+            return None
+        d = next((n for n in ("LEFT", "RIGHT") if mv in (n, "STEP_" + n)), None)
+        if d is None:
+            return None
+        if act == "JUMP_" + d or (act == "RUN_JUMP_" + d and mv == d) or (
+                act == "UP" and self.rivals[seat].up_hops()):
+            return "JUMP_" + d
+        return None
+
     def _start(self, seat: str, action: str) -> bool:
         """Start a move and run its first frame; False if it had no frames."""
         r = self.rivals[seat]
+        last = self._last_end[seat]
+        side = next((n for n in ("LEFT", "RIGHT") if n in action), None)
+        self._fresh[seat] = not (last is not None and last[1] == "moved"
+                                 and last[2] >= self.frames - 1
+                                 and side is not None and side in (last[0] or ""))
         self._move_action[seat] = action
         self._started[seat] = self.frames
         gen = r._versus_macro(action)
@@ -770,6 +821,7 @@ class Duel:
     def _finish(self, seat: str) -> None:
         r = self.rivals[seat]
         r._result["frames"] = self._move_frame[seat]
+        self._last_end[seat] = (self._move_action[seat], r._result.get("effect"), self.frames)
         self.last_result[seat] = dict(r._result)
         self._moves[seat] = None
         self._move_frame[seat] = 0

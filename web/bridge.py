@@ -16,14 +16,15 @@ for local play, not for online human vs human (which needs a server).
 
 Modes:
 
-* `human_vs_ai`: one human seat, keys as in `play.py --versus` for that seat;
+* `human_vs_ai`: one human seat. Both key sets drive it (decision #55): WASD, F, G, T,
+  left Shift and arrows, `.`, `/`, `'`, right Shift, combined as one seat's held keys;
   the other seat is driven by `rival(observation, legal_actions)`, which sees
   only its own seat. The page's default rival is the scripted baseline
   (`SeatControllerRival` around `agents/versus_baseline.make_baseline()`, made
   by `make_game`); `WebGame` itself defaults to the labelled `IdleRival`. The
   trained rival (T07) plugs in the same way: a `SeatController` in the adapter.
-* `local_two_players`: both seats on one keyboard, one payload per seat, two
-  panels. A local test mode, like `play.py ARENA --versus`: both players see
+* `local_two_players`: both seats on one keyboard (A = WASD set, B = arrows set),
+  one payload per seat, two panels. A local test mode, like `play.py ARENA --versus`: both players see
   both panels.
 """
 
@@ -50,6 +51,20 @@ KEY_MAP = {
     "B": {"left": "left", "right": "right", "up": "up", "down": "down", "attack": ".",
           "draw": "/", "take": "'", "shift": "rshift"},
 }
+
+
+# T19, decision #55 (Saad, 2026-11-24): outside local two-player, both sets drive the
+# player's own seat. Logical key name -> the physical names of both sets.
+ALL_KEY_NAMES = frozenset(name for m in KEY_MAP.values() for name in m.values())
+_LOGICAL = {name: logical for m in KEY_MAP.values() for logical, name in m.items()}
+
+
+def to_seat_keys(seat: str, names) -> set[str]:
+    """Physical key names from either set, renamed into `seat`'s own set (the online
+    server uses one two-seat game, whose seats read their own names). Unknown
+    names, and anything that is not text, are dropped."""
+    mine = KEY_MAP[seat]
+    return {mine[_LOGICAL[n]] for n in names if isinstance(n, str) and n in _LOGICAL}
 
 
 def running_dir(me: dict) -> str | None:
@@ -237,9 +252,12 @@ class WebGame:
         return {seat: self._held(seat) for seat in self.humans}
 
     def _held(self, seat: str) -> dict:
-        m = KEY_MAP[seat]
-        held = sorted(k for k, name in m.items() if k != "shift" and self._keys.get(name))
-        return {"held": held, "shift": bool(self._keys.get(m["shift"]))}
+        """The seat's logical keys. Human vs AI reads both sets (#55); local two-player
+        keeps seat A on its set and seat B on its own."""
+        maps = list(KEY_MAP.values()) if self.mode == "human_vs_ai" else [KEY_MAP[seat]]
+        held = sorted({k for m in maps for k, name in m.items()
+                       if k != "shift" and self._keys.get(name)})
+        return {"held": held, "shift": any(self._keys.get(m["shift"]) for m in maps)}
 
     def rematch(self) -> None:
         """R: the same duel again from the same seed (play.py --versus)."""

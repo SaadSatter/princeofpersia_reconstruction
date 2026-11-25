@@ -93,9 +93,8 @@ test("T19: gameKeys covers every key of both seats and no more", () => {
 test("T19: human vs AI and online hints name both sets; local two-player keeps the split", () => {
   for (const seat of ["A", "B"]) {
     const h = K.keyHints("human_vs_ai", seat);
-    assert.match(h, /WASD/);
-    assert.match(h, /Arrow/);
     assert.match(h, /work too/);
+    assert.match(h, seat === "A" ? /right Shift work too/ : /WASD, F, G, T and left Shift work too/);
   }
   const local = K.keyHints("local_two_players", "A");
   assert.doesNotMatch(local, /work too/);

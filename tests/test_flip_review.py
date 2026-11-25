@@ -244,7 +244,7 @@ def test_flips_and_hop_flips_are_deterministic():
 
 # --- the observation agrees with itself (reviewer note) -------------------------
 @pytest.mark.parametrize("action, effect", [("RUN_JUMP_RIGHT", "flipped"),
-                                            ("JUMP_RIGHT", "jumped")])
+                                            ("JUMP_RIGHT", "flipped")])   # T19 #53: was "jumped"
 def test_last_result_names_the_same_effect_as_the_motion(action, effect):
     ep = episode((2, 0, 1, +1), PARKED)
     ep.step("A", action)

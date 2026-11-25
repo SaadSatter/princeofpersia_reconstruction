@@ -363,6 +363,26 @@ class Game:
         if (yield from self._phase(flight, depart)):
             self._enter(target, "jump")
 
+    def _climb_target(self) -> Cell | None:
+        """The ledge cell UP climbs to from here, facing as now, or None (R-C12)."""
+        k = self.kid
+        above = self.geom.offset(k.cell, -1, 0)
+        above_ahead = self.geom.offset(k.cell, -1, k.facing)
+        if (isinstance(above, tuple) and self.geom.tile(above) == T.SPACE
+                and isinstance(above_ahead, tuple) and not self.blocks(above_ahead)
+                and self.geom.supported(above_ahead)):
+            return above_ahead
+        return None
+
+    def up_hops(self) -> bool:
+        """True if UP here, as the kid stands now, is a hop straight up: not a climb,
+        a hang climb or the open exit. T19 (#54) uses it to tell a hop from a climb."""
+        k = self.kid
+        if k.posture != "standing":
+            return False
+        ex = self.mech.exit_for(k.cell)
+        return not (ex is not None and ex.open) and self._climb_target() is None
+
     def _up(self):
         k = self.kid
         if k.posture == "hanging":
@@ -383,10 +403,8 @@ class Game:
                 self.terminal = "won"
             return
         above = self.geom.offset(k.cell, -1, 0)
-        above_ahead = self.geom.offset(k.cell, -1, k.facing)
-        if (isinstance(above, tuple) and self.geom.tile(above) == T.SPACE
-                and isinstance(above_ahead, tuple) and not self.blocks(above_ahead)
-                and self.geom.supported(above_ahead)):
+        above_ahead = self._climb_target()
+        if above_ahead is not None:
             self._result["effect"] = "climbed"       # R-C12 (simplified)
             self._plan("climbed", P.CLIMB_UP, above_ahead)
             if (yield from self._phase(P.CLIMB_UP, P.CLIMB_DEPART)):
