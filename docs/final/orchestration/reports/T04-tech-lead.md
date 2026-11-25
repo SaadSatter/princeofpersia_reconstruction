@@ -1,0 +1,7 @@
+# T04 report (Tech Lead), 2026-11-23 — condensed by the orchestrator
+
+Status: done, awaiting gates. Branch `task/T04` (in /home/claude/sm/wt/T04): 2dfa651 failing tests (2 collection errors confirmed) -> 3e33b39 implementation -> af76c30 design note + session record. New files only: pop/seats.py, pop/versus_runner.py, tests/test_seats.py, tests/test_versus_runner.py, docs/final/VERSUS_RUNNER.md, docs/agent-sessions/13-T04-versus-runner.md (number provisional; collides with the existing 13 record — renumber at integration). pop/versus.py untouched.
+Tests: new 38 passed; full 457 passed, 12 skipped; scan_secrets 0 findings.
+Design: SeatController protocol (human, scripted, random, policy, fallback); controller_seed one-way hash; VersusRunner asks both seats on the same frames with deep copies; exact-name validation; exception/timeout/illegal/malformed -> WAIT source:fallback with reason, per seat; injectable clock plus real-time cap via _call_with_timeout; per-seat max_decisions, max_fallbacks, max_frames -> status aborted:<reason>:<seats>; per-seat JSONL traces; replay(); seat swap.
+Limitations: no public VersusEpisode.snapshot(), runner reads _duel (runner only); HumanController WAIT is a 6-frame move (play.py needs a no-input answer); lockstep, not real-time; timed-out threads cannot be killed; winner mapping unit-tested only.
+Decisions for Saad: 6-frame cadence and 5 s timeout; max_fallbacks overrun = aborted vs forfeit, default limits; exact-name validation.
