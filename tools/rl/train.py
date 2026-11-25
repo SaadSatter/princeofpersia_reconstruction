@@ -245,9 +245,14 @@ def train(cfg: TrainConfig) -> dict:
     if final and final["failed"]:
         stopped = "final_check_policy_error"             # #47: an error in the shipped path fails the check
         policy_errors += final["policy_errors"]
+        # #50: weights that failed the shipped-path check must not sit under the shipping name.
+        (out / "weights.json").replace(out / "weights.failed.json")
+    failed = stopped == "final_check_policy_error"
     summary = {"commit": _git_head(), "seed": cfg.seed, "updates": update, "episodes": episodes,
                "steps": steps, "wall_seconds": round(time.time() - t0, 1), "stopped": stopped,
                "policy_errors": policy_errors, "weights_sha256": sha, "checkpoint_chosen_by_score": False,
+               "weights_file": "weights.failed.json" if failed else "weights.json",
+               "weights_failed": failed,
                "final_check_vs_baseline_tuning_pure_python": final}
     (out / "summary.json").write_text(json.dumps(summary, indent=1))
     return summary
