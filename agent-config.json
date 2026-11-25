@@ -1,0 +1,153 @@
+{
+  "schema_version": "course-1",
+  "updated": "2026-11-24",
+  "status_note": "Manifest for Shadow Masque's in-game AI rival and its production agent team. As of 2026-11-24 the PPO rival code (agents/rl, tools/rl), the macro layer and the versus runner are on branch orch/preview, and the evaluation suite (evaluation/, tools/eval) is on orch/wip-T08 (untested, unreviewed). None of them is on main yet. No trained weights exist yet. Entries say where each artifact lives.",
+  "purpose": "Drive one rival seat in a two-rival stealth duel: choose bounded macro-actions from that seat's own partial observation, compared against a scripted pathfinding baseline on the same interface.",
+  "tools_available": [
+    "macro-actions only: BLEND, DISGUISE, WAIT, FOLLOW, STRIKE, FLEE, CLIMB, SEARCH, RIG_TRAP (decision #23; RIG_TRAP masked until traps are integrated)",
+    "the seat's own legal-action list, used as the action mask"
+  ],
+  "prohibited_actions": [
+    "read the GameState, the other seat's observation, the RNG seed, guard scripts, trap ownership or other rooms",
+    "tell a disguised rival from a guard by anything a human could not see",
+    "act outside its own seat or submit outcomes instead of inputs",
+    "read held-out evaluation scenarios during training",
+    "make network or paid model calls"
+  ],
+  "memory_policy": "Per-seat, per-duel encoder history only (last macro and its state, rooms seen, per-figure tells matched by place; capped counters, no clock). Reset with each duel. Nothing persists between duels or between seats.",
+  "context_sources": [
+    "pop/observation.py: observe(seat), one seat's view (main)",
+    "pop/interface.py: legal_actions(seat) (main)",
+    "agents/rl/encoder.py: Encoder, 251 features (orch/preview)"
+  ],
+  "model_choice": {
+    "default_mode": "scripted baseline until a trained policy passes Gate 2 (agents/versus_baseline.py, orch/preview)",
+    "in_game_model": "Small PPO policy we train ourselves (decision #3, 2026-11-23): actor-critic MLP 2x64 tanh, masked softmax; pure-Python stdlib inference, argmax over allowed macros",
+    "weights": "plain JSON 'sm-ppo-mlp-1', loaded only with its recorded SHA-256 (agents/rl/policy.py:load_net). None yet: full training not started",
+    "training": "tools/rl/train.py, numpy, fixed seeds; full run needs Saad's approval",
+    "legacy_llm_player": "agents/model_player.py with Claude Haiku 4.5 via POP_MODEL (midterm rival; not the G2/G3 rival). Paid calls capped under $1 total, smoke only (decision #8)",
+    "development_assistants": "Claude Code: Production Orchestrator on claude-opus-5-5 (main session) and named workers on claude-sonnet-5-5; see agent_team"
+  },
+  "prompts_or_system_instructions": "N/A for the PPO rival (no prompt). Legacy LLM player: agents/model_player.py system prompt.",
+  "named_failure_modes": [
+    "hidden-state leak through features, mask, ids, ordering or errors",
+    "reward hacking through shaping terms",
+    "over-fitting to the two tuning starts",
+    "held-out contamination",
+    "inference error or timeout (labelled WAIT fallback)",
+    "stale macro after the state changed (re-validated each decision)",
+    "weights file tampered or mismatched (SHA-256 refusal)",
+    "no way down a floor in the macro vocabulary (GATE-T05-eval; T05-fix1 WIP)"
+  ],
+  "evaluation_cases": "Deterministic tests: tests/test_rl_encoder.py, tests/test_rl_policy.py, tests/test_rl_train.py, tests/test_versus_runner.py, leak tests (orch/preview). Scenario suite D1, B2, I3, F5 (tuning) and H6 (held-out, frozen) with Saad's success definitions (decision #9): evaluation/ and tools/eval/run_versus_suite.py (orch/wip-T08, unreviewed).",
+  "logging_policy": "Per-run results JSON with commit, controller names and versions, weights hash, seat, outcome, termination, success flag, metrics, invalid/stale/fallback/busy counts, latency and trace paths. Two-seat traces replay to the same final snapshot. Provider, token and cost fields are N/A for the PPO rival. No player data or credentials.",
+  "human_override_points": [
+    "human takes either seat at any time (same engine.step)",
+    "choose the scripted baseline as the rival",
+    "quit or rematch with the same seed"
+  ],
+  "test_command": "uv run pytest -q",
+  "ci_workflow_path": ".github/workflows/ci.yml",
+  "native_artifact": ".claude/skills/evaluate-rival/SKILL.md (executable evaluation extension); agents/rl/policy.py:make_rl_rival (callable rival interface, orch/preview)",
+  "limits": {
+    "duel_frames": 3600,
+    "duel_minutes": 5,
+    "decision_every_frames": 6,
+    "macro_every_decisions": 4,
+    "controller_timeout_seconds": 5,
+    "live_spend_cap_usd": 1.0,
+    "training_seconds_default": 5100
+  },
+  "fallback": "Inference error or runner failure gives a labelled WAIT ('source': 'fallback'), counted per seat; a run over its fallback limit is reported as aborted, never dropped.",
+  "limitations": [
+    "Untrained: no weights yet, so no strength claim is possible.",
+    "Policy chooses when to act; the target is fixed to the nearest figure that is not downed.",
+    "Only two tuning starts: expect over-fitting.",
+    "In the static web build the full state lives in the browser, so devtools can read hidden state; acceptable for human vs AI, not for online human vs human.",
+    "Most rival and evaluation code is on orch/preview or WIP branches, not main."
+  ],
+  "agent_team": [
+    {
+      "role": "Production Orchestrator (execution architecture; not a course production role)",
+      "native_artifact": ".claude/agents/orchestrator.md",
+      "procedure": "docs/final/orchestration/agents/orchestrator.md",
+      "model": "claude-opus-5-5 (main session, .claude/settings.json agent=orchestrator)",
+      "purpose": "Route requests, write briefs, delegate to named workers, run Gate 3, keep STATUS and REVIEW_LOG.",
+      "tools_and_permissions": "Read, write, shell, git; may spawn only tech-lead, qa, evaluation-specialist, requirements-auditor, rules-reviewer, Explore, claude-code-guide, web-fetch. No merge into main of gameplay, no push, no paid calls without Saad.",
+      "outputs": "task briefs, REVIEW_LOG rows, STATUS, integration branches",
+      "handoff": "brief committed to main -> tech-lead",
+      "human_approval": "Saad decides design, merges, pushes, spending and every Student decision."
+    },
+    {
+      "role": "Tech Lead (course role: tech)",
+      "native_artifact": ".claude/agents/tech-lead.md",
+      "procedure": "docs/final/orchestration/agents/tech-lead.md",
+      "model": "claude-sonnet-5-5",
+      "purpose": "Implement approved tasks with failing tests first.",
+      "tools_and_permissions": "Read, Grep, Glob, Edit, Write, Bash in its own worktree; the brief's write paths only; no Agent tool.",
+      "outputs": "commits on task/<ID>; reports/<ID>-tech-lead.md",
+      "handoff": "its committed report -> qa",
+      "human_approval": "Cannot approve or close its own work."
+    },
+    {
+      "role": "QA (course role: qa)",
+      "native_artifact": ".claude/agents/qa.md",
+      "procedure": "docs/final/orchestration/agents/qa.md",
+      "model": "claude-sonnet-5-5",
+      "purpose": "Gate 1: verify the exact commit, write tests, reproduce failures.",
+      "tools_and_permissions": "Read, Grep, Glob, Edit, Write, Bash in its own worktree; tests and its report only; never production code.",
+      "outputs": "tests and reports/<ID>-qa.md on gate/<ID>-qa with a verdict",
+      "handoff": "reads the tech-lead report; its report -> evaluation-specialist or orchestrator",
+      "human_approval": "Verdicts are recommendations; Saad decides findings."
+    },
+    {
+      "role": "Evaluation Specialist (not a course production role unless Saad adds it)",
+      "native_artifact": ".claude/agents/evaluation-specialist.md",
+      "procedure": "docs/final/orchestration/agents/evaluation-specialist.md",
+      "model": "claude-sonnet-5-5",
+      "purpose": "Gate 2: knowledge boundary, baseline fairness, PPO method, held-out separation, evaluation validity.",
+      "tools_and_permissions": "Read, Grep, Glob, Edit, Write, Bash in its own worktree; evaluation paths and its report only.",
+      "outputs": "reports/<ID>-evaluation-specialist.md on gate/<ID>-eval",
+      "handoff": "reads the qa report; its report -> orchestrator",
+      "human_approval": "No training run or paid call without Saad."
+    },
+    {
+      "role": "Requirements Auditor (temporary worker)",
+      "native_artifact": ".claude/agents/requirements-auditor.md",
+      "procedure": "docs/final/orchestration/agents/requirements-auditor.md",
+      "model": "claude-sonnet-5-5",
+      "purpose": "Read-only compliance audit against FINAL_REQUIREMENTS.",
+      "tools_and_permissions": "Read, Grep, Glob, Write (its report only), read-only Bash.",
+      "outputs": "reports/<ID>-requirements-auditor.md on audit/<ID>",
+      "handoff": "its report -> orchestrator",
+      "human_approval": "Never marks anything complete without evidence."
+    },
+    {
+      "role": "Independent review task: rules-reviewer",
+      "native_artifact": ".claude/agents/rules-reviewer.md",
+      "model": "claude-sonnet-5-5",
+      "purpose": "Read-only review of rules, the per-seat interface and hidden information.",
+      "tools_and_permissions": "Read, Grep, Glob only.",
+      "outputs": "findings text, saved by the orchestrator with a label",
+      "handoff": "findings -> orchestrator -> Saad",
+      "human_approval": "Saad decides every finding."
+    },
+    {
+      "role": "Reusable skills",
+      "native_artifact": ".claude/skills/game-rules-audit/SKILL.md, .claude/skills/session-evidence/SKILL.md, .claude/skills/evaluate-rival/SKILL.md",
+      "purpose": "Boundary audit; session evidence records; reproducible rival evaluation.",
+      "human_approval": "Reports only; Saad decides."
+    }
+  ],
+  "playing_agent_interface": {
+    "native_artifact": "pop/interface.py (two-seat), pop/seats.py and pop/versus_runner.py (orch/preview)",
+    "operations": {
+      "seat": ["observe(seat)", "legal_actions(seat)", "step(seat, action) via the runner"],
+      "runner": ["reset(seed)", "outcome()"]
+    },
+    "sees": "copies of its own seat's observation and legal-action list only",
+    "never_sees": ["the GameState", "the other seat's observation", "disguise identity", "trap ownership", "other rooms", "the RNG seed", "repository files", "the evaluator"],
+    "limits": {"duel_frames": 3600},
+    "evaluation_cases": "tests/test_leakage.py, tests/test_versus.py, tests/test_versus_runner.py (orch/preview)"
+  }
+}

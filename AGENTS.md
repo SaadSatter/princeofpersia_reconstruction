@@ -80,8 +80,10 @@ Before planning, reviewing or modifying the final project:
 4. Identify skills in `.claude/skills/` whose triggers apply.
 5. Read the latest record in `docs/agent-sessions/` before continuing
    unfinished work.
-6. Do not run paid model calls, push, merge or change the frozen midterm
-   suite without Saad's explicit approval.
+6. Do not run paid model calls, merge or change the frozen midterm suite
+   without Saad's explicit approval. Pushing branches and opening issues and
+   PRs for handoffs need no per-push approval (Saad, 2026-11-24, decisions
+   #27 and #28); never force-push, delete or rewrite a shared branch.
 
 Before implementing anything, briefly report: which documents were read,
 which requirements apply, which skills are relevant, and any open decisions
