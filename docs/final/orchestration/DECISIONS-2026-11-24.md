@@ -68,3 +68,14 @@ Saad, in chat (verbatim): "Yes stop on first error, keep going through the gates
 | # | Topic | Saad's answer (verbatim excerpt) | Effect |
 |---|---|---|---|
 | 47 | T07-fix1 proposed fail-fast | "Yes stop on first error" | Training stops on the first update with any policy or encoder error, writes no weights, and exits with status 2 and a message on stderr (`TrainConfig.fail_on_policy_error`, on by default). The flag on this proposal is cleared |
+
+## Addendum: Tue 2026-11-24, late night (T13-fix1, training run)
+
+Saad's choices (AskUserQuestion), quoted verbatim:
+
+| # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
+|---|---|---|---|
+| 48 | T13 silent-drop detection (EVAL-3) | "Detect in ~6 s (Recommended)" | Server keepalive: ping every 3 s, 3 s timeout. A silent drop is noticed within about 6 s, the dropped seat's held keys are cleared at once, and then the 15 s pause (#38) starts |
+| 49 | Online AI-seat fallbacks (EVAL-5) | "Log only, document (Recommended)" | A live human-vs-AI duel never aborts on fallbacks. Each fallback is logged server-side as `"source": "fallback"` and counted in the trace. `ONLINE_PLAY.md` says so. Evaluation keeps #24's abort rule |
+| 50 | Weights after a failed `final_check` (T16 QA F1) | "Withhold (Recommended)" | On a `final_check` policy error, `weights.json` is renamed `weights.failed.json`, alongside the existing exit 2 and `stopped`. This is a small task (T17) through QA and Eval before the run |
+| 51 | **Full PPO training run** | "Go, 4,800 s cap (Recommended)" | **Saad's go-ahead** for the full run from `orch/reviewed` 2835928 (plus T17 once closed), on Saad's Mac: 2 workers, the numpy `train` extra, `--seconds 4800`, the Mac kept awake. It starts after T17 passes Gate 3. It counts only with exit 0 and `stopped` in {`time_cap`, `max_iters`} |
