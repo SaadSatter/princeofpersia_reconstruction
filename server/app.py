@@ -30,6 +30,8 @@ from websockets.datastructures import Headers
 from websockets.http11 import Response
 
 from .match import TICK_S, Match
+from .rooms import (MAX_FAILED_JOINS, MAX_ROOMS, FailedJoins, Room, RoomFactory,
+                    make_code, normalize_code)
 
 JOIN_TIMEOUT_S = 5.0
 SEND_TIMEOUT_S = 2.0         # a client that cannot take one message in this long is dropped
@@ -37,13 +39,20 @@ MAX_QUEUED = 48              # per seat; older `state` messages are dropped firs
 PING_INTERVAL_S = 3.0        # decision #48: a silent drop is noticed in about 6 s
 PING_TIMEOUT_S = 3.0
 CLOSE_TIMEOUT_S = 1.0        # the library default (10 s) would delay the notice
-ERROR_TEXT = {"full": "The duel is full.", "bad_token": "That seat token is not valid."}
+LOBBY_IDLE_S = 60.0          # a client choosing Create or Join may think this long
+ERROR_TEXT = {"full": "That room is full", "bad_token": "That seat token is not valid.",
+              "no_room": "No room with that code", "expired": "That room has expired",
+              "rate_limited": "Too many tries. Wait a minute.", "busy": "The server is full. Try later.",
+              "no_rooms": "This server has no rooms."}
 INDEX = "online.html"
 ONLINE_FILES = frozenset({"online.html", "online.js", "keys.js", "draw.js", "ui.js"})
 
 
-def hello_message(seat: str, token: str, rival: str | None) -> dict:
-    return {"type": "hello", "seat": seat, "token": token, "rival": rival}
+def hello_message(seat: str, token: str, rival: str | None, code: str | None = None) -> dict:
+    msg = {"type": "hello", "seat": seat, "token": token, "rival": rival}
+    if code is not None:
+        msg["code"] = code                        # this room's own code, to its own seats only
+    return msg
 
 
 def error_message(code: str) -> dict:
@@ -95,19 +104,32 @@ class SeatLink:
 
 
 class OnlineServer:
-    def __init__(self, match: Match, clock: Callable[[], float] = time.monotonic,
+    """Many rooms (T18, #52), each with its own `Match`, links, sockets and expiry.
+
+    `match` alone is the T13 single-duel lobby (a join with no code), kept so the old
+    clients and tests work unchanged. `match_factory` turns on rooms: `create` makes a
+    room with a 4-letter code, `join` with a code takes its free seat.
+    """
+
+    def __init__(self, match: Match | None = None, clock: Callable[[], float] = time.monotonic,
                  site_dir: Path | None = None, send_timeout: float = SEND_TIMEOUT_S,
                  ping_interval: float = PING_INTERVAL_S, ping_timeout: float = PING_TIMEOUT_S,
-                 close_timeout: float = CLOSE_TIMEOUT_S):
-        self.match = match
+                 close_timeout: float = CLOSE_TIMEOUT_S,
+                 match_factory: RoomFactory | None = None,
+                 code_factory: Callable[[], str] = make_code, max_rooms: int = MAX_ROOMS,
+                 max_failed_joins: int = MAX_FAILED_JOINS):
         self.clock = clock
         self.send_timeout = send_timeout
         self.ping_interval, self.ping_timeout = ping_interval, ping_timeout
         self.close_timeout = close_timeout
-        self.links: dict[str, SeatLink] = {}
+        self.match_factory = match_factory
+        self.code_factory = code_factory
+        self.max_rooms = max_rooms
+        self.max_failed_joins = max_failed_joins
+        self.default = Room(None, match) if match is not None else None
+        self.rooms: dict[str, Room] = {}
         self._bg: set[asyncio.Task] = set()
         self.site_dir = Path(site_dir) if site_dir is not None else None
-        self.conns: dict[str, object] = {}
         self._files: dict[str, Path] = {}
         if self.site_dir is not None:
             manifest = json.loads((self.site_dir / "manifest.json").read_text())
@@ -117,6 +139,22 @@ class OnlineServer:
                      if n in ONLINE_FILES or n.startswith("art/")} | {"manifest.json"}
             self._files = {"/" + n: self.site_dir / n for n in sorted(names)}
             self._files["/"] = self.site_dir / INDEX
+
+    # The single-duel lobby's parts, under the names T13 used.
+    @property
+    def match(self) -> Match | None:
+        return self.default.match if self.default else None
+
+    @property
+    def links(self) -> dict:
+        return self.default.links if self.default else {}
+
+    @property
+    def conns(self) -> dict:
+        return self.default.conns if self.default else {}
+
+    def all_rooms(self) -> list[Room]:
+        return ([self.default] if self.default else []) + list(self.rooms.values())
 
     # --- serving ------------------------------------------------------------------
     async def start(self, host: str, port: int):
@@ -149,25 +187,32 @@ class OnlineServer:
 
     # --- one client -----------------------------------------------------------------
     async def handler(self, ws) -> None:
-        seat = None
+        room = seat = None
         try:
-            seat = await self._join(ws)
-            if seat is None:
+            got = await self._join(ws)
+            if got is None:
                 return
+            room, seat = got
             async for raw in ws:
-                self.match.receive(seat, raw, self.clock())
-                await self.flush()
+                room.match.receive(seat, raw, self.clock())
+                await self._flush_room(room)
         except Exception:                       # a bad client must never stop the server
             pass
         finally:
-            if seat is not None and self.conns.get(seat) is ws:
-                del self.conns[seat]
-                self._drop_link(seat)
-                self.match.connection_lost(seat, self.clock())
-                await self.flush()
+            if seat is not None and room.conns.get(seat) is ws:
+                self._release(room, seat)
+                await self._flush_room(room)
 
-    def _drop_link(self, seat: str) -> None:
-        link = self.links.pop(seat, None)
+    def _release(self, room: Room, seat: str) -> None:
+        """A seat's socket is gone: the duel pauses (#38) and the room's empty timer may start."""
+        del room.conns[seat]
+        self._drop_link(room, seat)
+        room.match.connection_lost(seat, self.clock())
+        room.note_presence(self.clock())
+
+    @staticmethod
+    def _drop_link(room: Room, seat: str) -> None:
+        link = room.links.pop(seat, None)
         if link is not None:
             link.stop()
 
@@ -177,60 +222,143 @@ class OnlineServer:
         task.add_done_callback(self._bg.discard)
 
     @staticmethod
-    async def _close_quietly(ws) -> None:
+    async def _close_quietly(ws, reason: str = "replaced") -> None:
         try:
-            await ws.close(1000, "replaced")        # same token, new socket
+            await ws.close(1000, reason)            # same token, new socket (or an expired room)
         except Exception:
             pass
         ws.transport.abort()                         # a half-open old socket must not linger
 
-    async def _join(self, ws) -> str | None:
+    async def _refuse(self, ws, code: str, close: bool = True) -> None:
         try:
-            raw = await asyncio.wait_for(ws.recv(), JOIN_TIMEOUT_S)
-            msg = json.loads(raw) if isinstance(raw, str) and len(raw) <= 512 else None
-        except (asyncio.TimeoutError, ValueError):
-            msg = None
-        if not isinstance(msg, dict) or msg.get("type") != "join":
-            await ws.close(1008, "join first")
-            return None
-        res = self.match.join(msg.get("token"), self.clock())
-        if not res["ok"]:
-            await ws.send(json.dumps(error_message(res["code"])))
-            await ws.close(1008, res["code"])
-            return None
+            await asyncio.wait_for(ws.send(json.dumps(error_message(code))), self.send_timeout)
+        except Exception:
+            close = True
+        if close:
+            await ws.close(1008, code)
+
+    async def _join(self, ws) -> tuple[Room, str] | None:
+        """The lobby phase of one connection. A failed code join keeps the socket open for a
+        retry, but only `max_failed_joins` times a minute (then a refusal and a close)."""
+        fails = FailedJoins(self.max_failed_joins)
+        wait = JOIN_TIMEOUT_S
+        while True:
+            try:
+                raw = await asyncio.wait_for(ws.recv(), wait)
+                msg = json.loads(raw) if isinstance(raw, str) and len(raw) <= 512 else None
+            except (asyncio.TimeoutError, ValueError):
+                msg = None
+            kind = msg.get("type") if isinstance(msg, dict) else None
+            if kind == "join" and msg.get("create") is True:
+                kind = "create"                  # the page's spelling: {"type":"join","create":true}
+            if kind not in ("join", "create"):
+                await ws.close(1008, "join first")
+                return None
+            now = self.clock()
+            legacy = kind == "join" and "code" not in msg and self.default is not None
+            if legacy:
+                room, res = self.default, self.default.match.join(msg.get("token"), now)
+                if not res["ok"]:
+                    await self._refuse(ws, res["code"])
+                    return None
+            else:
+                if fails.blocked(now):
+                    await self._refuse(ws, "rate_limited")
+                    return None
+                room, res = (self._create(now) if kind == "create"
+                             else self._join_code(msg, now))
+                if not res["ok"]:
+                    if kind == "join":
+                        fails.record(now)
+                    await self._refuse(ws, res["code"], close=False)
+                    wait = LOBBY_IDLE_S
+                    continue
+            return await self._seat_up(room, ws, res)
+
+    def _create(self, now: float) -> tuple[Room | None, dict]:
+        if self.match_factory is None:
+            return None, {"ok": False, "code": "no_rooms"}
+        self._reap(now)
+        if len(self.rooms) >= self.max_rooms:
+            return None, {"ok": False, "code": "busy"}
+        code = self.code_factory()
+        while code in self.rooms:                    # a code is reused only after its room expired
+            code = self.code_factory()
+        match = self.match_factory(code)
+        room = self.rooms[code] = Room(code, match, created=now, second_joined=match.rival is not None)
+        return room, match.join(None, now)           # the creator takes seat A
+
+    def _join_code(self, msg: dict, now: float) -> tuple[Room | None, dict]:
+        self._reap(now)
+        code = normalize_code(msg.get("code"))
+        room = self.rooms.get(code) if code is not None else None
+        if room is None:
+            return None, {"ok": False, "code": "no_room"}
+        res = room.match.join(msg.get("token"), now)  # a token of another room is "bad_token" here
+        if res["ok"] and not msg.get("token"):
+            room.second_joined = True
+        return room, res
+
+    async def _seat_up(self, room: Room, ws, res: dict) -> tuple[Room, str] | None:
         seat = res["seat"]
-        old = self.conns.get(seat)
-        self.conns[seat] = ws
-        self._drop_link(seat)
-        link = self.links[seat] = SeatLink(ws, self.send_timeout)
+        old = room.conns.get(seat)
+        room.conns[seat] = ws
+        room.note_presence(self.clock())
+        self._drop_link(room, seat)
+        link = room.links[seat] = SeatLink(ws, self.send_timeout)
         if old is not None and old is not ws:
             self._background(self._close_quietly(old))   # never wait on the old socket
         try:
             await asyncio.wait_for(
-                ws.send(json.dumps(hello_message(seat, res["token"], None))), self.send_timeout)
+                ws.send(json.dumps(hello_message(seat, res["token"], None, room.code))),
+                self.send_timeout)
         except Exception:
             # The new socket died before it heard hello: free the seat now (pause, grace).
-            if self.conns.get(seat) is ws:
-                del self.conns[seat]
-                self._drop_link(seat)
-                self.match.connection_lost(seat, self.clock())
-                await self.flush()
+            if room.conns.get(seat) is ws:
+                self._release(room, seat)
+                await self._flush_room(room)
             return None
         link.start()
-        await self.flush()
-        return seat
+        await self._flush_room(room)
+        return room, seat
 
     # --- the clock --------------------------------------------------------------------
-    async def flush(self) -> None:
-        """Move the match's outgoing messages onto each seat's queue. Never awaits a socket."""
-        for seat, link in list(self.links.items()):
-            for msg in self.match.drain(seat):
+    async def _flush_room(self, room: Room) -> None:
+        for seat, link in list(room.links.items()):
+            for msg in room.match.drain(seat):
                 link.put(json.dumps(msg, separators=(",", ":")), msg.get("type") == "state")
 
+    async def flush(self) -> None:
+        """Move every room's outgoing messages onto each seat's queue. Never awaits a socket."""
+        for room in self.all_rooms():
+            await self._flush_room(room)
+
+    def _reap(self, now: float) -> None:
+        """Drop expired rooms (item 6). Their connected clients are told and closed."""
+        for code, room in list(self.rooms.items()):
+            if not room.expired(now):
+                continue
+            del self.rooms[code]
+            for ws in list(room.conns.values()):
+                self._background(self._tell_expired(ws))
+            for seat in list(room.links):
+                self._drop_link(room, seat)
+            room.match.close()
+
+    async def _tell_expired(self, ws) -> None:
+        try:
+            await asyncio.wait_for(ws.send(json.dumps(error_message("expired"))), self.send_timeout)
+        except Exception:
+            pass
+        await self._close_quietly(ws, "expired")
+
     async def pump(self) -> None:
-        """One step of the tick loop: advance the match to `clock()` and send."""
-        self.match.advance(self.clock())
-        await self.flush()
+        """One step of the tick loop: advance every room to `clock()` and send."""
+        now = self.clock()
+        for room in self.all_rooms():
+            room.match.advance(now)
+            await self._flush_room(room)
+        self._reap(now)
 
     async def run_ticks(self, sleep=asyncio.sleep) -> None:
         while True:

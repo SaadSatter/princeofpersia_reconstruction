@@ -13,6 +13,19 @@
   #status[data-state="paused"], #status[data-state="error"] { color: #e08040; }
   #outcome { font-size: 18px; color: #f0c040; min-height: 1.4em; }
   .keys { color: #9a968c; font-size: 13px; }
+  /* The landing state reuses the game's stone button look from ui.js (.sm-rematch-btn). */
+  #lobby { margin: 12px 0; max-width: 360px; }
+  #lobby .sm-rematch-btn { display: block; width: 100%; margin: 12px 0; }
+  #lobby .or { text-align: center; color: #9a968c; margin: 8px 0; letter-spacing: 2px; }
+  #code-input { -webkit-appearance: none; appearance: none; width: 100%; box-sizing: border-box;
+    border: 0; border-radius: 0; background: #1a1d28; color: #f0c040; text-align: center;
+    font: bold 28px monospace; letter-spacing: 8px; text-transform: uppercase; padding: 10px 0;
+    box-shadow: 4px 0 0 #0d0e12, -4px 0 0 #0d0e12, 0 4px 0 #0d0e12, 0 -4px 0 #0d0e12,
+      inset 4px 4px 0 #0d0e12, inset -4px -4px 0 #3a4256; }
+  #code-input:focus { outline: 4px solid #f0c040; outline-offset: 4px; }
+  #lobby-msg { color: #e08040; min-height: 1.4em; text-align: center; }
+  #room { display: none; margin: 4px 0; }
+  #room-code { font: bold 28px monospace; letter-spacing: 8px; color: #f0c040; }
 </style>
 <!-- Phaser is pinned in web/versions.json; tools/web/build.py fills it in. -->
 <script src="{{PHASER_URL}}"></script>
@@ -23,6 +36,15 @@
 <body>
 <h1>Shadow Masque</h1>
 <div id="status" data-state="loading">loading</div>
+<div id="lobby">
+  <button type="button" id="create-room" class="sm-rematch-btn">Create room</button>
+  <div class="or">or</div>
+  <input id="code-input" maxlength="4" autocomplete="off" autocapitalize="characters"
+         spellcheck="false" placeholder="CODE" aria-label="4-letter room code">
+  <button type="button" id="join-room" class="sm-rematch-btn">Join room</button>
+  <div id="lobby-msg"></div>
+</div>
+<div id="room">Room code <span id="room-code"></span> (read it out to your rival)</div>
 <div id="rival"></div>
 <div id="game"></div>
 <div id="hud"></div>
