@@ -3,8 +3,9 @@
 Status: built on `orch/reviewed` fc02687 by the Tech Lead (T08), through Gate 1
 (QA) and Gate 2 (Evaluation Specialist) with notes, then corrected by T08-fix1
 (decisions #64, #65, #74 to #77 and the gate findings); T08-fix1 is waiting for
-its own gates. No held-out result exists. T09 runs H6 once, after T08-fix1 and
-T19, on the post-T19 engine.
+its own gates. Status update (T09-fix1): T09 ran H6 once on 2026-11-25 and its
+result is in `RESULTS-T09.md` (verdict: not supported, 13 of 16 against a bar
+of 14). The rules below are unchanged.
 
 Code: `evaluation/` (scenarios, monitors, controllers, freeze check, analysis)
 and `tools/eval/` (`run_versus_suite.py`, `analyze_results.py`). Tests:
@@ -27,6 +28,9 @@ results):
 | H-a | In full duels from the held-out starts the PPO rival wins more often than it loses against the scripted baseline, in both seats | H6, win/draw/loss per controller and per seat, Wilson intervals |
 | H-b | The PPO rival does not do worse than the baseline on the four approved scenarios (D1, B2, I3, F5) | tuning split, per-scenario success rates, M against S as the subject, per seat (decision #65) |
 | H-c | Neither rival is pushed to its fallback: fallbacks, invalid inputs and stale inputs stay at 0 for both | the rows' `seats.*.fallbacks`, `invalid_inputs`, `stale_inputs` |
+
+Status note (T09-fix1): decision #80 relaxed H-c for the T09 step-1 health check
+only; on H6 the stale counts are reported (see `RESULTS-T09.md`), not required to be 0.
 
 H-a is the headline. A draw (time up) is not a win; an aborted round is not a
 win. If the intervals overlap the report says so and makes no strength claim.
@@ -183,8 +187,8 @@ H6-4 and the lists above and compares them with the frozen file.
    seats, writes no ledger line and refuses any policy configuration.
 5. MvM is test only and is refused on the held-out split.
 6. T08 and T08-fix1 ran no policy on H6 (WAIT or scripted seats with a frame cap
-   and a temporary ledger, for schema tests only). T09 runs it once, after
-   T08-fix1 and T19.
+   and a temporary ledger, for schema tests only). T09 ran it once, after
+   T08-fix1 and T19; the result is in `RESULTS-T09.md`.
 
 ## 5. Runner policy (decision #24) and result rows
 

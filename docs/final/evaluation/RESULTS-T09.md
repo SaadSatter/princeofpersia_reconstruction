@@ -37,13 +37,13 @@ PPO is seat A in MvS and seat B in SvM. Start positions are fixed by seat (A and
 ## The odd rows, in full
 
 - **H6-8 SvM, the one loss.** The scripted baseline (seat A) won at frame 519 with 1 heart left against the PPO rival at 0. Hazard-ahead start; by entry into the falling posture, the PPO seat entered 3 falls and the baseline 3 (trial 0 replay). Same start, other order: the PPO rival won with 1 heart left (frame 633).
-- **H6-1 MvS, draw (training-like start).** 3600 frames, 3 hearts each, no hit decided. The same start, other order, was a PPO win at 1485 frames.
-- **H6-2 SvM, draw.** 3600 frames, PPO 3 hearts, baseline 2.
-- No aborted duel, no fallback, no refused, errored, timed-out or busy decision, 0 invalid inputs on either seat (all 48 rows, both seats).
+- **H6-1 MvS, draw (training-like start).** 3600 frames, 3 hearts each, no hit decided. Stalemate; cause not analysed. The same start, other order, was a PPO win at 1485 frames.
+- **H6-2 SvM, draw.** 3600 frames, PPO 3 hearts, baseline 2. Stalemate; cause not analysed.
+- No aborted duel, no fallback, no refused, errored, timed-out or busy decision, 0 invalid inputs on either seat (all 48 rows, both seats). These "0 errors" are runner-level only: PPO inference errors (caught inside the controller and answered with WAIT) were not recorded in the held-out rows; T08-fix2 adds them for future runs (decision #84).
 
 ## Stale inputs and falls (decision #80: reported per duel as a confound)
 
-The PPO seat did **not** stay at 0 stale on H6. Per trial (the three trials of a cell are identical; totals over 48 rows are 21 PPO and 18 baseline):
+The PPO seat did **not** stay at 0 stale on H6. PROTOCOL H-c ("0 stale for both seats") is therefore not met as written on H6 (PPO 21, baseline 18); decision #80 relaxed it for the step-1 health check only, and on H6 the counts are reported, as here. Per trial (the three trials of a cell are identical; totals over 48 rows are 21 PPO and 18 baseline):
 
 | cell | PPO-seat stale per trial | baseline stale per trial |
 | --- | --- | --- |
@@ -58,14 +58,18 @@ The PPO seat did **not** stay at 0 stale on H6. Per trial (the three trials of a
 | H6-7 SvM | 2 | 0 |
 | every other cell | 0 | 0 |
 
-A stale input is a queued move that was no longer legal when the previous move ended (the tuning diagnostic found it comes with a move ending in a fall, where only WAIT is legal), so the drop costs nothing extra. The run is not repeated (brief step 3, decision #80). Falls, counted as entries into the posture `falling` by replaying trial 0 of each cell (descriptive; includes ordinary drops, not only damage), per cell PPO/baseline: H6-1 MvS 1/1, SvM 0/0; H6-2 2/1, 0/4; H6-3 1/3, 2/4; H6-4 2/2, 0/1; H6-5 2/1, 2/4; H6-6 0/2, 4/3; H6-7 2/5, 3/1; H6-8 1/2, 3/3. Totals 25 PPO, 37 baseline: the baseline entered the falling posture about 1.5 times as often, which may favour the PPO rival and is not the same as falling damage (not measured here). The stale counts do not change the verdict: counting the 16 duels as they ended, 13 wins is below 14 either way.
+A stale input is a queued move that was no longer legal when the previous move ended (the tuning diagnostic found it comes with a move ending in a fall, where only WAIT is legal), so the drop costs nothing extra. This mechanism is shown for the baseline on the tuning split; it is not verified for the PPO seat (H6-2 MvS, H6-5 MvS, H6-6 SvM, H6-7 SvM). The run is not repeated (brief step 3, decision #80). Falls (not independently reproduced: the replay script is not committed, and the per-cell numbers were only re-summed, not re-derived), counted as entries into the posture `falling` by replaying trial 0 of each cell (descriptive; includes ordinary drops, not only damage), per cell PPO/baseline: H6-1 MvS 1/1, SvM 0/0; H6-2 2/1, 0/4; H6-3 1/3, 2/4; H6-4 2/2, 0/1; H6-5 2/1, 2/4; H6-6 0/2, 4/3; H6-7 2/5, 3/1; H6-8 1/2, 3/3 (the one loss, H6-8 SvM, had 3 falls on each seat, so falls do not explain it). Totals 25 PPO, 37 baseline: the baseline entered the falling posture about 1.5 times as often, which may favour the PPO rival and is not the same as falling damage (not measured here). None of the three non-wins (H6-1 MvS, H6-2 SvM, H6-8 SvM) has a stale input on either seat, so stale inputs do not explain the shortfall. The claim stays "not shown"; it is not "would have reached 14".
+
+## Status of H-a and the intervals
+
+PROTOCOL H-a ("wins more than it loses") is not the pre-registered criterion; the bar of decision #77 is. No strength claim is made. The Wilson interval (lower bound 0.57, above 0.5) is optimistic because the effective n is near 8, and the baseline line in `analysis.txt` (1W 2D 13L) is the complement of the PPO line, not independent evidence.
 
 ## Confounds and limits
 
 - The rival's targeting is the nearest figure; the baseline's uses the same observation and macros. H6 has one distinct outcome per condition (deterministic, G-4), not 3 independent trials.
 - Guard patrols overlap with training for H6-1 (full), and partly for H6-3, 6, 7, 8 (#75); H6-2, 4, 5 are unseen layouts. The claim is "unseen start pairs and guard layouts", not an unseen map.
 - No guard in room 2 (G-3). Hazard-ahead starts H6-5, 6, 8.
-- The PPO rival was trained for duels only. The baseline stale inputs and falls above. The start positions are fixed by seat, so seat order is confounded with position.
+- The PPO rival was trained for duels only. The baseline stale inputs and falls above. The start positions are fixed by seat, so seat order is confounded with position: the 7W 1D 0L (seat A) against 6W 1D 1L (seat B) split, with 8 duels each, is not evidence of a seat effect either way.
 - Latency (measured, per decision, PPO seat, 7500 decisions): mean 0.27 ms, max 10.8 ms (H6-3 SvM t2).
 - Replay: `--replay` of trial 0 of all 16 cells reproduced the traces (all `ok`). A replay is not new evidence.
 - Effective n near 8: the reported intervals are optimistic.
