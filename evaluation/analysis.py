@@ -170,6 +170,58 @@ def duel_results(rows: list[dict]) -> list[dict]:
     return out
 
 
+def _seat_errors(r: dict) -> list[tuple[str, int | None, bool]]:
+    """(seat, policy_errors, recorded) per seat. A row from before T08-fix2 has no field: a
+    policy seat there is "not recorded", never read as zero errors."""
+    out = []
+    for seat, s in sorted((r.get("seats") or {}).items()):
+        kind = ((r.get("controllers") or {}).get(seat) or {}).get("kind", "policy")
+        if "policy_errors" in s:
+            out.append((seat, s["policy_errors"], True))
+        elif kind == "policy":
+            out.append((seat, None, False))
+    return out
+
+
+def policy_error_totals(rows: list[dict]) -> list[dict]:
+    """Sum of swallowed PPO inference errors per condition (decision #84)."""
+    out = []
+    for (scn, start, cfg), rs in sorted(_by_condition(rows).items()):
+        per = [sum(e or 0 for _, e, _ in _seat_errors(r)) for r in rs]
+        out.append({"scenario": scn, "start_id": start, "config": cfg, "policy_errors": sum(per),
+                    "rows_with_errors": sum(1 for n in per if n)})
+    return out
+
+
+def policy_error_lines(rows: list[dict]) -> list[str]:
+    """Markdown: totals per condition, then the odd rows (non-zero count). On a held-out
+    split a non-zero count is a harness error: counted and shown, the run is not aborted."""
+    lines = ["", "## PPO inference errors (swallowed into WAIT; decision #84)", "",
+             "| scenario | start | config | policy errors | rows with errors |", "|---|---|---|---|---|"]
+    for t in policy_error_totals(rows):
+        lines.append(f"| {t['scenario']} | {t['start_id']} | {t['config']} | "
+                     f"{t['policy_errors']} | {t['rows_with_errors']} |")
+    odd, missing = [], []
+    for r in rows:
+        errs = _seat_errors(r)
+        bad = [f"seat {seat}: {n}" for seat, n, _ in errs if n]
+        if bad:
+            tag = " (harness error)" if r.get("split") == "heldout" else ""
+            odd.append(f"- `{r['row_id']}`: {'; '.join(bad)}{tag}")
+        if any(not rec for _, _, rec in errs):
+            missing.append(r["row_id"])
+    lines += ["", "### Odd rows: non-zero policy errors", ""]
+    lines += odd or ["None."]
+    if odd and any(r.get("split") == "heldout" and r["row_id"] in {o.split('`')[1] for o in odd}
+                   for r in rows):
+        lines += ["", "A held-out policy seat with swallowed inference errors is reported as a harness "
+                  "error; the run was not aborted."]
+    if missing:
+        lines += ["", f"Policy errors not recorded (rows from before T08-fix2): {len(missing)} rows, "
+                  "so zero cannot be assumed."]
+    return lines
+
+
 def render(rows: list[dict], headers: list[dict], every_round: bool = True) -> str:
     lines = ["# Versus evaluation summary", ""]
     if any(r.get("dry_run") for r in rows) or any(h.get("dry_run") for h in headers):
@@ -224,6 +276,7 @@ def render(rows: list[dict], headers: list[dict], every_round: bool = True) -> s
     if aborted:
         lines += ["", "## Aborted rounds", ""]
         lines += [f"- `{r['row_id']}`: {r['abort_reason']} {r.get('error') or ''}" for r in aborted]
+    lines += policy_error_lines(rows)
     if every_round:
         lines += ["", "## Every round", "", "| row | termination | success | reason |",
                   "|---|---|---|---|"]

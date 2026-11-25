@@ -84,6 +84,16 @@ def build(kind: str, policy_factory=None, name: str | None = None):
     raise ValueError(f"unknown controller kind {kind!r}")
 
 
+def policy_errors_of(ctrl) -> int | None:
+    """Inference errors a policy seat swallowed into WAIT (T08-fix2, decision #84).
+    An integer for a policy seat that exposes `policy_errors()`, else None (not a policy seat,
+    or no counter, which a reader must not mistake for zero)."""
+    fn = getattr(ctrl, "policy_errors", None)
+    if getattr(ctrl, "kind", None) != "policy" or not callable(fn):
+        return None
+    return int(fn())
+
+
 def describe(ctrl) -> dict:
     """What a result row records about a controller. Provider, token and cost
     fields are N/A for scripted and PPO controllers."""

@@ -207,6 +207,7 @@ def run_trial(t: Trial, out_dir: Path, *, seed_key: bytes, key_id: str, run_id: 
         metrics=verdict["metrics"],
         seats={seat: {k: s[k] for k in ("slot", "decisions", "fallbacks", "refused", "errors",
                                         "timeouts", "busy", "reset_error")}
+               | {"policy_errors": C.policy_errors_of(ctrls[seat])}      # #84: None if not a policy seat
                for seat, s in res["seats"].items()},
         invalid_inputs=res["outcome"]["invalid_inputs"],
         stale_inputs=res["outcome"]["stale_inputs"],

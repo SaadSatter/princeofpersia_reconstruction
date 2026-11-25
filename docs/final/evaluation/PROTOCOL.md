@@ -206,7 +206,9 @@ H6-4 and the lists above and compares them with the frozen file.
   names, versions and weights hash, seat (`controllers.A/B`, `subject_seat`,
   `outcome.result_A/B`, `outcome.result_subject`),
   outcome, termination, success flag and reason, metrics, invalid, stale,
-  replaced and fallback/busy/timeout counts, decisions, measured latency
+  replaced and fallback/busy/timeout counts, `seats.A/B.policy_errors` (PPO inference
+  errors swallowed into WAIT, an integer for a policy seat, `null` otherwise; decision #84),
+  decisions, measured latency
   (`time.perf_counter`), trace paths, forced stand-ins, `seed_key_id`.
 - **Two-seat traces**: `traces/<scenario>/<start>/<config>-t<n>/` holds
   `seat-A.jsonl`, `seat-B.jsonl` (one line per decision, with the seat's
