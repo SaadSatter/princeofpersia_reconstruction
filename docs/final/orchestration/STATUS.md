@@ -74,13 +74,14 @@ No `rc/*` (approved release candidate) branch exists.
 > **Decision numbers:** two orchestrator sessions append to `DECISIONS-2026-11-24.md`. Fetch and read the last number right before adding one (PPO line #74–#77 were first committed as #67–#70 by mistake).
 | closed (Gate 3, 2026-11-25) | T09 + T09-fix1 | the one held-out run: **NOT SUPPORTED** at the pre-registered bar (13 W / 2 D / 1 L of 16; bar 14, 0 aborted); `docs/final/evaluation/RESULTS-T09.md` | QA 25df2ca, 7ed2a43; rules-reviewer; G3 closed | `orch/reviewed` = `orch/preview` 5518f54 | — |
 | closed (Gate 3, 2026-11-25) | T08-fix2 + fix1 | PPO `policy_errors` in every evaluation row (#84); unrecorded counts print "not recorded", never 0 | QA 114c3f6, 28a2442; Eval 71a6ed0, 4c45913; G3 closed | `orch/reviewed` = `orch/preview` 74975e1 | — |
+| **running** (T22-fix1 tech-lead, attempt 1 of 2) | T22 + fix1 | trained rival in the game; three modes in pygame, web and online (#87–#92) | T22 G1 2477843, G2 0ff9d4a ACCEPT w/ notes (EVAL-T22-1 major → fix1); fix1 G1, G2, G3 (after T20) | `task/T22-fix1` from 0ff9d4a | — |
 | closed (Gate 3, 2026-11-24) | T17 | withhold failed weights (#50) | G1 3943732, G2 55873a6 ACCEPT w/ notes; G3 closed | `orch/reviewed` f08c1a8 | — |
 | closed | SMOKE-01 | orchestration smoke test: every path in README Files + CLAUDE.md Roles tables, and agent procedure pointers, exist on `main` | G1 ACCEPT WITH NOTES (1 minor), G2 n/a, G3 closed | `task/SMOKE-01` fc16525, `gate/SMOKE-01-qa` 3bb36f5 (not merged) | none |
 | closed (Gate 3, 2026-11-24) | T18 | online room codes (#52), code-less default room HOME (#56), limits (#57) | G1 7f3525e, G2 f4dc475 ACCEPT w/ notes; G3 closed | `orch/reviewed` 6a4b8b5, then fc02687 (with T07-run1) | — |
 | closed (Gate 3, 2026-11-25; `orch/reviewed` b2203c3) | T18-fix1 | one room's error never stops the server (EVAL-T18-1) | — | brief `tasks/T18-fix1.md`; base fc02687 | — |
 | closed (Gate 3, 2026-11-25; `orch/reviewed` bdc3c76) | T19 | either control scheme (#55), 2-tick input grace (#54), kneel pickups, flip by default (#53, amends R-V22) | G1, G2, G3 to come | base = `orch/reviewed` tip after T18; brief `tasks/T19.md`@53e7ece | — |
-| **T20-fix1 Gate 2** (evaluation-specialist dispatched; G1 ACCEPT w/ notes 47ebfea) | T20 | playtest telemetry (#67, #68) | G1, G2, G3 | brief `tasks/T20.md` | — |
-| queued (after T20) | T21 | telemetry-analyst agent (#69) | G1, G3 | brief `tasks/T21.md` | — |
+| closed (Gate 3, 2026-11-25; `orch/reviewed` 72066f1) | T20 + fix1 + fix2 | playtest telemetry (#67, #68) | G1, G2, G3 | brief `tasks/T20.md` | — |
+| closed (Gate 3, 2026-11-25; `orch/reviewed` 1a515ca) | T21 | telemetry-analyst agent (#69) | G1, G3 | brief `tasks/T21.md` | — |
 | not started | T03 | official-repository move (decision #6), `python -m team init` | — | — | — |
 | closed (Gate 3); **PR #6 awaiting Saad's merge** | T10a (+fix1, fix2) | docs in line with decisions #1–#30: Changes since G1 in GDD and Configuration, PPO rival, orchestration, checklist, plan, README | G1 accept w/ notes ×3; G2 n/a; G3 closed | `orch/T10a` a1b9738 | issue #5, PR #6 |
 | not started | T10b | T10a follow-ups: GDD §2 and §6 labels, `LINGER_AFTER` location (GDD:105), `EVIDENCE_INDEX.md` pass (after Saad commits his edits), tracker `docs/final/TRACKER.md`, scope lock | — | — | — |
@@ -104,13 +105,17 @@ Deadline pressure: G2/G3 recording and the official-repository move are due **Sa
 
 ## Waiting on Saad
 
+- **T21 (telemetry analyst):** restart the session (`claude --agent orchestrator`, from a checkout that has T21's `.claude/agents/telemetry-analyst.md`, so `orch/reviewed` or after the PR) to make it spawnable. Minor QA notes: N3 (add a scope check to the orchestrator's analyst step; the orchestrator does it anyway), N1/N2/N5 (dry-run citations).
+
+- **T20:** approve the draft sentence in `docs/final/playtest/CONSENT.md` ("What is recorded") before the first playtest with `--playtest`.
+
 - **EVAL-T18-2 (minor):** a room that fails mid-tick ends without telling its two players (their screens freeze), and a persistent error logs every tick. Fix it in a small follow-up? (Recommended by Gate 2.)
 - **T19:** (a) the 4–8 suspicion surcharge on discarded run frames: accept it and state it in R-V35, or stop charging them; (b) keep `ppo-run-1.json` without retraining (Gate 2 recommends keeping it; T09 is not held); (c) the planner still prices a turn before an against-facing jump (no behaviour effect today; fixing it changes the rival, so it would be its own task).
 
 - ~~T18 follow-ups~~ decided (#62 keep as built, #63 crash fix = T18-fix1). Previously: EVAL-T18-1, where one room's trace-write error stops every room (fix: guard `pump`/`_record`); QA-T18-1, where the ligature "ﬀ" is read as "FF"; the room cap of 50 against a measured safe level of about 40 on the M4; creates are not rate-limited; "full" versus "No room" tells a guesser that a code exists.
 - **Note:** the main checkout is on `experiment/gcp-ppo-cpu` (the other session), which was cut from fc02687 and so includes T18. The orchestrator writes `main` records from `.claude/worktrees/orch-main`.
 
-- **Draft PR #11** (`orch/pr-main` 088c3fc → `main`): all reviewed gameplay (T01–T17), online play and the PPO stack. The suite on the merge commit is re-run after training. Merging is Saad's.
+- **Draft PR #11** (`orch/pr-main` accf8a5 → `main`, refreshed 2026-11-25): all reviewed work through T19, T07-run1 (trained weights), T08 + fixes, T09 (not supported, 13 of 16). Suite on the merge: `1821 passed, 11 skipped, 5 xfailed`. Merging is Saad's.
 - **Two-machine playtest of T13** (online play), and a first browser run of the hosted page. Neither has been verified yet.
 
 - ~~numpy~~ decided #34, done in T15 (closed). Not in `dev` (#40). Previously: **numpy is not a declared dependency.** T07 (PPO trainer and tests) and one T04-fix1 QA probe import it, so a clean `uv` environment fails to collect `tests/test_rl_policy.py` and `tests/test_rl_train.py` on `orch/preview`. Adding it (an optional `train` extra in `pyproject.toml` + `uv.lock`) needs Saad's approval.
