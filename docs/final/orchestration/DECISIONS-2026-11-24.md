@@ -235,3 +235,12 @@ His choices (AskUserQuestion), quoted verbatim. Recorded by the PPO-line orchest
 | 88 | On-screen names | "Honest names (Recommended)" | "AI Model (trained)" and "Baseline (scripted)" on the menu, the HUD and the end screen. Closes the open `--rival baseline` neutral-label question: honest labels by default (the existing `--neutral` flag may stay as an opt-in for blind tests) |
 | 89 | Human seat in the AI modes | "Human players since they are using different machines, they can use either WASD or the arrows, both are valid" | Read with #55: in every mode where each human has their own machine (online, and human vs AI), the player's own seat accepts both WASD and the arrows. Local two-player on one keyboard keeps A = WASD, B = arrows (#55). The human plays seat A in the AI modes; no seat-swap option is added (not asked for) |
 | 90 | Timing against T20 | "Start now, merge after T20 (Recommended)" | T22 starts now from `orch/reviewed` 74975e1, with mode code in new modules and thin hooks in `play.py`, `web/` and `server/`; overlap with T20 is resolved at Gate 3 after T20 lands |
+
+## Addendum: Wed 2026-11-25 (PPO line: T22 tech-lead questions)
+
+Saad's choices on `reports/T22-tech-lead.md`@73e6531 (AskUserQuestion), quoted verbatim. Recorded by the PPO-line orchestrator (session 8edb65a6):
+
+| # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
+|---|---|---|---|
+| 91 | The legacy `--rival baseline` path (no creator-chosen mode) still shows "AI rival: …" because `tests/test_gate_t13_qa_online.py::test_cli_process_two_scripted_clients_real_clock_and_trace_dir[baseline]` pins it | "Update that test (Recommended)" | Finish #88 there: the legacy label code is removed and that one assertion changes to the honest label "Baseline (scripted)". No other existing-test edit. In T22-fix1 |
+| 92 | Default start | "Menu by default (Recommended)" | A bare `python play.py` shows the three-mode menu (the old single-player level stays reachable with a flag and its situation argument), and the hosted page opens on a mode chooser. The web smoke test (`tools/web/smoke.cjs` / `.github/workflows/web-smoke.yml` path) is updated to pick a mode. If any other existing test breaks, stop and report. In T22-fix1 |
