@@ -138,3 +138,20 @@ Saad's choices on `reports/T08-tech-lead.md`@deb8718 (AskUserQuestion), quoted v
 | 64 | Held-out run-once key | "Weights + engine commit (Recommended)" | The run-once ledger allows one held-out (H6) run per (weights SHA-256, engine commit). Every run is still recorded and reported, so a re-run after a rule change is allowed but visible. T08-fix1 |
 | 65 | Seat-B coverage of D1, B2, I3, F5-a/b | "Add mirrored seat-B starts (Recommended)" | Each tuning skill scenario also gets mirrored starts with the rival in seat B, so every scenario reports per-seat results. Tuning split only; H6 is not changed. T08-fix1 |
 | 66 | B2 "active blend" reading | "Report it, don't score it (Recommended)" | B2 success stays as #58. `success_active` (at least 6 distinct cells while under 50) is reported beside it and is never scored. As built; documented in PROTOCOL.md |
+
+## Addendum: playtest telemetry and a telemetry analyst (T20, T21)
+
+Saad's request in chat (verbatim):
+
+> "Add this telemetry for playtests and then make an agent a telemetry analyst. Your released build logs play events, and the agent reports where players stall, quit, or ignore a mechanic. You check its findings against your Playtest Log."
+
+His choices (AskUserQuestion), verbatim. Numbered from #67 because a parallel session took #64–#66:
+
+| # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
+|---|---|---|---|
+| 67 | Which builds log | "Online server, behind a flag (Recommended)" | `python -m server --playtest` (off by default) writes one event log per room and seat; local pygame `--versus` gets the same flag. Only room code, seat and ticks identify a player; Saad maps seat to player code (P03) on his observation sheet. No names, IPs or browser data. Logs stay on the host and are never sent to a client. The hosted page logs nothing |
+| 68 | Event set | "Default set (Recommended)" | Duel start and end; every resolved action (accepted or refused, with effect); room changes; disguise on and broken; sword drop and pickup; traps rigged and sprung; hits and hearts; idle spells; pause, disconnect, reconnect, forfeit; rematch pressed or not. Times in ticks plus seconds since duel start. No raw keys |
+| 69 | Analyst as a course role | "Native helper now, decide later (Recommended)" | `telemetry-analyst` is a native worker, not a formal course production agent. It counts only if Saad later writes an origin note with two real, dated friction instances |
+| 70 | Order | "T18-fix1 now, telemetry after T19 (Recommended)" | T18-fix1 (`server/app.py`) runs now alongside T19 (disjoint paths; amends #32/#39 for this pair). T20 (telemetry) starts after T19 closes; T21 (the analyst agent) after T20 |
+
+The orchestrator checks every analyst finding against Saad's Playtest Log (`docs/final/playtest/LOG.md` and `sessions/`) before relaying it; a finding the log does not support is marked "not confirmed by the Playtest Log".
