@@ -30,6 +30,11 @@ def lan_ip() -> str:
         s.close()
 
 
+def trace_name(code: str, n: int, seed: int) -> str:
+    """The input trace's file name: the room's code keeps rooms' traces apart (T18)."""
+    return f"duel-{code}-{n:03d}-seed{seed}.json"
+
+
 async def serve_forever(args) -> None:
     from tools.web import build
     from .app import OnlineServer
@@ -38,22 +43,26 @@ async def serve_forever(args) -> None:
     trace_dir = Path(args.trace_dir) if args.trace_dir else None
     count = [0]
 
-    def write_trace(trace: dict) -> None:
-        if trace["fallbacks"]:
-            print(f"AI seat B: {len(trace['fallbacks'])} fallback(s) this duel "
-                  f"(source: fallback), see the trace", flush=True)
-        if trace_dir is None:
-            return
-        trace_dir.mkdir(parents=True, exist_ok=True)
-        count[0] += 1
-        path = trace_dir / f"duel-{count[0]:03d}-seed{trace['seed']}.json"
-        path.write_text(json.dumps(trace, separators=(",", ":")))
+    def make_match(code: str) -> Match:
+        """One fresh `Match` per room; its trace file name carries the room's code."""
+        def write_trace(trace: dict) -> None:
+            if trace["fallbacks"]:
+                print(f"Room {code}, AI seat B: {len(trace['fallbacks'])} fallback(s) this duel "
+                      f"(source: fallback), see the trace", flush=True)
+            if trace_dir is None:
+                return
+            trace_dir.mkdir(parents=True, exist_ok=True)
+            count[0] += 1
+            path = trace_dir / trace_name(code, count[0], trace["seed"])
+            path.write_text(json.dumps(trace, separators=(",", ":")))
 
-    match = Match(seed=args.seed, rival=None if args.rival == "none" else args.rival,
-                  on_finish=write_trace, neutral=args.neutral)
+        return Match(seed=args.seed, rival=None if args.rival == "none" else args.rival,
+                     on_finish=write_trace, neutral=args.neutral)
+
     with tempfile.TemporaryDirectory() as site:
         manifest = build.build(Path(site))
-        srv = OnlineServer(match, site_dir=Path(site))
+        # The code-less default room (decision #56): a join with no code enters it.
+        srv = OnlineServer(make_match("HOME"), site_dir=Path(site), match_factory=make_match)
         server = await srv.start(args.host, args.port)
         port = server.sockets[0].getsockname()[1]
         print(f"Shadow Masque online, build {manifest['build']}", flush=True)

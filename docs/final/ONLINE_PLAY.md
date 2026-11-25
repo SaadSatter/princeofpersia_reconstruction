@@ -20,11 +20,52 @@ Options: `--host` (default `0.0.0.0`), `--port` (default 8765), `--seed`
 `traces/online/`).
 
 It prints the URL to give the players, for example
-`http://192.168.1.23:8765/`. The first browser to open it gets seat A (WASD, F,
-G, T, left Shift), the second gets seat B (arrows, `.`, `/`, `'`, right
-Shift); a third is told "The duel is full." Seat tokens live in the tab's
-`sessionStorage`, so a refreshed tab rejoins its seat, and two tabs on one
-machine are two seats.
+`http://192.168.1.23:8765/`.
+
+### Play with a room code (T18, decision #52)
+
+Many duels can run on one server at once, one per room.
+
+1. Both players open the URL. The page offers **Create room** and **Join room**.
+2. Player 1 presses **Create room**. The page shows a 4-letter code (capital
+   letters, no I and no O, for example `KTWM`) and Player 1 takes seat A (WASD,
+   F, G, T, left Shift). Read the code to Player 2.
+3. Player 2 types the code (any case) and presses **Join room**, and takes seat
+   B (arrows, `.`, `/`, `'`, right Shift). The duel starts.
+4. A wrong or expired code says "No room with that code"; a room that already
+   has two players says "That room is full". You can retry. After 10 failed
+   joins in a minute on one connection the server refuses and closes it ("Too
+   many tries"). *Proposal for Saad:* the number 10 a minute.
+5. With `--rival baseline`, **Create room** gives you seat A at once and the
+   scripted baseline is seat B. Nobody needs to join (a Join is told the room is
+   full).
+
+Each room has its own duel, tick loop, pause and forfeit (#38), rematch (#41)
+and trace file (`duel-<CODE>-NNN-seed<seed>.json`); a slow or stalled player in
+one room never delays another. Seat tokens belong to one room: a token from
+room X is refused by room Y. Seat tokens and the room code live in the tab's
+`sessionStorage`, so a refreshed tab rejoins its room and seat, and two tabs on
+one machine are two seats. The one exception: if Player 1 refreshes before
+Player 2 has joined, the seat is freed (T13 behaviour), so the old code may
+no longer hold Player 1; create a new room.
+
+A room expires when both players have been gone for 15 s (the forfeit window,
+#38) or 10 minutes after it was created with no second player (a baseline room
+never waits for one). Its code can be used again only after that. The server
+holds at most 50 rooms (*proposal for Saad*; Create then says "The server is
+full"). The code comes from the operating system's random source
+(`random.SystemRandom`), never from the duel's seed. The page and the server
+tell a client nothing about any other room: no list, no count.
+**The default room (decision #56).** `python -m server` also keeps one room with
+no code, for scripted clients and the T13 flow. A `{"type":"join"}` with no
+code and no `create` flag enters it: first is seat A, second seat B, the third is
+told "That room is full", and it resets when everyone has left. It never
+expires, has no code, and does not count toward the 50 rooms. The page has no
+button for it (Create and Join only); coded rooms and the default room share
+nothing (separate seats, tokens and messages). Its traces are named
+`duel-HOME-NNN-seed<seed>.json`. A token from one is refused by the other.
+Limits as built are approved (#57): 10 failed joins per connection per minute,
+50 rooms, expiry 10 min or 15 s, no per-IP limit.
 
 **Internet is needed.** The page loads Phaser from the pinned CDN
 (`web/versions.json`, decision #25), so the host's players and the page's
@@ -48,7 +89,7 @@ The page (`web/online.html`, `web/online.js`) draws only its own seat's view
 with `web/draw.js`, a copy of the hosted page's Phaser drawer (kept separate because `tests/test_gate_t14_qa_main_contract.py` loads `main.js` alone). It shows:
 status (connecting, waiting for rival, playing, paused, duel over), the HUD,
 its own key hints, the build hash and the outcome. It sends only the keys held
-(`{"type":"keys"}`), a `join` with an optional token and `{"type":"rematch"}`.
+(`{"type":"keys"}`), a `join` (with a room code and optional token, or `create: true`) and `{"type":"rematch"}`.
 It contains no game rules and publishes no test hook (`window.__smLast` is
 only in the hosted page).
 
@@ -112,10 +153,10 @@ rematch) carries exactly its own fallbacks. `traces/online/` is git-ignored.
 
 ## Knowledge boundary and how it is tested
 
-A client receives only: `hello` (its own seat and token), `state` (its own
+A client receives only: `hello` (its own seat, token and room code), `state` (its own
 seat's `seat_view`, `draw`, `hud`, `outcome`, and the AI label when there is
 one) and `status` (fixed text chosen by connection state alone), or `error`
-(`full`, `bad_token`). Never sent: the `GameState`, the other seat's
+(`full`, `bad_token`, `no_room`, `expired`, `rate_limited`, `busy`). Never sent: the `GameState`, the other seat's
 observation, payload, keys or token, input counts, the seed, trap ownership,
 guard scripts, or whether a figure is a disguised rival (R-V25). The input
 trace stays on the server (written to `--trace-dir` after each duel).

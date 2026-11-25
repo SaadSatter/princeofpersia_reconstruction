@@ -1,7 +1,8 @@
-// Shadow Masque online page (T13): one browser per rival, one authoritative server.
-// No game logic and no Python in the browser here. The page sends which keys are held and
-// rematch requests, and draws the payload for its own seat that the server
-// sends (see docs/final/ONLINE_PLAY.md). It never sends outcomes or positions.
+// Shadow Masque online page (T13, rooms T18): one browser per rival, one authoritative server.
+// No game logic and no Python in the browser here. The page asks for a room (Create room, or
+// Join room with a 4-letter code), sends which keys are held and rematch requests, and draws
+// the payload for its own seat that the server sends (see docs/final/ONLINE_PLAY.md). It
+// never sends outcomes or positions.
 /* global Phaser, SMKeys, SMDraw, SMUi */
 "use strict";
 
@@ -11,6 +12,7 @@
   const ZOOM = 3;
   const RETRY_MS = 1000;
   const TOKEN_KEY = "sm-seat-token"; // sessionStorage: one seat per tab
+  const CODE_KEY = "sm-room-code";   // sessionStorage: the room that seat belongs to
 
   // Physical key names of each seat (web/bridge.py KEY_MAP); the server enforces them.
   const SEAT_KEYS = {
@@ -24,6 +26,13 @@
   const rivalEl = document.getElementById("rival");
   const buildEl = document.getElementById("build");
   const keysEl = document.getElementById("keys");
+  const lobbyEl = document.getElementById("lobby");
+  const lobbyMsgEl = document.getElementById("lobby-msg");
+  const codeInput = document.getElementById("code-input");
+  const createBtn = document.getElementById("create-room");
+  const joinBtn = document.getElementById("join-room");
+  const roomEl = document.getElementById("room");
+  const roomCodeEl = document.getElementById("room-code");
 
   let ws = null;
   let seat = null;
@@ -34,6 +43,7 @@
   let latest = null;
   let stopped = false;
   let everJoined = false;
+  let firstMsg = null; // what to send when a socket opens: create, or join with a typed code
 
   const rematchButton = SMUi.createRematch(document, document.body, function () {
     send({ type: "rematch" });
@@ -43,6 +53,42 @@
   function setStatus(text, state) {
     statusEl.textContent = text;
     statusEl.dataset.state = state;
+  }
+
+  function store(key, value) {
+    try {
+      if (value === null) { sessionStorage.removeItem(key); } else { sessionStorage.setItem(key, value); }
+    } catch (e) { /* private mode */ }
+  }
+
+  function load(key) {
+    try { return sessionStorage.getItem(key); } catch (e) { return null; }
+  }
+
+  // The landing state: Create room, or Join room with a 4-letter code.
+  function showLobby(message) {
+    lobbyEl.style.display = "block";
+    roomEl.style.display = "none";
+    lobbyMsgEl.textContent = message || "";
+    setStatus(message ? "" : "Create a room or join one", "ready");
+    outcomeEl.textContent = "";
+    hudEl.textContent = "";
+    rematchButton.update(SMUi.rematchView(null, "none"));
+  }
+
+  function enterRoom(code) {
+    lobbyEl.style.display = "none";
+    roomEl.style.display = "block";
+    roomCodeEl.textContent = code;
+  }
+
+  function leaveRoom(message) {
+    store(TOKEN_KEY, null);
+    store(CODE_KEY, null);
+    everJoined = false;
+    seat = null;
+    latest = null;
+    showLobby(message);
   }
 
   function send(msg) {
@@ -62,6 +108,9 @@
   }
 
   window.addEventListener("keydown", function (e) {
+    if (seat === null) {
+      return; // on the landing state keys are for the code box, not the game
+    }
     if (SMKeys.shouldPrevent(e.code)) {
       e.preventDefault();
     }
@@ -73,6 +122,9 @@
     sendKeys();
   });
   window.addEventListener("keyup", function (e) {
+    if (seat === null) {
+      return;
+    }
     held = SMKeys.applyKey(held, e.code, false);
     sendKeys();
   });
@@ -110,17 +162,19 @@
     if (msg.type === "hello") {
       seat = msg.seat;
       everJoined = true;
-      try { sessionStorage.setItem(TOKEN_KEY, msg.token); } catch (e) { /* private mode */ }
+      store(TOKEN_KEY, msg.token);
+      if (msg.code) {
+        store(CODE_KEY, msg.code);
+        enterRoom(msg.code);
+      }
       keysEl.textContent = SMKeys.keyHints("human_vs_ai", seat);
       setStatus("Connected as seat " + seat, "ready");
     } else if (msg.type === "error") {
-      if (msg.code === "bad_token") {
-        try { sessionStorage.removeItem(TOKEN_KEY); } catch (e) { /* ignore */ }
-        everJoined = false;
-        return; // the close handler reconnects without a token
-      }
-      stopped = true;
-      setStatus(msg.text, "error");
+      // "No room with that code", "That room is full", a stale token or a room that expired:
+      // back to the landing state with the server's words. The server keeps the socket open
+      // for another try, except after "Too many tries" and an expired room.
+      leaveRoom(msg.text);
+      stopped = msg.code === "rate_limited" || msg.code === "expired";
     } else if (msg.type === "status") {
       rematchState = msg.rematch;
       setStatus(msg.text || STATUS_WORDS[msg.state] || msg.state, msg.state);
@@ -137,12 +191,14 @@
     const proto = window.location.protocol === "https:" ? "wss://" : "ws://";
     ws = new WebSocket(proto + window.location.host + "/ws");
     ws.addEventListener("open", function () {
-      let token = null;
-      try { token = sessionStorage.getItem(TOKEN_KEY); } catch (e) { /* ignore */ }
       sentKeys = "";
-      const joinMsg = { type: "join" };
-      if (token) { joinMsg.token = token; }
-      send(joinMsg);
+      const token = load(TOKEN_KEY);
+      const code = load(CODE_KEY);
+      if (token && code) {
+        send({ type: "join", code: code, token: token }); // refresh or reconnect: the same seat
+      } else if (firstMsg !== null) {
+        send(firstMsg);
+      }
     });
     ws.addEventListener("message", function (e) {
       onMessage(JSON.parse(e.data));
@@ -154,7 +210,16 @@
         setStatus("This seat was opened in another tab", "error");
         return;
       }
+      ws = null;
       if (stopped) {
+        stopped = false;
+        return;
+      }
+      if (!load(TOKEN_KEY)) {
+        // Not in a room: stay on (or return to) the landing state.
+        if (lobbyEl.style.display !== "none" && lobbyMsgEl.textContent === "") {
+          showLobby("Connection closed. Try again.");
+        }
         return;
       }
       setStatus(everJoined ? "Reconnecting" : "Connecting", "loading");
@@ -162,11 +227,37 @@
     });
   }
 
+  // Ask for a room. An open socket is reused (the server allows a few tries a minute).
+  function begin(msg) {
+    firstMsg = msg;
+    lobbyMsgEl.textContent = "";
+    if (ws !== null && ws.readyState === WebSocket.OPEN) {
+      send(msg);
+    } else {
+      setStatus("Connecting", "loading");
+      connect();
+    }
+  }
+
   async function main() {
     const manifest = await (await fetch("manifest.json")).json();
     buildEl.textContent = manifest.build;
     keysEl.textContent = SMKeys.keyHints("human_vs_ai", "A");
-    setStatus("Connecting", "loading");
+    createBtn.addEventListener("click", function () {
+      begin({ type: "join", create: true });
+    });
+    joinBtn.addEventListener("click", function () {
+      const code = codeInput.value.trim();
+      if (code.length !== 4) {
+        lobbyMsgEl.textContent = "Type the 4-letter code";
+        return;
+      }
+      begin({ type: "join", code: code });
+    });
+    codeInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") { joinBtn.click(); }
+    });
+    showLobby("");
     new Phaser.Game({
       type: Phaser.AUTO,
       parent: "game",
@@ -184,7 +275,10 @@
           if (latest !== null) {
             show(latest);
           }
-          connect();
+          if (load(TOKEN_KEY) && load(CODE_KEY)) {
+            setStatus("Connecting", "loading");
+            connect(); // a refreshed tab rejoins its room and seat
+          }
         },
       },
     });
