@@ -73,6 +73,50 @@ start, no other H6 start and no H6-4 guard patrol uses. Column 3 is a tuning
 cell; column 4 is free, so B starts at (1,2,4,+1). The tuning scenarios'
 cells were chosen the same way against the H6 cells.
 
+### 3.1 Selection rule for H6-5 to H6-8 (decision #74, T08-fix1)
+
+Saad (decision #74) chose to extend H6 from 4 to 8 starts (16 duels with seats
+swapped) before the one held-out run. H6 has never been run, so the new hash
+voids no result. **This rule was committed before any new start was added.**
+It uses only the arena map and the lists of cells already in use. It never
+reads a policy, a baseline, a result row or a checkpoint, and no new start may
+be chosen, kept or dropped because of how any controller plays it.
+
+Inputs: rooms 1 to 6 of arena A; the eight `TUNING_STARTS`; every start cell
+and guard post of every tuning scenario (seat-B mirrors included); the arena's
+default `STARTS` and `GUARD_POSTS`; and H6-1 to H6-4 exactly as frozen at
+SHA-256 `44da40eca7a5606a9778cd3dca9756a34eb3962d3143a1304247ef2c92070847`.
+
+Definitions. `H(s)` is the lowercase hexadecimal SHA-256 of the ASCII string
+`s`; candidates are ordered by `H` ascending (string comparison). A *floor
+cell* is a cell of row 2 (the corridor row, where every existing start is)
+that `evaluation.spec` accepts as walkable. Used cells `U` are the rival
+start cells of all inputs above; used posts `P` are their guard-post tuples
+`(room, row, (first col, last col))`.
+
+1. Rival cell candidates: every floor cell of rooms 1 to 6 not in `U`, ordered
+   by `H("h6x|cell|<room>|<row>|<col>")`.
+2. For k = 5, 6, 7, 8 in turn: seat A takes the first candidate not yet taken;
+   seat B takes the first candidate not yet taken **in a different room**.
+   (Both rivals start in different rooms, GDD 5.3.) Both cells then count as
+   used. Facing is toward the middle of the room: +1 if the column is 4 or
+   less, otherwise -1. Hearts 3, no disguise, no forced seat.
+3. Guard post candidates: room 1 to 6, row 2, a span of 2 to 4 columns
+   `(c0, c1)` with every cell a floor cell, whose tuple is not in `P` and which
+   contains neither rival cell of this start. Ordered by
+   `H("h6x|post|<room>|<c0>|<c1>")`. Guard 1 takes the first candidate; guard 2
+   takes the first candidate in a **different room**; both tuples then join `P`
+   (so later starts cannot reuse them). Facing is +1 if the first byte of
+   `H("h6x|face|<room>|<c0>|<c1>")` is even, else -1. Names are `h6<k>-g1` and
+   `h6<k>-g2`.
+4. Check, and fail the build rather than adjust: every new rival cell is
+   outside `U`; no new post tuple is in `P`; no new start repeats a training or
+   tuning configuration (both starts plus guard layout).
+
+The rule is implemented in `tools/eval/select_heldout_starts.py` and tested in
+`tests/test_eval_t08fix1_h6.py`, which regenerates H6-5 to H6-8 from H6-1 to
+H6-4 and the lists above and compares them with the frozen file.
+
 ## 4. Freeze rule
 
 1. `H6.json` is committed once and never edited. The CLI recomputes its
