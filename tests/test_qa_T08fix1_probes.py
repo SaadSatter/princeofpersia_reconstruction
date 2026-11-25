@@ -187,7 +187,7 @@ def test_staged_deleted_and_renamed_files_are_dirty_and_an_edited_ledger_is_not(
     _git(repo, "mv", "pop/m.py", "pop/n.py")
     assert suite.git_state(repo)["dirty"] is True
     _git(repo, "reset", "-q", "--hard")
-    (repo / "evaluation/m.py").unlink()
+    (repo / "tools/eval/m.py").unlink()
     assert suite.git_state(repo)["dirty"] is True
 
 
