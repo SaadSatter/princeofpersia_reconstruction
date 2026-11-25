@@ -155,3 +155,11 @@ His choices (AskUserQuestion), verbatim. Numbered from #67 because a parallel se
 | 70 | Order | "T18-fix1 now, telemetry after T19 (Recommended)" | T18-fix1 (`server/app.py`) runs now alongside T19 (disjoint paths; amends #32/#39 for this pair). T20 (telemetry) starts after T19 closes; T21 (the analyst agent) after T20 |
 
 The orchestrator checks every analyst finding against Saad's Playtest Log (`docs/final/playtest/LOG.md` and `sessions/`) before relaying it; a finding the log does not support is marked "not confirmed by the Playtest Log".
+
+Saad's choices on the T19 tech-lead report (`reports/T19-tech-lead.md`@597e181), AskUserQuestion, verbatim:
+
+| # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
+|---|---|---|---|
+| 71 | A jump away from the facing: instant turn, or 4-tick turn first | "Keep instant turn (Recommended)" | `JUMP_*` faces and jumps at once (`Rival._directional`); runs and steps still turn first (R-D20). The QA probe `tests/test_gate_t05_qa_probes.py::test_qa_baseline_never_needs_a_fallback_over_randomised_duels_in_every_room` has its volume floor lowered by its author (QA) at Gate 1; the zero-fallback assertion stays. Gate 2 checks the macro planner (it still prices a turn) and the shipped PPO rival |
+| 72 | `tests/test_server_ws.py::test_keys_move_your_own_rival_and_each_client_gets_only_its_own_payload` expects seat B's `a` to be ignored | "Update it to #55 (Recommended)" | Only that assertion changes: seat B's WASD keys move seat B, and never seat A. The T19 tech-lead makes the change |
+| 73 | Kneel art | "Crouch is fine for now (Recommended)" | The crouch strip is drawn for sword pickup, uniform take and rigging. A dedicated kneel sprite is not planned |
