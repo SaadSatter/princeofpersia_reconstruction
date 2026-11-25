@@ -25,15 +25,39 @@ def test_multi_worker_error_is_counted_and_stops_the_run(tmp_path, monkeypatch):
     assert not (tmp_path / "weights.json").exists()
 
 
-def test_final_check_does_not_read_rival_error_counts():
-    """T07-fix1-E1 (minor gap, asserted as present): the exported pure-Python path can WAIT silently."""
-    assert "policy_errors" not in inspect.getsource(train.final_check)
+def test_final_check_counts_an_exported_policy_error_and_fails(tmp_path, monkeypatch):
+    """T07-fix1-E1, fixed in T16: an error in the exported pure-Python path is counted and fails the check."""
+    from agents.rl import encoder as enc_mod, policy as pol
+    from tools.rl import ppo
+    monkeypatch.setattr(env, "COMBOS", env.COMBOS[:2])
+    p = tmp_path / "w.json"
+    sha = ppo.export_json(ppo.init_params((enc_mod.N_FEATURES, 8, len(enc_mod.MACRO_SLOTS)), 0), p)
+
+    def boom(self, x, mask):
+        raise RuntimeError("injected")
+    monkeypatch.setattr(pol.Net, "act", boom)
+    r = train.final_check(p, sha, 1)
+    assert r["policy_errors"] > 0 and r["failed"] is True
 
 
-def test_in_loop_eval_errors_are_not_summed():
-    """T07-fix1-E2 (minor gap, asserted as present): greedy eval episodes `evs` are not error-checked."""
-    src = inspect.getsource(train.train)
-    assert 'e["policy_errors"] for e in evs' not in src
+def test_in_loop_eval_error_is_counted_logged_and_stops_the_run(tmp_path, monkeypatch):
+    """T07-fix1-E2, fixed in T16: greedy eval-episode errors are summed, logged, and stop the run (#47)."""
+    orig = env.TrainPolicy._choose
+
+    def maybe(self, obs, legal, status):
+        if self.greedy:
+            raise RuntimeError("eval boom")
+        return orig(self, obs, legal, status)
+    monkeypatch.setattr(env.TrainPolicy, "_choose", maybe)
+    cfg = train.TrainConfig(out_dir=str(tmp_path), workers=1, max_iters=2, total_seconds=120,
+                            episodes_per_iter=2, max_frames=120, eval_episodes=2, final_eval_seeds=0,
+                            hidden=(8, 8))
+    with pytest.raises(train.TrainingError):
+        train.train(cfg)
+    s = json.loads((tmp_path / "summary.json").read_text())
+    assert s["stopped"] == "policy_error" and s["policy_errors"] > 0 and s["weights_sha256"] is None
+    rows = [json.loads(x) for x in (tmp_path / "log.jsonl").read_text().splitlines()]
+    assert rows[-1]["eval_policy_errors"] > 0
 
 
 def test_start_balance_baseline_vs_baseline():
