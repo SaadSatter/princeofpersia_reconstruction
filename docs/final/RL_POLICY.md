@@ -164,6 +164,9 @@ there stops the run as well. `final_check` reads `policy_errors()` of the export
 policy on every duel and writes `policy_errors` and `failed` into the
 `final_check_vs_baseline_tuning_pure_python` block of `summary.json`; a count above 0
 sets `stopped` to `final_check_policy_error` and the command exits with status 2.
+**Decided (#50, Saad):** in that case the exported file is renamed `weights.failed.json`, so
+no `weights.json` exists; `summary.json` carries `weights_file`, `weights_failed` (true) and
+the `weights_sha256` of the failed file. A clean run still writes `weights.json`.
 With `fail_on_policy_error` off (diagnosis only) an update whose episodes are all
 empty skips the PPO update instead of crashing.
 
