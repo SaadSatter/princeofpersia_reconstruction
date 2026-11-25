@@ -166,11 +166,11 @@ Saad's choices on the T19 tech-lead report (`reports/T19-tech-lead.md`@597e181),
 
 ## Addendum: Wed 2026-11-25, after midnight (PPO line: T08 Gate 2 items)
 
-Saad's choices on `reports/T08-evaluation-specialist.md`@059aea5 (AskUserQuestion), quoted verbatim. Recorded by the PPO-line orchestrator (session 8edb65a6):
+Numbered #74 to #77 (first committed as #67 to #70 in 5e6c757, which collided with the other session's #67 to #70; corrected in the next commit). Saad's choices on `reports/T08-evaluation-specialist.md`@059aea5 (AskUserQuestion), quoted verbatim. Recorded by the PPO-line orchestrator (session 8edb65a6):
 
 | # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
 |---|---|---|---|
-| 67 | Held-out size | "Extend to 8 starts (Recommended)" | T08-fix1 adds 4 held-out starts (H6-5 to H6-8; 16 duels with seats swapped), chosen by a rule written down before any cell is picked and never from policy results, then re-freezes `H6.json` with a new SHA-256. H6 has never been run, so nothing is voided |
-| 68 | QA F-3, guard patrols overlap | "Accept and document (Recommended)" | The held-out claim is "unseen start pairs and guard layouts", not "unseen cells". T09 reports each start and labels the most training-like starts |
-| 69 | B2 and the disguise | "Yes, disguise must last (Recommended)" | Amends #58: B2 succeeds only if the rival is still disguised at the end and the guard's suspicion stayed below 50 throughout. `success_active` stays reported, not scored (#66) |
-| 70 | Pre-registered T09 bar | "Approve the bar (Recommended)" | Written into PROTOCOL.md before the run: the rival is called better than the scripted baseline on H6 only with at least 14 wins of the 16 held-out duels (7 of 8 per 4 starts) and no aborted duel. Anything below is reported as "not supported", with the full numbers |
+| 74 | Held-out size | "Extend to 8 starts (Recommended)" | T08-fix1 adds 4 held-out starts (H6-5 to H6-8; 16 duels with seats swapped), chosen by a rule written down before any cell is picked and never from policy results, then re-freezes `H6.json` with a new SHA-256. H6 has never been run, so nothing is voided |
+| 75 | QA F-3, guard patrols overlap | "Accept and document (Recommended)" | The held-out claim is "unseen start pairs and guard layouts", not "unseen cells". T09 reports each start and labels the most training-like starts |
+| 76 | B2 and the disguise | "Yes, disguise must last (Recommended)" | Amends #58: B2 succeeds only if the rival is still disguised at the end and the guard's suspicion stayed below 50 throughout. `success_active` stays reported, not scored (#66) |
+| 77 | Pre-registered T09 bar | "Approve the bar (Recommended)" | Written into PROTOCOL.md before the run: the rival is called better than the scripted baseline on H6 only with at least 14 wins of the 16 held-out duels (7 of 8 per 4 starts) and no aborted duel. Anything below is reported as "not supported", with the full numbers |

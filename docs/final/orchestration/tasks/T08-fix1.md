@@ -1,7 +1,7 @@
-# T08-fix1: decisions #64, #65, #67–#70 and the T08 gate findings
+# T08-fix1: decisions #64, #65, #74–#77 and the T08 gate findings
 
 Handoff id: HO-T08-fix1-orchestrator. Assigned: tech-lead; then qa (Gate 1), evaluation-specialist (Gate 2), Gate 3. Corrective attempt 1 of 2 for T08.
-Read first: `tasks/T08.md`@0bba440 (with its amendment); `reports/T08-tech-lead.md`@deb8718; `reports/T08-qa.md`@cf43ba1 (F-1 to F-4); `reports/T08-evaluation-specialist.md`@059aea5 (E-1 to E-6 and its proposed fix list); decisions #58–#61, #64–#70 in `DECISIONS-2026-11-24.md` on `main`.
+Read first: `tasks/T08.md`@0bba440 (with its amendment); `reports/T08-tech-lead.md`@deb8718; `reports/T08-qa.md`@cf43ba1 (F-1 to F-4); `reports/T08-evaluation-specialist.md`@059aea5 (E-1 to E-6 and its proposed fix list); decisions #58–#61, #64–#66, #74–#77 in `DECISIONS-2026-11-24.md` on `main`.
 Base: `gate/T08-eval` 059aea5 (T08 + QA probes + Eval test). `git switch -c task/T08-fix1 059aea5`. Paste the base's suite line.
 
 ## Fix list (failing test first for each)
@@ -10,9 +10,9 @@ Base: `gate/T08-eval` 059aea5 (T08 + QA probes + Eval test). `git switch -c task
 2. **QA F-1** (before item 3): D1 credits a guard only if the agent struck it, or was in the guard's room when it went down.
 3. **#65 seat-B starts**: mirrored starts for D1, B2, I3 and F5-a/b with the subject in seat B, tuning split only, and per-seat analysis.
 4. **QA F-2**: `duel_results` tolerates `controllers: {}` and lists those rows as aborted (#24). **QA F-4**: `--replay` reads `split` from the trace's `meta.json`.
-5. **#69 B2**: success also requires the subject still disguised at the end. Keep the threshold 50 a named parameter and `success_active` reported, not scored (#66).
-6. **#67 H6 to 8 starts**: first commit a written selection rule (in `docs/final/evaluation/PROTOCOL.md` or `evaluation/heldout/README.md`), then add H6-5 to H6-8 by that rule: rival start cells disjoint from the 8 `TUNING_STARTS`, every tuning scenario, `arena.STARTS` and the existing H6 starts, and no H6 configuration (both starts plus guard layout) equal to a training or tuning configuration. Never consult policy or baseline results on the new starts. Re-freeze `H6.json` and record the new SHA-256 in all three places. Do not run any policy on H6; for schema tests, WAIT seats or scripted seats with a small frame cap and a temp ledger only.
-7. **Docs (#68, #70, E-6)**: PROTOCOL.md section 3 and the H6 README say start cells and guard post tuples are disjoint and patrol ranges are not, and the claim is "unseen start pairs and guard layouts". The pre-registered T09 bar: at least 14 of 16 held-out duels won and no aborted duel; below that, "not supported", with the full numbers. Under H-b: the PPO rival was trained for duels only, so the skill scenarios are a result, not a defect. Wilson intervals for the new sizes.
+5. **#76 B2**: success also requires the subject still disguised at the end. Keep the threshold 50 a named parameter and `success_active` reported, not scored (#66).
+6. **#74 H6 to 8 starts**: first commit a written selection rule (in `docs/final/evaluation/PROTOCOL.md` or `evaluation/heldout/README.md`), then add H6-5 to H6-8 by that rule: rival start cells disjoint from the 8 `TUNING_STARTS`, every tuning scenario, `arena.STARTS` and the existing H6 starts, and no H6 configuration (both starts plus guard layout) equal to a training or tuning configuration. Never consult policy or baseline results on the new starts. Re-freeze `H6.json` and record the new SHA-256 in all three places. Do not run any policy on H6; for schema tests, WAIT seats or scripted seats with a small frame cap and a temp ledger only.
+7. **Docs (#75, #77, E-6)**: PROTOCOL.md section 3 and the H6 README say start cells and guard post tuples are disjoint and patrol ranges are not, and the claim is "unseen start pairs and guard layouts". The pre-registered T09 bar: at least 14 of 16 held-out duels won and no aborted duel; below that, "not supported", with the full numbers. Under H-b: the PPO rival was trained for duels only, so the skill scenarios are a result, not a defect. Wilson intervals for the new sizes.
 8. Optional (Eval item 6): an evaluator-side script that generates the F-3 exposure table.
 
 ## Tests you may change
