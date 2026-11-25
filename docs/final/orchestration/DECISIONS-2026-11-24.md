@@ -56,3 +56,9 @@ Saad's choices (AskUserQuestion), quoted verbatim:
 | 43 | T07-E1: PPO and RIG_TRAP | "Train without traps" | RIG_TRAP stays reserved and masked for the PPO rival. Training does not wait for traps. G2/G3 documents "the AI rival does not set traps; traps are human-only" (`RL_POLICY.md`, Changes since G1). Rigging by the AI rival would need a new run, after G2/G3 |
 | 44 | T07-E3: tuning starts | "Add tuning starts (Recommended)" | T07-fix1 adds about 6 tuning starts, including lower floors, disjoint from H6 by construction. T08 freezes H6 with a hash and proves the two sets disjoint before the full run |
 | 45 | T13 live AI-seat budget | "Accept 0.04 s live (Recommended)" | On the live server the AI seat gets at most 0.04 s per decision, then a labelled, server-logged WAIT fallback. Evaluation and training keep the 5 s runner timeout (#24) |
+
+Saad, in chat (verbatim): "Yes both press rematch, keep going through the gates"
+
+| # | Topic | Saad's answer (verbatim excerpt) | Effect |
+|---|---|---|---|
+| 46 | #41 "both press" reading | "Yes both press rematch" | Confirmed. Online, the rematch starts only after both players have pressed the Rematch button. The flag on #41 is cleared |
