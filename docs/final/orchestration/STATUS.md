@@ -81,6 +81,8 @@ No `rc/*` (approved release candidate) branch exists.
 | closed (Gate 3); **PR #6 awaiting Saad's merge** | T10a (+fix1, fix2) | docs in line with decisions #1–#30: Changes since G1 in GDD and Configuration, PPO rival, orchestration, checklist, plan, README | G1 accept w/ notes ×3; G2 n/a; G3 closed | `orch/T10a` a1b9738 | issue #5, PR #6 |
 | not started | T10b | T10a follow-ups: GDD §2 and §6 labels, `LINGER_AFTER` location (GDD:105), `EVIDENCE_INDEX.md` pass (after Saad commits his edits), tracker `docs/final/TRACKER.md`, scope lock | — | — | — |
 
+> **Worktree note (2026-11-24, Saad's instruction):** the main project folder is back on `main`; the experiment branch `experiment/gcp-ppo-cpu` was only an experiment and is left as is (not deleted). To free `main`, `.claude/worktrees/orch-main` was detached at the same commit (Saad: "Detach that worktree (Recommended)"); no files changed. Sessions working in a worktree commit detached and push with `git push origin HEAD:main`, after `git fetch` and a fast-forward to `origin/main`.
+
 ## Next eligible task
 
 **Now (2026-11-24, night):** T18 closed at Gate 3 (`orch/reviewed` fc02687). T19 (controls, grace window, kneel, flip; brief `tasks/T19.md`) is with the tech-lead from base fc02687; then QA, Eval, Gate 3. Saad's request and decisions #52–#55 are in `DECISIONS-2026-11-24.md`. Another Claude session works on PPO (`agents/rl/`, `tools/rl/`); T18 and T19 do not write there. After T19 the PPO rival is re-checked against the new jump rule.
