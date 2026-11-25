@@ -39,11 +39,11 @@ paths and are historical.
 | Branch | Head | Class | Content |
 | --- | --- | --- | --- |
 | `main` | see `git log` | Saad's merged work + orchestration records | gameplay as of 721b3e6; orchestration docs |
-| `orch/reviewed` | 2835928 | reviewed integration candidate | T01 chain, T02, T04 chain incl. fix3, T11 + fix1, T05 + T05-fix1, T15, T06b, T14 + T14-fix1, T07 + T07-fix1 + T16, GATE-wave3 reports (2026-11-24) |
+| `orch/reviewed` | f08c1a8 | reviewed integration candidate | everything on the preview line, all gates passed: T01, T02, T04 (incl. fix3), T05 + fix1, T06b, T07 + fix1 + T16 + T17, T11 + fix1, T13 + fix1, T14 + fix1, T15 |
+| `orch/preview` | f08c1a8 | = `orch/reviewed` (fast-forwarded 2026-11-24) | |
 | `int/preview-T05-fix1` | b52d145 | parked integration | `orch/preview` + `orch/reviewed` 2180fea. One T07 test fails (fixture relied on the mirror deadlock). Becomes `orch/preview` after T07-fix1 |
 | `int/T13-base` | ae90c8c | preview line (supersedes `int/preview-T05-fix1`) | `orch/preview` + `orch/reviewed` 704521d. 1 known failure (T07 fixture). Base for T13 and GATE-wave3; becomes `orch/preview` after T07-fix1 |
 | `task/T05-fix1`, `gate/T05-fix1-qa`, `gate/T05-fix1-eval` | 161a841, 12c11bd, 1b303ff | worker branches (closed task) | merged into `orch/reviewed` |
-| `orch/preview` | 87606b9 | preview / demo build; some gates pending | `orch/reviewed` + T05, T14, T14-fix1, T06a/T06b, T07, 2026-11-24 records. Suite there: 959 passed, 12 skipped, 3 xfailed (sandbox, Python 3.13, as recorded by the previous orchestrator; not re-run 2026-11-24) |
 | `orch/wip-T05-fix1` | ab78522 | unreviewed WIP snapshot | interrupted ~02:00 ET 2026-11-24. **Untested; never merge** |
 | `orch/wip-T08` | 25e4587 | unreviewed WIP snapshot | same |
 | `orch/wip-T04-fix3` | 76de25c | unreviewed WIP snapshot | same |
@@ -66,11 +66,10 @@ No `rc/*` (approved release candidate) branch exists.
 | closed (Gate 3, 2026-11-24) | T05 + T05-fix1 | macros + baseline; CLIMB both ways (#31), descent, lone-guard rule 5, mirror no longer deadlocked | G1 ACCEPT w/ notes (12c11bd), G2 ACCEPT w/ notes (1b303ff), G3 closed | `orch/reviewed` 2180fea; preview merge parked on `int/preview-T05-fix1` b52d145 (breaks one T07 test, see REVIEW_LOG) | issue #7 |
 | closed (Gate 3, 2026-11-24) | T04-fix3 (+ #33 flip) | refuse shared controller, keyed seed, in-flight race | G1 ab7fcba, G2 0eef8e4 ACCEPT w/ notes; G3 closed | `orch/reviewed` 704521d | issue #8 |
 | closed (Gate 3, 2026-11-24) | T15 | numpy as optional `train` extra (#34) | G1 ACCEPT (f2ac18b); G2 n/a; G3 closed | `orch/reviewed` 199f858 | issue #9 |
-| **rejected at Gate 1**; T13-fix1 next (attempt 1 of 2) | T13 | online play: server on Saad's laptop (LAN, #36), `websockets` extra (#37), pause 15 s then forfeit (#38), game-styled rematch button (#41) | G1 REJECT (52ce850: QA-1 tick-loop freeze, QA-2 dead seat stays connected); G2 9a3feac ACCEPT w/ notes on the boundary (no leak); 4 majors to fix | `task/T13` 160135c, report dc28e18 (base ae90c8c) | issue #10 |
+| closed (Gate 3, 2026-11-24) | T13 + T13-fix1 | online play: LAN server (#36), websockets extra (#37), pause 15 s then forfeit (#38), 6 s drop detection (#48), log-only fallbacks (#49), both-press rematch (#41, #46) | fix1 G1 38b0f45, G2 68864ac ACCEPT w/ notes; G3 closed | `orch/reviewed` 4697989 | issue #10 |
 | unreviewed WIP | T08 | scenario suite D1/B2/I3/F5 + held-out H6, CLI, analysis | — | `orch/wip-T08` 25e4587 | none |
-| **approved (#51), waits for T17** | T07 full training run | PPO run, `--seconds 4800`, 2 workers, from `orch/reviewed` after T17 | T17 Gate 3 | — | — |
-| **active** (Gate 1 running) | T17 | withhold weights after a failed `final_check` (#50) | G1, G2 pending | `task/T17` 54308c0, report bb773ea | — |
-| **active** (Gate 1 running) | T13-fix1 | online corrections: QA-1, QA-2, EVAL-1 to EVAL-6, keepalive 3+3 s (#48), log-only fallbacks (#49) | G1, G2 pending (attempt 1 of 2) | `task/T13-fix1` 385b3bf, report b75695f | issue #10 |
+| **running** (started 20:40:05 ET) | T07 full training run (#51) | 4,800 s cap, 2 workers, seed 0, from f08c1a8 | after-run checks by the orchestrator, then a worker commits the results, then gates | worktree `.claude/worktrees/train`, output `tools/rl/logs/run-1/` (**do not delete**) | — |
+| closed (Gate 3, 2026-11-24) | T17 | withhold failed weights (#50) | G1 3943732, G2 55873a6 ACCEPT w/ notes; G3 closed | `orch/reviewed` f08c1a8 | — |
 | closed | SMOKE-01 | orchestration smoke test: every path in README Files + CLAUDE.md Roles tables, and agent procedure pointers, exist on `main` | G1 ACCEPT WITH NOTES (1 minor), G2 n/a, G3 closed | `task/SMOKE-01` fc16525, `gate/SMOKE-01-qa` 3bb36f5 (not merged) | none |
 | not started | T03 | official-repository move (decision #6), `python -m team init` | — | — | — |
 | closed (Gate 3); **PR #6 awaiting Saad's merge** | T10a (+fix1, fix2) | docs in line with decisions #1–#30: Changes since G1 in GDD and Configuration, PPO rival, orchestration, checklist, plan, README | G1 accept w/ notes ×3; G2 n/a; G3 closed | `orch/T10a` a1b9738 | issue #5, PR #6 |
