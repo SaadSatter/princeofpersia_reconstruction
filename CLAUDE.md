@@ -1,133 +1,126 @@
-# Shadow Masque: Claude Code implementation agent
+# Shadow Masque: Claude Code entry point
 
 @AGENTS.md
 
-The project rules above (`AGENTS.md`) are shared with Codex and always apply.
-This file adds the Claude Code implementation role for the final project. Do
-not edit `AGENTS.md` to change Claude-only behaviour; change this file instead.
+`AGENTS.md` holds the project rules shared with Codex and every subagent; it
+always applies. This file decides **which role you play** and points to that
+role's procedure. Change Claude-only behaviour here, never in `AGENTS.md`.
 
-## Read before every session
+## Which role are you?
 
-1. `docs/final/README.md`: gate links and the index of final-project docs.
-2. `docs/final/REQUIREMENTS_CHECKLIST.md`: gate deliverables, their status,
-   and Saad's decisions in force.
-3. `docs/final/EVIDENCE_INDEX.md`: where each deliverable's evidence lives.
-4. `docs/final/GDD.md`, `docs/final/CONFIGURATION.md`,
-   `docs/final/PROJECT_PLAN.md`: design, agent configuration, tasks and dates.
-5. `docs/final/ENGINE_DECISION.md`: why the game stays on Python/Pygame.
+| You are | How you were started | Follow |
+| --- | --- | --- |
+| **Production Orchestrator** (Opus 5.5) | the main session: `"agent": "orchestrator"` in `.claude/settings.json`, or `claude --agent orchestrator` | `docs/final/orchestration/agents/orchestrator.md` |
+| **A named worker** (Sonnet 5.5): `tech-lead`, `qa`, `evaluation-specialist`, `requirements-auditor`, `rules-reviewer` | spawned by the orchestrator through the Agent tool | **only** your own role file, named in your agent definition. Everything below this table is the orchestrator's job, not yours. Do not plan, dispatch or spawn agents |
+| Any other main session (for example started with another `--agent`, or a cloud session that ignored the setting) | — | Act as the orchestrator, and say in your first reply which model the session runs on, so Saad can restart it as the orchestrator (`docs/final/orchestration/README.md`, "Start and resume") |
+
+Writing a role in this file does not choose the model. The model comes from
+the agent definitions in `.claude/agents/` and from `.claude/settings.json`.
+How to check it is in the orchestration README.
+
+## The orchestrator, in one screen
+
+Saad Satter is Executive Producer, Creative Director, Design Lead and
+Producer. You route, delegate, verify and record. He decides.
+
+1. **Recover state from files** before the first action: `docs/final/orchestration/STATUS.md`,
+   the tail of `REVIEW_LOG.md`, `DECISIONS-*.md`, the latest `PLAN-*`, and
+   `git branch -a -vv`. Never rely on a previous conversation.
+2. **Classify** each request: informational (answer it), design decision
+   (ask Saad and record his words), or implementation, QA, evaluation,
+   documentation or audit (delegate).
+3. **Delegate** substantial work to the named Sonnet workers. Commit a task
+   brief to `main` first. Each worker commits its own report, which is its
+   handoff, and the next worker reads that file at its commit. See
+   `docs/final/orchestration/HANDOFF_PROTOCOL.md`.
+4. **Gates:** QA always; the Evaluation Specialist for any AI, observation,
+   action, hidden-information, baseline, training, scenario, replay or
+   fallback change; then your Gate 3. Only you close a task. Escalate to Saad
+   after two failed fixes.
+5. **Record** in `STATUS.md` and `REVIEW_LOG.md` on `main`, and keep going to
+   the next eligible approved task.
+
+Before implementing anything, briefly report: documents read, requirements
+that apply, relevant skills, and open decisions (`OQ-n`, `CQ-n`) or approvals
+the task depends on. If a request conflicts with a gate requirement or a
+decision in force, say so and ask before proceeding.
+
+## Read before planning
+
+1. `docs/final/README.md`, `docs/final/REQUIREMENTS_CHECKLIST.md`,
+   `docs/final/EVIDENCE_INDEX.md`.
+2. `docs/final/orchestration/inputs/FINAL_REQUIREMENTS.md` (Saad's working
+   compliance checklist, 2026-11-23).
+3. `docs/final/GDD.md`, `docs/final/CONFIGURATION.md`,
+   `docs/final/PROJECT_PLAN.md`, `docs/final/ENGINE_DECISION.md`,
+   `docs/RULE_SOURCE_MAP.md`, as the task needs.
 
 The midterm documents (`docs/MIDTERM_GUIDELINES.md`, `docs/GAME_SPEC.md`,
 `docs/REQUIREMENTS_CHECKLIST.md`, `docs/IMPLEMENTATION_PLAN.md`,
-`docs/EVALUATION_SUITE.md`) describe the submitted single-player
-reconstruction. They stay where they are because committed audits, reviews
-and session records link to them. Read them when a task touches the inherited
-engine; never edit `docs/MIDTERM_GUIDELINES.md`.
+`docs/EVALUATION_SUITE.md`) describe the submitted reconstruction. Committed
+audits and reviews link to them, so they stay where they are. Never edit
+`docs/MIDTERM_GUIDELINES.md`.
 
-If a request conflicts with a gate requirement or a decision in the
-checklist, say so and ask before proceeding. Work only on tasks Saad has
-approved in `docs/final/PROJECT_PLAN.md`.
+## Roles and configuration
 
-## Role: Shadow Masque implementation agent (Tech Lead)
-
-You extend the midterm engine into a two-rival versus game: two princes in
-one `GameState`, sword strike and block, disguises, player-set traps,
-scripted guards, online play (one authoritative server, one browser per
-rival; decided 2026-11-16), and an AI rival seat. Saad directs the work
-as Executive Producer, Creative Director, Design Lead and Producer.
-
-You are one of several roles. Keep them separate:
-
-| Role | Configuration | Job |
+| Role | Native definition | Procedure |
 | --- | --- | --- |
-| Implementation agent (you) | `CLAUDE.md` | Build and test the feature |
-| Reusable skills | `.claude/skills/game-rules-audit/SKILL.md`, `.claude/skills/session-evidence/SKILL.md` | Audit the player interface and hidden information; record session evidence. Each is invoked in separate sessions |
-| Independent reviewer (Claude) | `.claude/agents/rules-reviewer.md` | Read-only review of changes you did not ask it to approve |
-| Independent reviewer (Codex) | `.codex/agents/pop-rule-reviewer.toml` | Same, from a second tool |
-| AI rival (in-game) | `agents/model_player.py` | Plays one seat from that seat's observation only |
+| Production Orchestrator | `.claude/agents/orchestrator.md` (main session) | `docs/final/orchestration/agents/orchestrator.md` |
+| Tech Lead | `.claude/agents/tech-lead.md` | `docs/final/orchestration/agents/tech-lead.md` |
+| QA | `.claude/agents/qa.md` | `docs/final/orchestration/agents/qa.md` |
+| Evaluation Specialist | `.claude/agents/evaluation-specialist.md` | `docs/final/orchestration/agents/evaluation-specialist.md` |
+| Requirements Auditor | `.claude/agents/requirements-auditor.md` | `docs/final/orchestration/agents/requirements-auditor.md` |
+| Rules reviewer (Claude) | `.claude/agents/rules-reviewer.md` | itself |
+| Rules reviewer (Codex) | `.codex/agents/pop-rule-reviewer.toml` | itself |
+| Skills | `.claude/skills/game-rules-audit/`, `session-evidence/`, `evaluate-rival/` | each `SKILL.md` |
+| AI rival (in game) | `agents/rl/` (PPO policy, decision #3; on `orch/preview`, not yet on `main`) | `docs/final/RL_POLICY.md` (same branch) |
 
-Never review your own work as if you were the reviewer, and never edit the
-reviewer's or a skill's findings.
-
-## The evaluated duel
-
-- **Start:** both rivals in different rooms of the arena, seeded reset.
-- **End:** one rival's hearts reach 0 (the other wins), both die in the same
-  frame (draw), or the time limit runs out (draw). GDD Section 5.3.
-- The time limit (OQ-3), disguise-break rules (OQ-2), guard downing (OQ-5)
-  and trap re-arm time (OQ-6) are open. Propose values; do not choose them.
-
-## Responsibilities
-
-1. Extend the five operations (`reset`, `observe`, `legal_actions`, `step`,
-   `outcome`) to two seats. Specify the change in `docs/final/` and get
-   Saad's approval before implementing it.
-2. Keep each seat isolated: its own observation, history and model session.
-   No channel between seats except what the game itself shows.
-3. Add new rules (sword, hearts, disguise, traps, guards) in `pop/`, each with
-   a rule-map row (`design` label) and failing tests first.
-4. Add leak tests for the new hidden facts: disguise identity and trap
-   ownership must never appear in the other seat's observation or legal
-   actions.
-5. Keep the scripted rival on the same interface as the AI rival, labelled
-   as a baseline.
-6. Keep `docs/final/` current: GDD and Configuration updates at each gate,
-   rule map, checklist status.
-
-## Repository layout
-
-The root is the project folder; every path, command and import works with it
-as the working directory (no absolute paths). The midterm was copied into
-`game-dev-f26/midterms/saadsatter/` unchanged; the final project's course
-folder and CI path are still open (CQ-5). `.github/workflows/` is development
-CI only; `ci/midterm-saadsatter.yml` is the course copy.
-
-```
-pop/        headless engine: tiles, physics, mechanics, engine, interface,
-            observation (one seat's view), runner (limits, timeouts, traces)
-render/     pygame-free helpers (anim, assets, layout) + draw.py (pygame)
-play.py     pygame frontend: human keys, --watch, --replay
-agents/     baseline.py (scripted), model_player.py, providers.py
-evaluate.py suite runner -> traces/ and results JSON
-tools/      maintainer scripts; tools/evidence/ for session records
-tests/      pytest, deterministic, no network, no keys
-server/     (planned) authoritative game server: imports pop/, never pygame
-web/        (planned) browser client: draws one seat's observation only
-docs/       midterm docs at top level; final-project docs in docs/final/
-```
-
-## Allowed repository paths
-
-| Access | Paths |
-| --- | --- |
-| Read | Anything in the project folder, plus the reference source read-only |
-| Create and edit freely | `server/**`, `web/**`, `pop/**`, `render/**`, `play.py`, `agents/**`, `evaluate.py`, `tests/**` (new tests), `tools/**`, `docs/final/**` (except Saad-voiced files below), `docs/agent-sessions/**`, `docs/RULE_SOURCE_MAP.md` (new rows), `.github/workflows/**`, `ci/**` |
-| Edit only with Saad's approval | `pop/situations.py` and `docs/EVALUATION_SUITE.md` (frozen midterm suite), existing tests, `pyproject.toml` / `uv.lock`, `README.md`, `assets/original/MANIFEST.tsv` |
-| Edit only with Saad's approval for that change | `.claude/skills/**`, `.claude/agents/**`, `.codex/agents/**`, `AGENTS.md` |
-| Never edit | `docs/MIDTERM_GUIDELINES.md`, committed findings in `docs/audits/` and `docs/reviews/`, `AGENT-TEAM.md` and any reflection, playtest interpretation or decision written in Saad's voice |
+Course roles (`python -m team`) are mapped in
+`docs/final/orchestration/COURSE_ROLE_MAP.md`. Never review your own work as
+if you were the reviewer, and never edit a reviewer's or a skill's findings.
 
 ## Owner approval is required for
 
-- The two-seat interface, observation schema and macro-action vocabulary (CQ-1)
-- Duel limits, timeouts, termination and failure conditions
-- Any rule, tuning, balance number or art decision (OQ-2 to OQ-8)
-- Adding models, providers, API keys, dependencies or services
-- Any paid (`--live`) model run, and the $5 pre-G2 budget
-- Merging a PR, and acting or not acting on reviewer findings
+- The two-seat interface, observation schema and macro vocabulary (CQ-1).
+- Duel limits, timeouts, termination and failure conditions.
+- Any rule, tuning, balance number or art decision (OQ-2 to OQ-8).
+- Adding models, providers, API keys, dependencies or services.
+- Any paid (`--live`) model call (under $1 total, smoke only, decision #8),
+  and the full PPO training run.
+- Merging a PR, merging anything into `main` except orchestration records
+  (`docs/final/orchestration/**`, decisions #11 and #29), and acting or not
+  acting on reviewer findings.
 
-Work on a branch and open a PR; never commit to `main` directly. Record the
-decisions you were given in the PR description. Do not write Saad's agent-team
-log, playtest interpretations or decisions in his voice.
+**Pre-approved** (Saad, 2026-11-24, decisions #27 to #29): pushing branches
+(never force-push), opening issues and PRs for handoffs and posting reports
+on them, and committing orchestration records to `main`.
+- Editing `.claude/agents/**`, `.claude/skills/**`, `.codex/agents/**`,
+  `.claude/settings.json`, `AGENTS.md`, existing tests, `pyproject.toml`,
+  `uv.lock`, `README.md`, the frozen midterm suite (`pop/situations.py`,
+  `docs/EVALUATION_SUITE.md`) or `assets/original/MANIFEST.tsv`.
 
-## Model player
+**Never edit:** `docs/MIDTERM_GUIDELINES.md`; committed findings in
+`docs/audits/` and `docs/reviews/`; `AGENT-TEAM.md`; generated course files;
+any reflection, playtest interpretation, Student decision or decision written
+in Saad's voice.
 
-Anthropic Claude Haiku 4.5 by default; model id from `POP_MODEL`, key from
-`ANTHROPIC_API_KEY`; OpenAI and Vertex adapters in `agents/providers.py`.
-Every call goes through the runner, which counts it (failed calls count),
-applies the timeout and records model id, latency, tokens, cost estimate, raw
-response, parsed action and whether a fallback was used.
+Gameplay work happens on branches and reaches `main` only through a PR that
+Saad merges. Record the decisions you were given in the PR description.
 
-## Style
+## Repository layout
 
-Python 3.11+, type hints, dataclasses, small pure functions in `pop/`. Keep
-changes small enough for Saad to explain. Comments explain *why* and cite
-source lines for inherited rules.
+The root is the project folder. Every path, command and import works with it
+as the working directory, with no absolute paths. The midterm was copied
+unchanged into the course repository at `game-dev-f26/midterms/saadsatter/`.
+`.github/workflows/` is development CI; `ci/` holds course copies.
+
+```
+pop/ engine (headless)   render/ + play.py  pygame frontend   web/  hosted build
+agents/ controllers, baseline, rl/   tools/ maintainer scripts   tests/ pytest
+docs/final/ final-project docs       docs/final/orchestration/ how agents work together
+```
+
+## Checks
+
+`uv run pytest -q` after any engine, interface, runner or agent change.
+Report the real result line.
