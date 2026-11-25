@@ -59,9 +59,17 @@ async def join_code(port, code, token=None, ws=None):
     return ws, await recv(ws)
 
 
+async def join_plain(port):
+    """A join with no code and no create flag: the default room (#56)."""
+    ws = await connect(port)
+    await ws.send(json.dumps({"type": "join"}))
+    return ws, await recv(ws)
+
+
 class Rig:
-    def __init__(self, codes=None, rival=None, **kw):
+    def __init__(self, codes=None, rival=None, default=False, **kw):
         self.now = [100.0]
+        self.default_match = Match(seed=0) if default else None
         self.made: dict[str, Match] = {}
         seq = iter(codes) if codes else None
 
@@ -69,7 +77,7 @@ class Rig:
             self.made[code] = Match(seed=0, rival=rival)
             return self.made[code]
 
-        self.srv = OnlineServer(clock=lambda: self.now[0], match_factory=factory,
+        self.srv = OnlineServer(self.default_match, clock=lambda: self.now[0], match_factory=factory,
                                 code_factory=(lambda: next(seq)) if seq else make_code, **kw)
 
     async def __aenter__(self):
@@ -393,5 +401,57 @@ def test_nothing_from_another_room_reaches_a_client():
             for secret in ("AAAA", h1["token"], hb1["token"]):
                 assert secret not in seen2
             for w in (a1, b1, a2, b2):
+                await w.close()
+    run(go())
+
+
+# --- decision #56: the code-less default room ------------------------------------------------
+
+def test_codeless_join_enters_the_default_room_a_then_b_then_full():
+    async def go():
+        async with Rig(default=True) as r:
+            w1, h1 = await join_plain(r.port)
+            w2, h2 = await join_plain(r.port)
+            w3, h3 = await join_plain(r.port)
+            assert (h1["seat"], h2["seat"]) == ("A", "B") and "code" not in h1
+            assert h3["type"] == "error" and h3["code"] == "full"
+            await settle()
+            assert r.default_match.state == "playing"
+            await w1.close(), await w2.close()
+    run(go())
+
+
+def test_default_room_never_expires_and_is_not_counted_in_the_cap():
+    async def go():
+        async with Rig(default=True, max_rooms=1) as r:
+            w1, _ = await join_plain(r.port)
+            await w1.close()
+            await settle()
+            r.now[0] += ROOM_WAIT_S * 3
+            await r.srv.pump()
+            assert r.srv.default is not None
+            wa, ha = await create(r.port)                           # the one coded room still fits
+            assert ha["type"] == "hello" and ha["code"]
+            await wa.close()
+    run(go())
+
+
+def test_default_room_and_coded_rooms_do_not_leak_into_each_other():
+    async def go():
+        async with Rig(default=True, codes=["AAAA"]) as r:
+            d1, dh1 = await join_plain(r.port)
+            a, ha = await create(r.port)
+            b, _ = await join_code(r.port, "AAAA")
+            d2, dh2 = await join_plain(r.port)
+            assert (dh1["seat"], dh2["seat"], ha["seat"]) == ("A", "B", "A")   # separate seat pools
+            await settle()
+            await r.ticks(12)
+            seen_d = json.dumps(await drain(d1) + await drain(d2))
+            seen_c = json.dumps(await drain(a) + await drain(b))
+            assert "AAAA" not in seen_d and ha["token"] not in seen_d
+            assert dh1["token"] not in seen_c and dh2["token"] not in seen_c
+            _, bad = await join_code(r.port, "AAAA", token=dh1["token"])   # default token, coded room
+            assert bad["code"] == "bad_token"
+            for w in (d1, d2, a, b):
                 await w.close()
     run(go())
