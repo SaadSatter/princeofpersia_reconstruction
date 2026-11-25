@@ -41,3 +41,15 @@ No real shipped-weights policy run and no H6 run (forbidden). The CLI injection 
 
 ## Probes
 `tests/test_qa_T08fix2_policy_errors_cli.py` (6 tests: 4 pass, 1 strict xfail F1, 1 skip when T09 results are absent).
+
+## Addendum (gate/T08-fix2-qa-fix, from 06b893d): fix to my T09 re-analysis probe
+
+`test_t09_committed_results_if_present_reanalyse_unchanged_apart_from_the_new_section` failed on the integration
+tree (T09 results present there; skipped on my gate branch). My assertion assumed the section is appended last;
+`analysis.render` inserts it before "## Every round". No product defect.
+
+- Old: `assert old.split("## PPO inference errors")[0].rstrip() in new` and `assert "not recorded" in new`.
+- New: take the "## PPO inference errors" section from the new render (up to the next "## " heading), assert
+  `"not recorded" in section`, and assert `new` minus that section `== old` (committed `analysis.txt`), strictly.
+
+Only that test changed.

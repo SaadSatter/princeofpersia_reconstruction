@@ -114,5 +114,8 @@ def test_t09_committed_results_if_present_reanalyse_unchanged_apart_from_the_new
     rows, headers = analysis.load_rows([str(res / "results.json")])
     new = analysis.render(rows, headers, every_round=True)
     old = (res / "analysis.txt").read_text()
-    assert old.split("## PPO inference errors")[0].rstrip() in new
-    assert "not recorded" in new
+    start = new.index("\n## PPO inference errors")
+    end = new.find("\n## ", start + 1)
+    section = new[start:end if end != -1 else len(new)]
+    assert "not recorded" in section
+    assert new[:start] + (new[end:] if end != -1 else "") == old
