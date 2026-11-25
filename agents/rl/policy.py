@@ -28,6 +28,10 @@ MACRO_EVERY = 4
 FORMAT = "sm-ppo-mlp-1"
 NEG = -1e9
 
+# The weights shipped with the game (PPO run 1, decision #51; docs/final/RL_POLICY.md).
+SHIPPED_WEIGHTS = Path(__file__).resolve().parent / "weights" / "ppo-run-1.json"
+SHIPPED_SHA256 = "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c"
+
 
 class WeightsError(ValueError):
     """The weights file is missing its hash, fails it, or does not fit this encoder."""

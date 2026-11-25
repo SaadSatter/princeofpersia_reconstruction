@@ -1,0 +1,28 @@
+{
+ "seed": 0,
+ "total_seconds": 4800.0,
+ "episodes_per_iter": 16,
+ "workers": 2,
+ "max_iters": null,
+ "max_frames": null,
+ "out_dir": "tools/rl/logs/run-1",
+ "hidden": [
+  64,
+  64
+ ],
+ "gamma": 0.995,
+ "lam": 0.95,
+ "lr": 0.0005,
+ "clip": 0.2,
+ "epochs": 4,
+ "minibatch": 256,
+ "vf": 0.5,
+ "ent": 0.01,
+ "snapshot_every": 5,
+ "snapshot_pool": 6,
+ "snapshot_prob": 0.5,
+ "eval_episodes": 8,
+ "final_eval_seeds": 4,
+ "shaping": true,
+ "fail_on_policy_error": true
+}
