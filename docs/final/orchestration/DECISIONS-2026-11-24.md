@@ -198,3 +198,13 @@ Saad's choice on `reports/T09-evaluation-specialist.md`@77bc2f7 (AskUserQuestion
 | # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
 |---|---|---|---|
 | 80 | T09 health check: stale inputs on the scripted seat (identical before and after T19; inputs stranded when a baseline jump ends in a fall) | "PPO seat 0 stale; report baseline (Recommended)" | The T09 health check passes with 0 aborted, 0 fallbacks, 0 invalid on both seats and 0 stale on the PPO seat. The baseline's stale inputs and its falls are reported per duel as a confound. T09 continues to steps 2 and 3 (H6 once). PROTOCOL H-c's "0 for both" is brought in line by a later docs task, not by T09 |
+
+## Addendum: T20 Gate 2 choices (T20-fix1)
+
+Saad's choices after the T20 Gate 1 REJECT (`reports/T20-qa.md`@8139bae) and Gate 2 (`reports/T20-evaluation-specialist.md`@a039283), AskUserQuestion, verbatim. Numbered from #81 because a parallel session took up to #80:
+
+| # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
+|---|---|---|---|
+| 81 | How the logger learns what the engine actually did | "Small public read-only accessor (Recommended)" | One read-only method in `pop/` (the move a seat actually started this tick, after R-V10, R-V22 and R-V35 rewrites and stale drops), failing test first. It changes no rule and is never part of a seat's observation. The recorder's "resolved action" column comes only from it |
+| 82 | How a grace-cancelled direction appears | "Marker + summary discounts it (Recommended)" | The log stays append-only and real-time. The direction row is written; the jump row carries `"grace": true`; the summarizer drops the superseded direction. QA updates its own F2 xfail to this form at Gate 1 |
+| 83 | Summary thresholds | "Idle 3 s, refused 12 ticks, stuck 60 s (Recommended)" | `IDLE_THRESHOLD_S = 3`, `REFUSED_RUN_MIN = 12` (ticks), `STUCK_ROOM_S = 60`; named constants |
