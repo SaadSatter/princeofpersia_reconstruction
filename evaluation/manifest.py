@@ -28,7 +28,10 @@ ROOT = Path(__file__).resolve().parent
 HELDOUT_PATH = ROOT / "heldout" / "H6.json"
 LEDGER_PATH = ROOT / "heldout" / "ledger.jsonl"
 TUNING_PATH = ROOT / "scenarios" / "tuning.json"
-HELDOUT_SHA256 = "44da40eca7a5606a9778cd3dca9756a34eb3962d3143a1304247ef2c92070847"
+# Re-frozen by T08-fix1 (decision #74): H6-5 to H6-8 added by the rule in PROTOCOL.md 3.1.
+# The first freeze (four starts) was 44da40eca7a5606a9778cd3dca9756a34eb3962d3143a1304247ef2c92070847;
+# it never ran, so no result is voided.
+HELDOUT_SHA256 = "d013152a84aed5d6ddf189a306e1dfa66f8b178a68dde2f6d5039684e82a5266"
 
 
 class FreezeError(RuntimeError):
