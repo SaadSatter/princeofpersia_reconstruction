@@ -222,3 +222,16 @@ Saad's choices on the T20-fix1 tech-lead report (`reports/T20-fix1-tech-lead.md`
 |---|---|---|---|
 | 85 | Existing T20 tests that assert the pre-#83 / pre-F3 behaviour | "Authors update them (Recommended)" | Only those assertions change, each listed old → new in its author's report. The Tech Lead updates `tests/test_t20_summarize.py::test_stalls` and `tests/test_t20_telemetry.py::test_connection_events_and_forfeit`. QA updates `tests/test_t20_qa_probes.py::test_real_scripted_duel_summarizes_deterministically`, its F1 xfail mark and its F2 test (to the #82 marker form). Eval removes its E1 xfail mark |
 | 86 | Reporting-only engine label `_rewrite` (kick, grace, hop_turn) set in `Duel._start` | "Accept the label (Recommended)" | Kept. It is read only through `VersusEpisode.started_move`. No rule reads it. Gate 2 checks that it changes no trace, hash or observation and that no seat can see it |
+
+## Addendum: Wed 2026-11-25 (PPO line: the trained rival in the game, three modes)
+
+Saad's request in chat (verbatim): "Wire the trained rival into the game, keep going through the gates, make a game mode for the AI Model and a seperate one for the baseline and one for the human vs human"
+
+His choices (AskUserQuestion), quoted verbatim. Recorded by the PPO-line orchestrator (session 8edb65a6):
+
+| # | Question (short) | Saad's answer (verbatim) | Orchestrator's reading and effect |
+|---|---|---|---|
+| 87 | Where the three modes are offered | "All three front ends (Recommended)" | pygame `play.py`, the hosted web page and the online server each offer **AI Model**, **Baseline** and **Human vs Human**, from one shared mode list. Task T22 |
+| 88 | On-screen names | "Honest names (Recommended)" | "AI Model (trained)" and "Baseline (scripted)" on the menu, the HUD and the end screen. Closes the open `--rival baseline` neutral-label question: honest labels by default (the existing `--neutral` flag may stay as an opt-in for blind tests) |
+| 89 | Human seat in the AI modes | "Human players since they are using different machines, they can use either WASD or the arrows, both are valid" | Read with #55: in every mode where each human has their own machine (online, and human vs AI), the player's own seat accepts both WASD and the arrows. Local two-player on one keyboard keeps A = WASD, B = arrows (#55). The human plays seat A in the AI modes; no seat-swap option is added (not asked for) |
+| 90 | Timing against T20 | "Start now, merge after T20 (Recommended)" | T22 starts now from `orch/reviewed` 74975e1, with mode code in new modules and thin hooks in `play.py`, `web/` and `server/`; overlap with T20 is resolved at Gate 3 after T20 lands |
