@@ -39,7 +39,7 @@ paths and are historical.
 | Branch | Head | Class | Content |
 | --- | --- | --- | --- |
 | `main` | see `git log` | Saad's merged work + orchestration records | gameplay as of 721b3e6; orchestration docs |
-| `orch/reviewed` | 83a90ea | reviewed integration candidate | T01 chain, T02, T04 chain incl. fix3, T11 + fix1, T05 + T05-fix1, T15, T06b, T14 + T14-fix1 (2026-11-24) |
+| `orch/reviewed` | 2835928 | reviewed integration candidate | T01 chain, T02, T04 chain incl. fix3, T11 + fix1, T05 + T05-fix1, T15, T06b, T14 + T14-fix1, T07 + T07-fix1 + T16, GATE-wave3 reports (2026-11-24) |
 | `int/preview-T05-fix1` | b52d145 | parked integration | `orch/preview` + `orch/reviewed` 2180fea. One T07 test fails (fixture relied on the mirror deadlock). Becomes `orch/preview` after T07-fix1 |
 | `int/T13-base` | ae90c8c | preview line (supersedes `int/preview-T05-fix1`) | `orch/preview` + `orch/reviewed` 704521d. 1 known failure (T07 fixture). Base for T13 and GATE-wave3; becomes `orch/preview` after T07-fix1 |
 | `task/T05-fix1`, `gate/T05-fix1-qa`, `gate/T05-fix1-eval` | 161a841, 12c11bd, 1b303ff | worker branches (closed task) | merged into `orch/reviewed` |
@@ -61,16 +61,14 @@ No `rc/*` (approved release candidate) branch exists.
 | closed (except fix3) | T04 + fix1 + fix2 | seat-controller protocol, versus runner | G1, G2 accept w/ notes; G3 closed | `orch/reviewed` | none |
 | under review | T11 + fix1 | playtest kit | G1 accept w/ notes; fix1 fact-check pending | `orch/reviewed` | none |
 | closed (Gate 3, 2026-11-24) | T06a / T06b | traps spec + rival-rigged loose floor | G1 e50a846, G2 f02314b ACCEPT w/ notes; G3 closed | `orch/reviewed` 0b32647 | — |
-| **rejected at Gate 1** → T07-fix1 | T07 | PPO encoder, trainer, stdlib policy. **Full training not started** | G1 REJECT (T07-QA-1 fixture), G2 ACCEPT w/ notes (E1–E4 before training) | preview line ae90c8c | — |
-| gates passed; **Gate 3 held** | T07-fix1 | parity fixture, fail-fast (#47), no AI traps (#43), 8 tuning starts (#44) | G1 9f7d310, G2 68cf81e ACCEPT w/ notes | integration `int/reviewed-T07` 99e85c9 (one stale wave3 probe fails) | — |
-| **active** (Gate 2 running) | T16 | PPO pre-training polish: stale probe (#44), `final_check` and in-loop error counts, `_batch` empty, docs | G1 ACCEPT w/ notes (37cf95c); G2 running | `task/T16` 9024ef8, report 7519820 | — |
+| closed (Gate 3, 2026-11-24) | T07 + T07-fix1 + T16 | PPO encoder, trainer, stdlib policy; fail-fast (#47); 8 tuning starts (#44); no AI traps (#43). **Full training not started** | final G1 37cf95c, G2 805df2b ACCEPT w/ notes; G3 closed | `orch/reviewed` 2835928 | — |
 | closed (Gate 3, 2026-11-24) | T14 + T14-fix1 | hosted web build (Pyodide + Phaser); not yet run in a browser | G1 e50a846, G2 f02314b ACCEPT w/ notes; G3 closed | `orch/reviewed` 83a90ea | — |
 | closed (Gate 3, 2026-11-24) | T05 + T05-fix1 | macros + baseline; CLIMB both ways (#31), descent, lone-guard rule 5, mirror no longer deadlocked | G1 ACCEPT w/ notes (12c11bd), G2 ACCEPT w/ notes (1b303ff), G3 closed | `orch/reviewed` 2180fea; preview merge parked on `int/preview-T05-fix1` b52d145 (breaks one T07 test, see REVIEW_LOG) | issue #7 |
 | closed (Gate 3, 2026-11-24) | T04-fix3 (+ #33 flip) | refuse shared controller, keyed seed, in-flight race | G1 ab7fcba, G2 0eef8e4 ACCEPT w/ notes; G3 closed | `orch/reviewed` 704521d | issue #8 |
 | closed (Gate 3, 2026-11-24) | T15 | numpy as optional `train` extra (#34) | G1 ACCEPT (f2ac18b); G2 n/a; G3 closed | `orch/reviewed` 199f858 | issue #9 |
-| **rejected at Gate 1**; Gate 2 running → T13-fix1 | T13 | online play: server on Saad's laptop (LAN, #36), `websockets` extra (#37), pause 15 s then forfeit (#38), game-styled rematch button (#41) | G1 REJECT (52ce850: QA-1 tick-loop freeze, QA-2 dead seat stays connected); G2 running | `task/T13` 160135c, report dc28e18 (base ae90c8c) | issue #10 |
+| **rejected at Gate 1**; T13-fix1 next (attempt 1 of 2) | T13 | online play: server on Saad's laptop (LAN, #36), `websockets` extra (#37), pause 15 s then forfeit (#38), game-styled rematch button (#41) | G1 REJECT (52ce850: QA-1 tick-loop freeze, QA-2 dead seat stays connected); G2 9a3feac ACCEPT w/ notes on the boundary (no leak); 4 majors to fix | `task/T13` 160135c, report dc28e18 (base ae90c8c) | issue #10 |
 | unreviewed WIP | T08 | scenario suite D1/B2/I3/F5 + held-out H6, CLI, analysis | — | `orch/wip-T08` 25e4587 | none |
-| blocked | T07 full training run | ~85 min PPO run | T05-fix1 closed 2026-11-24; still needs T07 gates (GATE-wave3), T07-fix1, numpy declared, **and** Saad's go-ahead | — | none |
+| **ready, waiting on Saad** | T07 full training run | ~85 min PPO run from `orch/reviewed` 2835928 | Saad's explicit go; F1 (withhold weights after a `final_check` error?); time cap | — | — |
 | closed | SMOKE-01 | orchestration smoke test: every path in README Files + CLAUDE.md Roles tables, and agent procedure pointers, exist on `main` | G1 ACCEPT WITH NOTES (1 minor), G2 n/a, G3 closed | `task/SMOKE-01` fc16525, `gate/SMOKE-01-qa` 3bb36f5 (not merged) | none |
 | not started | T03 | official-repository move (decision #6), `python -m team init` | — | — | — |
 | closed (Gate 3); **PR #6 awaiting Saad's merge** | T10a (+fix1, fix2) | docs in line with decisions #1–#30: Changes since G1 in GDD and Configuration, PPO rival, orchestration, checklist, plan, README | G1 accept w/ notes ×3; G2 n/a; G3 closed | `orch/T10a` a1b9738 | issue #5, PR #6 |
