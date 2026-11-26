@@ -42,12 +42,12 @@ def test_down_at_a_ledge_edge_with_no_body_still_hangs():
     assert ep._duel.rivals["A"].disguised is False
 
 
-def test_down_at_a_ledge_edge_standing_over_a_body_takes_the_uniform_instead_of_hanging():
-    """QA F1 reproduced: the standing hang-down becomes a take. Rare (needs a body on the edge cell)."""
+def test_down_at_a_ledge_edge_standing_over_a_body_still_hangs():
+    """Decision #101 (was: takes the uniform instead of hanging). Hang wins at a ledge edge."""
     ep = edge_episode(body=True)
     r = ep._duel.rivals["A"]
-    assert r._kneel_target() == "uniform"
+    assert r._kneel_target() is None
     ep.step("A", "DOWN")
-    run(ep, V.TAKE_FRAMES + 2)
-    assert r.disguised is True and r.kid.posture == "standing"
-    assert ep.observe("A")["last_result"]["effect"] == "took_uniform"
+    run(ep, 30)
+    assert r.kid.posture == "hanging" and r.disguised is False
+    assert ep.observe("A")["last_result"]["effect"] == "hanging"
