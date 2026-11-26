@@ -1,0 +1,93 @@
+# Versus evaluation summary
+
+- run `20261125T085558Z` split `heldout` commit `77bc2f7d506d` dry_run=False seed_key_id=5b5c7582
+
+Rows: 48; aborted: 0 (counted as not a success, not a win, and listed below).
+
+## Distinct outcomes per condition
+
+Seeds are not independent trials: rows of one condition with the same final state are one trial.
+
+| scenario | start | config | rows | distinct | aborted |
+|---|---|---|---|---|---|
+| H6 | H6-1 | MvS | 3 | 1 | 0 |
+| H6 | H6-1 | SvM | 3 | 1 | 0 |
+| H6 | H6-2 | MvS | 3 | 1 | 0 |
+| H6 | H6-2 | SvM | 3 | 1 | 0 |
+| H6 | H6-3 | MvS | 3 | 1 | 0 |
+| H6 | H6-3 | SvM | 3 | 1 | 0 |
+| H6 | H6-4 | MvS | 3 | 1 | 0 |
+| H6 | H6-4 | SvM | 3 | 1 | 0 |
+| H6 | H6-5 | MvS | 3 | 1 | 0 |
+| H6 | H6-5 | SvM | 3 | 1 | 0 |
+| H6 | H6-6 | MvS | 3 | 1 | 0 |
+| H6 | H6-6 | SvM | 3 | 1 | 0 |
+| H6 | H6-7 | MvS | 3 | 1 | 0 |
+| H6 | H6-7 | SvM | 3 | 1 | 0 |
+| H6 | H6-8 | MvS | 3 | 1 | 0 |
+| H6 | H6-8 | SvM | 3 | 1 | 0 |
+
+## Scenario success (distinct outcomes; aborted rounds count as failures)
+
+| scenario | config | subject seat | subject controller | k/n | rate | 95% Wilson | rows | aborted | flag |
+|---|---|---|---|---|---|---|---|---|---|
+
+## Duels: win / draw / loss
+
+| scenario | controller | configs | W | D | L | n | aborted | win 95% | by seat A | by seat B | flag |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| H6 | M | MvS+SvM | 13 | 2 | 1 | 16 | 0 | 0.57-0.93 | 7W 1D 0L | 6W 1D 1L |  |
+| H6 | S | MvS+SvM | 1 | 2 | 13 | 16 | 0 | 0.01-0.28 | 1W 1D 6L | 0W 1D 7L |  |
+
+## Every round
+
+| row | termination | success | reason |
+|---|---|---|---|
+| H6/H6-1/MvS/t0 | draw:time_up | None | outcome_only |
+| H6/H6-1/MvS/t1 | draw:time_up | None | outcome_only |
+| H6/H6-1/MvS/t2 | draw:time_up | None | outcome_only |
+| H6/H6-1/SvM/t0 | won:B | None | outcome_only |
+| H6/H6-1/SvM/t1 | won:B | None | outcome_only |
+| H6/H6-1/SvM/t2 | won:B | None | outcome_only |
+| H6/H6-2/MvS/t0 | won:A | None | outcome_only |
+| H6/H6-2/MvS/t1 | won:A | None | outcome_only |
+| H6/H6-2/MvS/t2 | won:A | None | outcome_only |
+| H6/H6-2/SvM/t0 | draw:time_up | None | outcome_only |
+| H6/H6-2/SvM/t1 | draw:time_up | None | outcome_only |
+| H6/H6-2/SvM/t2 | draw:time_up | None | outcome_only |
+| H6/H6-3/MvS/t0 | won:A | None | outcome_only |
+| H6/H6-3/MvS/t1 | won:A | None | outcome_only |
+| H6/H6-3/MvS/t2 | won:A | None | outcome_only |
+| H6/H6-3/SvM/t0 | won:B | None | outcome_only |
+| H6/H6-3/SvM/t1 | won:B | None | outcome_only |
+| H6/H6-3/SvM/t2 | won:B | None | outcome_only |
+| H6/H6-4/MvS/t0 | won:A | None | outcome_only |
+| H6/H6-4/MvS/t1 | won:A | None | outcome_only |
+| H6/H6-4/MvS/t2 | won:A | None | outcome_only |
+| H6/H6-4/SvM/t0 | won:B | None | outcome_only |
+| H6/H6-4/SvM/t1 | won:B | None | outcome_only |
+| H6/H6-4/SvM/t2 | won:B | None | outcome_only |
+| H6/H6-5/MvS/t0 | won:A | None | outcome_only |
+| H6/H6-5/MvS/t1 | won:A | None | outcome_only |
+| H6/H6-5/MvS/t2 | won:A | None | outcome_only |
+| H6/H6-5/SvM/t0 | won:B | None | outcome_only |
+| H6/H6-5/SvM/t1 | won:B | None | outcome_only |
+| H6/H6-5/SvM/t2 | won:B | None | outcome_only |
+| H6/H6-6/MvS/t0 | won:A | None | outcome_only |
+| H6/H6-6/MvS/t1 | won:A | None | outcome_only |
+| H6/H6-6/MvS/t2 | won:A | None | outcome_only |
+| H6/H6-6/SvM/t0 | won:B | None | outcome_only |
+| H6/H6-6/SvM/t1 | won:B | None | outcome_only |
+| H6/H6-6/SvM/t2 | won:B | None | outcome_only |
+| H6/H6-7/MvS/t0 | won:A | None | outcome_only |
+| H6/H6-7/MvS/t1 | won:A | None | outcome_only |
+| H6/H6-7/MvS/t2 | won:A | None | outcome_only |
+| H6/H6-7/SvM/t0 | won:B | None | outcome_only |
+| H6/H6-7/SvM/t1 | won:B | None | outcome_only |
+| H6/H6-7/SvM/t2 | won:B | None | outcome_only |
+| H6/H6-8/MvS/t0 | won:A | None | outcome_only |
+| H6/H6-8/MvS/t1 | won:A | None | outcome_only |
+| H6/H6-8/MvS/t2 | won:A | None | outcome_only |
+| H6/H6-8/SvM/t0 | won:A | None | outcome_only |
+| H6/H6-8/SvM/t1 | won:A | None | outcome_only |
+| H6/H6-8/SvM/t2 | won:A | None | outcome_only |

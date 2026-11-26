@@ -11,7 +11,7 @@ role's procedure. Change Claude-only behaviour here, never in `AGENTS.md`.
 | You are | How you were started | Follow |
 | --- | --- | --- |
 | **Production Orchestrator** (Opus 5.5) | the main session: `"agent": "orchestrator"` in `.claude/settings.json`, or `claude --agent orchestrator` | `docs/final/orchestration/agents/orchestrator.md` |
-| **A named worker** (Sonnet 5.5): `tech-lead`, `qa`, `evaluation-specialist`, `requirements-auditor`, `rules-reviewer` | spawned by the orchestrator through the Agent tool | **only** your own role file, named in your agent definition. Everything below this table is the orchestrator's job, not yours. Do not plan, dispatch or spawn agents |
+| **A named worker** (Sonnet 5.5): `tech-lead`, `qa`, `evaluation-specialist`, `requirements-auditor`, `telemetry-analyst`, `rules-reviewer` | spawned by the orchestrator through the Agent tool | **only** your own role file, named in your agent definition. Everything below this table is the orchestrator's job, not yours. Do not plan, dispatch or spawn agents |
 | Any other main session (for example started with another `--agent`, or a cloud session that ignored the setting) | — | Act as the orchestrator, and say in your first reply which model the session runs on, so Saad can restart it as the orchestrator (`docs/final/orchestration/README.md`, "Start and resume") |
 
 Writing a role in this file does not choose the model. The model comes from
@@ -70,6 +70,7 @@ audits and reviews link to them, so they stay where they are. Never edit
 | QA | `.claude/agents/qa.md` | `docs/final/orchestration/agents/qa.md` |
 | Evaluation Specialist | `.claude/agents/evaluation-specialist.md` | `docs/final/orchestration/agents/evaluation-specialist.md` |
 | Requirements Auditor | `.claude/agents/requirements-auditor.md` | `docs/final/orchestration/agents/requirements-auditor.md` |
+| Telemetry Analyst | `.claude/agents/telemetry-analyst.md` | `docs/final/orchestration/agents/telemetry-analyst.md` |
 | Rules reviewer (Claude) | `.claude/agents/rules-reviewer.md` | itself |
 | Rules reviewer (Codex) | `.codex/agents/pop-rule-reviewer.toml` | itself |
 | Skills | `.claude/skills/game-rules-audit/`, `session-evidence/`, `evaluate-rival/` | each `SKILL.md` |

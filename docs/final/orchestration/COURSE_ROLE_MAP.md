@@ -20,6 +20,7 @@ repository), and from `inputs/FINAL_REQUIREMENTS.md` section 4.
 | `qa` | `qa` (QA) | **Yes**, a G2/G3 starter, once `agent-team/roles/qa.md` exists and is tailored | Rendered to `.claude/agents/team-qa.md`. Course rule kept: QA writes tests, never game code |
 | `evaluation-specialist` | none yet | **No**, unless Saad adds it with an origin note backed by real, dated friction that predates its first commit (721b3e6, 2026-11-23) | Never counted automatically |
 | `requirements-auditor` | none | **No** | Temporary worker |
+| `telemetry-analyst` | none | **No**: not a formal production agent (decision #69) | Reads playtest telemetry logs and reports counted facts; Saad interprets. Writes its report only |
 | `rules-reviewer` | part of `qa`'s rule-change check | No (it is a review task, as in the course starter) | The course QA role's `rules` slot already says "Run rules-reviewer on any change to a rule or the player interface" |
 | In-game PPO rival | none | No | "Your in-game agent is separate" (`team/README.md`) |
 
@@ -28,7 +29,7 @@ repository), and from `inputs/FINAL_REQUIREMENTS.md` section 4.
 `python -m team render` writes `.claude/agents/team-<id>.md` and
 `.agents/skills/team-<id>/SKILL.md`, and leaves other agents alone. The
 native names here (`orchestrator`, `tech-lead`, `qa`, `evaluation-specialist`,
-`requirements-auditor`, `rules-reviewer`) never begin with `team-`, so the
+`requirements-auditor`, `telemetry-analyst`, `rules-reviewer`) never begin with `team-`, so the
 files cannot collide. Once `agent-team/` exists in the official repository,
 two registrations describe the same course role (`team-tech` and
 `tech-lead`; `team-qa` and `qa`). The rule then is:

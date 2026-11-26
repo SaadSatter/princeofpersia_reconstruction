@@ -31,24 +31,27 @@ any move (VERSUS_SPEC 2.1, R-V03). Guards and disguise follow (R-V13 to R-V21).
 from __future__ import annotations
 
 import copy
+import json
 import random
 
 from . import observation
 from . import physics as P
 from . import tiles as T
 from .engine import ACTIONS, LEGAL_BY_POSTURE, Game, Kid
-from .guards import SIGHT_CELLS, Guard, blocked_between
+from .guards import (ALERT_DRAW_FRAMES, CHASE_FRAMES, PATROL_FRAMES, SIGHT_CELLS, Guard,
+                     blocked_between)
 from .mechanics import Mechanics
 from .physics import Cell, Geometry
 from .situations import Situation
 
 SEATS = ("A", "B")
 TICKS_PER_SECOND = 12                 # R-D26 display rate; VERSUS_SPEC 2.1
+DUEL_FRAMES = 5 * 60 * TICKS_PER_SECOND   # OQ-3, Saad 2026-11-23: "Make the duel time limit 5min"
 TASK = ("Duel: bring the other rival's hearts to 0. Both rivals act at the same "
         "time; the duel ends on a death, a double death, or the time limit.")
-OBSERVATION_KEYS = observation.OBSERVATION_KEYS | {"me", "figures", "swords", "suspicion"}
+OBSERVATION_KEYS = observation.OBSERVATION_KEYS | {"me", "figures", "swords", "suspicion", "my_traps"}
 FIGURE_KEYS = {"kind", "row", "col", "facing", "posture", "stance", "armed", "motion"}
-ME_EXTRA_KEYS = {"stance", "armed", "disguised", "knocked_down_frames", "motion"}
+ME_EXTRA_KEYS = {"stance", "armed", "disguised", "knocked_down_frames", "motion", "traps_left"}
 
 INVALID_SEAT = "unknown seat"
 INVALID_NOT_TEXT = "action must be a string"
@@ -76,14 +79,30 @@ SUSPICION_MAX = 100                   # R-V19
 SUSPICION_RUN, SUSPICION_LEAP, SUSPICION_LINGER = 4, 6, 1     # per frame, R-V19
 LINGER_AFTER = 24                     # "over 2 s" within 1 cell, R-V19
 SUSPICION_FALL = 2                    # per frame, R-V20
+# Rigged traps (docs/final/TRAPS_SPEC.md, Saad's decision #22, 2026-11-23). The seat-facing
+# `RIG` action is the engine half of the `RIG_TRAP` macro (CQ-1).
+RIG_FRAMES = 12                       # R-V27: kneel as long as TAKE
+TRAPS_PER_RIVAL = 4                   # R-V31: shared across trap types
+SUSPICION_RIG = 3                     # R-V33: per frame of the kneel, in a guard's sight
+RIG_KIND = "loose"                    # the only type built so far (gate plate is later)
 LEAPS = ("jumped", "flipped", "climbed", "hanging", "dropped")  # jumping or climbing
 JUMPS = ("jumped", "flipped")          # a flip is a jump over someone (R-V22)
 VERSUS_ACTIONS = ("DRAW", "SHEATHE", "STANCE_UP", "STANCE_DOWN", "LUNGE", "THROW",
-                  "KICK", "SWEEP", "TAKE")
+                  "KICK", "SWEEP", "TAKE", "RIG")
 BREAKS_DISGUISE = ("DRAW", "LUNGE", "THROW", "KICK", "SWEEP")  # R-V21
 DIRECTIONAL = {d: (d, "STEP_" + d, "JUMP_" + d, "RUN_JUMP_" + d) for d in ("LEFT", "RIGHT")}
 HOPS = ("none", "bumped_ceiling")      # UP on open floor: a hop straight up (pop/engine.py _up)
 HOP_FLIPS = {"_HOP_FLIP_LEFT": -1, "_HOP_FLIP_RIGHT": +1}       # R-V22, started by the duel
+GRACE_TICKS = 2                       # R-V35, Saad #54 (2026-11-24): direction + jump window
+# R-V18 (T01, AUDIT-B F1): every motion a guard can show (pop/guards.py Guard.motion),
+# as (effect, frames). A disguised rival's move outside this set is shown to the
+# other seat only if it raises suspicion by rule (Duel.suspicious_rise); any
+# other move (a wait, a bump, a refused careful step, a crouch) is shown as
+# standing still, the way a paused guard is observed.
+GUARD_MOTIONS = frozenset({
+    ("moved", PATROL_FRAMES), ("moved", CHASE_FRAMES), ("turned", P.TURN),
+    ("drew", ALERT_DRAW_FRAMES), ("sheathed", ALERT_DRAW_FRAMES),
+    ("lunge", LUNGE_WINDUP + LUNGE_ACTIVE + LUNGE_RECOVERY)})
 
 
 class Rival(Game):
@@ -119,6 +138,7 @@ class Rival(Game):
         self.knocked_down = 0              # R-V12
         self.disguised = False             # R-V17 to R-V21
         self.still = 0                     # frames standing still (R-V19 lingering)
+        self._trap_fall = False            # falling with a rigged floor (R-V28)
 
     def _tick(self) -> None:
         """This rival's part of the frame the duel has already advanced."""
@@ -149,10 +169,19 @@ class Rival(Game):
                 and not Game.blocks(self, where))
 
     def _jump_look(self, running: bool, vaulted: bool) -> str:
-        """R-V22: a jump over someone is a flip, and so is every running jump
-        (Saad, 2026-11-17: over holes and spikes too) and a hop turned into a
-        jump. A standing jump over nobody stays a plain jump."""
-        return "flipped" if running or vaulted or self._hop_flip else "jumped"
+        """R-V22 (amended by Saad #53, 2026-11-24): every directional jump is a
+        flip, standing or running, over someone or nobody. Where it lands is
+        unchanged. (Before: only a jump over someone, a running jump or a hop
+        turned into a jump flipped.)"""
+        return "flipped"
+
+    def _directional(self, d: int, kind: str):
+        """A jump pointed the other way faces that way and jumps, with no separate
+        4-frame turn first (Saad #53/#54: a direction and a jump are one flip in
+        that direction). Runs and steps still turn first (R-D20)."""
+        if kind == "jump":
+            self.kid.facing = d
+        yield from super()._directional(d, kind)
 
     def _flip_from_hop(self, d: int):
         """R-V22 (Saad, 2026-11-17): a direction pointed while hopping straight up
@@ -185,17 +214,60 @@ class Rival(Game):
         super()._hurt(amount, reason)
         self.disguised = False                              # R-V21: losing a heart
 
-    def uniform_ahead(self):
-        """A downed guard still in uniform to take (R-V17): in this rival's own cell
-        (standing over the body, facing either way) or in the cell ahead. The own
-        cell was added after Saad's playtest of 2026-11-17: a downed guard can be
-        walked onto, and T over the body did nothing."""
+    def _react(self, events: list) -> None:
+        """Note a fall caused by a sprung rig before the inherited reaction starts it."""
+        k = self.kid
+        for _, cell, _ in events:
+            if cell in self.duel.sprung and (
+                    (k.posture == "standing" and k.cell == cell and not self._airborne)
+                    or (k.posture == "hanging" and k.hang_ledge == cell)):
+                self._trap_fall = True
+        super()._react(events)
+
+    def _land(self) -> None:
+        """R-V28: a sprung trap costs 1 heart in all. A fall of 2 rows already costs
+        one (R-V01), so only a shorter fall adds it; a deadly fall is left alone."""
+        hp = self.kid.hp
+        super()._land()
+        if self._trap_fall:
+            self._trap_fall = False
+            if self.kid.posture == "standing" and self.kid.hp == hp:
+                self._hurt(1, "died:trap")
+                if self.alive:
+                    self._result["effect"] = "hurt"
+
+    def rig_target(self) -> Cell | None:
+        """R-V27: the cell a RIG would rig, or None if RIG is not legal now. Reads
+        only this seat's own state and what it sees in its own room: never the
+        other seat's rigs (a refusal there would reveal them, TRAPS_SPEC 2), and
+        never a link to a room below, which no observation shows (so the floor
+        the tile falls to must lie in this room)."""
+        d, k = self.duel, self.kid
+        cell = self.ahead()
+        if (not isinstance(cell, tuple) or cell[0] != k.room or k.posture != "standing"
+                or d.traps_left[self.seat] <= 0 or self.seat in d.rigs.get(cell, {})
+                or self.geom.tile(cell) != T.FLOOR or not self.geom.supported(cell)
+                or d.body_in(cell) or d.claimed(cell, other_than=self.seat)
+                or not d.floor_below_in_room(cell)):
+            return None
+        return cell
+
+    def downed_guard_ahead(self):
+        """A downed guard in this rival's own cell (standing over the body, facing
+        either way) or in the cell ahead. The own cell was added after Saad's
+        playtest of 2026-11-17: a downed guard can be walked onto, and T over the
+        body did nothing."""
         here, ahead = self.kid.cell, self.ahead()
         for cell in (here, ahead):
             for g in self.duel.guards.values():
-                if g.downed and g.uniform and g.cell == cell:
+                if g.downed and g.cell == cell:
                     return g
         return None
+
+    def uniform_ahead(self):
+        """The downed guard in reach if its uniform is still there to take (R-V17)."""
+        g = self.downed_guard_ahead()
+        return g if g is not None and g.uniform else None
     # --- swordplay macros (per-frame generators, like the inherited ones) ---
     def _versus_macro(self, action: str):
         if action in HOP_FLIPS:                             # internal: never a seat's input
@@ -208,7 +280,7 @@ class Rival(Game):
                 self.disguised = False                      # R-V21: drawing or any attack
             return {"DRAW": self._draw, "SHEATHE": self._sheathe, "LUNGE": self._lunge,
                     "THROW": self._throw, "KICK": self._kick, "SWEEP": self._sweep,
-                    "DOWN": self._pickup, "TAKE": self._take}[action]()
+                    "DOWN": self._pickup, "TAKE": self._take, "RIG": self._rig}[action]()
         return self._macro(action)
 
     def _draw(self):
@@ -280,12 +352,29 @@ class Rival(Game):
         self._result["effect"] = "took_uniform"
         self._plan("took_uniform", TAKE_FRAMES)
         yield from self._frames(TAKE_FRAMES)
-        if g is not None and g.uniform and g.downed:
+        if g is None or not (g.uniform and g.downed):
+            # R-V26: nothing to take is a no-op the acting seat can read; the
+            # other seat saw the same TAKE frames either way.
+            self._result["effect"] = "no_uniform"
+        else:
             g.uniform = False
             self.disguised = True
             if self.sword == "drawn":
                 self.sword = "sheathed"                     # under the uniform
             self.stance, self.stance_change = None, None
+
+    def _rig(self):                                         # R-V27
+        target = self.rig_target()
+        self._result["effect"] = "no_rig" if target is None else "rigged"
+        self._plan("kneeled", RIG_FRAMES)
+        if target is None:                                  # not reachable: RIG is only started when legal
+            return
+        self.duel.traps_left[self.seat] -= 1                # spent at the start, even if cancelled
+        cell = self.kid.cell
+        yield from self._frames(RIG_FRAMES)
+        if not (self.kid.cell == cell and self.kid.posture == "standing"
+                and self.duel.place_rig(self.seat, target)):
+            self._result["effect"] = "no_rig"               # the floor changed under the kneel
 
     def _pickup(self):                                      # R-V09
         self._result["effect"] = "took_sword"
@@ -297,10 +386,10 @@ class Rival(Game):
 
 class Duel:
     def __init__(self, situation: Situation, starts: dict[str, tuple[int, int, int, int]],
-                 seed: int = 0, time_limit_frames: int = P.GAME_FRAMES,
+                 seed: int = 0, time_limit_frames: int = DUEL_FRAMES,
                  guard_posts: dict | None = None):
-        """time_limit_frames: OQ-3 (duel length) is open; the default is the
-        inherited 60-minute clock (R-C24) until Saad sets it.
+        """time_limit_frames: the duel's length; 5 minutes by default (OQ-3, closed
+        2026-11-23). The single-player 60-minute clock (R-C24) is unchanged.
         guard_posts: name -> (room, row, (c0, c1)[, facing]) (pop/arena.py)."""
         self.situation = situation
         self.seed = seed
@@ -316,10 +405,19 @@ class Duel:
         self._move_frame: dict[str, int] = {seat: 0 for seat in SEATS}
         self._move_action: dict[str, str | None] = {seat: None for seat in SEATS}
         self._started: dict[str, int] = {seat: -1 for seat in SEATS}   # frame a move began
+        # Reporting only (T20-fix1): which rewrite of an accepted input began the move.
+        self._rewrite: dict[str, str | None] = {seat: None for seat in SEATS}
+        # R-V35 (grace window): how the last move ended, and whether this one began a run.
+        self._last_end: dict[str, tuple[str | None, str | None, int] | None] = {
+            seat: None for seat in SEATS}                       # (action, effect, frame)
+        self._fresh: dict[str, bool] = {seat: True for seat in SEATS}
         # While the rivals advance, each plans against the other as it was when the
         # frame began, so the seat id never decides where a move goes (R-V00).
         self._view: dict[str, dict] | None = None
         self.pending: dict[str, str | None] = {seat: None for seat in SEATS}
+        # Reporting only (AUDIT-B F3): queued inputs that never started.
+        self.replaced: dict[str, int] = {seat: 0 for seat in SEATS}
+        self.stale: dict[str, int] = {seat: 0 for seat in SEATS}
         self.last_result: dict[str, dict | None] = {seat: None for seat in SEATS}
         self.terminal: str | None = None
         self.guards = {name: Guard.at_post(name, post)
@@ -327,6 +425,11 @@ class Duel:
         self.swords: list[Cell] = []            # dropped swords (R-V07, R-V08)
         self.suspicion: dict[tuple[str, str], int] = {}   # (guard, seat) -> 0..100
         self.flying: list[dict] = []            # thrown swords in flight (R-V08)
+        # Rigged traps (R-V27 to R-V32): cell -> {seat: kind}. Only ever shown to the
+        # owning seat (observe: my_traps). `sprung` marks floors that fell from a rig.
+        self.rigs: dict[Cell, dict[str, str]] = {}
+        self.traps_left: dict[str, int] = {seat: TRAPS_PER_RIVAL for seat in SEATS}
+        self.sprung: set[Cell] = set()
 
     # --- queries ------------------------------------------------------
     def standing_at(self, cell: Cell, other_than: str) -> bool:
@@ -335,6 +438,53 @@ class Duel:
                        for seat, v in self._view.items() if seat != other_than)
         return any(r.kid.cell == cell and r.kid.posture == "standing"
                    for seat, r in self.rivals.items() if seat != other_than)
+
+    def body_in(self, cell: Cell) -> bool:
+        """A living rival, or any guard (downed too), in `cell`."""
+        return (any(r.alive and r.kid.cell == cell for r in self.rivals.values())
+                or any(g.cell == cell for g in self.guards.values()))
+
+    def floor_below_in_room(self, cell: Cell) -> bool:
+        """The tile at `cell` would fall onto a floor in the same room (the landing
+        `Mechanics._drop_loose` finds), judged from visible tiles only."""
+        room, row, col = cell
+        for r in range(row + 1, P.ROWS):
+            below = (room, r, col)
+            if self.geom.tile(below) == T.WALL:
+                return False
+            if self.geom.supported(below):
+                return True
+        return False
+
+    def place_rig(self, seat: str, cell: Cell) -> bool:
+        """Rig `cell` for `seat` (R-V28, R-V31): one rig per seat per cell, so a double
+        rig is possible and a refusal never tells a seat about the other's rig."""
+        if self.geom.tile(cell) != T.FLOOR or seat in self.rigs.get(cell, {}):
+            return False
+        self.rigs.setdefault(cell, {})[seat] = RIG_KIND
+        return True
+
+    def _standing_bodies(self) -> dict[str, Cell]:
+        bodies = {seat: r.kid.cell for seat, r in self.rivals.items()
+                  if r.alive and r.kid.posture == "standing"}
+        bodies.update({"guard:" + n: g.cell for n, g in self.guards.items() if not g.downed})
+        return bodies
+
+    def _spring_rigs(self, before: dict[str, Cell]) -> None:
+        """R-V28, R-V30, R-V32: a body that stepped onto a rigged cell this frame (any
+        rival, owner included, or a guard) starts the floor shaking, and the rig is
+        spent. A body already standing there does not spring it. Nothing here
+        records who owned it."""
+        for cell in [c for c in self.rigs if self.geom.tile(c) != T.FLOOR]:
+            del self.rigs[cell]                             # the floor is gone (rubble fell on it)
+        if not self.rigs:
+            return
+        now = self._standing_bodies()
+        for cell in sorted(self.rigs):
+            if any(c == cell and before.get(who) != cell for who, c in now.items()):
+                self.mech.loose.setdefault(cell, 0)         # shaking, as a touched loose floor
+                self.sprung.add(cell)
+                del self.rigs[cell]
 
     def guard_at(self, cell: Cell) -> Guard | None:
         """A standing (not downed) guard in `cell`."""
@@ -404,11 +554,34 @@ class Duel:
         d = (k.col - g.col) * g.facing
         return 1 <= d <= SIGHT_CELLS and not blocked_between(self.geom, self.mech, g.cell, k.cell)
 
+    def hopping(self, seat: str) -> bool:
+        """A hop straight up in progress: UP on open floor, not a climb (R-V24).
+        Crouching (DOWN) has the same effect name, "none", so the input decides."""
+        return (self.busy(seat) and self._move_action[seat] == "UP"
+                and (self.rivals[seat].plan or {}).get("effect") in HOPS)
+
+    def suspicious_rise(self, seat: str) -> int:
+        """Per-frame suspicion this rival's move in progress adds in a guard's
+        sight: running (R-V19), jumping or climbing (R-V19), hopping (R-V24)."""
+        m = self.motion(seat)
+        if m is None:
+            return 0
+        if m["effect"] == "moved" and m["frames"] == P.RUN:
+            return SUSPICION_RUN
+        if m["effect"] in LEAPS or self.hopping(seat):
+            return SUSPICION_LEAP
+        return 0
+
+    def kneeling(self, seat: str) -> bool:
+        m = self.motion(seat)
+        return m is not None and m["effect"] == "kneeled"
+
     def _suspect(self) -> None:
-        """R-V19 to R-V21: each guard's meter for each disguised rival."""
+        """R-V19 to R-V21, R-V24: each guard's meter for each disguised rival."""
         for seat, r in self.rivals.items():
             m = self.motion(seat)
-            r.still = r.still + 1 if m is None else 0
+            idle = m is None or m["effect"] == "waited"     # R-V19, QA3: a re-sent WAIT is still
+            r.still = r.still + 1 if idle else 0
             if not r.disguised:
                 continue
             for name, g in self.guards.items():
@@ -416,13 +589,13 @@ class Duel:
                 level = self.suspicion.get(key, 0)
                 if self.in_sight(g, r):
                     near = abs(r.kid.col - g.col) <= 1
-                    if m is None:
+                    if idle:
                         delta = (SUSPICION_LINGER if r.still > LINGER_AFTER else 0) if near \
                             else -SUSPICION_FALL
-                    elif m["effect"] == "moved" and m["frames"] == P.RUN:
-                        delta = SUSPICION_RUN
-                    elif m["effect"] in LEAPS:
-                        delta = SUSPICION_LEAP
+                    elif self.suspicious_rise(seat):
+                        delta = self.suspicious_rise(seat)
+                    elif self.kneeling(seat):
+                        delta = SUSPICION_RIG                   # R-V33: rigging in sight
                     elif m["effect"] == "moved":
                         delta = -SUSPICION_FALL                 # walking (a careful step)
                     else:
@@ -469,8 +642,10 @@ class Duel:
             elif r.sword == "sheathed":
                 acts.append("DRAW")
             acts.append("SWEEP")
-            if not r.disguised and r.uniform_ahead() is not None:
-                acts.append("TAKE")
+            if not r.disguised and r.downed_guard_ahead() is not None:
+                acts.append("TAKE")                         # R-V26: whether or not a uniform remains
+            if r.rig_target() is not None:
+                acts.append("RIG")                          # R-V27
         if self.airborne_jump(seat):
             acts.append("KICK")
         return tuple(acts)
@@ -485,6 +660,8 @@ class Duel:
             i = STANCES.index(base) + (1 if action == "STANCE_UP" else -1)
             r.stance_change = (STANCES[i], STANCE_FRAMES)
             return
+        if self.pending[seat] is not None:
+            self.replaced[seat] += 1         # the latest press wins (VERSUS_SPEC 2.1)
         self.pending[seat] = action
 
     def tick(self) -> None:
@@ -495,6 +672,7 @@ class Duel:
         for body in [*self.rivals.values(), *self.guards.values()]:
             body.invulnerable = max(0, body.invulnerable - 1)
             body.knocked_down = max(0, body.knocked_down - 1)
+        cells0 = self._standing_bodies()
         alive = [r for r in self.rivals.values() if r.alive]
         pressing = sorted({c for r in alive if (c := r._pressing()) is not None})
         near: set[Cell] = set()
@@ -528,6 +706,7 @@ class Duel:
         self._suspect()
         self._fly_swords()
         self._contacts()
+        self._spring_rigs(cells0)
         self._check_end()
 
     def _advance(self, seat: str) -> None:
@@ -541,7 +720,15 @@ class Duel:
         if gen is not None and self.pending[seat] == "KICK" and self.airborne_jump(seat):
             self.pending[seat] = None        # R-V10: the kick replaces the rest of the jump
             self.cancel(seat)
-            if self._start(seat, "KICK"):
+            if self._start(seat, "KICK", "kick"):
+                return
+            r._tick()
+            return
+        jump = self._grace_jump(seat) if gen is not None else None
+        if jump is not None:                 # R-V35: a jump just after a direction is one flip
+            self.pending[seat] = None
+            self.cancel(seat)
+            if self._start(seat, jump, "grace"):
                 return
             r._tick()
             return
@@ -549,7 +736,7 @@ class Duel:
         if d is not None:                    # R-V22: a direction turns the hop into a flip
             self.pending[seat] = None
             self.cancel(seat)
-            if self._start(seat, "_HOP_FLIP_" + d):
+            if self._start(seat, "_HOP_FLIP_" + d, "hop_turn"):
                 return
             r._tick()
             return
@@ -562,9 +749,12 @@ class Duel:
                 self._finish(seat)
         action = self.pending[seat]
         self.pending[seat] = None
-        if action is not None and action != "KICK" and action in self.legal_actions(seat) \
-                and r.terminal is None and self._start(seat, action):
-            return
+        if action is not None:
+            if action != "KICK" and action in self.legal_actions(seat) and r.terminal is None:
+                if self._start(seat, action):
+                    return
+            else:
+                self.stale[seat] += 1        # no longer legal now that the rival is free
         r._tick()                            # free this frame: the world still acts on it
 
     def _hop_turn(self, seat: str) -> str | None:
@@ -576,9 +766,40 @@ class Duel:
             return None
         return next((d for d in ("LEFT", "RIGHT") if act in DIRECTIONAL[d]), None)
 
-    def _start(self, seat: str, action: str) -> bool:
-        """Start a move and run its first frame; False if it had no frames."""
+    def _grace_jump(self, seat: str) -> str | None:
+        """R-V35 (Saad #54, 2026-11-24): the jump a seat meant, if a jump input
+        arrived within GRACE_TICKS of a plain direction (a run, a careful step or
+        a turn) that began a fresh run, and the jump would not be a climb.
+
+        Direction first, then jump: the pending input is a jump that way, a
+        running jump asked for by a front end that already saw the first run
+        frame, or a bare UP that hops. The unfinished direction move is dropped
+        (it places the kid only at its end, so nothing is lost) and a standing
+        jump that way starts now. A direction that began a run chain is left
+        alone: a jump mid-run is the ordinary running jump. Jump first, then
+        direction is the hop turn (`_hop_turn`, R-V22)."""
+        act, mv = self.pending[seat], self._move_action[seat]
+        if (act is None or mv is None or not self._fresh[seat]
+                or not 1 <= self._move_frame[seat] <= GRACE_TICKS):
+            return None
+        d = next((n for n in ("LEFT", "RIGHT") if mv in (n, "STEP_" + n)), None)
+        if d is None:
+            return None
+        if act == "JUMP_" + d or (act == "RUN_JUMP_" + d and mv == d) or (
+                act == "UP" and self.rivals[seat].up_hops()):
+            return "JUMP_" + d
+        return None
+
+    def _start(self, seat: str, action: str, rewrite: str | None = None) -> bool:
+        """Start a move and run its first frame; False if it had no frames. `rewrite`
+        names the engine rule that replaced the accepted input (reporting only)."""
+        self._rewrite[seat] = rewrite
         r = self.rivals[seat]
+        last = self._last_end[seat]
+        side = next((n for n in ("LEFT", "RIGHT") if n in action), None)
+        self._fresh[seat] = not (last is not None and last[1] == "moved"
+                                 and last[2] >= self.frames - 1
+                                 and side is not None and side in (last[0] or ""))
         self._move_action[seat] = action
         self._started[seat] = self.frames
         gen = r._versus_macro(action)
@@ -604,6 +825,7 @@ class Duel:
     def _finish(self, seat: str) -> None:
         r = self.rivals[seat]
         r._result["frames"] = self._move_frame[seat]
+        self._last_end[seat] = (self._move_action[seat], r._result.get("effect"), self.frames)
         self.last_result[seat] = dict(r._result)
         self._moves[seat] = None
         self._move_frame[seat] = 0
@@ -877,6 +1099,9 @@ class Duel:
             "disguised": {seat: r.disguised for seat, r in self.rivals.items()},
             "suspicion": {f"{g}:{seat}": v for (g, seat), v in sorted(self.suspicion.items())},
             "swords": list(self.swords),
+            "rigs": {str(c): dict(v) for c, v in sorted(self.rigs.items())},
+            "traps_left": dict(self.traps_left),
+            "sprung": sorted(self.sprung),
             "flying": [dict(s) for s in self.flying],
             "pending": dict(self.pending),
             "mech": self.mech.snapshot(),
@@ -903,21 +1128,31 @@ def observe(duel: Duel, seat: str) -> dict:
     room = me.kid.room
     obs = observation.build(me, None, duel.last_result[seat])
     obs["task"] = TASK
+    # The duel's own clock, not the single-player one observation.build reads.
+    obs["minutes_left"] = max(0, (duel.time_limit - duel.frames) // (TICKS_PER_SECOND * 60))
     obs["me"] = {**obs["kid"], "stance": me.stance, "armed": me.armed,
                  "disguised": me.disguised, "knocked_down_frames": me.knocked_down,
-                 "motion": _motion_view(duel, seat, room)}
+                 "motion": _motion_view(duel, seat, room), "traps_left": duel.traps_left[seat]}
     figures = []
     for other, r in duel.rivals.items():
         if other == seat or r.kid.room != room:
             continue
         # R-V18: a disguised rival is observed exactly as a guard (same kind and
         # fields; sheathed, so stance None and armed False, like a patrolling guard).
+        motion = _motion_view(duel, other, room)
+        # A move that ends in another room is masked too (GATE-T01 QA1): a guard's
+        # move never does, and the figure still leaves the room on arrival.
+        if (r.disguised and motion is not None
+                and ((motion["effect"], motion["frames"]) not in GUARD_MOTIONS
+                     or motion["to"] is None)
+                and not duel.suspicious_rise(other)):
+            motion = None           # T01 / AUDIT-B F1: shown as a paused guard is
         figures.append({"kind": "guard" if r.disguised else "rival",
                         "row": r.kid.row, "col": r.kid.col,
                         "facing": "right" if r.kid.facing > 0 else "left",
                         "posture": "knocked_down" if r.knocked_down else r.kid.posture,
                         "stance": r.stance, "armed": r.armed,
-                        "motion": _motion_view(duel, other, room)})
+                        "motion": motion})
     for g in duel.guards.values():
         if g.room != room:
             continue
@@ -932,12 +1167,19 @@ def observe(duel: Duel, seat: str) -> dict:
                             "to": [m["to"][1], m["to"][2]] if m["to"][0] == room else None,
                             "to_posture": m["posture"],
                             "to_facing": "right" if m["facing"] > 0 else "left"}})
-    obs["figures"] = sorted(figures, key=lambda f: (f["row"], f["col"], f["kind"]))
+    # Every observed field, so a tie never falls back to insertion order (rivals
+    # before guards), which would tell a disguised rival from a guard (GATE-T01 L2).
+    obs["figures"] = sorted(figures, key=lambda f: (f["row"], f["col"], f["kind"], json.dumps(f, sort_keys=True)))
     obs["swords"] = sorted(
         [{"row": c[1], "col": c[2], "flying": False} for c in duel.swords if c[0] == room]
         + [{"row": f["cell"][1], "col": f["cell"][2], "flying": True}
            for f in duel.flying if f["cell"][0] == room],
         key=lambda s: (s["row"], s["col"], s["flying"]))
+    # R-V34: this seat's own unsprung rigs in its room; never the other seat's.
+    obs["my_traps"] = sorted(
+        ({"row": c[1], "col": c[2], "kind": kinds[seat]}
+         for c, kinds in duel.rigs.items() if c[0] == room and seat in kinds),
+        key=lambda t: (t["row"], t["col"]))
     # R-V19: each guard's meter for THIS rival only, for guards in its room.
     obs["suspicion"] = [{"row": g.row, "col": g.col, "level": lvl}
                         for (name, s), lvl in sorted(duel.suspicion.items())
@@ -946,12 +1188,20 @@ def observe(duel: Duel, seat: str) -> dict:
     return obs
 
 
+class StartedMove(str):
+    """The name of a move the engine started (see `VersusEpisode.started_move`). It is a
+    plain string; `rewrite` says which engine rule replaced the accepted input, if any:
+    "kick" (R-V10), "grace" (R-V35), "hop_turn" (R-V22) or None."""
+
+    rewrite: str | None = None
+
+
 class VersusEpisode:
     """The five operations per seat (VERSUS_SPEC 2.2), plus `tick` for the runner
     and server only. Seats never receive the Duel."""
 
     def __init__(self, situation: Situation, starts: dict[str, tuple[int, int, int, int]],
-                 seed: int = 0, time_limit_frames: int = P.GAME_FRAMES,
+                 seed: int = 0, time_limit_frames: int = DUEL_FRAMES,
                  guard_posts: dict | None = None):
         self._situation = situation
         self._starts = dict(starts)
@@ -1000,11 +1250,34 @@ class VersusEpisode:
         t = self._duel.terminal
         return {"status": "ongoing" if t is None else "terminal", "reason": t,
                 "frames": self._duel.frames, "inputs": dict(self.inputs),
-                "invalid_inputs": dict(self.invalid)}
+                "invalid_inputs": dict(self.invalid),
+                "stale_inputs": dict(self._duel.stale),
+                "replaced_inputs": dict(self._duel.replaced)}
 
     # runner and server only
     def tick(self) -> None:
         self._duel.tick()
+
+    def started_move(self, seat: str) -> str | None:
+        """T20-fix1 (decision #81): the move the engine started for `seat` on the last
+        tick, or None. It is the move after every rewrite the engine makes to an
+        accepted input (R-V10 kick swap, R-V22 hop turn, R-V35 grace cancel) and after
+        stale-input drops, so a held key or a queued input is not a start. Read-only
+        reporting for the host's playtest log: no rule reads it and no observation
+        carries it. The internal hop-flip keeps its engine name (`_HOP_FLIP_LEFT`). The
+        result is a str whose `.rewrite` names the rule that replaced the input."""
+        _check_seat(seat)
+        d = self._duel
+        if d._started[seat] != d.frames:
+            return None
+        action = d._move_action[seat]
+        # `_replan` puts a move cancelled on its first frame back in the queue: it
+        # starts again next tick, so it is counted then.
+        if action is not None and d.pending[seat] == action:
+            return None
+        move = StartedMove(action)
+        move.rewrite = d._rewrite[seat]
+        return move
 
     def _refuse(self, seat: str, error: str, count: bool = True) -> dict:
         if count:
@@ -1017,7 +1290,7 @@ def _check_seat(seat: str) -> None:
         raise ValueError(INVALID_SEAT)
 
 
-def arena_episode(seed: int = 0, time_limit_frames: int = P.GAME_FRAMES) -> VersusEpisode:
+def arena_episode(seed: int = 0, time_limit_frames: int = DUEL_FRAMES) -> VersusEpisode:
     """The six-room arena (pop/arena.py) with both rivals at their starts."""
     from . import arena
     return VersusEpisode(arena.situation("A"), arena.STARTS, seed, time_limit_frames,

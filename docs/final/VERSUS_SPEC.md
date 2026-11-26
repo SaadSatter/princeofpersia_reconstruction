@@ -55,7 +55,7 @@ mechanics only, no names, art or code from it.
 | `observe(seat)` | That seat's view only (Section 6) |
 | `legal_actions(seat)` | The inputs that seat may submit now |
 | `step(seat, action)` | Validates and queues the seat's input; refused input changes nothing and is counted, as in the midterm |
-| `outcome()` | `ongoing`, or terminal with reason: `won:A`, `won:B`, `draw:both_died`, `draw:time_up` (GDD 5.3) |
+| `outcome()` | `status` (`ongoing` or `terminal`) and `reason` (`won:A`, `won:B`, `draw:both_died`, `draw:time_up`, GDD 5.3), plus reporting counters: `frames`, `inputs`, `invalid_inputs`, `stale_inputs` and `replaced_inputs` (each per seat; added by T01; reporting and terminal reward only, never an observation feature) |
 | runner and server only: `tick()` | Advances one frame; never exposed to a seat |
 
 ### 2.3 Inputs (action vocabulary)
@@ -70,6 +70,7 @@ The midterm's 11 movement actions stay. New inputs:
 | `KICK` | F while airborne (dive kick) | During the airborne frames of a jump |
 | `SWEEP` | Down + F | Standing or crouching |
 | `TAKE` | Down beside a downed, uniformed guard | Standing next to one, facing it |
+| `RIG` | (macro `RIG_TRAP`, CQ-1) | Standing, free, `traps_left > 0`, the floor cell ahead is plain floor with a floor below it in the same room, and holds no body (TRAPS_SPEC Section 1, R-V27) |
 
 Up and Down keep their midterm meanings (climb, crouch, hang, drink) when
 the sword is sheathed or nothing else applies. *Proposed:* while armed and
@@ -98,15 +99,17 @@ Frames are engine frames (12 per second). All numbers *proposed*.
 
 Rivals cannot walk or run through each other or through a standing guard
 **in their own room**; they can jump over a knocked-down one, and a jump to
-the side can flip over a standing one (R-V22). Every running jump is a flip,
-so it can also clear holes and spikes as a flip, and so is a hop straight up
-turned by pointing a direction mid-hop. A body in another room is out of
+the side can flip over a standing one (R-V22). Every directional jump is a flip
+(Saad #53, 2026-11-24), standing or running, over someone or over nobody, so it
+can also clear holes and spikes, and so is a hop straight up turned by pointing
+a direction mid-hop. A direction and a jump pressed within 2 ticks of each
+other, in either order, are one flip that way (R-V35, Saad #54). A body in another room is out of
 sight and never stops a move; a rival that arrives on someone settles beside
 them (R-V23).
 
 | Id | Rule | Numbers |
 | --- | --- | --- |
-| R-V22 | Flip (Saad, 2026-11-17; confirmed after playtest the same day: guards can be flipped over, and flips are automatic, with no separate key): **every running jump is a flip** (over holes and spikes too, as far as a running jump already goes), and a standing jump flips when it passes over someone; a standing jump over nobody stays a plain jump. **Hop then point** (Saad, 2026-11-17): a direction input (with or without Up held) during a hop straight up (`UP` on open floor, not a climb to a ledge) ends the hop and starts a standing jump that way, always a flip, facing the pointed way without a separate turn. Any frame on which the seat still sees itself hopping counts, including the last (frame 8 of 8; kept by Saad, 2026-11-23); a direction after the hop has landed is an ordinary move. Any directional input counts, so a `RUN_JUMP_*` sent mid-hop becomes this 3-cell standing flip (the AI seat's action description must say so). A standing or running jump may fly over the other rival or a standing guard **in the jumper's own room**, and does not land on anyone. Walls and closed gates still stop it. A body in another room is out of sight: it neither stops the jump nor is flipped over (R-V23). A flip is one forward 360° somersault, shown to every seat in the room as motion effect `flipped` (and the same effect in the jumper's `last_result`). Otherwise it is a jump: dive kick allowed, suspicion as a leap, sweeps miss while airborne. The flipper keeps its cell until it lands (as every jump), so a lunge into that cell still hits it: a guard facing the jumper sees it and stabs it mid-flip (kept by Saad, 2026-11-23; flip over a guard that faces away or has not seen you). Its landing cell, when it is in the jumper's own room, is claimed for the flight: neither a guard nor the other rival (disguised or not) can step into it. A landing cell in the next room is not claimed, because nobody there can see it coming; if someone is standing there on arrival, R-V23 settles the jumper | Same span and frames as the jump (3 cells standing, 4 after a running jump's run-up); the arc rises 22 px higher on screen *(proposed)*; a running flip leaves the floor on its first frame |
+| R-V22 | Flip (Saad, 2026-11-17; confirmed after playtest the same day: guards can be flipped over, and flips are automatic, with no separate key): **every directional jump is a flip** (Saad #53, 2026-11-24: standing or running, over someone or over nobody; it lands where the jump always landed, a jump into a wall is still a bump, and a jump pointed the other way faces that way and jumps with no separate turn); before #53 only a running jump and a standing jump over someone flipped. **Hop then point** (Saad, 2026-11-17): a direction input (with or without Up held) during a hop straight up (`UP` on open floor, not a climb to a ledge) ends the hop and starts a standing jump that way, always a flip, facing the pointed way without a separate turn. Any frame on which the seat still sees itself hopping counts, including the last (frame 8 of 8; kept by Saad, 2026-11-23); a direction after the hop has landed is an ordinary move. Any directional input counts, so a `RUN_JUMP_*` sent mid-hop becomes this 3-cell standing flip (the AI seat's action description must say so). A standing or running jump may fly over the other rival or a standing guard **in the jumper's own room**, and does not land on anyone. Walls and closed gates still stop it. A body in another room is out of sight: it neither stops the jump nor is flipped over (R-V23). A flip is one forward 360° somersault, shown to every seat in the room as motion effect `flipped` (and the same effect in the jumper's `last_result`). Otherwise it is a jump: dive kick allowed, suspicion as a leap, sweeps miss while airborne. The flipper keeps its cell until it lands (as every jump), so a lunge into that cell still hits it: a guard facing the jumper sees it and stabs it mid-flip (kept by Saad, 2026-11-23; flip over a guard that faces away or has not seen you). Its landing cell, when it is in the jumper's own room, is claimed for the flight: neither a guard nor the other rival (disguised or not) can step into it. A landing cell in the next room is not claimed, because nobody there can see it coming; if someone is standing there on arrival, R-V23 settles the jumper | Same span and frames as the jump (3 cells standing, 4 after a running jump's run-up); the arc rises 22 px higher on screen *(proposed)*; a running flip leaves the floor on its first frame |
 | R-V23 | **Step in and settle** (Saad, 2026-11-23, after the independent review of 2026-11-18): a standing body or landing cell **in another room** never stops a move, so a move never reveals someone out of sight. A rival that ends a frame standing on someone (a body it could not see when it started, or one that arrived after its move began) moves to the nearest free cell **of the room it arrived in**, on the same row: back toward where it came from first, then forward, never past a wall or closed gate, never onto spikes, a hole or a claimed landing cell. Walking into someone standing in a doorway cell therefore puts the mover just past them. A move it had just started from the cell it was moved off is planned again from the new cell. Two rivals that arrive in one cell in the same frame both go back where they were (R-V00); so do two whose settle cells would be the same. Only if the row has no free cell does a mover go back where it was | Nearest free cell: 1 back, 1 forward, 2 back, … |
 
 Swords dropped in a room stay there; they are visible to whoever is in that
@@ -129,9 +132,11 @@ Scripted, not AI (GDD). Hostile to both rivals equally.
 | --- | --- | --- |
 | R-V17 | `TAKE` beside a downed, uniformed guard: the rival kneels, takes the uniform and is disguised; its sword is sheathed under it | 12 frames |
 | R-V18 | A disguised rival is drawn, and observed by the other seat, **exactly** as a guard (Section 6). Guards ignore a disguised rival whose suspicion is not full | — |
-| R-V19 | Suspicion: each guard has a meter 0–100 **per rival**. It rises only while that guard sees the disguised rival (R-V14 sight) | Running +4/frame; jumping or climbing +6/frame; standing still within 1 cell for over 2 s +1/frame |
+| R-V19 | Suspicion: each guard has a meter 0–100 **per rival**. It rises only while that guard sees the disguised rival (R-V14 sight) | Running +4/frame; jumping or climbing +6/frame; standing still within 1 cell for over 2 s +1/frame (a re-sent `WAIT` counts as standing still; Saad, 2026-11-23, "Yes, fix it") |
 | R-V20 | It falls when the rival walks (`STEP`), stands still out of reach, or is out of sight | −2/frame |
 | R-V21 | The disguise breaks at once on: drawing, any attack, or any guard's meter reaching 100 (decided); *proposed additions:* a stance change (it draws the sword anyway) and losing a heart. Then it is gone for the rest of the duel (one uniform per downed guard) | — |
+| R-V24 | A hop straight up (`UP` on open floor, not a climb) by a disguised rival in a guard's sight raises that guard's suspicion (Saad, 2026-11-23: "Hopping should raise suspicion") | +6/frame, the jumping or climbing step *(proposed, for Saad to confirm)* |
+| R-V26 | `TAKE` is legal whenever a downed guard is in this rival's own cell or the cell ahead, **whether or not its uniform is still there** (Saad, 2026-11-23, decision 15: "TAKE always legal"). With a uniform it is R-V17. Without one the input is accepted, plays the same 12 `TAKE` frames, changes nothing else and reports `last_result.effect: "no_uniform"` to the acting seat. The other seat sees the same frames either way | 12 frames |
 
 ## 6. What each seat sees (leak rules)
 
@@ -154,6 +159,11 @@ its own rival) plus:
   `knocked_down_frames`.
 - `suspicion`: a list of `{row, col, level}` for guards **in view** whose
   meter concerns **this** rival only.
+- `my_traps` (T06b, decision #22, R-V34): a list of `{row, col, kind}` for **this
+  seat's own** unsprung rigs in its current room, sorted; the key is present for
+  both seats and never holds a cell the seat did not rig. `me.traps_left` is the
+  seat's own budget (4 at the start). A rigged cell is a plain `_` in `tiles`
+  for everyone, the owner included. See `TRAPS_SPEC.md`.
 
 Never in a seat's observation: the other seat's suspicion meters, which
 figure is the disguised rival, guard scripts or posts, trap ownership, other
@@ -213,10 +223,16 @@ implementation chose the values below; each is a constant and can change.
 | Observation | Two additions: `motion` (Section 6) and flying swords in `swords` (`flying: true`); `motion.effect` gains the value `flipped` (R-V22) |
 | Flip (R-V22) | The inherited jump asks `_can_vault(cell)` for each cell it would fly over; single-player answers no, so midterm traces are unchanged. A running jump still needs a free run-up cell, so it cannot flip over someone directly in front; a standing jump can. A running jump plans its flight after the run-up; `motion.frame` counts the flight from take-off (1-8), not from the start of the run (it used to report 5-12 of 8, so the picture began mid-flight; `test_regression_running_jump_flight_counts_its_own_frames`). A running flip's picture skips the standing jump's grounded lead-in, so it is airborne from frame 1 (`render/versus_view.pose`) |
 | Review fixes (2026-11-23) | From the audit and independent review of 2026-11-18 (`docs/audits/AUDIT-2026-11-18-flip-r-v22.md`, `docs/reviews/INDEPENDENT-REVIEW-flip-r-v22.md`): `Rival.blocks` counts bodies and landing cells only in the rival's own room (R-V23); `Duel.claims` claims landing cells only in the jumper's own room, against guards and the other rival; `Duel.tick` gives both rivals the frame-start view while they plan (`Duel._view`); `Duel._settle_arrivals` replaces `_separate`; the jump's `last_result.effect` equals its motion effect. Tests: `tests/test_flip_review.py`; `test_a_rival_in_the_next_room_does_not_stop_the_jump` replaces the test that asserted the old room-edge block |
+| Either control set (Saad #55, 2026-11-24) | Human vs AI (page `mode=ai`) and online: WASD, F, G, T, left Shift and the arrows, `.`, `/`, `'`, right Shift both drive the player's own seat and combine; local two-player keeps the split below |
 | Local test keys | `play.py ARENA --versus`: A uses WASD, F attack, G draw/sheathe, T take; B uses arrows, `.` attack, `/` draw/sheathe, `'` take. One keyboard, two panels, each drawn from its own seat's observation; not the online key map (OQ-7). Up + direction while running in that direction is a running jump (a flip, R-V22), as in the original game; from a standstill it is a standing jump unless Shift is held. Before Saad's playtest of 2026-11-17 it needed Shift even mid-run, so a run never turned into a flip |
 
 Not done yet: the independent review after each stage (Section 9 asks for
 one before the next stage; it must run in a separate session to be
 independent), the game server and browser client, the AI seat in versus
-play, traps set by rivals, and the duel time limit (OQ-3: the limit is a
-parameter, default the inherited 60-minute clock).
+play, and traps set by rivals.
+
+Duel time limit (OQ-3, closed by Saad 2026-11-23: "Make the duel time limit
+5min"): 5 minutes, 3,600 frames at 12 per second (`pop/versus.py:DUEL_FRAMES`,
+the default for `Duel`, `VersusEpisode`, `arena_episode` and
+`play.py --versus`). The limit ends in `draw:time_up`; a seat's
+`minutes_left` counts down from the duel's own limit.

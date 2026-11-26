@@ -1,0 +1,14 @@
+{"type":"header","schema":2,"build":"fixture","seed":1,"rival":"human","room":"V2V2","duel":1,"duel_frames":3600,"ticks_per_second":12,"idle_threshold_s":3.0,"seat":"A"}
+{"t":0,"s":0.0,"seat":"A","type":"duel_start","room":"room-aaa","hearts":3,"armed":false,"traps_left":4}
+{"t":2,"s":0.2,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":"RIGHT"}
+{"t":2,"s":0.2,"seat":"A","type":"move","move":"RIGHT","effect":"moved"}
+{"t":3,"s":0.3,"seat":"A","type":"action","action":"RUN_JUMP_RIGHT","accepted":true,"started":"JUMP_RIGHT","grace":true}
+{"t":3,"s":0.3,"seat":"A","type":"move","move":"JUMP_RIGHT","effect":"flipped","grace":true}
+{"t":20,"s":1.7,"seat":"A","type":"action","action":"JUMP_LEFT","accepted":true,"started":"JUMP_LEFT"}
+{"t":20,"s":1.7,"seat":"A","type":"move","move":"JUMP_LEFT","effect":"flipped"}
+{"t":21,"s":1.8,"seat":"A","type":"action","action":"JUMP_LEFT","accepted":true,"started":null}
+{"t":32,"s":2.7,"seat":"A","type":"move","move":"JUMP_LEFT","effect":"flipped","repeat":true}
+{"t":40,"s":3.4,"seat":"A","type":"action","action":"TAKE","accepted":true,"started":"TAKE"}
+{"t":40,"s":3.4,"seat":"A","type":"move","move":"TAKE","effect":"took_sword"}
+{"t":60,"s":5.0,"seat":"A","type":"move","move":"TAKE","effect":"took_sword","repeat":true}
+{"t":80,"s":6.7,"seat":"A","type":"duel_end","result":"draw","reason":"draw:time_up","frames":80}
