@@ -46,11 +46,14 @@ Many duels can run on one server at once, one per room.
    has two players says "That room is full". You can retry. After 10 failed
    joins in a minute on one connection the server refuses and closes it ("Too
    many tries"). *Proposal for Saad:* the number 10 a minute.
-5. **Game mode (T22, #87):** before pressing Create room the creator picks **AI Model
-   (trained)**, **Baseline (scripted)** or **Human vs Human** (default Human vs Human; the
-   list is the one in `manifest.json`). An AI room gives the creator seat A and puts the
-   rival on seat B; the duel starts when the creator is in. A Human vs Human room waits for
-   a second player. The chosen mode is one extra field of the create message
+5. **Game mode (T22, #87; one click for AI, T25, #95):** the page opens on the three
+   mode buttons: **AI Model (trained)**, **Baseline (scripted)**, **Human vs Human** (the
+   list is the one in `manifest.json`). Clicking AI Model or Baseline starts a private match
+   at once: no Create or Join step and no room code on the page. The server still makes a
+   room for that client only (seat A to the client, the rival on seat B; the code in its own
+   `hello` is for the page's refresh-and-rejoin, never shown, and a join with it is told the
+   room is full). Clicking Human vs Human shows **Create room** and **Join room** with
+   the code (steps 1 to 4). A Human vs Human room waits for a second player. The chosen mode is one extra field of the create message
    (`{"type":"join","create":true,"mode":"ai"}`); an unknown one is refused (`bad_mode`).
    Without it a room follows the server's `--rival`. Rematch: one press in an AI room, both
    players in a human room (#41, #46).

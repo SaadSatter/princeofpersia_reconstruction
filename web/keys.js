@@ -106,15 +106,34 @@
   const HINT_B = "Arrow keys move (right Shift: careful step; up: jump), . attack " +
     "(with up: throw, with down: sweep; in the air: dive kick), / draw or sheathe, ' take a uniform.";
 
+  // Decision #98: with a drawn sword the stance key (down) does not kneel, so the hint says
+  // to sheathe first (G or /), or press T to take the uniform.
+  const KNEEL_TEXT = "kneel: sword or uniform (sheathe first if your sword is drawn).";
+  const KNEEL_A = " S " + KNEEL_TEXT;
+  const KNEEL_B = " Down " + KNEEL_TEXT;
+
   function keyHints(mode, seat) {
     if (mode === "local_two_players") {
-      return "Seat A: " + HINT_A + " Seat B: " + HINT_B + " R or Enter: rematch when the duel ends.";
+      return "Seat A: " + HINT_A + KNEEL_A + " Seat B: " + HINT_B + KNEEL_B +
+        " R or Enter: rematch when the duel ends.";
     }
-    return "You are seat " + seat + ". " + (seat === "B" ? HINT_B + EITHER_B : HINT_A + EITHER_A) +
+    return "You are seat " + seat + ". " +
+      (seat === "B" ? HINT_B + KNEEL_B + EITHER_B : HINT_A + KNEEL_A + EITHER_A) +
       " R or Enter: rematch when the duel ends.";
   }
 
+  // Decision #95: what the online lobby shows for a chosen mode (an id of manifest.modes, or
+  // null before a choice). AI Model and Baseline start a private match at once, with no Create
+  // or Join step and no room code on the page; Create / Join and the code belong to Human vs
+  // Human only.
+  function lobbyView(modeId) {
+    const human = modeId === "human";
+    return { startsAtOnce: modeId === "ai" || modeId === "baseline",
+             showCreateJoin: human, showCode: human };
+  }
+
   return Object.freeze({
+    lobbyView: lobbyView,
     keyHints: keyHints,
     currentPlay: currentPlay,
     needsChooser: needsChooser,

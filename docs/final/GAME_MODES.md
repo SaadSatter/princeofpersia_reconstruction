@@ -52,8 +52,12 @@ uv run --extra online python -m server               # rooms; the creator picks 
 uv run --extra online python -m server --rival ai    # the default (code-less) room is vs AI
 ```
 
-On the page, pick the mode, then **Create room**. AI rooms start at once with the rival on
-seat B; a Human vs Human room waits for the second player's code join. Details:
+On the page, click a mode (T25, #95). AI Model and Baseline start a private match at once with
+the rival on seat B (no Create, Join or room code on the page); Human vs Human shows **Create
+room** / **Join room** and waits for the second player's code join. The loading screen is
+centred (#96) and the server logs unused browser connections as one quiet line (#97). The key
+hints say that S (Down for the arrow set) kneels for the sword or the uniform, and to sheathe
+first if the sword is drawn (#98). Details:
 `docs/final/ONLINE_PLAY.md`.
 
 ## What the AI seat is, and what it is not
