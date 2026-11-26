@@ -272,16 +272,35 @@ class Rival(Game):
     def _versus_macro(self, action: str):
         if action in HOP_FLIPS:                             # internal: never a seat's input
             return self._flip_from_hop(HOP_FLIPS[action])
-        if action in VERSUS_ACTIONS or (action == "DOWN" and self.sword == "none"
-                                        and self.kid.cell in self.duel.swords):
+        if action in VERSUS_ACTIONS or (action == "DOWN" and self._kneel_target() is not None):
             self._result = {"effect": None, "frames": 0, "fell_rows": 0, "hp_change": 0}
             self.plan = None
             if action in BREAKS_DISGUISE:
                 self.disguised = False                      # R-V21: drawing or any attack
             return {"DRAW": self._draw, "SHEATHE": self._sheathe, "LUNGE": self._lunge,
                     "THROW": self._throw, "KICK": self._kick, "SWEEP": self._sweep,
-                    "DOWN": self._pickup, "TAKE": self._take, "RIG": self._rig}[action]()
+                    "DOWN": self._kneel, "TAKE": self._take, "RIG": self._rig}[action]()
         return self._macro(action)
+
+    def _kneel_target(self) -> str | None:
+        """What DOWN does here beyond the inherited crouch (R-V09, R-V17, Saad #94):
+        pick up a dropped sword first, otherwise take a downed guard's uniform."""
+        if self.sword == "none" and self.kid.cell in self.duel.swords:
+            return "sword"
+        if (self.kid.posture == "standing" and not self.disguised
+                and self.uniform_ahead() is not None and not self._would_hang_down()):
+            return "uniform"
+        return None
+
+    def _would_hang_down(self) -> bool:
+        """Saad #101: where DOWN starts a hang-down it keeps that meaning (TAKE takes the uniform).
+        The same test as `engine._down`: the cell ahead is open and unsupported."""
+        target = self.ahead()
+        return (isinstance(target, tuple) and not self.blocks(target)
+                and not self.geom.supported(target))
+
+    def _kneel(self):
+        return self._pickup() if self._kneel_target() == "sword" else self._take()
 
     def _draw(self):
         self._result["effect"] = "drew"

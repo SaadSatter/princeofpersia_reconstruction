@@ -130,7 +130,7 @@ Scripted, not AI (GDD). Hostile to both rivals equally.
 
 | Id | Rule | Proposed numbers |
 | --- | --- | --- |
-| R-V17 | `TAKE` beside a downed, uniformed guard: the rival kneels, takes the uniform and is disguised; its sword is sheathed under it | 12 frames |
+| R-V17 | `TAKE` beside a downed, uniformed guard: the rival kneels, takes the uniform and is disguised; its sword is sheathed under it. `DOWN` over, or beside and facing, the same body does the same (Saad, decision 94, 2026-11-25); a dropped sword on the kneeling cell is picked up first (R-V09), with the sword then drawn, `SHEATHE` then `DOWN`, or `TAKE`, takes the uniform (Saad, decision 98). At a ledge edge, where `DOWN` would start a hang-down, `DOWN` still hangs and only `TAKE` takes the uniform (Saad, decision 101) | 12 frames |
 | R-V18 | A disguised rival is drawn, and observed by the other seat, **exactly** as a guard (Section 6). Guards ignore a disguised rival whose suspicion is not full | — |
 | R-V19 | Suspicion: each guard has a meter 0–100 **per rival**. It rises only while that guard sees the disguised rival (R-V14 sight) | Running +4/frame; jumping or climbing +6/frame; standing still within 1 cell for over 2 s +1/frame (a re-sent `WAIT` counts as standing still; Saad, 2026-11-23, "Yes, fix it") |
 | R-V20 | It falls when the rival walks (`STEP`), stands still out of reach, or is out of sight | −2/frame |
