@@ -248,3 +248,7 @@ Gate 3 note, T05-fix1 (2026-11-24, orchestrator session 8edb65a6, started as the
 
 - `reports/T23-fix1-tech-lead.md` @ 5756e25 on `task/T23-fix1`, read by the orchestrator. Verdict partial: `7 failed, 2357 passed, 11 skipped, 5 xfailed` (worker's line). Own work (6041f6c..5756e25) within permitted writes. Two failures need existing-test edits: approved by Saad (#113, #114). Four are QA's #99 updates.
 - Orchestrator finding: the merge base from the T23-fix1 brief pulled 126 main-line commits into the gameplay branch. T23-fix2 rebuilds it by cherry-pick from dfe2d90. Not sent to QA yet.
+
+## 2026-11-26: T23-fix2 tech-lead report read; to QA
+
+- `reports/T23-fix2-tech-lead.md` @ 444bd39 on `task/T23-fix2` (from dfe2d90, cherry-picks only). Commit to review 9c53235. Orchestrator checked `git diff --name-only dfe2d90..444bd39`: T23 files and the two approved tests only. Worker's line: `4 failed, 2344 passed, 11 skipped, 5 xfailed` (the four QA #99 tests). Dispatched to QA (Gate 1).
