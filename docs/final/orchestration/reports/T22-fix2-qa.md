@@ -94,3 +94,16 @@ None.
 - It still proves what it proved: a slow policy becomes a logged `"source": "fallback"` that never reaches the client (the later asserts are untouched), and `advance` is bounded by the rival budget (about 0.04 s) plus noise, not by the 0.30 s delay (a stalled loop would show at least 0.30 s, twice the new bound).
 - `worst` on an idle machine: 0.0455 s (`[ai]`) and 0.0459 s (`[baseline]`). The loaded-run failure values were not captured earlier; the failure message now prints them.
 - Nothing else changed.
+
+### Addendum: full-suite runs after the change (clean committed tree)
+```
+run A: FAILED tests/test_qa_T22_probes.py::test_server_ai_seat_gets_only_seat_b_and_a_slow_policy_is_a_logged_fallback_never_sent[ai]
+       1 failed, 2172 passed, 11 skipped, 5 xfailed, 2 warnings in 667.67s (0:11:07)
+run B: 2173 passed, 11 skipped, 5 xfailed, 2 warnings in 807.42s (0:13:27)
+run C (extra): FAILED tests/test_rl_train.py::test_smoke_training_runs_logs_exports_and_loads_back
+       (tests/test_rl_train.py:76  assert time.time() - t0 < 60)
+       1 failed, 2172 passed, 11 skipped, 5 xfailed, 2 warnings in 787.82s (0:13:07)
+```
+- Run A: I had cut the output to the last 3 lines, so I did not see which assertion of the probe failed. I could not reproduce it: the probe passes alone, and 8 times in a row with 16 busy processes loading the CPU. It may be the warm-up check `fallbacks == []` (a normal tick exceeding the 0.04 s rival budget on a loaded machine), which I was told not to change. Unverified.
+- Run C failed on a different wall-clock test (a 60 s smoke-training bound), not a T22 test. The suite took 11 to 13 minutes against 8 earlier, so the machine was loaded.
+- So the suite is load-sensitive in at least two places, neither touched by fix2. Suggest Gate 3 runs it on an idle machine, and the Tech Lead hardens the `fallbacks == []` warm-up check if it is the cause.
