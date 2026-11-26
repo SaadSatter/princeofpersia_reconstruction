@@ -276,3 +276,10 @@ Saad's choices on `reports/T24-tech-lead.md`@6f0975c (AskUserQuestion), quoted v
 |---|---|---|---|
 | 98 | After a kneel picks up a dropped sword (drawn), taking the uniform next | "Keep it: sheathe or T (Recommended)" | No extra rule: with a drawn sword, down stays the stance key; sheathe (G or `/`) then kneel, or press T, to take the uniform. R-V09 unchanged. The key hints say so (T25) |
 | — | Uniform or potion first on a potion cell | "what is a potion cell?" | Answered, no decision needed: potions exist only in the single-player Level 1 reconstruction (R-C16, R-C21: crouching on a potion drinks it). `pop/versus.py` and the arena have no potions, so the case cannot occur in a duel. QA confirms at Gate 1 |
+
+Saad's choices on the T23 tech-lead report (`reports/T23-tech-lead.md`@0c7d73a, blocked), AskUserQuestion, verbatim:
+
+| # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
+|---|---|---|---|
+| 99 | Existing tests that assert the old run-on after landing | "Authors update them (Recommended)" | Only the assertions that encode the old run-on behaviour change, each one listed old → new by its author, as with #85: QA (`test_t20_qa_probes.py` ×3, `test_t20_qa_refused_mirror.py[3-None]`) and the Tech Lead (`test_t20fix1_recorder.py::test_a_jump_then_three_left_ticks_is_one_flip`). `tests/test_server_match.py` replay test stays unchanged; the fix makes the server trace record releases |
+| 100 | When T23-fix1 runs | "After T22 closes (Recommended)" | T23-fix1 starts from the reviewed line after T22 merges; it may then touch `server/match.py`, `server/trace.py` and `play.py` |
