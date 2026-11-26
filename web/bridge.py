@@ -290,6 +290,8 @@ class WebGame:
                     act = "KICK"                     # attack in the air: dive kick
                 if act and act in legal:
                     ep.step(seat, act)
+                else:
+                    ep.release(seat)                 # T23 (#93): no key held, nothing queued
             else:
                 act = self.rival(ep.observe(seat), ep.legal_actions(seat))
                 if act is not None:

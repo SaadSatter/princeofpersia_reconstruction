@@ -42,5 +42,9 @@ screenshots/
 # Online play input traces (server only)
 traces/online/
 
+# Claude Code worker worktrees (isolation: worktree) and the orchestrator's integration worktree
+.claude/worktrees/
+.claude/settings.local.json
+
 # Playtest telemetry (T20, host only)
 traces/playtest/

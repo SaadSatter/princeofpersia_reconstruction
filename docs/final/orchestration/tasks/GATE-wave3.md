@@ -33,3 +33,27 @@ Focus:
   - The smoke script logic; the Node contract test.
 - **T14-fix1 (Eval).** The adapter gives the AI seat only its own view; the neutral label is really neutral (no other field differs); the build hash reveals nothing.
 Return one verdict block per task you reviewed. Be concise.
+
+---
+
+## Resumed 2026-11-24 (native agents, decision #39)
+
+This note replaces the `/home/claude/sm/...` paths above. Setup: `tasks/_EXEC_COMMON.md`. One `qa` worker reviews all three tasks (Gate 1). Then one `evaluation-specialist` reviews all three (Gate 2), after reading QA's report.
+
+**Commits under review** (all reachable in the repository): T06b `9af96a9` (code) and `4e9121b` (record); T07 `1e34cf2`; T14-fix1 `ca3667b`. Implementer summaries: `reports/wave2-batch.md` on `main`. Briefs: `tasks/T06b.md`, `tasks/T07.md`, `tasks/T14-fix1.md`.
+
+**Where to run.** Branch from the current preview line, `int/T13-base` at `ae90c8c`. It is `orch/preview` with all three tasks, plus `orch/reviewed` 704521d (T05 + T05-fix1, T04-fix3, T15 numpy extra). Run the suite with `uv run --frozen --extra play --extra train pytest -q`. Review each task's own diff (`git diff <base>..<commit>`), and test its behaviour on `ae90c8c`.
+
+**Known failure on `ae90c8c`.** `tests/test_rl_policy.py::test_pure_python_logits_equal_the_numpy_forward_pass_on_200_observations` collects 200 observations from one baseline-vs-baseline duel. Since T05-fix1 ended the mirror deadlock, that duel ends after about 145 decisions. QA: confirm the cause and record it as a T07 finding with the minimal correct fix (for example, collect across several seeds). Do not fix the test yourself; T07-fix1 will.
+
+**Changed since the original brief.**
+- T05-fix1 is closed (CLIMB both ways, #31; per-seat reporting required for baseline comparisons).
+- T04-fix3 is closed (one controller per seat; `busy` in both modes).
+- numpy is now the `train` extra (#34, #40).
+- **T07 Eval:** "readiness for the full training run after T05-fix1" now applies. Still, no training run without Saad's go-ahead.
+- **T14-fix1:** T13 (online play) is being built at the same time, on `web/`, from this base. Review T14-fix1 as committed, and name in your report any finding that T13 would inherit.
+
+**Branches and permitted writes.**
+- QA: `gate/wave3-qa`, new tests `tests/test_gate_w3_qa_<task>_*.py` (failing ones xfail strict), report `docs/final/orchestration/reports/GATE-wave3-qa.md`.
+- Eval: `gate/wave3-eval`, branched from QA's report commit. New tests `tests/test_gate_w3_eval_<task>_*.py`, plus the evaluation paths in its role file. Report `docs/final/orchestration/reports/GATE-wave3-evaluation-specialist.md`.
+- Each report has **one verdict block per task** (T06b, T07, T14-fix1), each with its own `reviewed_commit` and verdict.
