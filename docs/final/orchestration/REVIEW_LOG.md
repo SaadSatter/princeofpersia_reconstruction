@@ -237,3 +237,9 @@ Gate 3 note, T05-fix1 (2026-11-24, orchestrator session 8edb65a6, started as the
 - Options (a) display-only camera smoothing (recommended), (b) scrolling window over joined rooms (needs OQ-4/CQ-1 and a PPO retrain; post-gold), (c) new continuous level (not feasible before 5 Dec). Estimates are the worker's judgement.
 - Closed at Gate 3 as a study. Choice of option is with Saad.
 | 2026-11-26 | AUDIT-G23 | audit | requirements-auditor | claude-sonnet-5-5 (configured; not yet verified) | report 0c29b82, fd11bcc on `audit/AUDIT-G23` | none of six G2/G3 lines met | `tasks/AUDIT-G23.md`@4120a54 → `reports/AUDIT-G23-requirements-auditor.md`@fd11bcc | CI red on `main` and PR #12 (websockets extra missing in `ci.yml`; orchestrator confirmed in run 45764999518). PR #6 "Changes since" stale (decisions to #30 only). Official repo untouched template. Tracker, scope lock missing. Pages 404. PR #12 body lacked T22 (fixed). Saad-only: playtest, Student decision, coverage map, recording, discussion link |
+
+## 2026-11-26: T26 Gate 3 (investigation, decision #106)
+
+- Report `reports/T26-tech-lead.md` @ a31d336 on `task/T26` (base dfe2d90), read by the orchestrator. Diff: that one file only. No suite run (no code).
+- Finding: one tap = one block (14 units) by design (R-D01); at the base a 2–5 tick hold moves 2 blocks because the last pending input runs after release. T23 (0c7d73a) removes that extra block (hold 1–4 ticks = 1 block). Options: no change beyond T23-fix1 (recommended), half-block grid, a nudge action, or decide with #107.
+- Closed at Gate 3 as a study. Option choice with Saad.

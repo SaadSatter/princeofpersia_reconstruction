@@ -85,7 +85,7 @@ No `rc/*` (approved release candidate) branch exists.
 | closed (Gate 3, 2026-11-25; `orch/reviewed` 72066f1) | T20 + fix1 + fix2 | playtest telemetry (#67, #68) | G1, G2, G3 | brief `tasks/T20.md` | — |
 | closed (Gate 3, 2026-11-25; `orch/reviewed` 1a515ca) | T21 | telemetry-analyst agent (#69) | G1, G3 | brief `tasks/T21.md` | — |
 | **T23-fix1 dispatched 2026-11-26** (#105; base dfe2d90 + 0c7d73a; first pass 0c7d73a on `task/T23`) | T23 | released direction still runs after landing (#93) | G1, G2, G3 | brief `tasks/T23.md` | — |
-| **dispatched 2026-11-26** (#106) | T26 | how far one left/right tap moves a rival: measure and propose options | G3 | brief `tasks/T26.md` | — |
+| closed (Gate 3, 2026-11-26; report a31d336); **option awaiting Saad** (#106) | T26 | how far one left/right tap moves a rival: measure and propose options | G3 | brief `tasks/T26.md` | — |
 | closed (Gate 3, 2026-11-26; report 7bca2b0); **option awaiting Saad** (#107) | T27 | side-scroller feasibility in place of six rooms (OQ-4) | G3 | brief `tasks/T27.md` | — |
 | not started | T03 | official-repository move (decision #6), `python -m team init` | — | — | — |
 | closed (Gate 3); **PR #6 awaiting Saad's merge** | T10a (+fix1, fix2) | docs in line with decisions #1–#30: Changes since G1 in GDD and Configuration, PPO rival, orchestration, checklist, plan, README | G1 accept w/ notes ×3; G2 n/a; G3 closed | `orch/T10a` a1b9738 | issue #5, PR #6 |
