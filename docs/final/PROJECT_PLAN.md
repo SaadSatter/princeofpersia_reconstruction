@@ -3,7 +3,7 @@
 **Version:** Initial (G1), 2026-11-15
 **Owner:** Saad Satter, as Producer
 **Drafted by:** the implementation agent (Claude Code). Saad reviews and owns it.
-**Current plan (2026-11-24):** this G1 plan is kept for the record. The plan in force is [`orchestration/PLAN-2026-11-23-v2.md`](orchestration/PLAN-2026-11-23-v2.md) with [`orchestration/PLAN-2026-11-23-v3-delta.md`](orchestration/PLAN-2026-11-23-v3-delta.md) (hosting by G2/G3). Task state is in [`orchestration/STATUS.md`](orchestration/STATUS.md). Where this file disagrees with them, they win; the changes that matter are in the risk notes below and in [`GDD.md`](GDD.md) and [`CONFIGURATION.md`](CONFIGURATION.md), "Changes since the last gate". Gate dates are unchanged.
+**Current plan (2026-11-24):** this G1 plan is kept for the record. The plan in force is [`orchestration/PLAN-2026-11-23-v2.md`](orchestration/PLAN-2026-11-23-v2.md) with [`orchestration/PLAN-2026-11-23-v3-delta.md`](orchestration/PLAN-2026-11-23-v3-delta.md) (hosting by G2/G3). Task state is in [`orchestration/STATUS.md`](orchestration/STATUS.md). Where this file disagrees with them, they win; the changes that matter are in the risk notes below and in [`GDD.md`](GDD.md) and [`CONFIGURATION.md`](CONFIGURATION.md), "Changes since the last gate". Gate dates are unchanged. **Dates corrected 2026-11-26:** the G2/G3 deliverables, the official-repository move and the first playable recording are due **Sat 28 Nov 2026, 11:59 p.m.** (`orchestration/inputs/FINAL_REQUIREMENTS.md` section 6, the newer course announcement). The Mon 30 Nov dates below are the G1 syllabus text and are marked superseded; Mon 30 Nov, 11:59 p.m. is the date for the three Braintrust replies.
 **Next step (G1 text):** after the G1 decision, this plan moves into Asana, with owners, acceptance criteria and dependencies per task. The full Risk Register follows at G2/G3.
 
 ## Gate dates
@@ -19,7 +19,7 @@ From the course syllabus (weeks 9–13 and finals).
 | Thu 19 Nov 2026, 11:59 p.m. | Braintrust | Two replies in the G1 discussion |
 | Mon 23 Nov 2026 (week 10) | Working session; **checkpoint**; graded G1 feedback | Deployed model call, isolated session state and forced-timeout fallback, in class or by recording |
 | Sat 28 Nov 2026 | First playable recording | Recording |
-| Mon 30 Nov 2026 (week 11) | **G2 Prototype and G3 Production**, combined | First playable; Initial Playtest Log; Scope-lock plan; Update GDD and Configuration Document; updated Risk Register; Braintrust notes |
+| Mon 30 Nov 2026 (week 11) | **G2 Prototype and G3 Production**, combined *[Superseded 2026-11-26: deliverables due Sat 28 Nov 2026, 11:59 p.m.; only the Braintrust replies fall on Mon 30 Nov, 11:59 p.m.]* | First playable; Initial Playtest Log; Scope-lock plan; Update GDD and Configuration Document; updated Risk Register; Braintrust notes |
 | Sat 5 Dec 2026 | Gold build recording | Recording |
 | Mon 7 Dec 2026 (week 12) | **G4 Final / Pre-Launch Review** | Final GDD and Configuration Document; Harness; Gold build; Update Playtest Log; Braintrust notes |
 | Mon 14 Dec 2026 (week 13) | **G5 Retrospective / Closure**; showcase | Final game and AAR; Playtest Log; optional System Card Response |
@@ -48,9 +48,9 @@ G2 is two weeks after G1, so the cut order in GDD Section 8 applies from the sta
 | Thu 26 Nov | Live tuning runs within the $5 cap; re-measure latency and cost (CQ-4) | Tech Lead, BI | Results JSON in `traces/live/` |
 | Thu 26 Nov | Host the server (OQ-10) with our own or placeholder art (OQ-8) | Producer (Saad), Tech Lead | Two testers on different computers reach one duel |
 | Fri 27 Nov | First playtest with external testers; Initial Playtest Log (CQ-6) | Design Lead, QA, BI | Observations recorded before interpretation |
-| Fri 27 Nov | Scope-lock plan: what stays, what is cut | Producer, Design Lead | Document in `docs/final/` |
+| Fri 27 Nov | Scope-lock plan: what stays, what is cut | Producer, Design Lead | Document in `docs/final/`: a draft is [`SCOPE_LOCK.md`](SCOPE_LOCK.md), not yet approved by Saad |
 | Sat 28 Nov | **First playable recording** | Saad | Recording linked from `docs/final/README.md` |
-| Sun 29 Nov | Update GDD, Configuration Document and Risk Register; Braintrust notes | Producer (Saad) | Documents labelled "Update" |
+| Sun 29 Nov | Update GDD, Configuration Document and Risk Register; Braintrust notes *[Superseded 2026-11-26: the GDD and Configuration update is due Sat 28 Nov, 11:59 p.m. (done as the dated "Changes since the last gate" entries of 2026-11-26); only the Braintrust notes stay on Mon 30 Nov]* | Producer (Saad) | Documents labelled "Update" |
 
 ## Risk updates since G1 (2026-11-24)
 
@@ -66,6 +66,21 @@ The original rows below are kept. These dated notes record what changed in them.
 | IP / Concept | Unchanged. The hosted page is a static public build, so it must serve only our own art (OQ-8) | #12 |
 
 Task rows in the G1 task table above that name Asana, a WebSocket server, two browser tabs, a live model call or the $5 cap are superseded by #10, #1/#12, #3 and #8 respectively; they are left as written.
+
+## Risk updates as of 2026-11-26
+
+Dated notes that supersede the 2026-11-24 table above where they differ. Ratings are not re-scored here; Saad owns the Risk Register update.
+
+| Risk row | What changed | Source |
+|---|---|---|
+| Technology (the AI rival) | The PPO rival is trained and shipped. The one held-out comparison against the scripted baseline won 13 of 16 duels, short of the pre-registered bar of 14: "NOT SUPPORTED". No claim that the rival beats the baseline is made. The rival never rigs traps. No external player has played against it | #51, #77, #43; [`evaluation/RESULTS-T09.md`](evaluation/RESULTS-T09.md) |
+| Network (online delay) | Online human vs human is back (reverses #1) as a LAN server on Saad's laptop. It is built and tested on localhost only: no two-machine run and no latency measurement exist (OQ-12 open). A laptop-hosted server is reachable only on the same Wi-Fi | #35 to #38; [`ONLINE_PLAY.md`](ONLINE_PLAY.md) |
+| Business / Audience (pairs of testers) | One person can test against the AI Model or Baseline modes. An external playtest has not happened; the playtest kit is an unapproved draft | [`playtest/LOG.md`](playtest/LOG.md) |
+| Timeline | Deliverables are due Sat 28 Nov, 11:59 p.m. Open items on Thu 26 Nov: CI red on `main` (T29), official-repository move (T03), the Student decision and the external playtest (Saad). T23-fix1 may land only if its gates close by Fri 27 Nov night; after that gameplay is frozen | #114, #115; [`TRACKER.md`](TRACKER.md) |
+| Scope (new) | Saad asked about a side-scroller and about smaller left/right steps. The studies are done; the build waits until after Sat 28 Nov on `experiment/scroll`, isolated from the graded build | #106 to #108, #115 |
+| Hosting (new) | The GitHub Pages deploy returned 404 (Pages not enabled). No hosted URL exists; the fallback in the cut order is two computers on one local network | #12, #13, #36; [`WEB_BUILD.md`](WEB_BUILD.md) |
+| Spending | Unchanged: under $1 total, smoke only; no paid call is needed by the PPO rival | #8 |
+| IP / Concept | Unchanged | #12 |
 
 ## Initial Risk Register
 

@@ -12,7 +12,7 @@ so agents can check against the rubric, not a summary of it.
 Status values: **done** (evidence exists and is linked), **in progress**,
 **not started**, **blocked** (waiting on a decision, named).
 
-Updated 2026-11-16; decisions and notes brought up to 2026-11-24 (task T10a). No status value was raised: where work exists only on `orch/preview`, `orch/reviewed` or a WIP branch, the row says so, because it is not on `main` and not yet closed by Saad. Branch state: [`orchestration/STATUS.md`](orchestration/STATUS.md).
+Updated 2026-11-16; decisions and notes brought up to 2026-11-24 (task T10a) and again to 2026-11-26 (task T10b). Where a row says "on `orch/reviewed`", it is in PR #12 (open) and not yet on `main`. The G2/G3 date is **Sat 28 Nov 2026, 11:59 p.m.** (`orchestration/inputs/FINAL_REQUIREMENTS.md` section 6), not Mon 30 Nov. Task state: [`TRACKER.md`](TRACKER.md); branch state: [`orchestration/STATUS.md`](orchestration/STATUS.md).
 
 ## Gates
 
@@ -27,14 +27,15 @@ Updated 2026-11-16; decisions and notes brought up to 2026-11-24 (task T10a). No
 | — | Tue 17 Nov | G1 decision (Approve or Hold) | not started | Instructor |
 | — | Thu 19 Nov | Braintrust: two replies in the G1 discussion | not started | Saad |
 | Checkpoint | Mon 23 Nov | Deployed model call through the runner | not started | Needs a live call; Saad approves. Since 2026-11-23 the AI rival is a PPO policy (#3), which makes no provider call; live spending is capped under $1, smoke only (#8). How the checkpoint applies is Saad's call |
-| Checkpoint | Mon 23 Nov | Isolated session state per seat | not started | Fake-provider test in CI. Seat-controller protocol and versus runner are on `orch/reviewed` (T04, accept with notes); not on `main` |
-| Checkpoint | Mon 23 Nov | Forced-timeout fallback | in progress | Single-seat fallback exists from the midterm; per-seat labelled `WAIT` fallback is on `orch/reviewed` / `orch/preview` (#24), not on `main` |
-| G2+G3 | Sat 28 Nov | First playable recording | not started | The hosted build (#12, #13) must be live for it; the build is on `orch/preview`, no live URL recorded |
-| G2+G3 | Mon 30 Nov | First playable build | not started | |
-| G2+G3 | Mon 30 Nov | Initial Playtest Log | blocked | Format is CQ-6 |
-| G2+G3 | Mon 30 Nov | Scope-lock plan | not started | Cut order: GDD Section 8 |
-| G2+G3 | Mon 30 Nov | Update GDD and Configuration Document | in progress | "Changes since the last gate" sections added 2026-11-24 (T10a, pending QA and Saad's merge); the final G2/G3 update after the build is still to do |
-| G2+G3 | Mon 30 Nov | Updated Risk Register; Braintrust notes | not started | |
+| Checkpoint | Mon 23 Nov | Isolated session state per seat | done | Seat-controller protocol and versus runner closed at Gate 3 (T04, T04-fix3), on `main` (each seat has its own observation, history and controller) |
+| Checkpoint | Mon 23 Nov | Forced-timeout fallback | done | Per-seat labelled `WAIT` fallback, 5 s timeout, abort over the limit (#24), on `main`; online live AI seat 0.04 s budget, log-only fallbacks (#45, #49) |
+| G2+G3 | Sat 28 Nov | First playable recording | not started | Saad records it. The build exists (pygame menu on `orch/reviewed`, online server and hosted page on `main`); no hosted URL (Pages deploy returned 404 on 2026-11-26) |
+| G2+G3 | Sat 28 Nov | First playable build | in progress | Duel, disguise, scripted guards, trained rival, online play: built. Needs PR #12 merged, CI green (T29) and the official-repository copy (T03) |
+| G2+G3 | Sat 28 Nov | Initial Playtest Log | blocked | No external playtest has been run. [`playtest/LOG.md`](playtest/LOG.md) is an empty template; the protocol, hypotheses and consent sentence are drafts that Saad has not approved |
+| G2+G3 | Sat 28 Nov | Scope-lock plan | in progress | Draft [`SCOPE_LOCK.md`](SCOPE_LOCK.md), not approved by Saad. Cut order: GDD Section 8 |
+| G2+G3 | Sat 28 Nov | Update GDD and Configuration Document | in progress | Dated "Changes since the last gate" entries of 2026-11-26 cover decisions #31 to #115 (T10b, pending QA and Saad's merge); the 2026-11-24 entries are kept as history |
+| G2+G3 | Sat 28 Nov | Updated Risk Register | not started | Dated risk notes of 2026-11-26 are in [`PROJECT_PLAN.md`](PROJECT_PLAN.md); Saad owns the re-scoring |
+| G2+G3 | Mon 30 Nov | Three Braintrust replies | not started | Saad. Due Mon 30 Nov, 11:59 p.m. |
 | G4 | Sat 5 Dec | Gold build recording | not started | |
 | G4 | Mon 7 Dec | Final GDD and Configuration; Harness; Gold build; Playtest Log update | not started | |
 | G5 | Mon 14 Dec | Final game and AAR; Playtest Log; optional System Card Response | not started | |
@@ -47,12 +48,12 @@ These still hold for every PR (`AGENTS.md`, midterm checks 2c, 3b, 3c):
 | Requirement | Status for versus play |
 | --- | --- |
 | Engine headless, no `pygame` in `pop/` | done (test exists) |
-| Deterministic reset and traces | done for one seat; two seats done on `final/versus-engine` (`tests/test_versus.py`, `test_swordplay.py`, `test_guards.py`, `test_disguise.py`) |
+| Deterministic reset and traces | done for one seat; two seats done (`tests/test_versus.py`, `test_swordplay.py`, `test_guards.py`, `test_disguise.py`), on `main` |
 | Legal and illegal actions validated, refused action changes no state | done for one seat; two seats done (`tests/test_versus.py::test_refused_input_changes_nothing_and_is_counted`) |
-| Step, model-call and timeout limits with terminal reasons | done for one seat; per-seat limits not started on `main`; versus runner with 3,600-frame limit, 6-frame cadence and 5 s timeout is on `orch/reviewed` / `orch/preview` (#5, #24) |
+| Step, model-call and timeout limits with terminal reasons | done: versus runner with the 3,600-frame limit, 6-frame cadence and 5 s timeout, on `main` (#5, #24) |
 | Hidden-information tests: current room only | done for one seat |
-| Hidden-information tests: disguise identity, trap ownership | disguise identity and suspicion done (`tests/test_disguise.py`); flips and bodies out of sight done (`tests/test_flip_review.py`, R-V22, R-V23, after the 2026-11-18 review); trap ownership: loose-floor traps are on `orch/preview` (T06b, review pending), not `main`; the leak evidence is unreviewed; gate plate not built |
-| Server sends each client only its own seat's observation | not started; online human vs human deferred (#1). The hosted page (#12) has no server: its bridge draws one seat only (`orch/preview`, T14), and the whole state lives in the browser |
+| Hidden-information tests: disguise identity, trap ownership | disguise identity and suspicion done (`tests/test_disguise.py`); flips and bodies out of sight done (`tests/test_flip_review.py`, R-V22, R-V23); trap ownership done for the loose-floor rig (T06b, closed at Gate 2), on `main`; gate plate not built |
+| Server sends each client only its own seat's observation | done for the online server (T13, T18, T25; boundary tests at Gate 2 with notes). Not yet run on two real machines. The hosted static page (#12) has no server: its bridge draws one seat only, but the whole state lives in the browser, which is accepted for human vs AI only |
 | A `test_regression_<issue>` test per observed bug | ongoing |
 
 ## Decisions in force (Saad, 2026-11-15)
@@ -113,22 +114,28 @@ what each changes: [`GDD.md`](GDD.md) and [`CONFIGURATION.md`](CONFIGURATION.md)
 - #7 the T02/T01 chain is the routed handoff; Saad writes the Student decision.
 - #14, #26 to #29 GitHub handoffs, publishing, pushing and commits to `main`
   under the orchestration rules; merging stays Saad's. #16 workers use Sonnet.
-- #30 "Update the outdated docs" (this update).
+- #30 "Update the outdated docs" (T10a, then refreshed by T10b).
+- #31 to #115, 2026-11-24 to 2026-11-26: CLIMB both ways (#31); online human vs human restored, LAN server, rooms, disconnect rule (#35 to #38, #41, #45 to #49, #52 to #57, #62, #63, #95 to #97, #102); numpy and websockets as extras (#34, #37, #40); PPO training and evaluation (#42 to #44, #47, #50, #51, #58 to #66, #71, #74 to #80, #84); controls, flip, grace window and kneel (#53 to #55, #73, #89, #94, #98, #101); playtest telemetry (#67 to #69, #81 to #83, #85, #86); three modes (#87 to #92); the side-scroller and step-size studies and the freeze (#105 to #108, #115); official-repository copy and Student decision (#103, #104, #113, #114). What each changes: [`GDD.md`](GDD.md) and [`CONFIGURATION.md`](CONFIGURATION.md), "Changes since the last gate (as of 2026-11-26)". Decisions #103 to #115 are in [`orchestration/DECISIONS-2026-11-26.md`](orchestration/DECISIONS-2026-11-26.md).
 
 ## Open decisions blocking work
 
 Closed since 2026-11-16: OQ-11 (#12, #25), CQ-1 (#23), OQ-3 (#5), OQ-6 (#22),
-CQ-7 (commit 2d40972). Still open or waiting on Saad: the rows below, plus the
+CQ-7 (commit 2d40972); closed 2026-11-24 to 26: OQ-7 (#55, #89), OQ-10 for
+G2/G3 (#36), OQ-13 (#38), the B2 threshold (#58, #76), D1 "on screen" (#59),
+CLIMB down (#31). Still open or waiting on Saad: the rows below, plus the
 items in [`orchestration/STATUS.md`](orchestration/STATUS.md) "Waiting on
-Saad" (B2 low-suspicion threshold, D1 "on screen", sprung trap costs 1 heart
-in all, macro cadence of 4 decisions, nearest-figure targeting, reward
-defaults, CLIMB down, the Student decision, the official-repository move).
+Saad" (sprung trap costs 1 heart in all, macro cadence of 4 decisions,
+nearest-figure targeting, reward defaults, the T19 suspicion surcharge, the
+T26 and T27 options, the playtest protocol and consent sentence, the Student
+decision, and the official-repository move; the scope lock draft needs his
+approval).
 
 
 | ID | Blocks | Needed by |
 | --- | --- | --- |
 | OQ-11 | ~~Browser client technology~~ closed 2026-11-23 (#12) | Sun 22 Nov |
-| OQ-7 | Key map | Sun 22 Nov |
-| OQ-10 | Hosting of a game server (static page decided, #12; online play deferred, #1) | Thu 26 Nov |
+| OQ-7 | ~~Key map~~ closed 2026-11-24/25 (#55, #89) | Sun 22 Nov |
+| OQ-10 | ~~Hosting of a game server~~ closed for G2/G3 2026-11-24 (#36, Saad's laptop on a LAN); the static page's Pages deploy is blocked (404) | Thu 26 Nov |
 | CQ-1 | ~~Macro-action vocabulary for the AI rival~~ closed 2026-11-23 (#23) | Thu 26 Nov |
-| CQ-6 | Playtest log format | Fri 27 Nov |
+| CQ-6 | Playtest log format (kit drafted, unapproved) | Fri 27 Nov |
+| OQ-12 | Network delay a sword fight tolerates (no two-machine run yet) | Playtest |

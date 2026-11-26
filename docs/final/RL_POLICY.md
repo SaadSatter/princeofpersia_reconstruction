@@ -142,8 +142,9 @@ no checkpoint is chosen by score. `summary.json` records the commit, seed,
 steps, wall time, the weights hash, and a final check of the exported file
 through the pure-Python rival against the baseline.
 
-Command as first written (run 1 used the command in `orchestration/reports/T17-evaluation-specialist.md`: seed 0, 4,800 s cap, out `tools/rl/logs/run-1`):
-`python -m tools.rl.train --out tools/rl/logs/run-0 --seed 0 --seconds 5100`
+Command used for the one full run (run 1, 2026-11-24; the first-written example, out `run-0` with a 5,100 s cap, is not what ran): seed 0, 4,800 s cap, 2 workers, out `tools/rl/logs/run-1`
+(`orchestration/reports/T17-evaluation-specialist.md`):
+`uv run --frozen --extra play --extra train python -m tools.rl.train --out tools/rl/logs/run-1 --seed 0 --seconds 4800 --workers 2`
 
 Speed (estimate, not a measurement of the full run): Gate 2 measured 8 untrained,
 early-ending duels in 2.7 s on an Apple M4 (about 0.34 s per duel). The earlier
@@ -211,8 +212,9 @@ file, last weights exported (`checkpoint_chosen_by_score: false`). Evidence:
 Final check through the pure-Python rival against the scripted baseline (**tuning
 starts, 128 duels, seat-swapped; not held-out**): 120 wins, 8 draws, 0 losses
 (win rate 0.9375), 0 policy errors. This is a smoke check on the starts the policy
-trained on. It is not a strength claim; the held-out H6 result is T09's and does not
-exist yet. The rival does not set traps (#43).
+trained on. It is not a strength claim. The held-out H6 result is T09's, run once on
+2026-11-25: 13 wins, 2 draws, 1 loss of 16, short of the pre-registered bar of 14,
+"NOT SUPPORTED" ([`evaluation/RESULTS-T09.md`](evaluation/RESULTS-T09.md)). The rival does not set traps (#43).
 
 ## Open items for Saad
 
