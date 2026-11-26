@@ -259,3 +259,8 @@ Gate 3 note, T05-fix1 (2026-11-24, orchestrator session 8edb65a6, started as the
 ## 2026-11-26: T23 Gate 1 ACCEPT
 
 - `reports/T23-qa.md` @ c2f9517 on `gate/T23-qa` (on 444bd39). Worker's line: `2360 passed, 11 skipped, 5 xfailed`. Four #99 assertion updates listed old → new (incl. `test_t20_qa_refused_mirror[3-None]` asked > 300 → > 200; mismatch check unchanged). New `tests/test_t23_qa_release.py` (12). No findings. To Gate 2.
+
+## 2026-11-26: T23 Gate 2 ACCEPT; Gate 3 closed
+
+- Gate 2: `reports/T23-evaluation-specialist.md` @ c1673cf on `gate/T23-eval` (on c2f9517; diff = report only). Targeted `116 passed`; T19 compare set byte-identical dfe2d90 vs c2f9517 (4 conditions × 32 episodes, 0 fallbacks). One optional minor: `server.trace.replay` should check that `ticks` and `releases` have equal lengths (not acted on; noted for a later task).
+- Gate 3 (orchestrator): all three reports read (444bd39, c2f9517, c1673cf). Scope checked by diff. Runtime models from metadata (`verify_models.py --session 8e40f288`): main claude-opus-5-5; tech-lead, qa, evaluation-specialist all claude-sonnet-5-5. **T23 closed.** `orch/reviewed` fast-forwarded dfe2d90 → c1673cf (no force). Reaches `main` only through a PR Saad merges.
