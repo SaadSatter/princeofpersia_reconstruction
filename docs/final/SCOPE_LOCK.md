@@ -1,6 +1,6 @@
 # Shadow Masque: scope lock for G2/G3
 
-**Draft, not approved by Saad.** Written 2026-11-26 by the tech-lead worker (task T10b) from Saad's recorded decisions. Every line cites the decision it comes from. Nothing here is a new decision. Saad approves, edits or rejects it; until he does, it is a proposal. Decision files: [`DECISIONS-2026-11-23.md`](orchestration/DECISIONS-2026-11-23.md), [`DECISIONS-2026-11-24.md`](orchestration/DECISIONS-2026-11-24.md) (to #102), `DECISIONS-2026-11-26.md` (#103 and later, on `main`). Where a decision number is shared by two sessions (#109 to #112 and #113 to #115), the orchestrator's renumbering applies.
+**Draft, not approved by Saad.** Written 2026-11-26 by the tech-lead worker (task T10b) from Saad's recorded decisions. Every line cites the decision it comes from. Nothing here is a new decision. Saad approves, edits or rejects it; until he does, it is a proposal. Decision files: [`DECISIONS-2026-11-23.md`](orchestration/DECISIONS-2026-11-23.md), [`DECISIONS-2026-11-24.md`](orchestration/DECISIONS-2026-11-24.md) (to #102), `DECISIONS-2026-11-26.md` (#103 and later, on `main`).
 
 Approval line for Saad: `Approved by Saad: ______ (date)`.
 
@@ -9,7 +9,7 @@ Approval line for Saad: `Approved by Saad: ______ (date)`.
 | Item | Decision |
 | --- | --- |
 | Two rivals in one `GameState`, sword strike and block, 3 hearts, disguise and uniform taking, suspicion, scripted guards | G1 decisions in [`GDD.md`](GDD.md); #4, #15, #17 to #19 |
-| Six-room arena of our own layouts (OQ-4) | G1 (2026-11-16); kept for G2/G3 by #115 |
+| Six-room arena of our own layouts (OQ-4) | G1 (2026-11-16); kept for G2/G3 by #118 |
 | One duel is 5 minutes = 3,600 frames; a time-up is a draw | #5 |
 | Loose-floor traps: one-shot, 4 per rival, owner can be hurt | #2, #22 |
 | AI rival is a small PPO policy we trained, plus a scripted baseline on the same interface | #3, #23, #24, #51 |
@@ -21,8 +21,8 @@ Approval line for Saad: `Approved by Saad: ______ (date)`.
 | Scenario suite D1, B2, I3, F5 and held-out H6, with the one held-out result reported as it came out | #9, #58 to #66, #74 to #80 |
 | Optional host-side playtest telemetry, off by default | #67 to #69 |
 | Paid model calls under $1 total, smoke only; the PPO rival needs none | #8 |
-| Fix for the "direction keeps running after landing" bug (T23-fix1), only if its gates close by Fri 2026-11-27 night | #93, #105, #115 |
-| Deterministic CI green on `main` (T29) and the official-repository copy (T03) | #104, #114 |
+| Fix for the "direction keeps running after landing" bug (T23-fix1), only if its gates close by Fri 2026-11-27 night | #93, #105, #118 |
+| Deterministic CI green on `main` (T29) and the official-repository copy (T03) | #104, #117 |
 
 ## Out of scope for G2/G3
 
@@ -31,10 +31,10 @@ Approval line for Saad: `Approved by Saad: ______ (date)`.
 | Gate-plate trap (loose floor only) | #2, #22 (gate plate "if there is time"; not built) |
 | The AI rival rigging traps (`RIG_TRAP` masked for it) | #43 |
 | Retraining the PPO rival | #51 (one run), T09 note: weights kept; a retrain needs Saad's approval with runtime and cost known (decision #111, scrolling session: "ask me then") |
-| A side-scrolling view in place of six rooms; any change to tap or step size | #106, #107, #108, #112, #115 (study done; build on `experiment/scroll`, after Sat 2026-11-28) |
+| A side-scrolling view in place of six rooms; any change to tap or step size | #106, #107, #108, #112, #118 (study done; build on `experiment/scroll`, after Sat 2026-11-28) |
 | Accounts, matchmaking, a public-internet game server, levels 2 to 14, original level data, sound, adaptive guards, more than two players | GDD Section 8 (G1) |
 | LLM rival in the game (the Haiku player stays as the legacy midterm rival) | #3 |
-| Any further gameplay change after T23-fix1 | #115 |
+| Any further gameplay change after T23-fix1 | #118 |
 | A formal course production-agent role for `telemetry-analyst` | #69 |
 
 ## Cut order, if time runs out
@@ -57,4 +57,4 @@ From GDD Section 8, unchanged: 1. rooms 6 to 3; 2. suspicion meter to a yes/no r
 
 ## Freeze
 
-Gameplay is frozen after T23-fix1, which may land only if its gates close by Fri 2026-11-27 night; T26, T27 and the scrolling line wait until after Sat 2026-11-28 for the graded `main` (#115). Documentation, CI and the official-repository copy may still change.
+Gameplay is frozen after T23-fix1, which may land only if its gates close by Fri 2026-11-27 night; T26, T27 and the scrolling line wait until after Sat 2026-11-28 for the graded `main` (#118). Documentation, CI and the official-repository copy may still change.

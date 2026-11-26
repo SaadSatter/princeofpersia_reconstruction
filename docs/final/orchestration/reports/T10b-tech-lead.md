@@ -6,7 +6,7 @@ from: tech-lead
 to: qa
 configured_model: claude-sonnet-5-5
 runtime_model: not visible to the agent (orchestrator records the verified id in REVIEW_LOG.md)
-consumed: docs/final/orchestration/tasks/T10b.md@b4aa069 (with the orchestrator's renumbering message: #109-#111 are now #113-#115, CI task is T29, T28 is the scrolling task; f7ab21b); reports/AUDIT-G23-requirements-auditor.md@fd11bcc
+consumed: docs/final/orchestration/tasks/T10b.md@b4aa069 (with the orchestrator's later messages: CI task is T29, T28 is the scrolling task; final decision numbers per a575221: #109 to #114 scrolling/T23-fix1 session, #116 to #118 this session); reports/AUDIT-G23-requirements-auditor.md@fd11bcc
 source_branch: task/T10b
 source_commit: b735c25
 reviewed_commit: n/a
@@ -19,7 +19,7 @@ Status: partial (docs done; one item deliberately not done, see "Known limitatio
 
 ## Work completed
 
-Base `orch/T10a` a1b9738 merged with `origin/orch/reviewed` dfe2d90 (merge commit 580b01a). The merge conflicted in nine files, all in orchestration records, agent definitions, `CLAUDE.md` and `.gitignore`; I took the `orch/reviewed` side for them (it adds the `telemetry-analyst`) and kept both sides of `.gitignore`. The orchestration records on `main` are authoritative and will differ; the orchestrator should not take this branch's copies of `STATUS.md` or `REVIEW_LOG.md`. Then, in b735c25: a new dated GDD and CONFIGURATION entry "as of 2026-11-26" covering decisions #31 to #115, which lists the false 2026-11-24 statements and supersedes them (the 2026-11-24 entry stays as history); status labels in GDD Sections 2, 4, 5.2, 5.3, 6, 7, 8 and the open-questions table; `LINGER_AFTER` pointed at `pop/versus.py`; CONFIGURATION A0 table brought to the shipped weights and the T09 result; PROJECT_PLAN dates (G2/G3 Sat 2026-11-28) and a dated risk note; REQUIREMENTS_CHECKLIST statuses and decisions list; `docs/final/README.md` G2/G3 table; RL_POLICY stale run-0 command and "does not exist yet" T09 line; new `TRACKER.md` (T01 to T29, T12 marked unused) and `SCOPE_LOCK.md` (header "Draft, not approved by Saad"); root `README.md` links and launch lines; session-record index.
+Base `orch/T10a` a1b9738 merged with `origin/orch/reviewed` dfe2d90 (merge commit 580b01a). The merge conflicted in nine files, all in orchestration records, agent definitions, `CLAUDE.md` and `.gitignore`; I took the `orch/reviewed` side for them (it adds the `telemetry-analyst`) and kept both sides of `.gitignore`. The orchestration records on `main` are authoritative and will differ; the orchestrator should not take this branch's copies of `STATUS.md` or `REVIEW_LOG.md`. Then, in b735c25: a new dated GDD and CONFIGURATION entry "as of 2026-11-26" covering decisions #31 to #118, which lists the false 2026-11-24 statements and supersedes them (the 2026-11-24 entry stays as history); status labels in GDD Sections 2, 4, 5.2, 5.3, 6, 7, 8 and the open-questions table; `LINGER_AFTER` pointed at `pop/versus.py`; CONFIGURATION A0 table brought to the shipped weights and the T09 result; PROJECT_PLAN dates (G2/G3 Sat 2026-11-28) and a dated risk note; REQUIREMENTS_CHECKLIST statuses and decisions list; `docs/final/README.md` G2/G3 table; RL_POLICY stale run-0 command and "does not exist yet" T09 line; new `TRACKER.md` (T01 to T29, T12 marked unused) and `SCOPE_LOCK.md` (header "Draft, not approved by Saad"); root `README.md` links and launch lines; session-record index.
 
 ## Paths
 
@@ -49,7 +49,7 @@ RUN 2 (clean tree, no commit during the run): 2355 passed, 11 skipped, 5 xfailed
 
 ## Findings
 
-- [minor] `DECISIONS-2026-11-26.md` at f7ab21b lists #113 and #114 twice and has #112 after #115 (the other session's rows kept their numbers while this session's were renumbered to #113 to #115). The orchestrator should sort it. I cited this session's decisions as #113 to #115 and the scrolling session's as #109 to #112, as the message told me.
+- [resolved] The duplicate decision numbers I found in `DECISIONS-2026-11-26.md` were fixed on `main` (a575221). All citations now use the final numbers: Student decision record #116, Saturday tasks #117, freeze #118; scrolling session #109 to #112; T23-fix1 test edits #113, #114.
 - [minor] `STATUS.md` on `orch/reviewed` is a stale copy (dated 2026-11-24 12:55); I read `main`'s b4aa069 version for task state.
 - [minor] The tracker's gate columns come from `STATUS.md` and `REVIEW_LOG.md`, not from re-reading each report; QA should spot-check a few rows.
 
@@ -74,7 +74,7 @@ QA (Gate 1): check facts and links in `docs/final/GDD.md`, `CONFIGURATION.md`, `
 Commit to review: b735c25 on task/T10b
 What changed: documentation only. The dated 2026-11-26 "Changes since the last gate" entries, corrected labels and dates, a tracker, a scope-lock draft, and links in the two READMEs. No rule, number or code change.
 How to check it: `git diff 580b01a..b735c25 --stat`; open `docs/final/GDD.md` first section; for facts, compare each row with `DECISIONS-2026-11-24.md` and `-26.md` on `main`; `git merge-base --is-ancestor <sha> origin/main` for "on main" claims; run `python3` link check on the changed files; `uv run --extra train --extra online --extra play pytest -q`.
-What I am unsure about: whether "Implemented" labels are right for T22 features on `orch/reviewed` (I wrote "on `orch/reviewed` only"); the tracker's T11 state; the OQ-7 closed-in-effect reading of #55 and #89; whether Saad wants the renames despite the broken-link cost; the numbers of the scrolling session (#109 to #112) as I cite them.
+What I am unsure about: whether "Implemented" labels are right for T22 features on `orch/reviewed` (I wrote "on `orch/reviewed` only"); the tracker's T11 state; the OQ-7 closed-in-effect reading of #55 and #89; whether Saad wants the renames despite the broken-link cost; none on numbering now (final per a575221).
 Touches the knowledge boundary or AI seat: no (documentation only; Gate 2 does not apply)
 
 ## Student decision required
