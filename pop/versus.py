@@ -1254,6 +1254,15 @@ class VersusEpisode:
                 "stale_inputs": dict(self._duel.stale),
                 "replaced_inputs": dict(self._duel.replaced)}
 
+    def release(self, seat: str) -> None:
+        """T23, decision #93: a key-driven (human) seat has no key held this tick, so
+        its queued input is dropped and cannot start after the move in progress ends.
+        A held key re-sends its input every tick, so only a released one lapses. AI
+        seats press no keys and never call this: their one pending input stays. It
+        clears the queue only: nothing is logged and no counter changes."""
+        _check_seat(seat)
+        self._duel.pending[seat] = None
+
     # runner and server only
     def tick(self) -> None:
         self._duel.tick()
