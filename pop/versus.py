@@ -288,9 +288,16 @@ class Rival(Game):
         if self.sword == "none" and self.kid.cell in self.duel.swords:
             return "sword"
         if (self.kid.posture == "standing" and not self.disguised
-                and self.uniform_ahead() is not None):
+                and self.uniform_ahead() is not None and not self._would_hang_down()):
             return "uniform"
         return None
+
+    def _would_hang_down(self) -> bool:
+        """Saad #101: where DOWN starts a hang-down it keeps that meaning (TAKE takes the uniform).
+        The same test as `engine._down`: the cell ahead is open and unsupported."""
+        target = self.ahead()
+        return (isinstance(target, tuple) and not self.blocks(target)
+                and not self.geom.supported(target))
 
     def _kneel(self):
         return self._pickup() if self._kneel_target() == "sword" else self._take()
