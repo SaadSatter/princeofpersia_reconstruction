@@ -254,3 +254,16 @@ Saad, in chat after a playtest (verbatim):
 | # | Topic | Saad's words | Orchestrator's reading and effect |
 |---|---|---|---|
 | 93 | A direction held in the air, then released, still runs after landing | "nothing is pressed but after landing player continues to move left a little" | Expected behaviour, from his report: once the key is released, nothing more happens. A pending input from a human seat is dropped if its key is no longer held when it would start. The grace window (R-V35), the hop turn (R-V22) and the kick (R-V10) are unchanged. AI seats keep the one-pending-input rule (they press no keys). The telemetry logs what actually starts. Task T23. A rule-map row is needed |
+
+## Addendum: Wed 2026-11-25 (PPO line: Saad's online playtest of T22-fix2)
+
+Saad's report in chat (verbatim excerpt): "Also when I kneel over a guards body it doesn't pick up the disguise"
+
+His answers (AskUserQuestion), quoted verbatim. Recorded by the PPO-line orchestrator (session 8edb65a6):
+
+| # | Question (short) | Saad's answer (verbatim) | Orchestrator's reading and effect |
+|---|---|---|---|
+| 94 | Should kneeling (S / down) over a downed guard also take the uniform? | "Yes, kneel takes it (Recommended)" | Amends R-V17: `DOWN` over (or beside, facing) a downed, uniformed guard takes the uniform with the TAKE timing (12 frames) and effects; a dropped sword on the same cell is picked up first (the existing R-V09 pickup), and the uniform only when there is no sword to take. `TAKE` keeps working. Rule-map row, failing test first. What the other seat sees stays as R-V25 says. Task T24 |
+| 95 | AI and Baseline rooms online | "…I clicked join room after clicking AI vs Human, but that needs to be pressed Create Room. I think that doesnt make sense, AI vs Human is a private match, no need to create room." | Online, choosing AI Model or Baseline starts a private match at once: no Create or Join step, no room code shown. Create / Join with a code stay for Human vs Human only. Task T25 (after T22 closes) |
+| 96 | Loading screen | "Also the load in screen is shifted top left corner, it should be centered" | The online page's loading / connecting screen is centred. Task T25 |
+| 97 | "opening handshake failed" messages | "Yes, but I think the issue is I clicked join room after clicking AI vs Human…" | The page and duels worked; the messages are log noise from unused browser connections. The server logs them quietly (one line, or debug level), without hiding real errors. Task T25 |
