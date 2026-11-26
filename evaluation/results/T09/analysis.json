@@ -1,0 +1,207 @@
+{
+ "success": [],
+ "duels": [
+  {
+   "scenario": "H6",
+   "controller": "M",
+   "mirror": false,
+   "n_rows": 48,
+   "n": 16,
+   "aborted": 0,
+   "win": 13,
+   "draw": 2,
+   "loss": 1,
+   "by_seat": {
+    "A": {
+     "win": 7,
+     "draw": 1,
+     "loss": 0,
+     "n": 8
+    },
+    "B": {
+     "win": 6,
+     "draw": 1,
+     "loss": 1,
+     "n": 8
+    }
+   },
+   "config": "MvS+SvM",
+   "win_ci": [
+    0.5699111903802586,
+    0.9340840092857187
+   ],
+   "loss_ci": [
+    0.01111934476464252,
+    0.28328737570298945
+   ],
+   "flag": ""
+  },
+  {
+   "scenario": "H6",
+   "controller": "S",
+   "mirror": false,
+   "n_rows": 48,
+   "n": 16,
+   "aborted": 0,
+   "win": 1,
+   "draw": 2,
+   "loss": 13,
+   "by_seat": {
+    "A": {
+     "win": 1,
+     "draw": 1,
+     "loss": 6,
+     "n": 8
+    },
+    "B": {
+     "win": 0,
+     "draw": 1,
+     "loss": 7,
+     "n": 8
+    }
+   },
+   "config": "MvS+SvM",
+   "win_ci": [
+    0.01111934476464252,
+    0.28328737570298945
+   ],
+   "loss_ci": [
+    0.5699111903802586,
+    0.9340840092857187
+   ],
+   "flag": ""
+  }
+ ],
+ "conditions": [
+  {
+   "scenario": "H6",
+   "start_id": "H6-1",
+   "config": "MvS",
+   "n_rows": 3,
+   "n_distinct": 1,
+   "aborted": 0
+  },
+  {
+   "scenario": "H6",
+   "start_id": "H6-1",
+   "config": "SvM",
+   "n_rows": 3,
+   "n_distinct": 1,
+   "aborted": 0
+  },
+  {
+   "scenario": "H6",
+   "start_id": "H6-2",
+   "config": "MvS",
+   "n_rows": 3,
+   "n_distinct": 1,
+   "aborted": 0
+  },
+  {
+   "scenario": "H6",
+   "start_id": "H6-2",
+   "config": "SvM",
+   "n_rows": 3,
+   "n_distinct": 1,
+   "aborted": 0
+  },
+  {
+   "scenario": "H6",
+   "start_id": "H6-3",
+   "config": "MvS",
+   "n_rows": 3,
+   "n_distinct": 1,
+   "aborted": 0
+  },
+  {
+   "scenario": "H6",
+   "start_id": "H6-3",
+   "config": "SvM",
+   "n_rows": 3,
+   "n_distinct": 1,
+   "aborted": 0
+  },
+  {
+   "scenario": "H6",
+   "start_id": "H6-4",
+   "config": "MvS",
+   "n_rows": 3,
+   "n_distinct": 1,
+   "aborted": 0
+  },
+  {
+   "scenario": "H6",
+   "start_id": "H6-4",
+   "config": "SvM",
+   "n_rows": 3,
+   "n_distinct": 1,
+   "aborted": 0
+  },
+  {
+   "scenario": "H6",
+   "start_id": "H6-5",
+   "config": "MvS",
+   "n_rows": 3,
+   "n_distinct": 1,
+   "aborted": 0
+  },
+  {
+   "scenario": "H6",
+   "start_id": "H6-5",
+   "config": "SvM",
+   "n_rows": 3,
+   "n_distinct": 1,
+   "aborted": 0
+  },
+  {
+   "scenario": "H6",
+   "start_id": "H6-6",
+   "config": "MvS",
+   "n_rows": 3,
+   "n_distinct": 1,
+   "aborted": 0
+  },
+  {
+   "scenario": "H6",
+   "start_id": "H6-6",
+   "config": "SvM",
+   "n_rows": 3,
+   "n_distinct": 1,
+   "aborted": 0
+  },
+  {
+   "scenario": "H6",
+   "start_id": "H6-7",
+   "config": "MvS",
+   "n_rows": 3,
+   "n_distinct": 1,
+   "aborted": 0
+  },
+  {
+   "scenario": "H6",
+   "start_id": "H6-7",
+   "config": "SvM",
+   "n_rows": 3,
+   "n_distinct": 1,
+   "aborted": 0
+  },
+  {
+   "scenario": "H6",
+   "start_id": "H6-8",
+   "config": "MvS",
+   "n_rows": 3,
+   "n_distinct": 1,
+   "aborted": 0
+  },
+  {
+   "scenario": "H6",
+   "start_id": "H6-8",
+   "config": "SvM",
+   "n_rows": 3,
+   "n_distinct": 1,
+   "aborted": 0
+  }
+ ],
+ "rows": 48,
+ "aborted": 0
+}

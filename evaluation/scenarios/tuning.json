@@ -1,0 +1,917 @@
+{
+ "schema": "shadow-masque-versus-eval/1/scenarios",
+ "split": "tuning",
+ "scenarios": [
+  {
+   "id": "D1",
+   "name": "Disguise",
+   "kind": "disguise",
+   "duration_frames": 1800,
+   "params": {},
+   "definition": "Success if the agent kills a guard and picks up the disguise when no other player is on screen. (Decision #9; 'on screen' = the other rival is in the agent's room at no frame, decision #59.)",
+   "starts": [
+    {
+     "id": "D1-a",
+     "rivals": {
+      "A": [
+       4,
+       2,
+       1,
+       1
+      ],
+      "B": [
+       3,
+       2,
+       7,
+       -1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": false
+     },
+     "guards": {
+      "d1a-guard": [
+       4,
+       2,
+       [
+        4,
+        5
+       ],
+       -1
+      ]
+     },
+     "other_controller": "wait"
+    },
+    {
+     "id": "D1-b",
+     "rivals": {
+      "A": [
+       5,
+       2,
+       6,
+       -1
+      ],
+      "B": [
+       1,
+       2,
+       2,
+       1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": false
+     },
+     "guards": {
+      "d1b-guard": [
+       5,
+       2,
+       [
+        0,
+        2
+       ],
+       1
+      ]
+     },
+     "other_controller": "wait"
+    },
+    {
+     "id": "D1-c",
+     "rivals": {
+      "A": [
+       1,
+       2,
+       2,
+       1
+      ],
+      "B": [
+       3,
+       2,
+       7,
+       -1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": false
+     },
+     "guards": {
+      "d1c-guard": [
+       1,
+       2,
+       [
+        4,
+        6
+       ],
+       -1
+      ]
+     },
+     "other_controller": "wait"
+    },
+    {
+     "id": "D1-a-B",
+     "subject": "B",
+     "rivals": {
+      "A": [
+       3,
+       2,
+       7,
+       -1
+      ],
+      "B": [
+       4,
+       2,
+       1,
+       1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": false
+     },
+     "guards": {
+      "d1a-guard": [
+       4,
+       2,
+       [
+        4,
+        5
+       ],
+       -1
+      ]
+     },
+     "other_controller": "wait"
+    },
+    {
+     "id": "D1-b-B",
+     "subject": "B",
+     "rivals": {
+      "A": [
+       1,
+       2,
+       2,
+       1
+      ],
+      "B": [
+       5,
+       2,
+       6,
+       -1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": false
+     },
+     "guards": {
+      "d1b-guard": [
+       5,
+       2,
+       [
+        0,
+        2
+       ],
+       1
+      ]
+     },
+     "other_controller": "wait"
+    },
+    {
+     "id": "D1-c-B",
+     "subject": "B",
+     "rivals": {
+      "A": [
+       3,
+       2,
+       7,
+       -1
+      ],
+      "B": [
+       1,
+       2,
+       2,
+       1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": false
+     },
+     "guards": {
+      "d1c-guard": [
+       1,
+       2,
+       [
+        4,
+        6
+       ],
+       -1
+      ]
+     },
+     "other_controller": "wait"
+    }
+   ]
+  },
+  {
+   "id": "B2",
+   "name": "Blend",
+   "kind": "blend",
+   "duration_frames": 1200,
+   "params": {},
+   "definition": "Blend if another guard doesn't notice it or keeps low suspicion. (Decision #9; 'low' = suspicion below 50 of 100 for the whole scenario, decision #58.)",
+   "starts": [
+    {
+     "id": "B2-a",
+     "rivals": {
+      "A": [
+       3,
+       2,
+       3,
+       1
+      ],
+      "B": [
+       1,
+       2,
+       2,
+       1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": true,
+      "B": false
+     },
+     "guards": {
+      "b2a-guard": [
+       3,
+       2,
+       [
+        5,
+        8
+       ],
+       -1
+      ]
+     },
+     "other_controller": "wait"
+    },
+    {
+     "id": "B2-b",
+     "rivals": {
+      "A": [
+       1,
+       2,
+       3,
+       1
+      ],
+      "B": [
+       3,
+       2,
+       7,
+       -1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": true,
+      "B": false
+     },
+     "guards": {
+      "b2b-g1": [
+       1,
+       2,
+       [
+        1,
+        6
+       ],
+       1
+      ],
+      "b2b-g2": [
+       1,
+       2,
+       [
+        2,
+        5
+       ],
+       -1
+      ]
+     },
+     "other_controller": "wait"
+    },
+    {
+     "id": "B2-c",
+     "rivals": {
+      "A": [
+       5,
+       2,
+       8,
+       -1
+      ],
+      "B": [
+       1,
+       2,
+       2,
+       1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": true,
+      "B": false
+     },
+     "guards": {
+      "b2c-guard": [
+       5,
+       2,
+       [
+        4,
+        8
+       ],
+       1
+      ]
+     },
+     "other_controller": "wait"
+    },
+    {
+     "id": "B2-a-B",
+     "subject": "B",
+     "rivals": {
+      "A": [
+       1,
+       2,
+       2,
+       1
+      ],
+      "B": [
+       3,
+       2,
+       3,
+       1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": true
+     },
+     "guards": {
+      "b2a-guard": [
+       3,
+       2,
+       [
+        5,
+        8
+       ],
+       -1
+      ]
+     },
+     "other_controller": "wait"
+    },
+    {
+     "id": "B2-b-B",
+     "subject": "B",
+     "rivals": {
+      "A": [
+       3,
+       2,
+       7,
+       -1
+      ],
+      "B": [
+       1,
+       2,
+       3,
+       1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": true
+     },
+     "guards": {
+      "b2b-g1": [
+       1,
+       2,
+       [
+        1,
+        6
+       ],
+       1
+      ],
+      "b2b-g2": [
+       1,
+       2,
+       [
+        2,
+        5
+       ],
+       -1
+      ]
+     },
+     "other_controller": "wait"
+    },
+    {
+     "id": "B2-c-B",
+     "subject": "B",
+     "rivals": {
+      "A": [
+       1,
+       2,
+       2,
+       1
+      ],
+      "B": [
+       5,
+       2,
+       8,
+       -1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": true
+     },
+     "guards": {
+      "b2c-guard": [
+       5,
+       2,
+       [
+        4,
+        8
+       ],
+       1
+      ]
+     },
+     "other_controller": "wait"
+    }
+   ]
+  },
+  {
+   "id": "I3",
+   "name": "Identify",
+   "kind": "identify",
+   "duration_frames": 1200,
+   "params": {},
+   "definition": "Identify if the agent can distinguish between player guard and real guard. (Decision #9.) The other rival starts disguised and paces like a patrol; a real guard stands nearby.",
+   "starts": [
+    {
+     "id": "I3-a",
+     "rivals": {
+      "A": [
+       3,
+       2,
+       6,
+       -1
+      ],
+      "B": [
+       3,
+       2,
+       8,
+       -1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": true
+     },
+     "guards": {
+      "i3a-guard": [
+       3,
+       2,
+       [
+        4,
+        4
+       ],
+       -1
+      ]
+     },
+     "other_controller": "decoy"
+    },
+    {
+     "id": "I3-b",
+     "rivals": {
+      "A": [
+       1,
+       2,
+       3,
+       -1
+      ],
+      "B": [
+       1,
+       2,
+       1,
+       1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": true
+     },
+     "guards": {
+      "i3b-guard": [
+       1,
+       2,
+       [
+        5,
+        5
+       ],
+       1
+      ]
+     },
+     "other_controller": "decoy"
+    },
+    {
+     "id": "I3-c",
+     "rivals": {
+      "A": [
+       1,
+       2,
+       1,
+       1
+      ],
+      "B": [
+       1,
+       2,
+       6,
+       -1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": true
+     },
+     "guards": {
+      "i3c-guard": [
+       1,
+       2,
+       [
+        3,
+        3
+       ],
+       1
+      ]
+     },
+     "other_controller": "decoy"
+    },
+    {
+     "id": "I3-a-B",
+     "subject": "B",
+     "rivals": {
+      "A": [
+       3,
+       2,
+       8,
+       -1
+      ],
+      "B": [
+       3,
+       2,
+       6,
+       -1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": true,
+      "B": false
+     },
+     "guards": {
+      "i3a-guard": [
+       3,
+       2,
+       [
+        4,
+        4
+       ],
+       -1
+      ]
+     },
+     "other_controller": "decoy"
+    },
+    {
+     "id": "I3-b-B",
+     "subject": "B",
+     "rivals": {
+      "A": [
+       1,
+       2,
+       1,
+       1
+      ],
+      "B": [
+       1,
+       2,
+       3,
+       -1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": true,
+      "B": false
+     },
+     "guards": {
+      "i3b-guard": [
+       1,
+       2,
+       [
+        5,
+        5
+       ],
+       1
+      ]
+     },
+     "other_controller": "decoy"
+    },
+    {
+     "id": "I3-c-B",
+     "subject": "B",
+     "rivals": {
+      "A": [
+       1,
+       2,
+       6,
+       -1
+      ],
+      "B": [
+       1,
+       2,
+       1,
+       1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": true,
+      "B": false
+     },
+     "guards": {
+      "i3c-guard": [
+       1,
+       2,
+       [
+        3,
+        3
+       ],
+       1
+      ]
+     },
+     "other_controller": "decoy"
+    }
+   ]
+  },
+  {
+   "id": "F5",
+   "name": "Fight or retreat",
+   "kind": "fight",
+   "duration_frames": 1800,
+   "params": {
+    "win_against": "either"
+   },
+   "definition": "Fight or retreat if it wins a duel against a player or guard. (Decision #9.) F5-a and F5-b are against a guard with the other rival idle in another room; F5-c is rival against rival.",
+   "starts": [
+    {
+     "id": "F5-a",
+     "rivals": {
+      "A": [
+       5,
+       2,
+       0,
+       1
+      ],
+      "B": [
+       1,
+       2,
+       2,
+       1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": false
+     },
+     "guards": {
+      "f5a-guard": [
+       5,
+       2,
+       [
+        5,
+        7
+       ],
+       -1
+      ]
+     },
+     "other_controller": "wait"
+    },
+    {
+     "id": "F5-b",
+     "rivals": {
+      "A": [
+       4,
+       2,
+       1,
+       1
+      ],
+      "B": [
+       3,
+       2,
+       7,
+       -1
+      ]
+     },
+     "hearts": {
+      "A": 2,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": false
+     },
+     "guards": {
+      "f5b-guard": [
+       4,
+       2,
+       [
+        3,
+        5
+       ],
+       1
+      ]
+     },
+     "other_controller": "wait"
+    },
+    {
+     "id": "F5-c",
+     "rivals": {
+      "A": [
+       1,
+       2,
+       2,
+       1
+      ],
+      "B": [
+       1,
+       2,
+       6,
+       -1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": false
+     },
+     "guards": {}
+    },
+    {
+     "id": "F5-a-B",
+     "subject": "B",
+     "rivals": {
+      "A": [
+       1,
+       2,
+       2,
+       1
+      ],
+      "B": [
+       5,
+       2,
+       0,
+       1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": false
+     },
+     "guards": {
+      "f5a-guard": [
+       5,
+       2,
+       [
+        5,
+        7
+       ],
+       -1
+      ]
+     },
+     "other_controller": "wait"
+    },
+    {
+     "id": "F5-b-B",
+     "subject": "B",
+     "rivals": {
+      "A": [
+       3,
+       2,
+       7,
+       -1
+      ],
+      "B": [
+       4,
+       2,
+       1,
+       1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 2
+     },
+     "disguised": {
+      "A": false,
+      "B": false
+     },
+     "guards": {
+      "f5b-guard": [
+       4,
+       2,
+       [
+        3,
+        5
+       ],
+       1
+      ]
+     },
+     "other_controller": "wait"
+    }
+   ]
+  }
+ ]
+}

@@ -29,9 +29,13 @@ class Sprite:
     facing: int
 
 
+# T19 (Saad, 2026-11-24, item 3): rigging a trap, picking up a dropped sword and taking
+# a uniform are all the same kneel (the rival's `crouch` strip). Before T19 `kneeled`
+# had no picture of its own and the other two used the `take` strip.
+KNEEL = "crouch"
 COMBAT_STRIPS = {"lunge": None, "throw": "throw", "dive_kick": "dive_kick",
-                 "sweep": "sweep", "took_sword": "take", "took_uniform": "take",
-                 "drew": "stance_mid"}
+                 "sweep": "sweep", "took_sword": KNEEL, "took_uniform": KNEEL,
+                 "kneeled": KNEEL, "drew": "stance_mid"}
 
 
 def _dir(facing: str) -> str:

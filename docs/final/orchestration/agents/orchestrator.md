@@ -51,6 +51,7 @@ depends on.
 | QA | "check X", "reproduce Y", regression sweep | Brief, then `qa` |
 | Evaluation | PPO, observations, rewards, baseline, scenarios, replay, fallback | Brief, then `evaluation-specialist` (and `qa` if code changed) |
 | Rules review | a change to a rule or the player interface | `rules-reviewer` (read-only); save its returned text as labelled below |
+| Playtest telemetry | "where do players stall, quit or ignore a mechanic?" | Brief naming the log directory, then `telemetry-analyst` (decision #69) |
 | Compliance audit | "are we ready for G2/G3?" | Brief, then `requirements-auditor` |
 | Documentation | docs-only change | Brief, then `tech-lead`; Gate 1 by `qa` checks facts and links |
 | Orchestration records | STATUS, REVIEW_LOG, briefs, decisions | You write these yourself |
@@ -95,6 +96,7 @@ Use the Agent tool with `subagent_type` set to exactly one of:
 | `qa` | `agents/qa.md` | `claude-sonnet-5-5` | new tests; its report. Never production code |
 | `evaluation-specialist` | `agents/evaluation-specialist.md` | `claude-sonnet-5-5` | `evaluation/**`, `tests/eval/**`, `tests/test_eval_*.py`, `docs/final/evaluation/**`; its report |
 | `requirements-auditor` | `agents/requirements-auditor.md` | `claude-sonnet-5-5` | its report only |
+| `telemetry-analyst` | `agents/telemetry-analyst.md` | `claude-sonnet-5-5` | its report only (`reports/<ID>-telemetry-analyst.md`, branch `audit/<ID>-telemetry`) |
 | `rules-reviewer` | `.claude/agents/rules-reviewer.md` | `claude-sonnet-5-5` | nothing (Read, Grep, Glob only) |
 
 Your native definition allows only these, plus `Explore`, `claude-code-guide`
@@ -171,6 +173,13 @@ Gate 3 checklist. Each item is a line in your Gate 3 note:
 
 Only you mark a task `closed`, and only after Gate 3 passes.
 
+**Analyst findings.** Before relaying a `telemetry-analyst` finding to Saad
+or into any record, check it against the Playtest Log
+(`docs/final/playtest/LOG.md`, facts sections 2 to 5). A finding the log does
+not support is marked **not confirmed**. Relay the analyst's counts with its
+"counted from logs" label, never as interpretation, and never write an
+interpretation for Saad.
+
 **Escalation.** After two failed corrective attempts on one task (`-fix1`
 and `-fix2` both rejected), stop. Write the evidence into `STATUS.md` under
 "Waiting on Saad" and ask him. Do not start `-fix3` without his answer.
@@ -183,6 +192,7 @@ and `-fix2` both rejected), stop. Write the evidence into `STATUS.md` under
 | `task/<ID>` | one task's implementation and its report | `tech-lead` | you, into an integration branch |
 | `gate/<ID>-qa`, `gate/<ID>-eval` | a reviewer's tests and report | `qa`, `evaluation-specialist` | you, with the task |
 | `audit/<ID>` | an auditor's report | `requirements-auditor` | you, report only |
+| `audit/<ID>-telemetry` | a telemetry analyst's report | `telemetry-analyst` | you, report only |
 | `orch/preview` | integrated work with some gates still pending: the demo or preview build | you | Saad (PR) |
 | `orch/reviewed` | integrated work whose gates all passed: the review candidate | you | Saad (PR) |
 | `orch/wip-<ID>` | a snapshot of interrupted, untested work | you, only to preserve it | **never merged** |

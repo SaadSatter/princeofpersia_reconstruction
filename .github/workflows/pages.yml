@@ -1,0 +1,48 @@
+# Hosted build (T14): build web/dist with tools/web/build.py and publish it on
+# GitHub Pages on every push to main. No secrets; the build uses the standard
+# library only. Saad enables Pages (Settings -> Pages -> Source: GitHub Actions).
+name: Web page (GitHub Pages)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build web/dist (reproducible; prints every file's SHA-256)
+        run: python3 tools/web/build.py
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # The deploy step alone needs these two permissions (GitHub Pages' OIDC upload).
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

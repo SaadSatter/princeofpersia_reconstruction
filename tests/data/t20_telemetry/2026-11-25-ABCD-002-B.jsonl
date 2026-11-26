@@ -1,0 +1,5 @@
+{"type":"header","schema":1,"build":"fixture","seed":1,"rival":"human","room":"ABCD","duel":2,"duel_frames":3600,"ticks_per_second":12,"idle_threshold_s":3.0,"seat":"B"}
+{"t":0,"s":0.0,"seat":"B","type":"duel_start","room":"room-ccc","hearts":3,"armed":false,"traps_left":4}
+{"t":500,"s":41.667,"seat":"B","type":"disconnect"}
+{"t":1000,"s":83.333,"seat":"B","type":"forfeit","by":"me"}
+{"t":1000,"s":83.333,"seat":"B","type":"duel_end","result":"lost","reason":"you_disconnected","frames":1000}

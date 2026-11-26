@@ -23,38 +23,3 @@ A task is closed only when its Gate 3 line says `closed`.
 | 2026-11-24 | T04 chain (T04, fix1, fix2) | Gate 1+2 | QA / Eval (Sonnet) | cd5c4aa | ACCEPT WITH NOTES | concurrent-start busy race (minor) | T04-fix3 (QA-5 refuse, in-flight flag); otherwise closed |
 | 2026-11-24 | T05 | Gate 1 | QA (Sonnet) | 19b5da2 | ACCEPT WITH NOTES | gate/T05-qa dec85c8; 3 majors | folded into T05-fix1 |
 | 2026-11-24 | T02 handoff | closed | QA (T02-close) | 72f6552 | ACCEPT | 650 passed; Student decision empty | Saad writes decision |
-
-## From 2026-11-24: native agents and file-based handoffs
-
-Rows now name the **model** (configured, and verified from transcript
-metadata with `tools/orchestration/verify_models.py`) and the **handoff
-files** read and written (`HANDOFF_PROTOCOL.md`).
-
-| Date | Task | Gate / event | Agent | Model (configured; verified) | Commit | Verdict | Handoff consumed → produced | Follow-up |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-11-24 | config probe | delegation probe (headless `claude -p`, session 197da38f) | orchestrator → tech-lead | opus-5-5 → sonnet-5-5; verified: transcript (main `claude-opus-5-5`, subagent `agentType: tech-lead`, `claude-sonnet-5-5`) | 721b3e6 | `general-purpose` spawn refused; `tech-lead` spawned | — | allowlist kept; `disallowedTools: Agent(...)` removes the whole Agent tool on 2.1.331 |
-| 2026-11-24 | SMOKE-01 | brief (coordination commit) | orchestrator | claude-opus-5-5; verified: transcript (session 50115623) | 58ea6e7 on `main` | n/a | → `tasks/SMOKE-01.md`@58ea6e7 | dispatched tech-lead |
-| 2026-11-24 | SMOKE-01 | implementation (read-only path check) | tech-lead (agent a9e1b3e1) | claude-sonnet-5-5 (verified: transcript) | fc16525 on `task/SMOKE-01` | n/a; 1 minor finding | `tasks/SMOKE-01.md`@58ea6e7 → `reports/SMOKE-01-tech-lead.md`@fc16525 | 435 passed, 12 skipped; to QA |
-| 2026-11-24 | SMOKE-01 | Gate 1 | qa (agent a3224446) | claude-sonnet-5-5 (verified: transcript) | reviewed fc16525; report 3bb36f5 on `gate/SMOKE-01-qa` | ACCEPT WITH NOTES | `reports/SMOKE-01-tech-lead.md`@fc16525 → `reports/SMOKE-01-qa.md`@3bb36f5 | minor: `CLAUDE.md:76` names `agents/rl/` and `docs/final/RL_POLICY.md`, absent on `main` (present on `orch/preview`, T07). Routed to Saad |
-| 2026-11-24 | SMOKE-01 | Gate 3 | orchestrator | claude-opus-5-5; verified: transcript (session 50115623) | 3bb36f5 (no integration; reports stay on their branches) | **closed** | brief@58ea6e7 → TL@fc16525 → QA@3bb36f5 → this row; chain unbroken | see Gate 3 note below |
-
-**SMOKE-01 Gate 3 note (2026-11-24 13:28 ET).** (1) Reviewed commits fc16525 and
-3bb36f5 are the ones recorded. Nothing was integrated (Saad: no merge). (2) Gate 1 report present,
-ACCEPT WITH NOTES. Gate 2 not required (Saad: "Gate 2 does not apply (no AI or
-boundary change)"). (3) No blocker or major finding. The one minor finding is
-correct: I checked `git cat-file -e 58ea6e7:docs/final/RL_POLICY.md` (missing)
-and `git ls-tree orch/preview` (present: `agents/rl/{__init__,encoder,policy}.py`,
-`docs/final/RL_POLICY.md`). It needs no fix on this task. It clears when T07
-reaches `main`, or when Saad approves a `CLAUDE.md` wording change.
-(4) I ran `uv run pytest -q` on 3bb36f5 in a temporary detached worktree, now removed:
-`435 passed, 12 skipped in 3.07s`. (5) Acceptance criteria 1 to 6 are met. I
-independently re-checked every literal path and all six `.claude/agents/*.md`
-procedure pointers at 58ea6e7. (6) The `consumed` chain is unbroken, and all three shas
-exist. (7) No checklist row is claimed. (8) `git diff --name-only 58ea6e7..3bb36f5`
-lists only `reports/SMOKE-01-tech-lead.md` and `reports/SMOKE-01-qa.md`.
-Cosmetic: both reports write `source_commit` as a description ("the commit
-adding this file"), because a commit cannot name its own sha. A template
-clarification could follow. Models from `tools/orchestration/verify_models.py --latest`:
-main `claude-opus-5-5`; subagent `type=tech-lead` and `type=qa`, both
-`meta_model=claude-sonnet-5-5 responses=claude-sonnet-5-5`.
-| 2026-11-24 | SMOKE-01 follow-up | configuration fixes from the chain (refactor session fb28fc89, Opus 5.5, not started as the orchestrator agent) | — | claude-opus-5-5 (verified: transcript) | see the commit after 44d02e2 | n/a | read `reports/SMOKE-01-tech-lead.md`@fc16525 and `reports/SMOKE-01-qa.md`@3bb36f5 | (1) agent commits now use `--author "Claude … (<role> …)"`, since worker commits showed Saad as author; (2) `source_commit` cannot be a report's own commit, which the template now says; (3) the QA minor finding was fixed in `CLAUDE.md`; (4) worktree test counts were documented (445 collected vs 459) |

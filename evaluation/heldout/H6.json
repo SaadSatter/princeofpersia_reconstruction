@@ -1,0 +1,376 @@
+{
+ "schema": "shadow-masque-versus-eval/1/scenarios",
+ "split": "heldout",
+ "scenarios": [
+  {
+   "id": "H6",
+   "name": "Full duel, held out",
+   "kind": "duel",
+   "duration_frames": 3600,
+   "params": {},
+   "definition": "Full two-rival duel from start configurations and guard posts that appear nowhere else (tuning, training or the default arena). Outcome only: win, draw or loss by controller slot, with seats swapped. FROZEN: do not edit; its SHA-256 is checked by the CLI.",
+   "starts": [
+    {
+     "id": "H6-1",
+     "rivals": {
+      "A": [
+       4,
+       2,
+       8,
+       -1
+      ],
+      "B": [
+       5,
+       2,
+       1,
+       1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": false
+     },
+     "guards": {
+      "h61-g1": [
+       4,
+       2,
+       [
+        2,
+        4
+       ],
+       1
+      ],
+      "h61-g2": [
+       5,
+       2,
+       [
+        6,
+        8
+       ],
+       -1
+      ]
+     }
+    },
+    {
+     "id": "H6-2",
+     "rivals": {
+      "A": [
+       1,
+       2,
+       5,
+       1
+      ],
+      "B": [
+       4,
+       2,
+       2,
+       -1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": false
+     },
+     "guards": {
+      "h62-g1": [
+       1,
+       2,
+       [
+        1,
+        3
+       ],
+       1
+      ],
+      "h62-g2": [
+       3,
+       2,
+       [
+        4,
+        7
+       ],
+       -1
+      ]
+     }
+    },
+    {
+     "id": "H6-3",
+     "rivals": {
+      "A": [
+       5,
+       2,
+       7,
+       -1
+      ],
+      "B": [
+       3,
+       2,
+       4,
+       1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": false
+     },
+     "guards": {
+      "h63-g1": [
+       4,
+       2,
+       [
+        7,
+        9
+       ],
+       -1
+      ],
+      "h63-g2": [
+       1,
+       2,
+       [
+        3,
+        5
+       ],
+       1
+      ]
+     }
+    },
+    {
+     "id": "H6-4",
+     "rivals": {
+      "A": [
+       3,
+       2,
+       5,
+       -1
+      ],
+      "B": [
+       1,
+       2,
+       4,
+       1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": false
+     },
+     "guards": {
+      "h64-g1": [
+       3,
+       2,
+       [
+        6,
+        8
+       ],
+       -1
+      ],
+      "h64-g2": [
+       1,
+       2,
+       [
+        1,
+        2
+       ],
+       1
+      ]
+     }
+    },
+    {
+     "id": "H6-5",
+     "rivals": {
+      "A": [
+       2,
+       2,
+       3,
+       1
+      ],
+      "B": [
+       6,
+       2,
+       0,
+       1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": false
+     },
+     "guards": {
+      "h65-g1": [
+       3,
+       2,
+       [
+        6,
+        7
+       ],
+       -1
+      ],
+      "h65-g2": [
+       1,
+       2,
+       [
+        3,
+        6
+       ],
+       1
+      ]
+     }
+    },
+    {
+     "id": "H6-6",
+     "rivals": {
+      "A": [
+       6,
+       2,
+       9,
+       -1
+      ],
+      "B": [
+       2,
+       2,
+       8,
+       -1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": false
+     },
+     "guards": {
+      "h66-g1": [
+       1,
+       2,
+       [
+        4,
+        5
+       ],
+       -1
+      ],
+      "h66-g2": [
+       5,
+       2,
+       [
+        4,
+        6
+       ],
+       -1
+      ]
+     }
+    },
+    {
+     "id": "H6-7",
+     "rivals": {
+      "A": [
+       6,
+       2,
+       5,
+       -1
+      ],
+      "B": [
+       2,
+       2,
+       0,
+       1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": false
+     },
+     "guards": {
+      "h67-g1": [
+       4,
+       2,
+       [
+        1,
+        2
+       ],
+       1
+      ],
+      "h67-g2": [
+       1,
+       2,
+       [
+        2,
+        3
+       ],
+       -1
+      ]
+     }
+    },
+    {
+     "id": "H6-8",
+     "rivals": {
+      "A": [
+       5,
+       2,
+       2,
+       1
+      ],
+      "B": [
+       4,
+       2,
+       3,
+       1
+      ]
+     },
+     "hearts": {
+      "A": 3,
+      "B": 3
+     },
+     "disguised": {
+      "A": false,
+      "B": false
+     },
+     "guards": {
+      "h68-g1": [
+       5,
+       2,
+       [
+        4,
+        7
+       ],
+       -1
+      ],
+      "h68-g2": [
+       6,
+       2,
+       [
+        0,
+        1
+       ],
+       1
+      ]
+     }
+    }
+   ]
+  }
+ ]
+}

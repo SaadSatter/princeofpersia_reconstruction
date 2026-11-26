@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Shadow Masque</title>
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body { background: #0d0e12; color: #d8d4c8; font: 14px/1.4 system-ui, sans-serif; margin: 0; padding: 16px; }
+  h1 { font-size: 20px; margin: 0 0 8px; }
+  #game canvas { image-rendering: pixelated; }
+  #status, #frames, #hud, #outcome, #label, #rival { margin: 4px 0; }
+  #outcome { font-size: 18px; color: #f0c040; min-height: 1.4em; }
+  #label { color: #e08040; }
+  .keys { color: #9a968c; font-size: 13px; }
+  #modes { margin: 8px 0; }
+  #modes a.mode { display: inline-block; margin-right: 12px; padding: 6px 12px; color: #d8d4c8;
+    background: #3a4256; text-decoration: none; box-shadow: inset 2px 2px 0 #8a93a8, inset -2px -2px 0 #1a1d28; }
+  #modes a.mode.current { color: #f0c040; outline: 2px solid #f0c040; }
+  a { color: #a0b0ff; }
+</style>
+<!-- Versions are pinned in web/versions.json; tools/web/build.py fills these in. -->
+<script>window.SM_CONFIG = { pyodideUrl: "{{PYODIDE_URL}}" };</script>
+<script src="{{PYODIDE_URL}}pyodide.js"></script>
+<script src="{{PHASER_URL}}"></script>
+<script src="keys.js"></script>
+<script src="ui.js"></script>
+</head>
+<body>
+<h1>Shadow Masque</h1>
+<div id="status" data-state="loading">loading</div>
+<div id="modes"></div>
+<div id="label"></div>
+<div id="rival"></div>
+<div id="game"></div>
+<div id="hud"></div>
+<div id="outcome"></div>
+<div>frames: <span id="frames">0</span> · build <span id="build">?</span></div>
+<p class="keys" id="keys"></p>
+<p class="keys">
+  Test rivals: <a href="?mode=ai&amp;rival=idle">idle placeholder</a> ·
+  <a href="?mode=ai&amp;rival=random">random placeholder</a> ·
+  Two players on separate machines: <a href="online.html">online play</a>
+</p>
+<script src="main.js"></script>
+</body>
+</html>

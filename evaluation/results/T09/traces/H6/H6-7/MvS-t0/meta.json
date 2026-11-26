@@ -1,0 +1,13 @@
+{
+ "schema": "shadow-masque-versus-eval/1",
+ "row_id": "H6/H6-7/MvS/t0",
+ "scenario": "H6",
+ "start_id": "H6-7",
+ "split": "heldout",
+ "seed": 0,
+ "config": "MvS",
+ "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+ "final_snapshot_sha256": "30e6cb44af13f22fd744506daddebbc1053c1ca5d555013e251689085f7e3952",
+ "frames": 299,
+ "decision_every": 6
+}

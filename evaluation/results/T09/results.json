@@ -1,0 +1,6433 @@
+{
+ "schema": "shadow-masque-versus-eval/1/results",
+ "run": {
+  "run_id": "20261125T085558Z",
+  "split": "heldout",
+  "dry_run": false,
+  "held_out_dry_run_wait_seats": false,
+  "configs": [
+   "MvS",
+   "SvM"
+  ],
+  "scenarios": [
+   "H6"
+  ],
+  "trials": 3,
+  "seed_base": 0,
+  "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+  "dirty": false,
+  "seed_key_id": "5b5c7582",
+  "decision_every": 6,
+  "timeout_s": 5.0,
+  "max_frames": null,
+  "decisions_in_force": {
+   "B2_low_threshold": 50,
+   "D1_on_screen": "the other rival is in the agent's room at no frame",
+   "H6_4_B_start": "moved off (1,2,3,+1) by the cell-set rule in PROTOCOL.md"
+  },
+  "scenario_file_sha256": {
+   "tuning": "09f2acedc0990aa39b0c100459d423ff25e7babde6d4c212983b6998b709ec96",
+   "heldout": "d013152a84aed5d6ddf189a306e1dfa66f8b178a68dde2f6d5039684e82a5266"
+  },
+  "ledger": {
+   "status": "claimed",
+   "policy_key": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+   "heldout_sha256": "d013152a84aed5d6ddf189a306e1dfa66f8b178a68dde2f6d5039684e82a5266",
+   "claimed_at_unix": 1795596959,
+   "run_id": "20261125T085558Z",
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "configs": [
+    "MvS",
+    "SvM"
+   ]
+  },
+  "provider_fields": "N/A (scripted and PPO controllers make no provider call)"
+ },
+ "rows": [
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-1/MvS/t0",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-1",
+   "config": "MvS",
+   "trial": 0,
+   "seed": 0,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "draw:time_up",
+    "reason": "draw:time_up",
+    "frames": 3600,
+    "winner_seat": null,
+    "winner_slot": null,
+    "result_A": "draw",
+    "result_B": "draw",
+    "result_subject": "draw"
+   },
+   "termination": "draw:time_up",
+   "metrics": {
+    "frames_observed": 3600,
+    "copresent_frames": 3566,
+    "first_copresent_frame": 35,
+    "distinct_cells": 10,
+    "rooms_visited": 2,
+    "subject_hp_end": 3,
+    "other_hp_end": 3,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 600,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 600,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 2,
+    "B": 4
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 600,
+     "mean_ms": 0.267,
+     "max_ms": 1.3
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 600,
+     "mean_ms": 0.332,
+     "max_ms": 1.3
+    }
+   },
+   "final_snapshot_sha256": "e50ea5d9e91f302562172994310ba969a82efc2157e66a8dd8141fcadfe816cf",
+   "trace_paths": {
+    "A": "traces/H6/H6-1/MvS-t0/seat-A.jsonl",
+    "B": "traces/H6/H6-1/MvS-t0/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-1/MvS/t1",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-1",
+   "config": "MvS",
+   "trial": 1,
+   "seed": 1,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "draw:time_up",
+    "reason": "draw:time_up",
+    "frames": 3600,
+    "winner_seat": null,
+    "winner_slot": null,
+    "result_A": "draw",
+    "result_B": "draw",
+    "result_subject": "draw"
+   },
+   "termination": "draw:time_up",
+   "metrics": {
+    "frames_observed": 3600,
+    "copresent_frames": 3566,
+    "first_copresent_frame": 35,
+    "distinct_cells": 10,
+    "rooms_visited": 2,
+    "subject_hp_end": 3,
+    "other_hp_end": 3,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 600,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 600,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 2,
+    "B": 4
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 600,
+     "mean_ms": 0.268,
+     "max_ms": 3.6
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 600,
+     "mean_ms": 0.337,
+     "max_ms": 2.5
+    }
+   },
+   "final_snapshot_sha256": "e50ea5d9e91f302562172994310ba969a82efc2157e66a8dd8141fcadfe816cf",
+   "trace_paths": {
+    "A": "traces/H6/H6-1/MvS-t1/seat-A.jsonl",
+    "B": "traces/H6/H6-1/MvS-t1/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-1/MvS/t2",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-1",
+   "config": "MvS",
+   "trial": 2,
+   "seed": 2,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "draw:time_up",
+    "reason": "draw:time_up",
+    "frames": 3600,
+    "winner_seat": null,
+    "winner_slot": null,
+    "result_A": "draw",
+    "result_B": "draw",
+    "result_subject": "draw"
+   },
+   "termination": "draw:time_up",
+   "metrics": {
+    "frames_observed": 3600,
+    "copresent_frames": 3566,
+    "first_copresent_frame": 35,
+    "distinct_cells": 10,
+    "rooms_visited": 2,
+    "subject_hp_end": 3,
+    "other_hp_end": 3,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 600,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 600,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 2,
+    "B": 4
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 600,
+     "mean_ms": 0.257,
+     "max_ms": 0.8
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 600,
+     "mean_ms": 0.328,
+     "max_ms": 0.8
+    }
+   },
+   "final_snapshot_sha256": "e50ea5d9e91f302562172994310ba969a82efc2157e66a8dd8141fcadfe816cf",
+   "trace_paths": {
+    "A": "traces/H6/H6-1/MvS-t2/seat-A.jsonl",
+    "B": "traces/H6/H6-1/MvS-t2/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-1/SvM/t0",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-1",
+   "config": "SvM",
+   "trial": 0,
+   "seed": 0,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:B",
+    "reason": "won:B",
+    "frames": 1485,
+    "winner_seat": "B",
+    "winner_slot": "B",
+    "result_A": "loss",
+    "result_B": "win",
+    "result_subject": "loss"
+   },
+   "termination": "won:B",
+   "metrics": {
+    "frames_observed": 1485,
+    "copresent_frames": 1349,
+    "first_copresent_frame": 137,
+    "distinct_cells": 13,
+    "rooms_visited": 2,
+    "subject_hp_end": 0,
+    "other_hp_end": 2,
+    "subject_alive_end": false,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 106,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 108,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 6,
+    "B": 6
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 106,
+     "mean_ms": 0.156,
+     "max_ms": 0.7
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 108,
+     "mean_ms": 0.15,
+     "max_ms": 0.6
+    }
+   },
+   "final_snapshot_sha256": "83b5dcc3961a09bac9bf53007acf49a1ffba73ed5e3874dfd87965a0c6999d13",
+   "trace_paths": {
+    "A": "traces/H6/H6-1/SvM-t0/seat-A.jsonl",
+    "B": "traces/H6/H6-1/SvM-t0/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-1/SvM/t1",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-1",
+   "config": "SvM",
+   "trial": 1,
+   "seed": 1,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:B",
+    "reason": "won:B",
+    "frames": 1485,
+    "winner_seat": "B",
+    "winner_slot": "B",
+    "result_A": "loss",
+    "result_B": "win",
+    "result_subject": "loss"
+   },
+   "termination": "won:B",
+   "metrics": {
+    "frames_observed": 1485,
+    "copresent_frames": 1349,
+    "first_copresent_frame": 137,
+    "distinct_cells": 13,
+    "rooms_visited": 2,
+    "subject_hp_end": 0,
+    "other_hp_end": 2,
+    "subject_alive_end": false,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 106,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 108,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 6,
+    "B": 6
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 106,
+     "mean_ms": 0.156,
+     "max_ms": 0.7
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 108,
+     "mean_ms": 0.157,
+     "max_ms": 1.0
+    }
+   },
+   "final_snapshot_sha256": "83b5dcc3961a09bac9bf53007acf49a1ffba73ed5e3874dfd87965a0c6999d13",
+   "trace_paths": {
+    "A": "traces/H6/H6-1/SvM-t1/seat-A.jsonl",
+    "B": "traces/H6/H6-1/SvM-t1/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-1/SvM/t2",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-1",
+   "config": "SvM",
+   "trial": 2,
+   "seed": 2,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:B",
+    "reason": "won:B",
+    "frames": 1485,
+    "winner_seat": "B",
+    "winner_slot": "B",
+    "result_A": "loss",
+    "result_B": "win",
+    "result_subject": "loss"
+   },
+   "termination": "won:B",
+   "metrics": {
+    "frames_observed": 1485,
+    "copresent_frames": 1349,
+    "first_copresent_frame": 137,
+    "distinct_cells": 13,
+    "rooms_visited": 2,
+    "subject_hp_end": 0,
+    "other_hp_end": 2,
+    "subject_alive_end": false,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 106,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 108,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 6,
+    "B": 6
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 106,
+     "mean_ms": 0.15,
+     "max_ms": 0.7
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 108,
+     "mean_ms": 0.151,
+     "max_ms": 0.6
+    }
+   },
+   "final_snapshot_sha256": "83b5dcc3961a09bac9bf53007acf49a1ffba73ed5e3874dfd87965a0c6999d13",
+   "trace_paths": {
+    "A": "traces/H6/H6-1/SvM-t2/seat-A.jsonl",
+    "B": "traces/H6/H6-1/SvM-t2/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-2/MvS/t0",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-2",
+   "config": "MvS",
+   "trial": 0,
+   "seed": 0,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:A",
+    "reason": "won:A",
+    "frames": 477,
+    "winner_seat": "A",
+    "winner_slot": "A",
+    "result_A": "win",
+    "result_B": "loss",
+    "result_subject": "win"
+   },
+   "termination": "won:A",
+   "metrics": {
+    "frames_observed": 477,
+    "copresent_frames": 101,
+    "first_copresent_frame": 377,
+    "distinct_cells": 28,
+    "rooms_visited": 5,
+    "subject_hp_end": 3,
+    "other_hp_end": 0,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 80,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 80,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 1,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 13,
+    "B": 15
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 80,
+     "mean_ms": 0.233,
+     "max_ms": 2.5
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 80,
+     "mean_ms": 0.828,
+     "max_ms": 1.5
+    }
+   },
+   "final_snapshot_sha256": "bf1538da606189b7fcbb00d5a7e0c43d8f13326913d931ee9c6e55abc7927247",
+   "trace_paths": {
+    "A": "traces/H6/H6-2/MvS-t0/seat-A.jsonl",
+    "B": "traces/H6/H6-2/MvS-t0/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-2/MvS/t1",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-2",
+   "config": "MvS",
+   "trial": 1,
+   "seed": 1,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:A",
+    "reason": "won:A",
+    "frames": 477,
+    "winner_seat": "A",
+    "winner_slot": "A",
+    "result_A": "win",
+    "result_B": "loss",
+    "result_subject": "win"
+   },
+   "termination": "won:A",
+   "metrics": {
+    "frames_observed": 477,
+    "copresent_frames": 101,
+    "first_copresent_frame": 377,
+    "distinct_cells": 28,
+    "rooms_visited": 5,
+    "subject_hp_end": 3,
+    "other_hp_end": 0,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 80,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 80,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 1,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 13,
+    "B": 15
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 80,
+     "mean_ms": 0.195,
+     "max_ms": 1.0
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 80,
+     "mean_ms": 0.816,
+     "max_ms": 1.9
+    }
+   },
+   "final_snapshot_sha256": "bf1538da606189b7fcbb00d5a7e0c43d8f13326913d931ee9c6e55abc7927247",
+   "trace_paths": {
+    "A": "traces/H6/H6-2/MvS-t1/seat-A.jsonl",
+    "B": "traces/H6/H6-2/MvS-t1/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-2/MvS/t2",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-2",
+   "config": "MvS",
+   "trial": 2,
+   "seed": 2,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:A",
+    "reason": "won:A",
+    "frames": 477,
+    "winner_seat": "A",
+    "winner_slot": "A",
+    "result_A": "win",
+    "result_B": "loss",
+    "result_subject": "win"
+   },
+   "termination": "won:A",
+   "metrics": {
+    "frames_observed": 477,
+    "copresent_frames": 101,
+    "first_copresent_frame": 377,
+    "distinct_cells": 28,
+    "rooms_visited": 5,
+    "subject_hp_end": 3,
+    "other_hp_end": 0,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 80,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 80,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 1,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 13,
+    "B": 15
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 80,
+     "mean_ms": 0.199,
+     "max_ms": 0.7
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 80,
+     "mean_ms": 0.796,
+     "max_ms": 1.5
+    }
+   },
+   "final_snapshot_sha256": "bf1538da606189b7fcbb00d5a7e0c43d8f13326913d931ee9c6e55abc7927247",
+   "trace_paths": {
+    "A": "traces/H6/H6-2/MvS-t2/seat-A.jsonl",
+    "B": "traces/H6/H6-2/MvS-t2/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-2/SvM/t0",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-2",
+   "config": "SvM",
+   "trial": 0,
+   "seed": 0,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "draw:time_up",
+    "reason": "draw:time_up",
+    "frames": 3600,
+    "winner_seat": null,
+    "winner_slot": null,
+    "result_A": "draw",
+    "result_B": "draw",
+    "result_subject": "draw"
+   },
+   "termination": "draw:time_up",
+   "metrics": {
+    "frames_observed": 3600,
+    "copresent_frames": 3476,
+    "first_copresent_frame": 125,
+    "distinct_cells": 15,
+    "rooms_visited": 3,
+    "subject_hp_end": 2,
+    "other_hp_end": 3,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 600,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 600,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 3,
+    "B": 4
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 600,
+     "mean_ms": 0.25,
+     "max_ms": 2.4
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 600,
+     "mean_ms": 0.345,
+     "max_ms": 1.7
+    }
+   },
+   "final_snapshot_sha256": "711cbec3dac5a9d1cec8a2dd6b0f4667bcb129d5f47b51e13c76edeff362cbec",
+   "trace_paths": {
+    "A": "traces/H6/H6-2/SvM-t0/seat-A.jsonl",
+    "B": "traces/H6/H6-2/SvM-t0/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-2/SvM/t1",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-2",
+   "config": "SvM",
+   "trial": 1,
+   "seed": 1,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "draw:time_up",
+    "reason": "draw:time_up",
+    "frames": 3600,
+    "winner_seat": null,
+    "winner_slot": null,
+    "result_A": "draw",
+    "result_B": "draw",
+    "result_subject": "draw"
+   },
+   "termination": "draw:time_up",
+   "metrics": {
+    "frames_observed": 3600,
+    "copresent_frames": 3476,
+    "first_copresent_frame": 125,
+    "distinct_cells": 15,
+    "rooms_visited": 3,
+    "subject_hp_end": 2,
+    "other_hp_end": 3,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 600,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 600,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 3,
+    "B": 4
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 600,
+     "mean_ms": 0.253,
+     "max_ms": 5.4
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 600,
+     "mean_ms": 0.351,
+     "max_ms": 4.1
+    }
+   },
+   "final_snapshot_sha256": "711cbec3dac5a9d1cec8a2dd6b0f4667bcb129d5f47b51e13c76edeff362cbec",
+   "trace_paths": {
+    "A": "traces/H6/H6-2/SvM-t1/seat-A.jsonl",
+    "B": "traces/H6/H6-2/SvM-t1/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-2/SvM/t2",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-2",
+   "config": "SvM",
+   "trial": 2,
+   "seed": 2,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "draw:time_up",
+    "reason": "draw:time_up",
+    "frames": 3600,
+    "winner_seat": null,
+    "winner_slot": null,
+    "result_A": "draw",
+    "result_B": "draw",
+    "result_subject": "draw"
+   },
+   "termination": "draw:time_up",
+   "metrics": {
+    "frames_observed": 3600,
+    "copresent_frames": 3476,
+    "first_copresent_frame": 125,
+    "distinct_cells": 15,
+    "rooms_visited": 3,
+    "subject_hp_end": 2,
+    "other_hp_end": 3,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 600,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 600,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 3,
+    "B": 4
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 600,
+     "mean_ms": 0.24,
+     "max_ms": 1.1
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 600,
+     "mean_ms": 0.34,
+     "max_ms": 0.9
+    }
+   },
+   "final_snapshot_sha256": "711cbec3dac5a9d1cec8a2dd6b0f4667bcb129d5f47b51e13c76edeff362cbec",
+   "trace_paths": {
+    "A": "traces/H6/H6-2/SvM-t2/seat-A.jsonl",
+    "B": "traces/H6/H6-2/SvM-t2/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-3/MvS/t0",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-3",
+   "config": "MvS",
+   "trial": 0,
+   "seed": 0,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:A",
+    "reason": "won:A",
+    "frames": 373,
+    "winner_seat": "A",
+    "winner_slot": "A",
+    "result_A": "win",
+    "result_B": "loss",
+    "result_subject": "win"
+   },
+   "termination": "won:A",
+   "metrics": {
+    "frames_observed": 373,
+    "copresent_frames": 301,
+    "first_copresent_frame": 20,
+    "distinct_cells": 13,
+    "rooms_visited": 2,
+    "subject_hp_end": 3,
+    "other_hp_end": 0,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 53,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 49,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 4,
+    "B": 3
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 53,
+     "mean_ms": 0.189,
+     "max_ms": 0.6
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 49,
+     "mean_ms": 0.265,
+     "max_ms": 1.0
+    }
+   },
+   "final_snapshot_sha256": "47ad2611bbdfaa6ba7b9a4991fdde0cc1e7de137c366e6d4aa0136e502f09ae5",
+   "trace_paths": {
+    "A": "traces/H6/H6-3/MvS-t0/seat-A.jsonl",
+    "B": "traces/H6/H6-3/MvS-t0/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-3/MvS/t1",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-3",
+   "config": "MvS",
+   "trial": 1,
+   "seed": 1,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:A",
+    "reason": "won:A",
+    "frames": 373,
+    "winner_seat": "A",
+    "winner_slot": "A",
+    "result_A": "win",
+    "result_B": "loss",
+    "result_subject": "win"
+   },
+   "termination": "won:A",
+   "metrics": {
+    "frames_observed": 373,
+    "copresent_frames": 301,
+    "first_copresent_frame": 20,
+    "distinct_cells": 13,
+    "rooms_visited": 2,
+    "subject_hp_end": 3,
+    "other_hp_end": 0,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 53,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 49,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 4,
+    "B": 3
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 53,
+     "mean_ms": 0.23,
+     "max_ms": 2.0
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 49,
+     "mean_ms": 0.273,
+     "max_ms": 1.2
+    }
+   },
+   "final_snapshot_sha256": "47ad2611bbdfaa6ba7b9a4991fdde0cc1e7de137c366e6d4aa0136e502f09ae5",
+   "trace_paths": {
+    "A": "traces/H6/H6-3/MvS-t1/seat-A.jsonl",
+    "B": "traces/H6/H6-3/MvS-t1/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-3/MvS/t2",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-3",
+   "config": "MvS",
+   "trial": 2,
+   "seed": 2,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:A",
+    "reason": "won:A",
+    "frames": 373,
+    "winner_seat": "A",
+    "winner_slot": "A",
+    "result_A": "win",
+    "result_B": "loss",
+    "result_subject": "win"
+   },
+   "termination": "won:A",
+   "metrics": {
+    "frames_observed": 373,
+    "copresent_frames": 301,
+    "first_copresent_frame": 20,
+    "distinct_cells": 13,
+    "rooms_visited": 2,
+    "subject_hp_end": 3,
+    "other_hp_end": 0,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 53,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 49,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 4,
+    "B": 3
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 53,
+     "mean_ms": 0.189,
+     "max_ms": 0.7
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 49,
+     "mean_ms": 0.251,
+     "max_ms": 1.0
+    }
+   },
+   "final_snapshot_sha256": "47ad2611bbdfaa6ba7b9a4991fdde0cc1e7de137c366e6d4aa0136e502f09ae5",
+   "trace_paths": {
+    "A": "traces/H6/H6-3/MvS-t2/seat-A.jsonl",
+    "B": "traces/H6/H6-3/MvS-t2/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-3/SvM/t0",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-3",
+   "config": "SvM",
+   "trial": 0,
+   "seed": 0,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:B",
+    "reason": "won:B",
+    "frames": 1479,
+    "winner_seat": "B",
+    "winner_slot": "B",
+    "result_A": "loss",
+    "result_B": "win",
+    "result_subject": "loss"
+   },
+   "termination": "won:B",
+   "metrics": {
+    "frames_observed": 1479,
+    "copresent_frames": 688,
+    "first_copresent_frame": 173,
+    "distinct_cells": 48,
+    "rooms_visited": 5,
+    "subject_hp_end": 0,
+    "other_hp_end": 2,
+    "subject_alive_end": false,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 239,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 241,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 49,
+    "B": 43
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 239,
+     "mean_ms": 0.577,
+     "max_ms": 2.4
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 241,
+     "mean_ms": 0.471,
+     "max_ms": 2.9
+    }
+   },
+   "final_snapshot_sha256": "3616da88628ab9ba876d392ac1b17b26a3ce2eaeb42a31bfe7d5b4961dd423a8",
+   "trace_paths": {
+    "A": "traces/H6/H6-3/SvM-t0/seat-A.jsonl",
+    "B": "traces/H6/H6-3/SvM-t0/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-3/SvM/t1",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-3",
+   "config": "SvM",
+   "trial": 1,
+   "seed": 1,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:B",
+    "reason": "won:B",
+    "frames": 1479,
+    "winner_seat": "B",
+    "winner_slot": "B",
+    "result_A": "loss",
+    "result_B": "win",
+    "result_subject": "loss"
+   },
+   "termination": "won:B",
+   "metrics": {
+    "frames_observed": 1479,
+    "copresent_frames": 688,
+    "first_copresent_frame": 173,
+    "distinct_cells": 48,
+    "rooms_visited": 5,
+    "subject_hp_end": 0,
+    "other_hp_end": 2,
+    "subject_alive_end": false,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 239,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 241,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 49,
+    "B": 43
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 239,
+     "mean_ms": 0.559,
+     "max_ms": 1.7
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 241,
+     "mean_ms": 0.451,
+     "max_ms": 1.7
+    }
+   },
+   "final_snapshot_sha256": "3616da88628ab9ba876d392ac1b17b26a3ce2eaeb42a31bfe7d5b4961dd423a8",
+   "trace_paths": {
+    "A": "traces/H6/H6-3/SvM-t1/seat-A.jsonl",
+    "B": "traces/H6/H6-3/SvM-t1/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-3/SvM/t2",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-3",
+   "config": "SvM",
+   "trial": 2,
+   "seed": 2,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:B",
+    "reason": "won:B",
+    "frames": 1479,
+    "winner_seat": "B",
+    "winner_slot": "B",
+    "result_A": "loss",
+    "result_B": "win",
+    "result_subject": "loss"
+   },
+   "termination": "won:B",
+   "metrics": {
+    "frames_observed": 1479,
+    "copresent_frames": 688,
+    "first_copresent_frame": 173,
+    "distinct_cells": 48,
+    "rooms_visited": 5,
+    "subject_hp_end": 0,
+    "other_hp_end": 2,
+    "subject_alive_end": false,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 239,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 241,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 49,
+    "B": 43
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 239,
+     "mean_ms": 0.591,
+     "max_ms": 2.6
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 241,
+     "mean_ms": 0.515,
+     "max_ms": 10.8
+    }
+   },
+   "final_snapshot_sha256": "3616da88628ab9ba876d392ac1b17b26a3ce2eaeb42a31bfe7d5b4961dd423a8",
+   "trace_paths": {
+    "A": "traces/H6/H6-3/SvM-t2/seat-A.jsonl",
+    "B": "traces/H6/H6-3/SvM-t2/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-4/MvS/t0",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-4",
+   "config": "MvS",
+   "trial": 0,
+   "seed": 0,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:A",
+    "reason": "won:A",
+    "frames": 1611,
+    "winner_seat": "A",
+    "winner_slot": "A",
+    "result_A": "win",
+    "result_B": "loss",
+    "result_subject": "win"
+   },
+   "termination": "won:A",
+   "metrics": {
+    "frames_observed": 1611,
+    "copresent_frames": 1461,
+    "first_copresent_frame": 137,
+    "distinct_cells": 14,
+    "rooms_visited": 4,
+    "subject_hp_end": 2,
+    "other_hp_end": 0,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 115,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 115,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 1
+   },
+   "replaced_inputs": {
+    "A": 2,
+    "B": 4
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 115,
+     "mean_ms": 0.133,
+     "max_ms": 0.4
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 115,
+     "mean_ms": 0.18,
+     "max_ms": 1.2
+    }
+   },
+   "final_snapshot_sha256": "0a97fe18c749cbcd21c840c5626080414539e79cd1cfe9b7896c1cef8fb0c7e6",
+   "trace_paths": {
+    "A": "traces/H6/H6-4/MvS-t0/seat-A.jsonl",
+    "B": "traces/H6/H6-4/MvS-t0/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-4/MvS/t1",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-4",
+   "config": "MvS",
+   "trial": 1,
+   "seed": 1,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:A",
+    "reason": "won:A",
+    "frames": 1611,
+    "winner_seat": "A",
+    "winner_slot": "A",
+    "result_A": "win",
+    "result_B": "loss",
+    "result_subject": "win"
+   },
+   "termination": "won:A",
+   "metrics": {
+    "frames_observed": 1611,
+    "copresent_frames": 1461,
+    "first_copresent_frame": 137,
+    "distinct_cells": 14,
+    "rooms_visited": 4,
+    "subject_hp_end": 2,
+    "other_hp_end": 0,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 115,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 115,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 1
+   },
+   "replaced_inputs": {
+    "A": 2,
+    "B": 4
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 115,
+     "mean_ms": 0.17,
+     "max_ms": 2.2
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 115,
+     "mean_ms": 0.183,
+     "max_ms": 1.2
+    }
+   },
+   "final_snapshot_sha256": "0a97fe18c749cbcd21c840c5626080414539e79cd1cfe9b7896c1cef8fb0c7e6",
+   "trace_paths": {
+    "A": "traces/H6/H6-4/MvS-t1/seat-A.jsonl",
+    "B": "traces/H6/H6-4/MvS-t1/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-4/MvS/t2",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-4",
+   "config": "MvS",
+   "trial": 2,
+   "seed": 2,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:A",
+    "reason": "won:A",
+    "frames": 1611,
+    "winner_seat": "A",
+    "winner_slot": "A",
+    "result_A": "win",
+    "result_B": "loss",
+    "result_subject": "win"
+   },
+   "termination": "won:A",
+   "metrics": {
+    "frames_observed": 1611,
+    "copresent_frames": 1461,
+    "first_copresent_frame": 137,
+    "distinct_cells": 14,
+    "rooms_visited": 4,
+    "subject_hp_end": 2,
+    "other_hp_end": 0,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 115,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 115,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 1
+   },
+   "replaced_inputs": {
+    "A": 2,
+    "B": 4
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 115,
+     "mean_ms": 0.155,
+     "max_ms": 1.3
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 115,
+     "mean_ms": 0.188,
+     "max_ms": 1.2
+    }
+   },
+   "final_snapshot_sha256": "0a97fe18c749cbcd21c840c5626080414539e79cd1cfe9b7896c1cef8fb0c7e6",
+   "trace_paths": {
+    "A": "traces/H6/H6-4/MvS-t2/seat-A.jsonl",
+    "B": "traces/H6/H6-4/MvS-t2/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-4/SvM/t0",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-4",
+   "config": "SvM",
+   "trial": 0,
+   "seed": 0,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:B",
+    "reason": "won:B",
+    "frames": 1635,
+    "winner_seat": "B",
+    "winner_slot": "B",
+    "result_A": "loss",
+    "result_B": "win",
+    "result_subject": "loss"
+   },
+   "termination": "won:B",
+   "metrics": {
+    "frames_observed": 1635,
+    "copresent_frames": 1355,
+    "first_copresent_frame": 281,
+    "distinct_cells": 21,
+    "rooms_visited": 5,
+    "subject_hp_end": 0,
+    "other_hp_end": 3,
+    "subject_alive_end": false,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 130,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 133,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 1,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 9,
+    "B": 15
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 130,
+     "mean_ms": 0.262,
+     "max_ms": 1.4
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 133,
+     "mean_ms": 0.171,
+     "max_ms": 0.9
+    }
+   },
+   "final_snapshot_sha256": "238f1f8f4b8d91e5f757efdb8f2c4549732893b5cf12c8fa6c0c790e05a94812",
+   "trace_paths": {
+    "A": "traces/H6/H6-4/SvM-t0/seat-A.jsonl",
+    "B": "traces/H6/H6-4/SvM-t0/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-4/SvM/t1",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-4",
+   "config": "SvM",
+   "trial": 1,
+   "seed": 1,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:B",
+    "reason": "won:B",
+    "frames": 1635,
+    "winner_seat": "B",
+    "winner_slot": "B",
+    "result_A": "loss",
+    "result_B": "win",
+    "result_subject": "loss"
+   },
+   "termination": "won:B",
+   "metrics": {
+    "frames_observed": 1635,
+    "copresent_frames": 1355,
+    "first_copresent_frame": 281,
+    "distinct_cells": 21,
+    "rooms_visited": 5,
+    "subject_hp_end": 0,
+    "other_hp_end": 3,
+    "subject_alive_end": false,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 130,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 133,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 1,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 9,
+    "B": 15
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 130,
+     "mean_ms": 0.255,
+     "max_ms": 1.5
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 133,
+     "mean_ms": 0.153,
+     "max_ms": 0.5
+    }
+   },
+   "final_snapshot_sha256": "238f1f8f4b8d91e5f757efdb8f2c4549732893b5cf12c8fa6c0c790e05a94812",
+   "trace_paths": {
+    "A": "traces/H6/H6-4/SvM-t1/seat-A.jsonl",
+    "B": "traces/H6/H6-4/SvM-t1/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-4/SvM/t2",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-4",
+   "config": "SvM",
+   "trial": 2,
+   "seed": 2,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:B",
+    "reason": "won:B",
+    "frames": 1635,
+    "winner_seat": "B",
+    "winner_slot": "B",
+    "result_A": "loss",
+    "result_B": "win",
+    "result_subject": "loss"
+   },
+   "termination": "won:B",
+   "metrics": {
+    "frames_observed": 1635,
+    "copresent_frames": 1355,
+    "first_copresent_frame": 281,
+    "distinct_cells": 21,
+    "rooms_visited": 5,
+    "subject_hp_end": 0,
+    "other_hp_end": 3,
+    "subject_alive_end": false,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 130,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 133,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 1,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 9,
+    "B": 15
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 130,
+     "mean_ms": 0.255,
+     "max_ms": 1.3
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 133,
+     "mean_ms": 0.162,
+     "max_ms": 1.4
+    }
+   },
+   "final_snapshot_sha256": "238f1f8f4b8d91e5f757efdb8f2c4549732893b5cf12c8fa6c0c790e05a94812",
+   "trace_paths": {
+    "A": "traces/H6/H6-4/SvM-t2/seat-A.jsonl",
+    "B": "traces/H6/H6-4/SvM-t2/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-5/MvS/t0",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-5",
+   "config": "MvS",
+   "trial": 0,
+   "seed": 0,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:A",
+    "reason": "won:A",
+    "frames": 459,
+    "winner_seat": "A",
+    "winner_slot": "A",
+    "result_A": "win",
+    "result_B": "loss",
+    "result_subject": "win"
+   },
+   "termination": "won:A",
+   "metrics": {
+    "frames_observed": 459,
+    "copresent_frames": 168,
+    "first_copresent_frame": 292,
+    "distinct_cells": 22,
+    "rooms_visited": 4,
+    "subject_hp_end": 2,
+    "other_hp_end": 0,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 67,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 65,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 1,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 13,
+    "B": 12
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 67,
+     "mean_ms": 0.169,
+     "max_ms": 0.5
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 65,
+     "mean_ms": 0.757,
+     "max_ms": 1.5
+    }
+   },
+   "final_snapshot_sha256": "e411084bd53c48b09a36a665f3f050af1287767c9ba901a8c1bad71d781e32e2",
+   "trace_paths": {
+    "A": "traces/H6/H6-5/MvS-t0/seat-A.jsonl",
+    "B": "traces/H6/H6-5/MvS-t0/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-5/MvS/t1",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-5",
+   "config": "MvS",
+   "trial": 1,
+   "seed": 1,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:A",
+    "reason": "won:A",
+    "frames": 459,
+    "winner_seat": "A",
+    "winner_slot": "A",
+    "result_A": "win",
+    "result_B": "loss",
+    "result_subject": "win"
+   },
+   "termination": "won:A",
+   "metrics": {
+    "frames_observed": 459,
+    "copresent_frames": 168,
+    "first_copresent_frame": 292,
+    "distinct_cells": 22,
+    "rooms_visited": 4,
+    "subject_hp_end": 2,
+    "other_hp_end": 0,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 67,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 65,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 1,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 13,
+    "B": 12
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 67,
+     "mean_ms": 0.166,
+     "max_ms": 0.5
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 65,
+     "mean_ms": 0.751,
+     "max_ms": 1.5
+    }
+   },
+   "final_snapshot_sha256": "e411084bd53c48b09a36a665f3f050af1287767c9ba901a8c1bad71d781e32e2",
+   "trace_paths": {
+    "A": "traces/H6/H6-5/MvS-t1/seat-A.jsonl",
+    "B": "traces/H6/H6-5/MvS-t1/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-5/MvS/t2",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-5",
+   "config": "MvS",
+   "trial": 2,
+   "seed": 2,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:A",
+    "reason": "won:A",
+    "frames": 459,
+    "winner_seat": "A",
+    "winner_slot": "A",
+    "result_A": "win",
+    "result_B": "loss",
+    "result_subject": "win"
+   },
+   "termination": "won:A",
+   "metrics": {
+    "frames_observed": 459,
+    "copresent_frames": 168,
+    "first_copresent_frame": 292,
+    "distinct_cells": 22,
+    "rooms_visited": 4,
+    "subject_hp_end": 2,
+    "other_hp_end": 0,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 67,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 65,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 1,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 13,
+    "B": 12
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 67,
+     "mean_ms": 0.163,
+     "max_ms": 0.5
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 65,
+     "mean_ms": 0.752,
+     "max_ms": 1.5
+    }
+   },
+   "final_snapshot_sha256": "e411084bd53c48b09a36a665f3f050af1287767c9ba901a8c1bad71d781e32e2",
+   "trace_paths": {
+    "A": "traces/H6/H6-5/MvS-t2/seat-A.jsonl",
+    "B": "traces/H6/H6-5/MvS-t2/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-5/SvM/t0",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-5",
+   "config": "SvM",
+   "trial": 0,
+   "seed": 0,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:B",
+    "reason": "won:B",
+    "frames": 295,
+    "winner_seat": "B",
+    "winner_slot": "B",
+    "result_A": "loss",
+    "result_B": "win",
+    "result_subject": "loss"
+   },
+   "termination": "won:B",
+   "metrics": {
+    "frames_observed": 295,
+    "copresent_frames": 288,
+    "first_copresent_frame": 8,
+    "distinct_cells": 15,
+    "rooms_visited": 2,
+    "subject_hp_end": 0,
+    "other_hp_end": 3,
+    "subject_alive_end": false,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 35,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 40,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 1,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 3,
+    "B": 3
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 35,
+     "mean_ms": 0.231,
+     "max_ms": 0.6
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 40,
+     "mean_ms": 0.165,
+     "max_ms": 0.6
+    }
+   },
+   "final_snapshot_sha256": "9cdcd700895e828be1391f394243835b4aa6927e7837722e864b2c025c1a71a9",
+   "trace_paths": {
+    "A": "traces/H6/H6-5/SvM-t0/seat-A.jsonl",
+    "B": "traces/H6/H6-5/SvM-t0/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-5/SvM/t1",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-5",
+   "config": "SvM",
+   "trial": 1,
+   "seed": 1,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:B",
+    "reason": "won:B",
+    "frames": 295,
+    "winner_seat": "B",
+    "winner_slot": "B",
+    "result_A": "loss",
+    "result_B": "win",
+    "result_subject": "loss"
+   },
+   "termination": "won:B",
+   "metrics": {
+    "frames_observed": 295,
+    "copresent_frames": 288,
+    "first_copresent_frame": 8,
+    "distinct_cells": 15,
+    "rooms_visited": 2,
+    "subject_hp_end": 0,
+    "other_hp_end": 3,
+    "subject_alive_end": false,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 35,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 40,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 1,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 3,
+    "B": 3
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 35,
+     "mean_ms": 0.243,
+     "max_ms": 0.7
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 40,
+     "mean_ms": 0.165,
+     "max_ms": 0.6
+    }
+   },
+   "final_snapshot_sha256": "9cdcd700895e828be1391f394243835b4aa6927e7837722e864b2c025c1a71a9",
+   "trace_paths": {
+    "A": "traces/H6/H6-5/SvM-t1/seat-A.jsonl",
+    "B": "traces/H6/H6-5/SvM-t1/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-5/SvM/t2",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-5",
+   "config": "SvM",
+   "trial": 2,
+   "seed": 2,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:B",
+    "reason": "won:B",
+    "frames": 295,
+    "winner_seat": "B",
+    "winner_slot": "B",
+    "result_A": "loss",
+    "result_B": "win",
+    "result_subject": "loss"
+   },
+   "termination": "won:B",
+   "metrics": {
+    "frames_observed": 295,
+    "copresent_frames": 288,
+    "first_copresent_frame": 8,
+    "distinct_cells": 15,
+    "rooms_visited": 2,
+    "subject_hp_end": 0,
+    "other_hp_end": 3,
+    "subject_alive_end": false,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 35,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 40,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 1,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 3,
+    "B": 3
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 35,
+     "mean_ms": 0.24,
+     "max_ms": 0.6
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 40,
+     "mean_ms": 0.173,
+     "max_ms": 0.6
+    }
+   },
+   "final_snapshot_sha256": "9cdcd700895e828be1391f394243835b4aa6927e7837722e864b2c025c1a71a9",
+   "trace_paths": {
+    "A": "traces/H6/H6-5/SvM-t2/seat-A.jsonl",
+    "B": "traces/H6/H6-5/SvM-t2/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-6/MvS/t0",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-6",
+   "config": "MvS",
+   "trial": 0,
+   "seed": 0,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:A",
+    "reason": "won:A",
+    "frames": 274,
+    "winner_seat": "A",
+    "winner_slot": "A",
+    "result_A": "win",
+    "result_B": "loss",
+    "result_subject": "win"
+   },
+   "termination": "won:A",
+   "metrics": {
+    "frames_observed": 274,
+    "copresent_frames": 223,
+    "first_copresent_frame": 16,
+    "distinct_cells": 6,
+    "rooms_visited": 1,
+    "subject_hp_end": 2,
+    "other_hp_end": 0,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 38,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 33,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 1
+   },
+   "replaced_inputs": {
+    "A": 2,
+    "B": 2
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 38,
+     "mean_ms": 0.213,
+     "max_ms": 1.1
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 33,
+     "mean_ms": 0.315,
+     "max_ms": 1.1
+    }
+   },
+   "final_snapshot_sha256": "a2116d41d4ffe1d0a150785300308adf5cf0b5484e0dfe146b73e49a69c0b90d",
+   "trace_paths": {
+    "A": "traces/H6/H6-6/MvS-t0/seat-A.jsonl",
+    "B": "traces/H6/H6-6/MvS-t0/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-6/MvS/t1",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-6",
+   "config": "MvS",
+   "trial": 1,
+   "seed": 1,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:A",
+    "reason": "won:A",
+    "frames": 274,
+    "winner_seat": "A",
+    "winner_slot": "A",
+    "result_A": "win",
+    "result_B": "loss",
+    "result_subject": "win"
+   },
+   "termination": "won:A",
+   "metrics": {
+    "frames_observed": 274,
+    "copresent_frames": 223,
+    "first_copresent_frame": 16,
+    "distinct_cells": 6,
+    "rooms_visited": 1,
+    "subject_hp_end": 2,
+    "other_hp_end": 0,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 38,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 33,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 1
+   },
+   "replaced_inputs": {
+    "A": 2,
+    "B": 2
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 38,
+     "mean_ms": 0.174,
+     "max_ms": 0.7
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 33,
+     "mean_ms": 0.303,
+     "max_ms": 1.2
+    }
+   },
+   "final_snapshot_sha256": "a2116d41d4ffe1d0a150785300308adf5cf0b5484e0dfe146b73e49a69c0b90d",
+   "trace_paths": {
+    "A": "traces/H6/H6-6/MvS-t1/seat-A.jsonl",
+    "B": "traces/H6/H6-6/MvS-t1/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-6/MvS/t2",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-6",
+   "config": "MvS",
+   "trial": 2,
+   "seed": 2,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:A",
+    "reason": "won:A",
+    "frames": 274,
+    "winner_seat": "A",
+    "winner_slot": "A",
+    "result_A": "win",
+    "result_B": "loss",
+    "result_subject": "win"
+   },
+   "termination": "won:A",
+   "metrics": {
+    "frames_observed": 274,
+    "copresent_frames": 223,
+    "first_copresent_frame": 16,
+    "distinct_cells": 6,
+    "rooms_visited": 1,
+    "subject_hp_end": 2,
+    "other_hp_end": 0,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 38,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 33,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 1
+   },
+   "replaced_inputs": {
+    "A": 2,
+    "B": 2
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 38,
+     "mean_ms": 0.176,
+     "max_ms": 0.7
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 33,
+     "mean_ms": 0.297,
+     "max_ms": 1.1
+    }
+   },
+   "final_snapshot_sha256": "a2116d41d4ffe1d0a150785300308adf5cf0b5484e0dfe146b73e49a69c0b90d",
+   "trace_paths": {
+    "A": "traces/H6/H6-6/MvS-t2/seat-A.jsonl",
+    "B": "traces/H6/H6-6/MvS-t2/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-6/SvM/t0",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-6",
+   "config": "SvM",
+   "trial": 0,
+   "seed": 0,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:B",
+    "reason": "won:B",
+    "frames": 357,
+    "winner_seat": "B",
+    "winner_slot": "B",
+    "result_A": "loss",
+    "result_B": "win",
+    "result_subject": "loss"
+   },
+   "termination": "won:B",
+   "metrics": {
+    "frames_observed": 357,
+    "copresent_frames": 156,
+    "first_copresent_frame": 202,
+    "distinct_cells": 17,
+    "rooms_visited": 3,
+    "subject_hp_end": 0,
+    "other_hp_end": 3,
+    "subject_alive_end": false,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 59,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 60,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 3
+   },
+   "replaced_inputs": {
+    "A": 6,
+    "B": 8
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 59,
+     "mean_ms": 0.447,
+     "max_ms": 1.5
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 60,
+     "mean_ms": 0.233,
+     "max_ms": 1.4
+    }
+   },
+   "final_snapshot_sha256": "8d634a9409ddca5f7c731d1b8773b88f2324ba25be03cfba03290e3b59224d94",
+   "trace_paths": {
+    "A": "traces/H6/H6-6/SvM-t0/seat-A.jsonl",
+    "B": "traces/H6/H6-6/SvM-t0/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-6/SvM/t1",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-6",
+   "config": "SvM",
+   "trial": 1,
+   "seed": 1,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:B",
+    "reason": "won:B",
+    "frames": 357,
+    "winner_seat": "B",
+    "winner_slot": "B",
+    "result_A": "loss",
+    "result_B": "win",
+    "result_subject": "loss"
+   },
+   "termination": "won:B",
+   "metrics": {
+    "frames_observed": 357,
+    "copresent_frames": 156,
+    "first_copresent_frame": 202,
+    "distinct_cells": 17,
+    "rooms_visited": 3,
+    "subject_hp_end": 0,
+    "other_hp_end": 3,
+    "subject_alive_end": false,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 59,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 60,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 3
+   },
+   "replaced_inputs": {
+    "A": 6,
+    "B": 8
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 59,
+     "mean_ms": 0.429,
+     "max_ms": 1.5
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 60,
+     "mean_ms": 0.21,
+     "max_ms": 0.8
+    }
+   },
+   "final_snapshot_sha256": "8d634a9409ddca5f7c731d1b8773b88f2324ba25be03cfba03290e3b59224d94",
+   "trace_paths": {
+    "A": "traces/H6/H6-6/SvM-t1/seat-A.jsonl",
+    "B": "traces/H6/H6-6/SvM-t1/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-6/SvM/t2",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-6",
+   "config": "SvM",
+   "trial": 2,
+   "seed": 2,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:B",
+    "reason": "won:B",
+    "frames": 357,
+    "winner_seat": "B",
+    "winner_slot": "B",
+    "result_A": "loss",
+    "result_B": "win",
+    "result_subject": "loss"
+   },
+   "termination": "won:B",
+   "metrics": {
+    "frames_observed": 357,
+    "copresent_frames": 156,
+    "first_copresent_frame": 202,
+    "distinct_cells": 17,
+    "rooms_visited": 3,
+    "subject_hp_end": 0,
+    "other_hp_end": 3,
+    "subject_alive_end": false,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 59,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 60,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 3
+   },
+   "replaced_inputs": {
+    "A": 6,
+    "B": 8
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 59,
+     "mean_ms": 0.412,
+     "max_ms": 1.4
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 60,
+     "mean_ms": 0.2,
+     "max_ms": 0.7
+    }
+   },
+   "final_snapshot_sha256": "8d634a9409ddca5f7c731d1b8773b88f2324ba25be03cfba03290e3b59224d94",
+   "trace_paths": {
+    "A": "traces/H6/H6-6/SvM-t2/seat-A.jsonl",
+    "B": "traces/H6/H6-6/SvM-t2/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-7/MvS/t0",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-7",
+   "config": "MvS",
+   "trial": 0,
+   "seed": 0,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:A",
+    "reason": "won:A",
+    "frames": 299,
+    "winner_seat": "A",
+    "winner_slot": "A",
+    "result_A": "win",
+    "result_B": "loss",
+    "result_subject": "win"
+   },
+   "termination": "won:A",
+   "metrics": {
+    "frames_observed": 299,
+    "copresent_frames": 284,
+    "first_copresent_frame": 16,
+    "distinct_cells": 9,
+    "rooms_visited": 1,
+    "subject_hp_end": 2,
+    "other_hp_end": 0,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 48,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 46,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 2
+   },
+   "replaced_inputs": {
+    "A": 3,
+    "B": 4
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 48,
+     "mean_ms": 0.175,
+     "max_ms": 0.7
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 46,
+     "mean_ms": 0.183,
+     "max_ms": 0.5
+    }
+   },
+   "final_snapshot_sha256": "30e6cb44af13f22fd744506daddebbc1053c1ca5d555013e251689085f7e3952",
+   "trace_paths": {
+    "A": "traces/H6/H6-7/MvS-t0/seat-A.jsonl",
+    "B": "traces/H6/H6-7/MvS-t0/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-7/MvS/t1",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-7",
+   "config": "MvS",
+   "trial": 1,
+   "seed": 1,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:A",
+    "reason": "won:A",
+    "frames": 299,
+    "winner_seat": "A",
+    "winner_slot": "A",
+    "result_A": "win",
+    "result_B": "loss",
+    "result_subject": "win"
+   },
+   "termination": "won:A",
+   "metrics": {
+    "frames_observed": 299,
+    "copresent_frames": 284,
+    "first_copresent_frame": 16,
+    "distinct_cells": 9,
+    "rooms_visited": 1,
+    "subject_hp_end": 2,
+    "other_hp_end": 0,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 48,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 46,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 2
+   },
+   "replaced_inputs": {
+    "A": 3,
+    "B": 4
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 48,
+     "mean_ms": 0.175,
+     "max_ms": 0.7
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 46,
+     "mean_ms": 0.191,
+     "max_ms": 0.5
+    }
+   },
+   "final_snapshot_sha256": "30e6cb44af13f22fd744506daddebbc1053c1ca5d555013e251689085f7e3952",
+   "trace_paths": {
+    "A": "traces/H6/H6-7/MvS-t1/seat-A.jsonl",
+    "B": "traces/H6/H6-7/MvS-t1/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-7/MvS/t2",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-7",
+   "config": "MvS",
+   "trial": 2,
+   "seed": 2,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:A",
+    "reason": "won:A",
+    "frames": 299,
+    "winner_seat": "A",
+    "winner_slot": "A",
+    "result_A": "win",
+    "result_B": "loss",
+    "result_subject": "win"
+   },
+   "termination": "won:A",
+   "metrics": {
+    "frames_observed": 299,
+    "copresent_frames": 284,
+    "first_copresent_frame": 16,
+    "distinct_cells": 9,
+    "rooms_visited": 1,
+    "subject_hp_end": 2,
+    "other_hp_end": 0,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 48,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 46,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 2
+   },
+   "replaced_inputs": {
+    "A": 3,
+    "B": 4
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 48,
+     "mean_ms": 0.173,
+     "max_ms": 0.7
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 46,
+     "mean_ms": 0.183,
+     "max_ms": 0.5
+    }
+   },
+   "final_snapshot_sha256": "30e6cb44af13f22fd744506daddebbc1053c1ca5d555013e251689085f7e3952",
+   "trace_paths": {
+    "A": "traces/H6/H6-7/MvS-t2/seat-A.jsonl",
+    "B": "traces/H6/H6-7/MvS-t2/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-7/SvM/t0",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-7",
+   "config": "SvM",
+   "trial": 0,
+   "seed": 0,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:B",
+    "reason": "won:B",
+    "frames": 1689,
+    "winner_seat": "B",
+    "winner_slot": "B",
+    "result_A": "loss",
+    "result_B": "win",
+    "result_subject": "loss"
+   },
+   "termination": "won:B",
+   "metrics": {
+    "frames_observed": 1689,
+    "copresent_frames": 1452,
+    "first_copresent_frame": 238,
+    "distinct_cells": 20,
+    "rooms_visited": 3,
+    "subject_hp_end": 0,
+    "other_hp_end": 3,
+    "subject_alive_end": false,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 128,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 132,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 2
+   },
+   "replaced_inputs": {
+    "A": 8,
+    "B": 12
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 128,
+     "mean_ms": 0.295,
+     "max_ms": 2.8
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 132,
+     "mean_ms": 0.155,
+     "max_ms": 0.8
+    }
+   },
+   "final_snapshot_sha256": "0104a503d6074d12cf2466fd6c46c7e02f07f1cbace1b59a61a2d99f4c25f76a",
+   "trace_paths": {
+    "A": "traces/H6/H6-7/SvM-t0/seat-A.jsonl",
+    "B": "traces/H6/H6-7/SvM-t0/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-7/SvM/t1",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-7",
+   "config": "SvM",
+   "trial": 1,
+   "seed": 1,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:B",
+    "reason": "won:B",
+    "frames": 1689,
+    "winner_seat": "B",
+    "winner_slot": "B",
+    "result_A": "loss",
+    "result_B": "win",
+    "result_subject": "loss"
+   },
+   "termination": "won:B",
+   "metrics": {
+    "frames_observed": 1689,
+    "copresent_frames": 1452,
+    "first_copresent_frame": 238,
+    "distinct_cells": 20,
+    "rooms_visited": 3,
+    "subject_hp_end": 0,
+    "other_hp_end": 3,
+    "subject_alive_end": false,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 128,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 132,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 2
+   },
+   "replaced_inputs": {
+    "A": 8,
+    "B": 12
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 128,
+     "mean_ms": 0.275,
+     "max_ms": 2.1
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 132,
+     "mean_ms": 0.192,
+     "max_ms": 5.0
+    }
+   },
+   "final_snapshot_sha256": "0104a503d6074d12cf2466fd6c46c7e02f07f1cbace1b59a61a2d99f4c25f76a",
+   "trace_paths": {
+    "A": "traces/H6/H6-7/SvM-t1/seat-A.jsonl",
+    "B": "traces/H6/H6-7/SvM-t1/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-7/SvM/t2",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-7",
+   "config": "SvM",
+   "trial": 2,
+   "seed": 2,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:B",
+    "reason": "won:B",
+    "frames": 1689,
+    "winner_seat": "B",
+    "winner_slot": "B",
+    "result_A": "loss",
+    "result_B": "win",
+    "result_subject": "loss"
+   },
+   "termination": "won:B",
+   "metrics": {
+    "frames_observed": 1689,
+    "copresent_frames": 1452,
+    "first_copresent_frame": 238,
+    "distinct_cells": 20,
+    "rooms_visited": 3,
+    "subject_hp_end": 0,
+    "other_hp_end": 3,
+    "subject_alive_end": false,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 128,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 132,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 2
+   },
+   "replaced_inputs": {
+    "A": 8,
+    "B": 12
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 128,
+     "mean_ms": 0.269,
+     "max_ms": 1.8
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 132,
+     "mean_ms": 0.154,
+     "max_ms": 0.6
+    }
+   },
+   "final_snapshot_sha256": "0104a503d6074d12cf2466fd6c46c7e02f07f1cbace1b59a61a2d99f4c25f76a",
+   "trace_paths": {
+    "A": "traces/H6/H6-7/SvM-t2/seat-A.jsonl",
+    "B": "traces/H6/H6-7/SvM-t2/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-8/MvS/t0",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-8",
+   "config": "MvS",
+   "trial": 0,
+   "seed": 0,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:A",
+    "reason": "won:A",
+    "frames": 633,
+    "winner_seat": "A",
+    "winner_slot": "A",
+    "result_A": "win",
+    "result_B": "loss",
+    "result_subject": "win"
+   },
+   "termination": "won:A",
+   "metrics": {
+    "frames_observed": 633,
+    "copresent_frames": 215,
+    "first_copresent_frame": 125,
+    "distinct_cells": 13,
+    "rooms_visited": 2,
+    "subject_hp_end": 1,
+    "other_hp_end": 0,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 106,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 105,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 7,
+    "B": 14
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 106,
+     "mean_ms": 0.209,
+     "max_ms": 1.8
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 105,
+     "mean_ms": 0.23,
+     "max_ms": 1.1
+    }
+   },
+   "final_snapshot_sha256": "cd1c80df583780053a69726a13f01b33a24421eb2056f549dc42729787dce599",
+   "trace_paths": {
+    "A": "traces/H6/H6-8/MvS-t0/seat-A.jsonl",
+    "B": "traces/H6/H6-8/MvS-t0/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-8/MvS/t1",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-8",
+   "config": "MvS",
+   "trial": 1,
+   "seed": 1,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:A",
+    "reason": "won:A",
+    "frames": 633,
+    "winner_seat": "A",
+    "winner_slot": "A",
+    "result_A": "win",
+    "result_B": "loss",
+    "result_subject": "win"
+   },
+   "termination": "won:A",
+   "metrics": {
+    "frames_observed": 633,
+    "copresent_frames": 215,
+    "first_copresent_frame": 125,
+    "distinct_cells": 13,
+    "rooms_visited": 2,
+    "subject_hp_end": 1,
+    "other_hp_end": 0,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 106,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 105,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 7,
+    "B": 14
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 106,
+     "mean_ms": 0.199,
+     "max_ms": 1.3
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 105,
+     "mean_ms": 0.238,
+     "max_ms": 1.1
+    }
+   },
+   "final_snapshot_sha256": "cd1c80df583780053a69726a13f01b33a24421eb2056f549dc42729787dce599",
+   "trace_paths": {
+    "A": "traces/H6/H6-8/MvS-t1/seat-A.jsonl",
+    "B": "traces/H6/H6-8/MvS-t1/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-8/MvS/t2",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-8",
+   "config": "MvS",
+   "trial": 2,
+   "seed": 2,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:A",
+    "reason": "won:A",
+    "frames": 633,
+    "winner_seat": "A",
+    "winner_slot": "A",
+    "result_A": "win",
+    "result_B": "loss",
+    "result_subject": "win"
+   },
+   "termination": "won:A",
+   "metrics": {
+    "frames_observed": 633,
+    "copresent_frames": 215,
+    "first_copresent_frame": 125,
+    "distinct_cells": 13,
+    "rooms_visited": 2,
+    "subject_hp_end": 1,
+    "other_hp_end": 0,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 106,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 105,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 7,
+    "B": 14
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 106,
+     "mean_ms": 0.191,
+     "max_ms": 0.7
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 105,
+     "mean_ms": 0.221,
+     "max_ms": 1.0
+    }
+   },
+   "final_snapshot_sha256": "cd1c80df583780053a69726a13f01b33a24421eb2056f549dc42729787dce599",
+   "trace_paths": {
+    "A": "traces/H6/H6-8/MvS-t2/seat-A.jsonl",
+    "B": "traces/H6/H6-8/MvS-t2/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-8/SvM/t0",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-8",
+   "config": "SvM",
+   "trial": 0,
+   "seed": 0,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:A",
+    "reason": "won:A",
+    "frames": 519,
+    "winner_seat": "A",
+    "winner_slot": "A",
+    "result_A": "win",
+    "result_B": "loss",
+    "result_subject": "win"
+   },
+   "termination": "won:A",
+   "metrics": {
+    "frames_observed": 519,
+    "copresent_frames": 371,
+    "first_copresent_frame": 131,
+    "distinct_cells": 23,
+    "rooms_visited": 2,
+    "subject_hp_end": 1,
+    "other_hp_end": 0,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 79,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 79,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 14,
+    "B": 7
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 79,
+     "mean_ms": 0.277,
+     "max_ms": 0.7
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 79,
+     "mean_ms": 0.215,
+     "max_ms": 1.1
+    }
+   },
+   "final_snapshot_sha256": "f9cd606f87b2e035dc0a8f8b65aeeb33cf52c0836323959b2638b5025bdbc50b",
+   "trace_paths": {
+    "A": "traces/H6/H6-8/SvM-t0/seat-A.jsonl",
+    "B": "traces/H6/H6-8/SvM-t0/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-8/SvM/t1",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-8",
+   "config": "SvM",
+   "trial": 1,
+   "seed": 1,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:A",
+    "reason": "won:A",
+    "frames": 519,
+    "winner_seat": "A",
+    "winner_slot": "A",
+    "result_A": "win",
+    "result_B": "loss",
+    "result_subject": "win"
+   },
+   "termination": "won:A",
+   "metrics": {
+    "frames_observed": 519,
+    "copresent_frames": 371,
+    "first_copresent_frame": 131,
+    "distinct_cells": 23,
+    "rooms_visited": 2,
+    "subject_hp_end": 1,
+    "other_hp_end": 0,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 79,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 79,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 14,
+    "B": 7
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 79,
+     "mean_ms": 0.278,
+     "max_ms": 0.7
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 79,
+     "mean_ms": 0.22,
+     "max_ms": 1.2
+    }
+   },
+   "final_snapshot_sha256": "f9cd606f87b2e035dc0a8f8b65aeeb33cf52c0836323959b2638b5025bdbc50b",
+   "trace_paths": {
+    "A": "traces/H6/H6-8/SvM-t1/seat-A.jsonl",
+    "B": "traces/H6/H6-8/SvM-t1/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  },
+  {
+   "schema": "shadow-masque-versus-eval/1",
+   "run_id": "20261125T085558Z",
+   "row_id": "H6/H6-8/SvM/t2",
+   "scenario": "H6",
+   "scenario_kind": "duel",
+   "split": "heldout",
+   "start_id": "H6-8",
+   "config": "SvM",
+   "trial": 2,
+   "seed": 2,
+   "subject_seat": "A",
+   "duration_frames": 3600,
+   "commit": "77bc2f7d506d5cb774287065ea2d62501343e72c",
+   "dirty": false,
+   "game_version": "0.1.0",
+   "dry_run": false,
+   "test_only": false,
+   "forced_controllers": {},
+   "decision_every": 6,
+   "seed_key_id": "5b5c7582",
+   "controllers": {
+    "A": {
+     "name": "versus-baseline",
+     "kind": "scripted",
+     "version": "source:caae521de60c541e",
+     "weights_sha256": null,
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    },
+    "B": {
+     "name": "ppo-80e4a110",
+     "kind": "policy",
+     "version": "ppo-run-1",
+     "weights_sha256": "80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c",
+     "provider": "N/A",
+     "tokens": "N/A",
+     "cost_usd": "N/A"
+    }
+   },
+   "aborted": false,
+   "abort_reason": null,
+   "harness_error": false,
+   "error": null,
+   "success": null,
+   "success_reason": "outcome_only",
+   "outcome": {
+    "status": "won:A",
+    "reason": "won:A",
+    "frames": 519,
+    "winner_seat": "A",
+    "winner_slot": "A",
+    "result_A": "win",
+    "result_B": "loss",
+    "result_subject": "win"
+   },
+   "termination": "won:A",
+   "metrics": {
+    "frames_observed": 519,
+    "copresent_frames": 371,
+    "first_copresent_frame": 131,
+    "distinct_cells": 23,
+    "rooms_visited": 2,
+    "subject_hp_end": 1,
+    "other_hp_end": 0,
+    "subject_alive_end": true,
+    "subject_disguised_end": false
+   },
+   "seats": {
+    "A": {
+     "slot": "A",
+     "decisions": 79,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    },
+    "B": {
+     "slot": "B",
+     "decisions": 79,
+     "fallbacks": 0,
+     "refused": 0,
+     "errors": 0,
+     "timeouts": 0,
+     "busy": 0,
+     "reset_error": null
+    }
+   },
+   "invalid_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "stale_inputs": {
+    "A": 0,
+    "B": 0
+   },
+   "replaced_inputs": {
+    "A": 14,
+    "B": 7
+   },
+   "latency": {
+    "A": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 79,
+     "mean_ms": 0.292,
+     "max_ms": 0.9
+    },
+    "B": {
+     "basis": "measured (time.perf_counter, per decision)",
+     "n": 79,
+     "mean_ms": 0.248,
+     "max_ms": 1.2
+    }
+   },
+   "final_snapshot_sha256": "f9cd606f87b2e035dc0a8f8b65aeeb33cf52c0836323959b2638b5025bdbc50b",
+   "trace_paths": {
+    "A": "traces/H6/H6-8/SvM-t2/seat-A.jsonl",
+    "B": "traces/H6/H6-8/SvM-t2/seat-B.jsonl"
+   },
+   "limits": {
+    "max_decisions": null,
+    "max_fallbacks": null,
+    "timeout_s": 5.0,
+    "max_frames": null
+   },
+   "runner": {
+    "copy_mode": "deepcopy",
+    "threaded": true
+   }
+  }
+ ]
+}

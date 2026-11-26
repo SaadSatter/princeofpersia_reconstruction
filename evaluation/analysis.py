@@ -1,0 +1,314 @@
+"""Summaries of a results file: success rates, win/draw/loss, every round.
+
+Rules (docs/final/evaluation/PROTOCOL.md):
+  * every row is in the denominator: an aborted round counts as "not a
+    success" and "not a win", and is also counted and listed on its own;
+  * seeds are not independent trials. Rows of one condition (scenario, start,
+    configuration) with the same final snapshot are one trial (T07-run1
+    Evaluation E3: duels of one start pair gave identical results across
+    seeds). `n_rows` is what ran, `n` is the distinct outcomes the interval
+    uses; an aborted row is always its own trial;
+  * a mirror match (the same kind of controller in both seats) is one trial,
+    reported by seat, never as two controllers;
+  * intervals are 95 % Wilson; with fewer than 3 distinct outcomes they are
+    printed but flagged "n<3";
+  * dry-run rows are labelled and are evidence of the plumbing only.
+"""
+
+from __future__ import annotations
+
+import json
+from collections import defaultdict
+from pathlib import Path
+
+from .stats import wilson
+
+MIN_TRIALS = 3
+
+
+def load_rows(paths: list[str | Path]) -> tuple[list[dict], list[dict]]:
+    rows, headers = [], []
+    for p in paths:
+        data = json.loads(Path(p).read_text())
+        headers.append(data["run"])
+        rows.extend(data["rows"])
+    return rows, headers
+
+
+def label(ctrl: dict) -> str:
+    return {"policy": "M", "scripted": "S"}.get(ctrl.get("kind"), ctrl.get("name", "?"))
+
+
+def rate(k: int, n: int) -> dict:
+    lo, hi = wilson(k, n)
+    return {"k": k, "n": n, "rate": (k / n) if n else None, "lo": lo, "hi": hi,
+            "flag": ("n<%d" % MIN_TRIALS) if n < MIN_TRIALS else ""}
+
+
+def _distinct(rows: list[dict]) -> list[dict]:
+    """One row per distinct outcome of a condition. The first row of each final
+    snapshot stands for its repeats; aborted rows each stand for themselves."""
+    seen: set = set()
+    out = []
+    for r in rows:
+        key = None if r["aborted"] else r.get("final_snapshot_sha256")
+        if key is not None:
+            if key in seen:
+                continue
+            seen.add(key)
+        out.append(r)
+    return out
+
+
+def _by_condition(rows: list[dict]) -> dict[tuple, list[dict]]:
+    groups: dict[tuple, list[dict]] = defaultdict(list)
+    for r in rows:
+        groups[(r["scenario"], r["start_id"], r["config"])].append(r)
+    return groups
+
+
+def condition_table(rows: list[dict]) -> list[dict]:
+    """Rows run and distinct outcomes for every (scenario, start, configuration)."""
+    out = []
+    for (scn, start, cfg), rs in sorted(_by_condition(rows).items()):
+        out.append({"scenario": scn, "start_id": start, "config": cfg, "n_rows": len(rs),
+                    "n_distinct": len(_distinct(rs)),
+                    "aborted": sum(1 for r in rs if r["aborted"])})
+    return out
+
+
+def success_by_scenario(rows: list[dict]) -> list[dict]:
+    """Per scenario, configuration and subject seat: successes over the distinct outcomes
+    of every start (decision #65: a mirrored start measures the subject in seat B, so the
+    two seats are two lines, never pooled). `subject` is the label of the controller in
+    the subject seat. Outcome-only scenarios (no success flag) are not listed."""
+    scored = [r for r in rows if r["scenario_kind"] != "duel"]
+    groups: dict[tuple, list[dict]] = defaultdict(list)
+    for r in scored:
+        groups[(r["scenario"], r["config"], r.get("subject_seat", "A"))].append(r)
+    out = []
+    for (scn, cfg, seat), rs in sorted(groups.items()):
+        picked = []
+        for conds in _by_condition(rs).values():
+            picked.extend(_distinct(conds))
+        out.append({"scenario": scn, "config": cfg, "subject_seat": seat,
+                    "subject": "/".join(sorted({label(r["controllers"][seat]) for r in rs
+                                                if r.get("controllers")})),
+                    "n_rows": len(rs), "distinct": len(picked),
+                    "aborted": sum(1 for r in rs if r["aborted"]),
+                    **rate(sum(1 for r in picked if r.get("success") is True), len(picked))})
+    return out
+
+
+def is_duel(r: dict) -> bool:
+    """A rival-against-rival row: no seat was forced to a stand-in."""
+    return not r.get("forced_controllers") and r["scenario_kind"] in ("duel", "fight")
+
+
+def duel_results(rows: list[dict]) -> list[dict]:
+    """Win/draw/loss. Mixed configurations (MvS, SvM): per controller label over
+    both seats, with the per-seat split. A mirror (SvS, MvM): one trial, by seat."""
+    duels = [r for r in rows if is_duel(r)]
+    out: list[dict] = []
+    mirror: dict[tuple, list[dict]] = defaultdict(list)
+    mixed: dict[tuple, list[dict]] = defaultdict(list)
+    unbuilt: dict[tuple, list[dict]] = defaultdict(list)
+    for r in duels:
+        if not r.get("controllers"):
+            # QA F-2: the trial failed while building its controllers (a policy that would
+            # not load). Nobody played, so it is an aborted trial of no controller (#24).
+            unbuilt[(r["scenario"], r["config"])].append(r)
+            continue
+        a, b = label(r["controllers"]["A"]), label(r["controllers"]["B"])
+        (mirror if a == b else mixed)[(r["scenario"], r["config"])].append(r)
+    for (scn, cfg), rs in sorted(unbuilt.items()):
+        out.append({"scenario": scn, "controller": "none built", "mirror": False, "config": cfg,
+                    "n_rows": len(rs), "n": len(rs), "aborted": len(rs),
+                    "win": 0, "draw": 0, "loss": 0,
+                    "by_seat": {s: {"win": 0, "draw": 0, "loss": 0, "n": 0} for s in "AB"},
+                    "win_ci": wilson(0, len(rs)), "loss_ci": wilson(0, len(rs)),
+                    "flag": ("n<%d" % MIN_TRIALS) if len(rs) < MIN_TRIALS else ""})
+    for (scn, cfg), rs in sorted(mirror.items()):
+        picked = [x for conds in _by_condition(rs).values() for x in _distinct(conds)]
+        done = [x for x in picked if not x["aborted"]]
+        out.append({"scenario": scn, "controller": label(rs[0]["controllers"]["A"]),
+                    "config": cfg, "mirror": True, "n_rows": len(rs), "n": len(picked),
+                    "aborted": len(picked) - len(done),
+                    "a_wins": sum(x["outcome"]["result_A"] == "win" for x in done),
+                    "b_wins": sum(x["outcome"]["result_B"] == "win" for x in done),
+                    "draws": sum(x["outcome"]["result_A"] == "draw" for x in done)})
+    by_ctrl: dict[tuple, dict] = {}
+    for (scn, cfg), rs in sorted(mixed.items()):
+        picked = [x for conds in _by_condition(rs).values() for x in _distinct(conds)]
+        for x in picked:
+            for seat in ("A", "B"):
+                name = label(x["controllers"][seat])
+                d = by_ctrl.setdefault((scn, name), {
+                    "scenario": scn, "controller": name, "mirror": False,
+                    "configs": set(), "n_rows": 0, "n": 0, "aborted": 0,
+                    "win": 0, "draw": 0, "loss": 0,
+                    "by_seat": {s: {"win": 0, "draw": 0, "loss": 0, "n": 0} for s in "AB"}})
+                d["configs"].add(cfg)
+                d["n"] += 1
+                d["by_seat"][seat]["n"] += 1
+                if x["aborted"]:
+                    d["aborted"] += 1
+                else:
+                    res = x["outcome"][f"result_{seat}"]
+                    if res in ("win", "draw", "loss"):
+                        d[res] += 1
+                        d["by_seat"][seat][res] += 1
+        for x in rs:
+            for seat in ("A", "B"):
+                by_ctrl[(scn, label(x["controllers"][seat]))]["n_rows"] += 1
+    for (scn, name), d in sorted(by_ctrl.items()):
+        d["config"] = "+".join(sorted(d.pop("configs")))
+        d["win_ci"] = wilson(d["win"], d["n"])
+        d["loss_ci"] = wilson(d["loss"], d["n"])
+        d["flag"] = ("n<%d" % MIN_TRIALS) if d["n"] < MIN_TRIALS else ""
+        out.append(d)
+    return out
+
+
+def _seat_errors(r: dict) -> list[tuple[str, int | None, bool]]:
+    """(seat, policy_errors, recorded) for each seat that is, or may be, a policy seat.
+    A count is recorded only when it is an integer. A row from before T08-fix2 has no field,
+    and a policy-kind seat whose field is null has no counter: both are "not recorded", never
+    read as zero errors. A scripted or fallback seat with null is not a policy seat: skipped."""
+    out = []
+    for seat, s in sorted((r.get("seats") or {}).items()):
+        kind = ((r.get("controllers") or {}).get(seat) or {}).get("kind")
+        n = s.get("policy_errors")
+        if isinstance(n, int):
+            out.append((seat, n, True))
+        elif "policy_errors" not in s and kind in (None, "policy"):
+            out.append((seat, None, False))
+        elif "policy_errors" in s and kind == "policy":
+            out.append((seat, None, False))
+    return out
+
+
+def policy_error_totals(rows: list[dict]) -> list[dict]:
+    """Sum of swallowed PPO inference errors per condition (decision #84), over rows whose
+    policy seats are recorded. No recorded policy seat gives None (not 0); `not_recorded`
+    (rows with an unrecorded policy seat) is present only when positive. A condition with no
+    policy seat at all has None and no `not_recorded` key."""
+    out = []
+    for (scn, start, cfg), rs in sorted(_by_condition(rows).items()):
+        per, unrec, has_policy = [], 0, False
+        for r in rs:
+            errs = _seat_errors(r)
+            has_policy = has_policy or bool(errs)
+            if any(not rec for _, _, rec in errs):
+                unrec += 1
+            if any(rec for _, _, rec in errs):
+                per.append(sum(e for _, e, rec in errs if rec))
+        t = {"scenario": scn, "start_id": start, "config": cfg,
+             "policy_errors": sum(per) if per else None,
+             "rows_with_errors": sum(1 for n in per if n) if per else None}
+        if unrec:
+            t["not_recorded"] = unrec
+        out.append(t)
+    return out
+
+
+def _cells(t: dict) -> tuple[str, str]:
+    nr = t.get("not_recorded", 0)
+    if t["policy_errors"] is None:
+        c = "not recorded" if nr else "n/a"
+        return c, c
+    suffix = f" ({nr} not recorded)" if nr else ""
+    return f"{t['policy_errors']}{suffix}", f"{t['rows_with_errors']}{suffix}"
+
+
+def policy_error_lines(rows: list[dict]) -> list[str]:
+    """Markdown: totals per condition, then the odd rows (non-zero count). On a held-out
+    split a non-zero count is a harness error: counted and shown, the run is not aborted."""
+    lines = ["", "## PPO inference errors (swallowed into WAIT; decision #84)", "",
+             "| scenario | start | config | policy errors | rows with errors |", "|---|---|---|---|---|"]
+    for t in policy_error_totals(rows):
+        e, w = _cells(t)
+        lines.append(f"| {t['scenario']} | {t['start_id']} | {t['config']} | {e} | {w} |")
+    odd, missing = [], []
+    for r in rows:
+        errs = _seat_errors(r)
+        bad = [f"seat {seat}: {n}" for seat, n, _ in errs if n]
+        if bad:
+            tag = " (harness error)" if r.get("split") == "heldout" else ""
+            odd.append(f"- `{r['row_id']}`: {'; '.join(bad)}{tag}")
+        if any(not rec for _, _, rec in errs):
+            missing.append(r["row_id"])
+    lines += ["", "### Odd rows: non-zero policy errors", ""]
+    lines += odd or ["None."]
+    if odd and any(r.get("split") == "heldout" and r["row_id"] in {o.split('`')[1] for o in odd}
+                   for r in rows):
+        lines += ["", "A held-out policy seat with swallowed inference errors is reported as a harness "
+                  "error; the run was not aborted."]
+    if missing:
+        lines += ["", f"Policy errors not recorded (rows from before T08-fix2): {len(missing)} rows, "
+                  "so zero cannot be assumed."]
+    return lines
+
+
+def render(rows: list[dict], headers: list[dict], every_round: bool = True) -> str:
+    lines = ["# Versus evaluation summary", ""]
+    if any(r.get("dry_run") for r in rows) or any(h.get("dry_run") for h in headers):
+        lines += ["**DRY RUN rows present: plumbing check only, not evidence of play strength.**",
+                  ""]
+    for h in headers:
+        lines.append(f"- run `{h['run_id']}` split `{h['split']}` commit `{h['commit'][:12]}` "
+                     f"dry_run={h['dry_run']} seed_key_id={h['seed_key_id']}")
+    aborted = [r for r in rows if r["aborted"]]
+    lines += ["", f"Rows: {len(rows)}; aborted: {len(aborted)} (counted as not a success, "
+              "not a win, and listed below).", ""]
+    lines += ["## Distinct outcomes per condition", "",
+              "Seeds are not independent trials: rows of one condition with the same final "
+              "state are one trial.", "",
+              "| scenario | start | config | rows | distinct | aborted |", "|---|---|---|---|---|---|"]
+    for c in condition_table(rows):
+        lines.append(f"| {c['scenario']} | {c['start_id']} | {c['config']} | {c['n_rows']} | "
+                     f"{c['n_distinct']} | {c['aborted']} |")
+    lines += ["", "## Scenario success (distinct outcomes; aborted rounds count as failures)", "",
+              "| scenario | config | subject seat | subject controller | k/n | rate | 95% Wilson | rows | aborted | flag |",
+              "|---|---|---|---|---|---|---|---|---|---|"]
+    for s in success_by_scenario(rows):
+        r = "n/a" if s["rate"] is None else f"{s['rate']:.2f}"
+        lines.append(f"| {s['scenario']} | {s['config']} | {s['subject_seat']} | "
+                     f"{s['subject']} | {s['k']}/{s['n']} | "
+                     f"{r} | {s['lo']:.2f}-{s['hi']:.2f} | {s['n_rows']} | {s['aborted']} | "
+                     f"{s['flag']} |")
+    duels = duel_results(rows)
+    lines += ["", "## Duels: win / draw / loss", ""]
+    mixed = [d for d in duels if not d["mirror"]]
+    mirror = [d for d in duels if d["mirror"]]
+    if mixed:
+        lines += ["| scenario | controller | configs | W | D | L | n | aborted | win 95% | by seat A | by seat B | flag |",
+                  "|---|---|---|---|---|---|---|---|---|---|---|---|"]
+    elif not mirror:
+        lines += ["No rival-against-rival rows."]
+    for d in mixed:
+        sa, sb = d["by_seat"]["A"], d["by_seat"]["B"]
+        lines.append(f"| {d['scenario']} | {d['controller']} | {d['config']} | {d['win']} | "
+                     f"{d['draw']} | {d['loss']} | {d['n']} | {d['aborted']} | "
+                     f"{d['win_ci'][0]:.2f}-{d['win_ci'][1]:.2f} | "
+                     f"{sa['win']}W {sa['draw']}D {sa['loss']}L | "
+                     f"{sb['win']}W {sb['draw']}D {sb['loss']}L | {d['flag']} |")
+    if mirror:
+        lines += ["", "Mirror matches (the same kind of controller in both seats): one trial each, "
+                  "by seat.", "",
+                  "| scenario | controller | config | trials | seat A wins | seat B wins | draws | aborted |",
+                  "|---|---|---|---|---|---|---|---|"]
+        for d in mirror:
+            lines.append(f"| {d['scenario']} | {d['controller']} | {d['config']} | {d['n']} | "
+                         f"{d['a_wins']} | {d['b_wins']} | {d['draws']} | {d['aborted']} |")
+    if aborted:
+        lines += ["", "## Aborted rounds", ""]
+        lines += [f"- `{r['row_id']}`: {r['abort_reason']} {r.get('error') or ''}" for r in aborted]
+    lines += policy_error_lines(rows)
+    if every_round:
+        lines += ["", "## Every round", "", "| row | termination | success | reason |",
+                  "|---|---|---|---|"]
+        for r in rows:
+            lines.append(f"| {r['row_id']} | {r.get('termination', 'ERROR')} | "
+                         f"{r.get('success')} | {r.get('success_reason')} |")
+    return "\n".join(lines) + "\n"
