@@ -291,3 +291,11 @@ Saad's choice on `reports/T24-evaluation-specialist.md`@d187e1c finding 2 (AskUs
 | # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
 |---|---|---|---|
 | 101 | At a ledge edge, on the same cell as a downed uniformed guard: hang or take? | "Hang wins at a ledge (Recommended)" | Refines #94: where `DOWN` would start a hang-down (the cell ahead is open and unsupported, as `engine._down` tests), it keeps its old meaning and the uniform is not taken; `TAKE` takes it there. Everywhere else kneeling takes the uniform. Task T24-fix1 |
+
+## Addendum: Thu 2026-11-26 (PPO line: T25 reconnecting overlay)
+
+Saad's choice on `reports/T25-qa.md`@efd8049 finding 1 (AskUserQuestion), quoted verbatim. Recorded by the PPO-line orchestrator (session 8edb65a6):
+
+| # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
+|---|---|---|---|
+| 102 | "Reconnecting" mid-duel uses the full-window loading overlay, hiding the game | "Full overlay is fine" | Keep T25 as built: the centred overlay also covers the game while reconnecting. No change |
