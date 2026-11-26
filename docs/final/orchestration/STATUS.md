@@ -84,10 +84,10 @@ No `rc/*` (approved release candidate) branch exists.
 | closed (Gate 3, 2026-11-25; `orch/reviewed` bdc3c76) | T19 | either control scheme (#55), 2-tick input grace (#54), kneel pickups, flip by default (#53, amends R-V22) | G1, G2, G3 to come | base = `orch/reviewed` tip after T18; brief `tasks/T19.md`@53e7ece | — |
 | closed (Gate 3, 2026-11-25; `orch/reviewed` 72066f1) | T20 + fix1 + fix2 | playtest telemetry (#67, #68) | G1, G2, G3 | brief `tasks/T20.md` | — |
 | closed (Gate 3, 2026-11-25; `orch/reviewed` 1a515ca) | T21 | telemetry-analyst agent (#69) | G1, G3 | brief `tasks/T21.md` | — |
-| **T23-fix2 dispatched 2026-11-26** (#113, #114; fix1 5756e25 partial; base dfe2d90 + 0c7d73a; first pass 0c7d73a on `task/T23`) | T23 | released direction still runs after landing (#93) | G1, G2, G3 | brief `tasks/T23.md` | — |
+| closed (Gate 3, 2026-11-26; `orch/reviewed` 41550f9) (#113, #114; base dfe2d90 + 0c7d73a; first pass 0c7d73a on `task/T23`) | T23 | released direction still runs after landing (#93) | G1, G2, G3 | brief `tasks/T23.md` | — |
 | closed (Gate 3, 2026-11-26; report a31d336); T23-fix1 first (#112) | T26 | how far one left/right tap moves a rival: measure and propose options | G3 | brief `tasks/T26.md` | — |
 | closed (Gate 3, 2026-11-26; report 7bca2b0); option (b) chosen (#108) | T27 | side-scroller feasibility in place of six rooms (OQ-4) | G3 | brief `tasks/T27.md` | — |
-| **queued after T23-fix1 integrates** (#108–#112) | T28 | scrolling view window over the joined arena, line `experiment/scroll` | G1, G2, G3 | brief `tasks/T28.md` | — |
+| **held until after Sat 2026-11-28** (#118; base will be `orch/reviewed` 41550f9 or later) (#108–#112) | T28 | scrolling view window over the joined arena, line `experiment/scroll` | G1, G2, G3 | brief `tasks/T28.md` | — |
 | not started | T03 | official-repository move (decision #6), `python -m team init` | — | — | — |
 | closed (Gate 3); **PR #6 awaiting Saad's merge** | T10a (+fix1, fix2) | docs in line with decisions #1–#30: Changes since G1 in GDD and Configuration, PPO rival, orchestration, checklist, plan, README | G1 accept w/ notes ×3; G2 n/a; G3 closed | `orch/T10a` a1b9738 | issue #5, PR #6 |
 | not started | T10b | T10a follow-ups: GDD §2 and §6 labels, `LINGER_AFTER` location (GDD:105), `EVIDENCE_INDEX.md` pass (after Saad commits his edits), tracker `docs/final/TRACKER.md`, scope lock | — | — | — |
