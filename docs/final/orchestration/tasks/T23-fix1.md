@@ -1,7 +1,7 @@
 # T23-fix1: finish the release rule across the server trace and pygame (#93, #99, #100)
 
 Handoff id: HO-T23-fix1-orchestrator. Assigned: tech-lead (the same agent if available); then qa, evaluation-specialist (Gate 2 applies: engine input rule, server trace and replay), Gate 3.
-**Starts only after T22 closes** (#100). Base: the `orch/reviewed` tip after T22, with `task/T23` 0c7d73a merged in. Name it in the dispatch note.
+**Starts only after T22 closes** (#100). Base (decision #105, 2026-11-26): `orch/reviewed` dfe2d90 with `task/T23` 0c7d73a merged in: `git switch -c task/T23-fix1 dfe2d90 && git merge --no-edit 0c7d73a`.
 
 1. `server/match.py` and `server/trace.py`: record each human release in the input trace, so replay gives the same outcome and state hash. `tests/test_server_match.py` passes unchanged.
 2. `play.py`: call `ep.release(seat)` in its own input loop, so pygame and `--playtest` have the fix.
