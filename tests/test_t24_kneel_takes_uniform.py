@@ -111,3 +111,11 @@ def test_no_new_action_and_down_stays_legal_where_it_was():
     assert not any("KNEEL" in a for a in legal)
     nothing = episode(a=(2, 0, 4, +1))
     assert "DOWN" in nothing.legal_actions("A") and "TAKE" not in nothing.legal_actions("A")
+
+
+def test_a_hanging_rival_over_a_body_still_just_lets_go():
+    """Macros issue DOWN only to drop from a ledge; it must never turn into a take."""
+    ep = over()
+    r = ep._duel.rivals["A"]
+    r.kid.posture = "hanging"
+    assert r._kneel_target() is None

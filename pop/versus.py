@@ -287,7 +287,8 @@ class Rival(Game):
         pick up a dropped sword first, otherwise take a downed guard's uniform."""
         if self.sword == "none" and self.kid.cell in self.duel.swords:
             return "sword"
-        if not self.disguised and self.uniform_ahead() is not None:
+        if (self.kid.posture == "standing" and not self.disguised
+                and self.uniform_ahead() is not None):
             return "uniform"
         return None
 
