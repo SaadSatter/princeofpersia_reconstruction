@@ -23,18 +23,18 @@ Saad's request: "every movement left or right, moves the player many units left 
 
 ## G2/G3 readiness, continued (session c612c020)
 
-Renumbered from #109–#111 (b4aa069) to #113–#115: the other orchestrator session used #109–#112 at the same time. Brief T28 (CI) renamed T29 for the same reason.
+Renumbered from #109–#111 (b4aa069) to **#116–#118** (corrected 2026-11-26: an earlier renumbering, f7ab21b, wrongly also changed the parallel session's #109–#111 and collided with its #113–#114; both restored). The parallel session's rows are #109–#114. Brief T28 (CI) renamed T29 for the same reason.
 
 Saad's choices (AskUserQuestion) after AUDIT-G23, quoted verbatim.
 
 | # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
 |---|---|---|---|
-| 113 | Student decision record for G2/G3 | "You can do A and tell me a sample of what #62 and 63 reasoning would be, and then give me the file path to fill it in" | The routed handoff is the T18 chain (`handoff-drafts/2026-11-24-qa-eval-to-tech-T18.md`, 5e2e16c). Saad writes its Student decision himself; the orchestrator gave a sample in chat only |
-| 114 | Agent tasks for Saturday | "CI fix, T10b docs refresh, T03 move, Session record" | Briefs T29 (CI), T10b, T03; session record at the end. **Amends #103:** PR #6 is not merged as is; T10b refreshes it first (AUDIT-G23: its "Changes since" stops at #30) |
-| 115 | G2/G3 gameplay freeze | "Freeze after T23-fix1 (Recommended)" | T23-fix1 may land if its gates close by Fri 2026-11-27 night; T26, T27 and the #108 scrolling branch wait until after Sat 2026-11-28 for the graded `main` |
-| 113 | Scrolling layout | "Scroll both axes (Recommended)" | Keep the 3x2 loop and shaft (OQ-4 layout kept); the view scrolls horizontally and vertically over the joined rooms |
-| 114 | View window size (replaces "own room", CQ-1) | "One room's size (Recommended)" | 10 columns x 3 rows centred on the seat's own rival; visible iff inside the window |
-| 115 | PPO retrain on the scrolling line | "Ask me then (Recommended)" | No training run until the engine passes QA and Eval and Saad approves with runtime and cost known |
+| 116 | Student decision record for G2/G3 | "You can do A and tell me a sample of what #62 and 63 reasoning would be, and then give me the file path to fill it in" | The routed handoff is the T18 chain (`handoff-drafts/2026-11-24-qa-eval-to-tech-T18.md`, 5e2e16c). Saad writes its Student decision himself; the orchestrator gave a sample in chat only |
+| 117 | Agent tasks for Saturday | "CI fix, T10b docs refresh, T03 move, Session record" | Briefs T29 (CI), T10b, T03; session record at the end. **Amends #103:** PR #6 is not merged as is; T10b refreshes it first (AUDIT-G23: its "Changes since" stops at #30) |
+| 118 | G2/G3 gameplay freeze | "Freeze after T23-fix1 (Recommended)" | T23-fix1 may land if its gates close by Fri 2026-11-27 night; T26, T27 and the #108 scrolling branch wait until after Sat 2026-11-28 for the graded `main` |
+| 109 | Scrolling layout | "Scroll both axes (Recommended)" | Keep the 3x2 loop and shaft (OQ-4 layout kept); the view scrolls horizontally and vertically over the joined rooms |
+| 110 | View window size (replaces "own room", CQ-1) | "One room's size (Recommended)" | 10 columns x 3 rows centred on the seat's own rival; visible iff inside the window |
+| 111 | PPO retrain on the scrolling line | "Ask me then (Recommended)" | No training run until the engine passes QA and Eval and Saad approves with runtime and cost known |
 | 112 | Tap size (T26) | Other: "Land T23-fix1 and merge it in before doing anything else" | T23-fix1 goes through its gates and is integrated into `orch/reviewed` first. T28 (scrolling) is dispatched only after that, from the new tip. No tap-size rule change |
 | 113 | T23-fix1: `test_server_match.py` replay test ignores releases | "Use trace.replay (Recommended)" | Approved edit to that existing test: replay through `server.trace.replay(tr)`; listed old → new |
 | 114 | T23-fix1: `test_t22fix2_overlap.py::test_ai_room_logs_only_the_human_seat` ends `duel_end`, `rematch` | "Accept rematch row (Recommended)" | Approved edit to that existing test: accept a `rematch` row after `duel_end`; listed old → new |
