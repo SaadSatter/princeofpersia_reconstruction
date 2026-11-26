@@ -244,3 +244,13 @@ Saad's choices on `reports/T22-tech-lead.md`@73e6531 (AskUserQuestion), quoted v
 |---|---|---|---|
 | 91 | The legacy `--rival baseline` path (no creator-chosen mode) still shows "AI rival: …" because `tests/test_gate_t13_qa_online.py::test_cli_process_two_scripted_clients_real_clock_and_trace_dir[baseline]` pins it | "Update that test (Recommended)" | Finish #88 there: the legacy label code is removed and that one assertion changes to the honest label "Baseline (scripted)". No other existing-test edit. In T22-fix1 |
 | 92 | Default start | "Menu by default (Recommended)" | A bare `python play.py` shows the three-mode menu (the old single-player level stays reachable with a flag and its situation argument), and the hosted page opens on a mode chooser. The web smoke test (`tools/web/smoke.cjs` / `.github/workflows/web-smoke.yml` path) is updated to pick a mode. If any other existing test breaks, stop and report. In T22-fix1 |
+
+## Addendum: playtest bug, a released direction still moves after landing (T23)
+
+Saad, in chat after a playtest (verbatim):
+
+> "After running a playtest when I jump into a direction and try holding the left or right in air, it seems to register it and log it after I land (sequence, move left, jump and flip left, nothing is pressed but after landing player continues to move left a little)"
+
+| # | Topic | Saad's words | Orchestrator's reading and effect |
+|---|---|---|---|
+| 93 | A direction held in the air, then released, still runs after landing | "nothing is pressed but after landing player continues to move left a little" | Expected behaviour, from his report: once the key is released, nothing more happens. A pending input from a human seat is dropped if its key is no longer held when it would start. The grace window (R-V35), the hop turn (R-V22) and the kick (R-V10) are unchanged. AI seats keep the one-pending-input rule (they press no keys). The telemetry logs what actually starts. Task T23. A rule-map row is needed |
