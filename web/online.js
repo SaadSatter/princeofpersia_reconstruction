@@ -67,13 +67,13 @@
     try { return sessionStorage.getItem(key); } catch (e) { return null; }
   }
 
-  // Decision #95: Create room / Join room (and the code) are for Human vs Human only; AI Model
-  // and Baseline start a private match with one click on their button.
+  // Decision #95: Create room / Join room (and the code) are for the human mode only; the
+  // AI modes start a private match with one click on their button.
   function applyLobbyView() {
     humanLobbyEl.style.display = SMKeys.lobbyView(chosenMode).showCreateJoin ? "block" : "none";
   }
 
-  // The landing state: pick a mode (AI and Baseline start at once; Human vs Human then offers
+  // The landing state: pick a mode (the AI modes start at once; the human mode then offers
   // Create room, or Join room with a 4-letter code).
   function showLobby(message) {
     starting = false;
