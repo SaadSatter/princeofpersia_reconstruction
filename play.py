@@ -304,8 +304,10 @@ def versus_main(args, rival=None) -> int:
                 act = "KICK"                                  # attack in the air: dive kick
             if act and act in legal:
                 ep.step(seat, act)
-            elif act and rec is not None:
-                rec.refused(seat, act)
+            else:
+                if act and rec is not None:
+                    rec.refused(seat, act)
+                ep.release(seat)                              # T23 (#93): same call as the hosted page
         if scripted:
             seat, _, act = scripted.pop(0).partition(":")
             ep.step(seat, act)
