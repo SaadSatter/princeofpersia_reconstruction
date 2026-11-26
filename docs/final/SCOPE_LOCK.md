@@ -51,7 +51,7 @@ From GDD Section 8, unchanged: 1. rooms 6 to 3; 2. suspicion meter to a yes/no r
 | Online play is tested on localhost only; not run on two machines; no latency measurement (OQ-12) | [`ONLINE_PLAY.md`](ONLINE_PLAY.md) |
 | No hosted page URL; the GitHub Pages deploy returned 404 on 2026-11-26. The hosted page runs the engine in the browser, so devtools can read hidden state (accepted for human vs AI only) | [`WEB_BUILD.md`](WEB_BUILD.md), GDD "Changes since" |
 | Left/right taps move a whole block; a held key can move two blocks until T23-fix1 lands | T26 report (`task/T26`), #93, #106 |
-| CI on `main` is red until T29 lands | AUDIT-G23 |
+| CI on `main` is red until PR #12 lands (the T29 fix is closed at Gate 3) | AUDIT-G23 |
 | Gate-plate trap not built; the AI never sets traps | [`TRAPS_SPEC.md`](TRAPS_SPEC.md), #43 |
 | The three-mode menu, kneel-takes-uniform and online polish are on `orch/reviewed` (PR #12), not on `main` until Saad merges it | #103 |
 

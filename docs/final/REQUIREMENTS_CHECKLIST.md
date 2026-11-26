@@ -126,7 +126,7 @@ CLIMB down (#31). Still open or waiting on Saad: the rows below, plus the
 items in [`orchestration/STATUS.md`](orchestration/STATUS.md) "Waiting on
 Saad" (sprung trap costs 1 heart in all, macro cadence of 4 decisions,
 nearest-figure targeting, reward defaults, the T19 suspicion surcharge, the
-T26 and T27 options, the playtest protocol and consent sentence, the Student
+the T26 tap-size option, the playtest protocol and consent sentence, the Student
 decision, and the official-repository move; the scope lock draft needs his
 approval).
 

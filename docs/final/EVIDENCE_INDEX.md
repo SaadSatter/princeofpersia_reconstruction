@@ -29,6 +29,7 @@ Updated 2026-11-16, branch `final/g1-shadow-masque`.
 | Date | Agent or skill | Session | Output | Independent of the builder? |
 | --- | --- | --- | --- | --- |
 | 2026-11-16 | `session-evidence` | S12 (`e2b80258`) | `docs/agent-sessions/12-pixellab-art-and-arena.md` | Records the builder's own session |
+| 2026-11-25 | `session-evidence` | S20 (`a45fface`) | `docs/agent-sessions/20-orchestrator-gameplay-telemetry.md` | Records the orchestrator's own session |
 | 2026-11-18 | `game-rules-audit` | not yet recorded | [`docs/audits/AUDIT-2026-11-18-flip-r-v22.md`](../audits/AUDIT-2026-11-18-flip-r-v22.md) (flip, commits `8c2d9bd`, `05fe136`) | Yes: run in a session other than the one that built the flip |
 | 2026-11-18 | `rules-reviewer` agent | not yet recorded | [`docs/reviews/INDEPENDENT-REVIEW-flip-r-v22.md`](../reviews/INDEPENDENT-REVIEW-flip-r-v22.md) (unedited) | Yes from the builder; started from the audit session, and read the audit's findings after forming its own |
 

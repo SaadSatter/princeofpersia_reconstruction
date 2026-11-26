@@ -2,7 +2,7 @@
 
 Dated 2026-11-26 (task T10b), for G2/G3. Draft for Saad. The tracker lives in this repository (decisions #6, #10); the official-repository move is task T03.
 
-Sources: `orchestration/STATUS.md` and `orchestration/REVIEW_LOG.md` on `main` (the task state below is as of coordination commit b4aa069 plus decisions to #118), and the reports named in each row. A report link points to a file on this branch; a task whose report is on its own `task/*` or `gate/*` branch says so. "Decision" cells point to [`DECISIONS-2026-11-23.md`](orchestration/DECISIONS-2026-11-23.md), [`DECISIONS-2026-11-24.md`](orchestration/DECISIONS-2026-11-24.md) (to #102) and `DECISIONS-2026-11-26.md` (#103 and later; on `main`). Gates: G1 QA, G2 Evaluation Specialist (AI, boundary, evaluation changes), G3 orchestrator. Only the orchestrator closes a task.
+Sources: `orchestration/STATUS.md` and `orchestration/REVIEW_LOG.md` on `main` (the task state below is as of coordination commit 02a93a5 (refreshed in T10b-fix1) plus decisions to #118), and the reports named in each row. A report link points to a file on this branch; a task whose report is on its own `task/*` or `gate/*` branch says so. "Decision" cells point to [`DECISIONS-2026-11-23.md`](orchestration/DECISIONS-2026-11-23.md), [`DECISIONS-2026-11-24.md`](orchestration/DECISIONS-2026-11-24.md) (to #102) and `DECISIONS-2026-11-26.md` (#103 and later; on `main`). Gates: G1 QA, G2 Evaluation Specialist (AI, boundary, evaluation changes), G3 orchestrator. Only the orchestrator closes a task.
 
 ## Tasks
 
@@ -33,13 +33,13 @@ Test evidence: the last full-suite line recorded by the orchestrator was `2245 p
 | T20 | Playtest telemetry (+ fix1, fix2) | closed | G1, G2, G3 | #67, #68, #81 to #83, #85, #86 | [T20-evaluation-specialist](orchestration/reports/T20-evaluation-specialist.md)<br>[T20-fix1-evaluation-specialist](orchestration/reports/T20-fix1-evaluation-specialist.md)<br>[T20-fix1-qa](orchestration/reports/T20-fix1-qa.md)<br>[T20-fix1-tech-lead](orchestration/reports/T20-fix1-tech-lead.md)<br>[T20-fix2-evaluation-specialist](orchestration/reports/T20-fix2-evaluation-specialist.md)<br>[T20-fix2-qa](orchestration/reports/T20-fix2-qa.md)<br>[T20-fix2-tech-lead](orchestration/reports/T20-fix2-tech-lead.md)<br>[T20-qa](orchestration/reports/T20-qa.md)<br>[T20-tech-lead](orchestration/reports/T20-tech-lead.md) |
 | T21 | `telemetry-analyst` native worker | closed | G1, G3 | #69 | [T21-dryrun-telemetry-analyst](orchestration/reports/T21-dryrun-telemetry-analyst.md)<br>[T21-qa](orchestration/reports/T21-qa.md)<br>[T21-tech-lead](orchestration/reports/T21-tech-lead.md) |
 | T22 | Trained rival in the game: three modes in pygame, web, online (+ fix1, fix2) | closed; on `orch/reviewed` (PR #12), not on `main` | G1/G2 x3; G3 closed | #87 to #92 | [T22-evaluation-specialist](orchestration/reports/T22-evaluation-specialist.md)<br>[T22-fix1-evaluation-specialist](orchestration/reports/T22-fix1-evaluation-specialist.md)<br>[T22-fix1-qa](orchestration/reports/T22-fix1-qa.md)<br>[T22-fix1-tech-lead](orchestration/reports/T22-fix1-tech-lead.md)<br>[T22-fix2-evaluation-specialist](orchestration/reports/T22-fix2-evaluation-specialist.md)<br>[T22-fix2-qa](orchestration/reports/T22-fix2-qa.md)<br>[T22-fix2-tech-lead](orchestration/reports/T22-fix2-tech-lead.md)<br>[T22-qa](orchestration/reports/T22-qa.md)<br>[T22-tech-lead](orchestration/reports/T22-tech-lead.md) |
-| T23 | Released direction still runs after landing (fix1 dispatched 2026-11-26; first pass 0c7d73a on `task/T23`) | in progress | G1, G2, G3 to come | #93, #99, #105 | brief on `main` |
+| T23 | Released direction still runs after landing (first pass 0c7d73a on `task/T23`; fix1 5756e25 partial; now T23-fix2 444bd39 on `task/T23-fix2`) | in progress at T23-fix2 | G1 ACCEPT (94ec401); G2, G3 to come | #93, #99, #105, #113, #114 | brief on `main` |
 | T24 | Kneel takes uniform; hang wins at a ledge (+ fix1) | closed; on `orch/reviewed` | G1/G2 x2; G3 closed | #94, #98, #101 | [T24-evaluation-specialist](orchestration/reports/T24-evaluation-specialist.md)<br>[T24-fix1-evaluation-specialist](orchestration/reports/T24-fix1-evaluation-specialist.md)<br>[T24-fix1-qa](orchestration/reports/T24-fix1-qa.md)<br>[T24-fix1-tech-lead](orchestration/reports/T24-fix1-tech-lead.md)<br>[T24-qa](orchestration/reports/T24-qa.md)<br>[T24-tech-lead](orchestration/reports/T24-tech-lead.md) |
 | T25 | Online polish: private AI/Baseline match, loading screen, quiet logs | closed; on `orch/reviewed` | G1 efd8049, G2 3925348; G3 closed | #95 to #98, #102 | [T25-evaluation-specialist](orchestration/reports/T25-evaluation-specialist.md)<br>[T25-qa](orchestration/reports/T25-qa.md)<br>[T25-tech-lead](orchestration/reports/T25-tech-lead.md) |
 | T26 | Study: how far one left/right tap moves a rival | closed as a study (report a31d336 on `task/T26`); option awaiting Saad | G3 | #106 | brief on `main` |
-| T27 | Study: side-scroller feasibility in place of six rooms (OQ-4) | closed as a study (report 7bca2b0 on `task/T27`); option awaiting Saad | G3 | #107 | brief on `main` |
+| T27 | Study: side-scroller feasibility in place of six rooms (OQ-4) | closed as a study (report 7bca2b0 on `task/T27`); option (b) chosen | G3 | #107, #108 | brief on `main` |
 | T28 | Scrolling-window line on `experiment/scroll` (orchestrator brief; separate worktree) | queued; after G2/G3 and after T23-fix1 is integrated | n/a yet | #108 to #112, #118 | brief on `main` |
-| T29 | CI fix: install the `online` extra so `main` goes green | brief committed on `main`; not yet reported | G1, G3 to come | #117 | brief on `main` |
+| T29 | CI fix: install the `online` extra so `main` goes green | closed at Gate 3 (2f3e493 on `orch/reviewed`); reaches `main` with PR #12 | G1 ACCEPT (2f3e493), G3 closed | #117 | brief on `main`; reports on `orch/reviewed` |
 | SMOKE-01 | Orchestration smoke test of the worker chain | closed | G1 accept w/ notes; G3 closed | #16 | [brief](orchestration/tasks/SMOKE-01.md) |
 | AUDIT-G23 | Requirements audit for G2/G3 (read-only, on `audit/AUDIT-G23`) | done 2026-11-26 | none | #117 | none on this branch |
 
@@ -51,7 +51,7 @@ Saad owns and dates these entries. This task does not write them for him. The fa
 | --- | --- | --- | --- | --- |
 | 2026-11-23 to 2026-11-28 | *Saad to fill* | *Saad to fill* | *Saad to fill* | Saad |
 
-Facts on file for the week (from `STATUS.md`, `REVIEW_LOG.md`): tasks T01 to T27 reached Gate 3 or closed as studies; PR #11 merged (a93d36a); PR #12 and PR #6 open; CI on `main` red since a93d36a until T29; T03 not started; no external playtest.
+Facts on file for the week (from `STATUS.md`, `REVIEW_LOG.md`): tasks T01 to T27 reached Gate 3 or closed as studies; PR #11 merged (a93d36a); PR #12 and PR #6 open; CI on `main` red since a93d36a until PR #12 carries the T29 fix; T03 not started; no external playtest.
 
 ## Risk Register
 
