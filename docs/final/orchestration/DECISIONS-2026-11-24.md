@@ -283,3 +283,11 @@ Saad's choices on the T23 tech-lead report (`reports/T23-tech-lead.md`@0c7d73a, 
 |---|---|---|---|
 | 99 | Existing tests that assert the old run-on after landing | "Authors update them (Recommended)" | Only the assertions that encode the old run-on behaviour change, each one listed old → new by its author, as with #85: QA (`test_t20_qa_probes.py` ×3, `test_t20_qa_refused_mirror.py[3-None]`) and the Tech Lead (`test_t20fix1_recorder.py::test_a_jump_then_three_left_ticks_is_one_flip`). `tests/test_server_match.py` replay test stays unchanged; the fix makes the server trace record releases |
 | 100 | When T23-fix1 runs | "After T22 closes (Recommended)" | T23-fix1 starts from the reviewed line after T22 merges; it may then touch `server/match.py`, `server/trace.py` and `play.py` |
+
+## Addendum: Wed 2026-11-25 (PPO line: T24 ledge edge)
+
+Saad's choice on `reports/T24-evaluation-specialist.md`@d187e1c finding 2 (AskUserQuestion), quoted verbatim. Recorded by the PPO-line orchestrator (session 8edb65a6):
+
+| # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
+|---|---|---|---|
+| 101 | At a ledge edge, on the same cell as a downed uniformed guard: hang or take? | "Hang wins at a ledge (Recommended)" | Refines #94: where `DOWN` would start a hang-down (the cell ahead is open and unsupported, as `engine._down` tests), it keeps its old meaning and the uniform is not taken; `TAKE` takes it there. Everywhere else kneeling takes the uniform. Task T24-fix1 |
