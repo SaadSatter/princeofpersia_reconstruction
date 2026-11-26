@@ -243,3 +243,8 @@ Gate 3 note, T05-fix1 (2026-11-24, orchestrator session 8edb65a6, started as the
 - Report `reports/T26-tech-lead.md` @ a31d336 on `task/T26` (base dfe2d90), read by the orchestrator. Diff: that one file only. No suite run (no code).
 - Finding: one tap = one block (14 units) by design (R-D01); at the base a 2–5 tick hold moves 2 blocks because the last pending input runs after release. T23 (0c7d73a) removes that extra block (hold 1–4 ticks = 1 block). Options: no change beyond T23-fix1 (recommended), half-block grid, a nudge action, or decide with #107.
 - Closed at Gate 3 as a study. Option choice with Saad.
+
+## 2026-11-26: T23-fix1 tech-lead report read
+
+- `reports/T23-fix1-tech-lead.md` @ 5756e25 on `task/T23-fix1`, read by the orchestrator. Verdict partial: `7 failed, 2357 passed, 11 skipped, 5 xfailed` (worker's line). Own work (6041f6c..5756e25) within permitted writes. Two failures need existing-test edits: approved by Saad (#113, #114). Four are QA's #99 updates.
+- Orchestrator finding: the merge base from the T23-fix1 brief pulled 126 main-line commits into the gameplay branch. T23-fix2 rebuilds it by cherry-pick from dfe2d90. Not sent to QA yet.

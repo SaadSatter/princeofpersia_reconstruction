@@ -34,3 +34,5 @@ Saad's choices (AskUserQuestion) after AUDIT-G23, quoted verbatim.
 | 110 | View window size (replaces "own room", CQ-1) | "One room's size (Recommended)" | 10 columns x 3 rows centred on the seat's own rival; visible iff inside the window |
 | 111 | PPO retrain on the scrolling line | "Ask me then (Recommended)" | No training run until the engine passes QA and Eval and Saad approves with runtime and cost known |
 | 112 | Tap size (T26) | Other: "Land T23-fix1 and merge it in before doing anything else" | T23-fix1 goes through its gates and is integrated into `orch/reviewed` first. T28 (scrolling) is dispatched only after that, from the new tip. No tap-size rule change |
+| 113 | T23-fix1: `test_server_match.py` replay test ignores releases | "Use trace.replay (Recommended)" | Approved edit to that existing test: replay through `server.trace.replay(tr)`; listed old → new |
+| 114 | T23-fix1: `test_t22fix2_overlap.py::test_ai_room_logs_only_the_human_seat` ends `duel_end`, `rematch` | "Accept rematch row (Recommended)" | Approved edit to that existing test: accept a `rematch` row after `duel_end`; listed old → new |
