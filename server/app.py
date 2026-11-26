@@ -28,6 +28,7 @@ from urllib.parse import urlsplit
 
 from websockets.asyncio.server import serve
 from websockets.datastructures import Headers
+from websockets.exceptions import InvalidMessage
 from websockets.http11 import Response
 
 from agents.modes import MODE_IDS
@@ -51,6 +52,29 @@ ERROR_TEXT = {"full": "That room is full", "bad_token": "That seat token is not 
               "no_rooms": "This server has no rooms.", "bad_mode": "That game mode is not offered."}
 INDEX = "online.html"
 ONLINE_FILES = frozenset({"online.html", "online.js", "keys.js", "draw.js", "ui.js"})
+
+
+class QuietUnusedConnections(logging.Filter):
+    """Decision #97: browsers open spare sockets and close them without a request, and the
+    library logs each as an ERROR "opening handshake failed" with a traceback. Rewrite only
+    those (a closed or empty connection) to one short INFO line. Any other handshake failure,
+    such as a bug in `_http`, keeps its level and traceback."""
+
+    BENIGN = (EOFError, ConnectionError, asyncio.TimeoutError, InvalidMessage)
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        if record.getMessage() == "opening handshake failed" and record.exc_info:
+            exc = record.exc_info[1]
+            cause = exc.__cause__ if exc is not None else None
+            if isinstance(exc, self.BENIGN) and (cause is None or isinstance(cause, self.BENIGN)):
+                record.levelno, record.levelname = logging.INFO, "INFO"
+                record.msg, record.args = "unused browser connection closed before a request", None
+                record.exc_info = record.exc_text = None
+        return True
+
+
+_ws_logger = logging.getLogger("server.ws")
+_ws_logger.addFilter(QuietUnusedConnections())
 
 
 def hello_message(seat: str, token: str, rival: str | None, code: str | None = None) -> dict:
@@ -165,7 +189,7 @@ class OnlineServer:
     async def start(self, host: str, port: int):
         return await serve(self.handler, host, port, process_request=self._http,
                            ping_interval=self.ping_interval, ping_timeout=self.ping_timeout,
-                           close_timeout=self.close_timeout)
+                           close_timeout=self.close_timeout, logger=_ws_logger)
 
     def _http(self, connection, request):
         if request.headers.get("Upgrade", "").lower() == "websocket":
