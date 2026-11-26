@@ -13,6 +13,7 @@ import pytest
 
 from pop.versus import arena_episode
 from pop.versus_runner import digest, snapshot
+from server.trace import replay
 from server.match import FORFEIT_GRACE_S, Match, TICK_S
 
 T = TICK_S
@@ -176,13 +177,9 @@ def test_the_input_trace_replays_to_the_same_outcome_and_state_hash():
         m.advance(now)
     tr = m.trace()
     assert tr["seed"] == 7 and len(tr["ticks"]) == frames(m)
-    ep = arena_episode(tr["seed"])
-    for tick in tr["ticks"]:
-        for seat, action in tick:
-            assert ep.step(seat, action)["accepted"]
-        ep.tick()
-    assert ep.outcome() == m.episode.outcome()
-    assert digest(snapshot(ep)) == digest(snapshot(m.episode)) == tr["state_hash"]
+    outcome, h = replay(tr)       # #113: the trace also holds each human release (#93)
+    assert outcome == m.episode.outcome()
+    assert h == tr["state_hash"] == digest(snapshot(m.episode))
 
 
 def test_the_trace_holds_inputs_not_what_clients_sent():
