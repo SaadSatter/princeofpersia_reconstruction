@@ -267,3 +267,12 @@ His answers (AskUserQuestion), quoted verbatim. Recorded by the PPO-line orchest
 | 95 | AI and Baseline rooms online | "…I clicked join room after clicking AI vs Human, but that needs to be pressed Create Room. I think that doesnt make sense, AI vs Human is a private match, no need to create room." | Online, choosing AI Model or Baseline starts a private match at once: no Create or Join step, no room code shown. Create / Join with a code stay for Human vs Human only. Task T25 (after T22 closes) |
 | 96 | Loading screen | "Also the load in screen is shifted top left corner, it should be centered" | The online page's loading / connecting screen is centred. Task T25 |
 | 97 | "opening handshake failed" messages | "Yes, but I think the issue is I clicked join room after clicking AI vs Human…" | The page and duels worked; the messages are log noise from unused browser connections. The server logs them quietly (one line, or debug level), without hiding real errors. Task T25 |
+
+## Addendum: Wed 2026-11-25 (PPO line: T24 open cases)
+
+Saad's choices on `reports/T24-tech-lead.md`@6f0975c (AskUserQuestion), quoted verbatim. Recorded by the PPO-line orchestrator (session 8edb65a6):
+
+| # | Question (short) | Saad's answer (verbatim) | Orchestrator's reading and effect |
+|---|---|---|---|
+| 98 | After a kneel picks up a dropped sword (drawn), taking the uniform next | "Keep it: sheathe or T (Recommended)" | No extra rule: with a drawn sword, down stays the stance key; sheathe (G or `/`) then kneel, or press T, to take the uniform. R-V09 unchanged. The key hints say so (T25) |
+| — | Uniform or potion first on a potion cell | "what is a potion cell?" | Answered, no decision needed: potions exist only in the single-player Level 1 reconstruction (R-C16, R-C21: crouching on a potion drinks it). `pop/versus.py` and the arena have no potions, so the case cannot occur in a duel. QA confirms at Gate 1 |
