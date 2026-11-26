@@ -255,3 +255,7 @@ Gate 3 note, T05-fix1 (2026-11-24, orchestrator session 8edb65a6, started as the
 | 2026-11-26 | T29 (briefed as T28 @b4aa069) | implementation | tech-lead | claude-sonnet-5-5 (verified: transcript, `verify_models.py`) | work eee55b9, report baa2ec6 on `task/T29` | n/a | `tasks/T28.md`@b4aa069 (= `T29.md`@f7ab21b) → `reports/T29-tech-lead.md`@baa2ec6 | `2265 passed, 45 skipped, 5 xfailed`; `ci.yml` only |
 | 2026-11-26 | T29 | Gate 1 | qa | claude-sonnet-5-5 (verified: transcript) | report 2f3e493 on `gate/T29-qa` | ACCEPT | `reports/T29-tech-lead.md`@baa2ec6 → `reports/T29-qa.md`@2f3e493 | local `2265 passed, 45 skipped, 5 xfailed`; Actions run 45768522109 success on 3.11 and 3.12 (`2262 passed, 48 skipped, 5 xfailed`) |
 | 2026-11-26 | T29 | **Gate 3** | orchestrator (session c612c020) | claude-opus-5-5 | `orch/reviewed` = `orch/preview` 2f3e493 (fast-forward from dfe2d90) | **closed** | brief@b4aa069 → TL@baa2ec6 → QA@2f3e493; chain unbroken (TL consumed T28.md, same content, renumbered) | reports read; run 45768522109 success at baa2ec6 checked by orchestrator; diff dfe2d90..2f3e493 = `ci.yml` + 2 reports; Gate 2 n/a. Reaches `main` with PR #12 (Saad merges, #103) |
+
+## 2026-11-26: T23 Gate 1 ACCEPT
+
+- `reports/T23-qa.md` @ c2f9517 on `gate/T23-qa` (on 444bd39). Worker's line: `2360 passed, 11 skipped, 5 xfailed`. Four #99 assertion updates listed old → new (incl. `test_t20_qa_refused_mirror[3-None]` asked > 300 → > 200; mismatch check unchanged). New `tests/test_t23_qa_release.py` (12). No findings. To Gate 2.
