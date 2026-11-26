@@ -15,10 +15,10 @@ verdict: n/a
 
 # T10b-fix1: tech-lead report
 
-Status: done (suite result below)
+Status: done
 
 ## Work completed
-Merged `origin/main` (02a93a5) into `task/T10b` (6c96c90). Conflicts in `.gitignore`, `docs/agent-sessions/README.md` and four orchestration files: main's copy taken for `.gitignore` and all of `docs/final/orchestration/`; the sessions README keeps the T10b index and gains main's Session 20 line. The T10a, T22, T24, T25 reports that came in through earlier merges (not on main) were removed, so `git diff origin/main -- docs/final/orchestration` lists only `reports/T10b-tech-lead.md` (and this report). Fixed QA F1 to F5 and the stale `agent-config.json` text.
+Merged `origin/main` (02a93a5, then again at d54e334, which closed T23; TRACKER and GDD refreshed for that) into `task/T10b` (6c96c90). Conflicts in `.gitignore`, `docs/agent-sessions/README.md` and four orchestration files: main's copy taken for `.gitignore` and all of `docs/final/orchestration/`; the sessions README keeps the T10b index and gains main's Session 20 line. The T10a, T22, T24, T25 reports that came in through earlier merges (not on main) were removed, so `git diff origin/main -- docs/final/orchestration` lists only `reports/T10b-tech-lead.md` (and this report). Fixed QA F1 to F5 and the stale `agent-config.json` text.
 
 ## Paths
 `docs/final/{GDD,CONFIGURATION,REQUIREMENTS_CHECKLIST,PROJECT_PLAN,ENGINE_DECISION,TRACKER,SCOPE_LOCK}.md`, `agent-config.json`, `docs/agent-sessions/README.md`, `.gitignore` (main's copy), this report.
@@ -33,24 +33,25 @@ Merged `origin/main` (02a93a5) into `task/T10b` (6c96c90). Conflicts in `.gitign
 | 5 | F4 TRACKER: T29 closed (2f3e493, with PR #12); T23 at fix2, G1 ACCEPT 94ec401, #113 #114 | Met | TRACKER rows T23, T29, header, PPP facts; SCOPE_LOCK limitation line |
 | 6 | F5 G2/G3 is Sat 2026-11-28 | Met | PROJECT_PLAN:97, ENGINE_DECISION:33 marked superseded |
 | 7 | `agent-config.json` weights text only | Met | three statements now cite run-1 weights, SHA-256 80e4a110...ba4c; JSON still parses |
-| 8 | Suite green | See below | |
+| 8 | Suite green | Met | 2355 passed (above) |
 
 ## Tests run
 ```
 uv run --frozen --extra play --extra train --extra online pytest -q
-4 failed, 2351 passed, 11 skipped, 5 xfailed, 2 warnings in 1361.31s (0:22:41)
+2355 passed, 11 skipped, 5 xfailed, 2 warnings in 1319.52s (0:21:59)
 ```
-This run was made with the merge staged but uncommitted. Two of the four (`tests/test_qa_T08_probes.py::test_the_ledger_*`) fail with "a real held-out run needs a clean tree" (decision #64), so they depend on a clean git tree. The rerun after commit is in "Rerun" below.
+Clean tree, on the merge of origin/main d54e334 (one later docs-only commit, the GDD known-bug row, 5cdfa76, came after the run began). An earlier run with the merge staged but uncommitted gave `4 failed, 2351 passed` (two `test_qa_T08_probes` ledger tests need a clean tree by decision #64; the other two passed on rerun, `22 passed, 1 xfailed`, under load). Not reproduced on the clean tree.
 
 ## Findings
 None new. F6 (tracker links to reports not on main) is now worse by design: the T10a, T22, T24, T25 report links in `TRACKER.md` do not resolve until PRs #6 and #12 land on `main`.
 
 ## Known limitations
 - TRACKER rows other than T23, T29, T27 were not re-derived beyond what QA flagged; I compared them to STATUS.md only for those.
-- Numbering renames (F6/brief item 5) remain recorded, not renamed.
+- Numbering renames remain recorded, not renamed.
+- `git diff origin/main` outside `docs/final` also lists the T22/T24/T25 code and tests: they come from the T10b base (PR #6 plus `orch/reviewed`, PR #12), not from this task.
 
 ## Unresolved findings
-Rerun results for the 4 failures: see below.
+None.
 
 ## Requested next action
 QA Gate 1 on `task/T10b-fix1`.
@@ -58,7 +59,7 @@ QA Gate 1 on `task/T10b-fix1`.
 Commit to review: see the head of `task/T10b-fix1`
 What changed: docs corrected per F1 to F5, orchestration records restored to main, agent-config weights text.
 How to check it: `git diff origin/main --name-only`; `git diff origin/main --name-only -- docs/final/orchestration`; `grep -n "T28" docs/final/GDD.md`; `python3 -c "import json;json.load(open('agent-config.json'))"`.
-What I am unsure about: the four suite failures (see Rerun); whether removing the T10a/T22/T24/T25 reports is intended (brief step 1 says only `reports/T10b-*` may differ).
+What I am unsure about: whether removing the T10a/T22/T24/T25 reports is intended (brief step 1 says only `reports/T10b-*` may differ).
 Touches the knowledge boundary or AI seat: no (Gate 2 does not apply)
 
 ## Student decision required
