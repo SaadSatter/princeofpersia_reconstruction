@@ -86,3 +86,11 @@ Evaluation Specialist: Gate 2 on `gate/T22-fix2-qa` / 9b59677. Focus on the AI s
 
 ## Student decision required
 None.
+
+## Addendum: flaky timing probe made robust (orchestrator request)
+`tests/test_qa_T22_probes.py` (my own T22 probe), the one assertion changed:
+- Old: `assert worst < 0.04 + 0.05, worst`
+- New: `assert worst < delay["s"] / 2, f"worst advance() took {worst:.3f}s (injected delay {delay['s']}s)"` (bound 0.15 s; the injected delay is 0.30 s)
+- It still proves what it proved: a slow policy becomes a logged `"source": "fallback"` that never reaches the client (the later asserts are untouched), and `advance` is bounded by the rival budget (about 0.04 s) plus noise, not by the 0.30 s delay (a stalled loop would show at least 0.30 s, twice the new bound).
+- `worst` on an idle machine: 0.0455 s (`[ai]`) and 0.0459 s (`[baseline]`). The loaded-run failure values were not captured earlier; the failure message now prints them.
+- Nothing else changed.
