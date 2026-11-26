@@ -52,7 +52,8 @@ def test_ai_room_logs_only_the_human_seat(tmp_path, mode):
     rows = [json.loads(x) for x in (tmp_path / "2026-11-25-ROOM-001-A.jsonl").read_text().splitlines()]
     assert rows[0]["rival"] == mode and rows[0]["seat"] == "A"
     assert {r["seat"] for r in rows[1:]} == {"A"}
-    assert rows[-1]["type"] == "duel_end"
+    ended = [r["type"] for r in rows].index("duel_end") if any(r["type"] == "duel_end" for r in rows) else None
+    assert ended is not None and all(r["type"] == "rematch" for r in rows[ended + 1:])   # #114: a rematch row may follow
 
 
 def test_ai_room_log_has_nothing_of_the_ai_seat_or_its_fallbacks(tmp_path):

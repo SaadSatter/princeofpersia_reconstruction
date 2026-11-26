@@ -154,6 +154,7 @@ class Match:
         self.forfeit: str | None = None
         self.rematch_pressed: set[str] = set()
         self._ticks: list[list[tuple[str, str]]] = []
+        self._releases: list[list[str]] = []      # per tick: human seats whose queued input was cleared (#93)
         self._next_tick = 0.0
         self._outbox: dict[str, list[dict]] = {s: [] for s in SEATS}
         self._finished = False
@@ -270,6 +271,7 @@ class Match:
         self.close_telemetry("restart")
         self.game.rematch()
         self._ticks = []
+        self._releases = []
         self._duel_fallbacks_from = len(self._fallbacks)   # each duel's trace carries only its own
         self._seen_fallbacks = self._fallback_counts()
         self.forfeit = None
@@ -316,6 +318,7 @@ class Match:
         payload = self.game.tick()
         accepted = [(seat, action) for _, seat, action in self.episode.log[before:]]
         self._ticks.append(list(accepted))
+        self._releases.append(list(self.game.released))   # replay needs them: a release changes the engine
         self._tele(lambda r: r.after_tick(accepted, self._now))
         self._note_fallbacks()
         ended = self.episode.outcome()["status"] == "terminal"
@@ -415,6 +418,7 @@ class Match:
     def trace(self) -> dict:
         return {"seed": self.seed, "rival": self.rival,
                 "ticks": [[list(x) for x in t] for t in self._ticks],
+                "releases": [list(r) for r in self._releases],
                 "fallbacks": list(self._fallbacks[self._duel_fallbacks_from:]),
                 "forfeit": self.forfeit, "outcome": self.episode.outcome(),
                 "state_hash": state_hash(self.episode)}

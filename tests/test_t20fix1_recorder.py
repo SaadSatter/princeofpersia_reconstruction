@@ -76,7 +76,7 @@ def test_a_jump_then_three_left_ticks_is_one_flip(tmp_path):
     rows = script(tmp_path, [(["d", "w"], 1), (["a"], 3), ([], 16)])
     assert summary_of(tmp_path)["mechanics"]["flip"] == 1
     left = [r for r in rows if r["type"] == "move" and r["move"] == "LEFT"]
-    assert left and all(r["effect"] != "flipped" for r in left)   # its own effect, not the flip's
+    assert not left     # #93/#99: the left was released before landing, so it never starts (was: left and its own effect)
 
 
 def test_two_separate_taps_are_two_flips(tmp_path):

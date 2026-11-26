@@ -247,6 +247,7 @@ class WebGame:
         self.art = art if art is not None else load_art()
         self.episode = episode if episode is not None else arena_episode(seed)
         self.humans = SEATS if mode == "local_two_players" else (human_seat,)
+        self.released: list[str] = []
         self._keys: dict[str, bool] = {}
         self._caches = {seat: {} for seat in SEATS}
         self.display_tick = 0
@@ -279,6 +280,7 @@ class WebGame:
     # --- one frame ----------------------------------------------------------
     def tick(self) -> dict:
         ep = self.episode
+        self.released = []                           # T23-fix1: human seats released this tick (server trace)
         for seat in SEATS:                           # A then B, as play.py
             if seat in self.humans:
                 k = self._held(seat)
@@ -290,6 +292,9 @@ class WebGame:
                     act = "KICK"                     # attack in the air: dive kick
                 if act and act in legal:
                     ep.step(seat, act)
+                else:
+                    ep.release(seat)                 # T23 (#93): no key held, nothing queued
+                    self.released.append(seat)
             else:
                 act = self.rival(ep.observe(seat), ep.legal_actions(seat))
                 if act is not None:

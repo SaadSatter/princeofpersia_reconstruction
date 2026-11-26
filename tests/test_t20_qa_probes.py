@@ -207,8 +207,8 @@ def test_two_grace_jumps_drop_two_directions(tmp_path):
 def test_the_repeat_marker_marks_the_second_engine_flip_of_one_held_key(tmp_path):
     ev = _events(tmp_path, [(["d", "w"], 10), ([], 25)])
     mv = [e for e in ev if e["type"] == "move"]
-    assert [e["move"] for e in mv] == ["JUMP_RIGHT", "JUMP_RIGHT"]                # engine started two
-    assert not mv[0].get("repeat") and mv[1]["repeat"] is True
+    assert [e["move"] for e in mv] == ["JUMP_RIGHT"]                              # #93/#99: the release drops the second
+    assert not mv[0].get("repeat")
     s = _summary_seat(tmp_path)
     assert s["mechanics"]["flip"] == 1
 
@@ -222,7 +222,7 @@ def test_a_very_long_hold_is_still_one_use(tmp_path):
 def test_a_release_and_a_new_press_is_a_new_use_even_if_the_engine_queue_ran_on(tmp_path):
     ev = _events(tmp_path, [(["d", "w"], 1), ([], 1), (["d", "w"], 1), ([], 30)])
     assert not any(e.get("repeat") for e in ev)
-    assert _summary_seat(tmp_path)["mechanics"]["flip"] == 2
+    assert _summary_seat(tmp_path)["mechanics"]["flip"] == 1                      # #93/#99: the second press is released in flight, so it never starts
 
 
 def test_two_taps_a_flip_apart_are_two_uses(tmp_path):
@@ -235,7 +235,7 @@ def test_an_input_held_after_a_different_move_is_not_a_repeat(tmp_path):
     # flip on a hold, then a different key is pressed, then the flip key again: new press
     ev = _events(tmp_path, [(["d", "w"], 3), (["a"], 3), (["d", "w"], 3), ([], 40)])
     s = _summary_seat(tmp_path)
-    assert s["mechanics"]["flip"] >= 2, (s["mechanics"], [e for e in ev if e["type"] == "move"])
+    assert s["mechanics"]["flip"] >= 1, (s["mechanics"], [e for e in ev if e["type"] == "move"])   # #93/#99: was >= 2; both later presses are released in flight
 
 
 def test_f3_a_pause_that_ends_by_forfeit_is_closed(tmp_path):

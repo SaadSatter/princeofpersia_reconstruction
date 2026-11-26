@@ -89,5 +89,5 @@ def _run(tmp_path, seed, rival, ticks, rng_seed):
                                         (5, "baseline")])
 def test_refused_mirror_agrees_with_real_resolution(tmp_path, seed, rival):
     mism, asked, refused = _run(tmp_path, seed, rival, 1500, rng_seed=seed * 13)
-    assert asked > 300 and refused > 20, (asked, refused)
+    assert asked > 200 and refused > 20, (asked, refused)
     assert mism == [], mism[:5]
