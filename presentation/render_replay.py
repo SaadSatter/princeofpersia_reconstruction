@@ -41,8 +41,8 @@ CAPTIONS = [
     (417, 432, "Tick 417: rival B's lunge hits, hearts 3 to 2 (telemetry)"),
     (433, 440, "Tick 433: rival B sweeps again"),
     (441, 455, "Tick 441: rival B's lunge hits, hearts 2 to 1 (telemetry)"),
-    (456, 462, "Tick 456: your lunge hits rival B, its hearts 3 to 2"),
-    (463, 465, "Tick 463: your THROW input; tick 465: hit, hearts 0, rival B wins"),
+    (456, 462, "Tick 456: rival B's hearts 3 to 2 (replay state; you sent LUNGE at 454, 456)"),
+    (463, 465, "Tick 463: your THROW input. Tick 465: sword drop, hearts 0, rival B wins"),
 ]
 
 
