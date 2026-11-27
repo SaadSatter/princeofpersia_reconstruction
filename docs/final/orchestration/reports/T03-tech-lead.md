@@ -86,3 +86,12 @@ Saad wrote his Student decision in `handoff-drafts/2026-11-24-qa-to-tech.md` at 
 - `python3 -m team validate`: only the G4 floor warning (`agents=2 origin_notes=0`). `render --today from-team-json` regenerated `board.html` and `team.json`, committed; a second render shows no drift.
 - `other-roles.md` unchanged: placeholders for Saad.
 - The repository is now `SaadSatter/shadow_masque`; the snapshot content is otherwise still fe21de1 (not re-archived). Official CI on PR #2 still had no result when last checked (run queued).
+
+## Update after decisions #121 and #122 (main 1a9b513)
+Official `g23-migration` head **f306dbcb4111b16ab0dd3262bc47ebe245c578c8**.
+- `agent-team/other-roles.md`: placeholder comment removed; Saad's six lines written with his text unchanged. The validator accepts a `student` value only when it is exactly `student` (`team/validate.py:~183`), so for producer, design, art, bi and release the line is `- role: student` and his sentence (starting with the em dash) is the indented line right under it, character for character. `narrative` is his line exactly (`not needed, because ...`). No reason was reworded.
+- `agent-team/roles/qa.md`: `permissions.writes` is now "tests and handoff notes; never production game code". Nothing else changed.
+- `python3 -m team validate`: `floor: 2 agents and 0 origin notes; G4 needs 3 and 1` / `agents=2 origin_notes=0`, exit 0 (no errors, no other warnings). `render --today from-team-json` regenerated board, coverage map and team.json (committed); a second render shows no drift.
+- PR #2 comment with Saad's student decisions: https://github.com/columbia-university-ai-games/final-saadsatter/pull/2#issuecomment-7224795839
+- Official CI: still no result known (last seen queued; the latest status query failed with a network error).
+- SCOPE_LOCK.md is not approved yet (decisions file); nothing done on it.
