@@ -44,7 +44,7 @@ The rival does not need to win, and no hypothesis needs to be confirmed.
 
 | Session | Build commit (full sha) | Launch command | Time limit (frames) | Baseline version | Policy weights hash | Seeds | Other config |
 |---|---|---|---|---|---|---|---|
-| | | | | | | | |
+| 2026-11-27 XGJT | `main` cca7002 (pulled before the session; game code unchanged since PR #12 merge 4e20b83) | `uv run --extra online python -m server --playtest`, AI Model mode | 3600 | — (not used) | 80e4a1100fddbdbbb8a4504fc8f7a2aa1b6d8a28bb4b053519634d742b5aba4c (ppo-run-1) | 0 | telemetry on; logs `telemetry/2026-11-27/` (room XGJT, 1 duel, 0 fallbacks) |
 
 Condition-code mapping for Session B (X/Y to rival type): sealed until the
 tallies in section 5 are written; then recorded here with who sealed it.
@@ -57,7 +57,7 @@ tallies in section 5 are written; then recorded here with who sealed it.
 
 | Session | Date | Gate | Type (A1/A2/R/B) | Player code(s) | External? | Consent read (time, by role) | Recording | Notes publishable | Completed / stopped at |
 |---|---|---|---|---|---|---|---|---|---|
-| | | | | | | | | | |
+| 2026-11-27 XGJT | 2026-11-27 | G2/G3 | Human vs AI (trained PPO rival) | P01 (confirm) | | option (b) read and agreed (decision #130) | | | 1 duel (XGJT-001) |
 
 **Distinct external players across G2–G4** (course requires at least two):
 
@@ -72,7 +72,7 @@ linking the sheet; key observations quoted from it, each with round and time.
 
 | Session | Sheet | Key observations (verbatim from the sheet, with round and time) |
 |---|---|---|
-| | `sessions/` | |
+| 2026-11-27 XGJT | (no sheet committed) | Saad's playtest entry, verbatim: "The human player was able to identify the AI rival, and the AI was also able to locate the human player. The AI demonstrated strong combat abilities, particularly in disarming opponents and executing consecutive attacks. It was also effective at defeating scripted guards. The human player struggled to counter the AI's attacks and interrupt its attack sequences." |
 
 ## 5. Tallies
 
@@ -87,7 +87,11 @@ No-encounter rounds are listed with zero opportunities, not dropped.
 
 ## 6. Interpretation
 
-Written by: Saad · Date: ______
+Written by: Saad · Date: 2026-11-27
+
+**Playtest Session — 2026-11-27** (Player code: P01 (confirm); Game mode: Human vs. AI (trained PPO rival)). Saad's words, verbatim:
+
+> The trained PPO rival appears to be particularly effective in combat. However, its ability to repeatedly disarm and attack opponents may create an imbalance that makes combat frustrating for human players. Further playtesting should investigate whether players can develop effective counterstrategies or whether combat balancing is necessary.
 
 (What the observations mean for each hypothesis; cite section 4 and 5 rows.)
 
