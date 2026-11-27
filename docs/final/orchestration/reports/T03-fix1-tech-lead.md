@@ -74,3 +74,11 @@ Touches the knowledge boundary or AI seat: no (Gate 2 does not apply).
 
 ## Student decision required
 none
+
+## Update after decision #132 (main a650ce3)
+Official `g23-migration` head is now **9caa5a12c9188d243618fc474ba587e91b2f1765** (was 60e4434). `game/` replaced again by a fresh `git archive a650ce3`, same method.
+- Diff `60e4434..9caa5a1 -- game/`: 3 files only. Modified: `game/docs/final/playtest/LOG.md`, `game/docs/final/orchestration/DECISIONS-2026-11-26.md`. Added: `game/docs/final/orchestration/tasks/T03-fix1.md` (orchestration record). Nothing outside `game/` changed.
+- `game/assets/original` still only `MANIFEST.tsv`. SCOPE_LOCK.md sha1 still `6d5e0f9e52e82005278bb1dd84e5957cad211a40`.
+- `python3 -m team validate`: exit 0, only the G4 floor warning (`agents=2 origin_notes=0`). `render --today from-team-json`: exit 0, working tree clean afterwards (no drift).
+- Docs-only change; I did not re-run the T31 subset or the full suite for this step (the earlier results above were for 60e4434, whose `game/` differs only by these three docs files).
+- Commit to review is now 9caa5a1 on official `g23-migration`.
