@@ -104,3 +104,4 @@ Saad's message, quoted verbatim:
 | # | Question (short) | Saad's answer (verbatim choice) | Effect |
 |---|---|---|---|
 | 125 | Official `final.yml` 10-minute limit vs an 8–9 minute suite | "Run a smaller suite" | Task T31: keep `timeout-minutes: 10`; "Your tests" runs a fast deterministic subset; the full suite stays in `shadow_masque` CI |
+| 126 | Playtest kit approval (asked: approve PROTOCOL.md, the hypotheses in LOG.md, the Section 3 definitions, and the telemetry consent sentence before the session) | "Everything is approved" | The playtest kit is approved and frozen as of 2026-11-27: `playtest/PROTOCOL.md` (incl. Section 3 definitions), the hypotheses in `playtest/LOG.md`, `CONSENT.md` with the telemetry sentence drafted in `TELEMETRY.md` ("Draft for CONSENT.md"). Task T32 records the status in those files. Read as **not** covering `SCOPE_LOCK.md`, which Saad asked to see after QA (#123) |
