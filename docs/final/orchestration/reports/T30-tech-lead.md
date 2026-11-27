@@ -67,3 +67,6 @@ Approval of the refreshed scope lock is Saad's, after QA and Gate 3. Not answere
 
 ## Update after QA
 QA N1 fixed: `SCOPE_LOCK.md` now cites push run 46040129893 (success on `main` 271d1ee), not 46038977033 (a workflow_dispatch on `orch/pr13-merge`), and says the last completed push runs on `main` succeeded (N2). No other change. The mentions of 46038977033 above are the original, superseded evidence. I did not re-query GitHub; the run id is from QA's note.
+
+## Update after Saad's approval (#127)
+Three edits to `docs/final/SCOPE_LOCK.md`, as instructed by the orchestrator: (1) header sentence now "Approved by Saad on 2026-11-27 (decision #127)." with the provenance text kept; (2) the approval line filled with the #127 text; (3) the external-playtest limitation row now says protocol, hypotheses and consent approved 2026-11-27 (#126), evidence cell unchanged. Nothing else changed. Decisions #126 and #127 were taken from the orchestrator's message; I did not read them on `main` here.

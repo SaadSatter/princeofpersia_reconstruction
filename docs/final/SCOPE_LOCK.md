@@ -1,8 +1,8 @@
 # Shadow Masque: scope lock for G2/G3
 
-**Draft, not approved by Saad.** Written 2026-11-26 by the tech-lead worker (task T10b) from Saad's recorded decisions. Every line cites the decision it comes from. Nothing here is a new decision. Saad approves, edits or rejects it; until he does, it is a proposal. Decision files: [`DECISIONS-2026-11-23.md`](orchestration/DECISIONS-2026-11-23.md), [`DECISIONS-2026-11-24.md`](orchestration/DECISIONS-2026-11-24.md) (to #102), `DECISIONS-2026-11-26.md` (#103 and later, on `main`).
+**Approved by Saad on 2026-11-27 (decision #127).** Written 2026-11-26 by the tech-lead worker (task T10b) from Saad's recorded decisions. Every line cites the decision it comes from. Nothing here is a new decision. Saad approves, edits or rejects it; until he does, it is a proposal. Decision files: [`DECISIONS-2026-11-23.md`](orchestration/DECISIONS-2026-11-23.md), [`DECISIONS-2026-11-24.md`](orchestration/DECISIONS-2026-11-24.md) (to #102), `DECISIONS-2026-11-26.md` (#103 and later, on `main`).
 
-Approval line for Saad: `Approved by Saad: ______ (date)`.
+`Approved by Saad: 2026-11-27 (decision #127, recorded in DECISIONS-2026-11-26.md)`
 
 **Scope baseline (decision #123):** the current playable build (`main` 271d1ee or later) is the scope baseline. Evidence-driven improvements before Gold remain possible, each with Saad's approval (see "Deferred" below). The refresh rules are Saad's decision #123 in `DECISIONS-2026-11-26.md`; this file only applies them and quotes nothing else in his voice. Refreshed 2026-11-27 by the tech-lead worker (task T30).
 
@@ -62,7 +62,7 @@ From GDD Section 8, unchanged: 1. rooms 6 to 3; 2. suspicion meter to a yes/no r
 | --- | --- |
 | The trained rival did not beat the baseline at the pre-registered bar: 13 W, 2 D, 1 L of 16 held-out duels, bar 14, "NOT SUPPORTED" (#77). The threshold was not changed after the result (#123) | [`evaluation/RESULTS-T09.md`](evaluation/RESULTS-T09.md) |
 | The rival's own inference errors were not recorded in the held-out rows (#84) | [`evaluation/RESULTS-T09.md`](evaluation/RESULTS-T09.md) |
-| External playtest: still pending until Saad conducts it; the playtest protocol and consent sentence are unapproved drafts | [`playtest/LOG.md`](playtest/LOG.md), #123 |
+| External playtest: still pending until Saad conducts it; protocol, hypotheses and consent approved 2026-11-27 (#126) | [`playtest/LOG.md`](playtest/LOG.md), #123 |
 | Online play is tested on localhost only; not run on two machines; no latency measurement (OQ-12) | [`ONLINE_PLAY.md`](ONLINE_PLAY.md) |
 | The hosted page runs the engine in the browser, so devtools can read hidden state (accepted for human vs AI only; the LAN server does not have this limit). The page deploys through GitHub Actions (run 46040177615); the custom domain `shadowmasque.com` has no public DNS records yet | [`WEB_BUILD.md`](WEB_BUILD.md), GDD "Changes since", REVIEW_LOG (Pages row, 2026-11-27) |
 | Left/right taps move a whole block (movement adjustments are deferred, above) | T26 report (`task/T26`), #106, #123 |
