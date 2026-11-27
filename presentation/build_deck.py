@@ -122,7 +122,57 @@ def picture(s, name, x, y, w=None, h=None):
     return p
 
 
+# Narration, trimmed to each slide's time slot at about 150 words a minute (the live demo and the
+# video play without speech). Overrides the longer draft passed to notes().
+SCRIPT = {
+    "Shadow Masque":
+        "This is Shadow Masque, a two-player stealth platformer. Rival swordsmen disguise themselves as "
+        "guards, set traps, and try to eliminate each other. Is that figure a guard, or my rival? "
+        "I'm Saad Satter, and this is the G2/G3 first playable.",
+    "First Playable: live demo":
+        "Now the game itself. The loop is: I act, the game responds, I interpret, and I choose my next action. "
+        "I move into the Barracks, draw my sword, defeat a scripted guard and take its uniform. Now I'm "
+        "disguised, and acting oddly raises the guard's suspicion. Then I look for the rival, the trained PPO "
+        "policy. Whatever it does decides what I do next. I'm playing this live, so its moves are its own.",
+    "The AI rival: learned vs scripted":
+        "The rival is a small PPO policy we trained. It sees only its own partial observation, picks a legal "
+        "macro action, and the one game engine runs it. Held out against the scripted baseline: 16 duels, 13 "
+        "wins, 2 draws, 1 loss. We pre-registered 14 wins, so the verdict is not supported. That means the "
+        "improvement wasn't shown at that bar, not that the rival is weak. Three trials of each duel were "
+        "identical, so the real sample is about eight starts. How players experience it, harder to read, more "
+        "tense, is untested. Training took 80 minutes on a local CPU, with no API cost.",
+    "External playtest: Human vs AI":
+        "One external player, one duel against the trained rival. The clip is reconstructed by replaying the "
+        "logged inputs; the final state matches the recorded hash. My observer notes are on the right, in my "
+        "words. Beside them is what the replay itself shows: three hits on the player, the rival winning two "
+        "hearts to none, and the only dropped sword is the player's own throw. So the replay supports strong "
+        "combat, not every item in my notes. The open question: can players develop counterstrategies, or "
+        "does combat need balancing?",
+    "Production agent team":
+        "I'm the Student and Creative Director. An Opus orchestrator routes work to Sonnet agents. Two are the "
+        "formal course agents: the Tech Lead builds and the QA agent verifies independently. The others are "
+        "supporting workers, and the PPO rival is a game feature, not a production agent. Our real handoff, "
+        "T02: QA found that a disguised player who waited could be told apart from a paused guard, through "
+        "unintended motion data. I approved the fix, including hops raising suspicion. The Tech Lead fixed "
+        "it, QA verified, 650 passed, 12 skipped, 2 unrelated expected failures, and I accepted it.",
+    "Verification and scope lock":
+        "Our deterministic suite passes and development CI is green. The official repository's CI run was still "
+        "queued on the course runner when I checked, so I'm not claiming it passed. In scope: the duel, "
+        "disguise, scripted guards, six rooms, loose-floor traps, the trained rival and the baseline. Out: "
+        "gate plates, public servers, sound. Deferred until evidence and my approval: retraining and AI traps. "
+        "If time runs out we cut rooms first, then the suspicion meter; never the duel or the disguise. "
+        "Limits: the rival missed its bar, and online play is localhost-tested only.",
+    "Road to Gold and approval requested":
+        "Alpha is Wednesday, December 2; Beta, Friday, December 4; Gold, Saturday, December 5. These "
+        "acceptance checks are proposals for my approval. I'm asking for G2: accept the first playable and "
+        "its agent implementation. And G3: accept the scope, fallbacks and these milestone checks. A hold "
+        "applies if the official CI stays queued, or the rival, the single playtest or online testing "
+        "remain unresolved. The official repository is on screen.",
+}
+
+
 def notes(s, title, timing, script, extra=""):
+    script = SCRIPT.get(title, script)
     NARRATION.append((title, timing, script))
     if os.environ.get("NO_NOTES"):       # Keynote cannot import python-pptx's notes master; render copy only
         return
@@ -133,7 +183,7 @@ def notes(s, title, timing, script, extra=""):
 # ---------------------------------------------------------------- slide 1
 s = new_slide("SHADOW MASQUE", "A competitive two-player stealth platformer")
 picture(s, "rehearsal-guard-down.jpg", 6.35, 1.55, w=6.45)
-text(s, 6.35, 5.17, 6.45, 0.6,
+text(s, 6.35, 5.62, 6.45, 0.5,
      "A real game frame: the player has struck down a palace guard. The game's own renderer and art.", 13, DIM)
 text(s, 0.55, 1.6, 5.6, 2.3,
      [("Two rival swordsmen share one palace.", {"size": 26, "font": SERIF}),
@@ -146,7 +196,7 @@ for i, w in enumerate(["Tension", "Deception", "Uncertainty", "Tactical combat"]
 text(s, 0.55, 5.75, 6.0, 1.2,
      [("Saad Satter", {"size": 26, "bold": True, "color": GOLD, "font": SERIF}),
       ("G2/G3 First Playable", {"size": 20})])
-text(s, 6.35, 5.75, 6.45, 1.2,
+text(s, 6.35, 6.2, 6.45, 1.0,
      [("Intended player experience: you cannot tell a rival from a guard until it is too late.",
        {"size": 16, "color": DIM, "italic": True})])
 notes(s, "Shadow Masque", "0:00 to 0:15 (15 s)",
@@ -413,7 +463,7 @@ for i, (n, d, checks) in enumerate(ms):
     text(s, x, 1.5, 3.95, 0.62, f"{n}  {d}", 20, BG, font=SERIF, bold=True, align=PP_ALIGN.CENTER,
          anchor=MSO_ANCHOR.MIDDLE)
     box(s, x, 2.12, 3.95, 2.3, fill=PANEL, line=GOLD)
-    text(s, x + 0.1, 2.17, 3.75, 2.2, ["• " + c for c in checks], 12.5)
+    text(s, x + 0.1, 2.17, 3.75, 2.2, ["• " + c for c in checks], 16)
     text(s, x, 4.43, 3.95, 0.3, "Proposed, not yet approved", 11, INDIGO, align=PP_ALIGN.CENTER)
 labelled(s, 0.55, 4.8, 4.0, 2.0, "G2 APPROVAL",
          "Accept the integrated first playable and its agent implementation; authorize production.", 14, accent=GREEN)

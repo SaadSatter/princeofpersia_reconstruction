@@ -1,0 +1,2 @@
+uv run --extra play --extra online --extra train pytest -q  (commit 74a918e, clean tree, 2026-11-27)
+2376 passed, 11 skipped, 5 xfailed
