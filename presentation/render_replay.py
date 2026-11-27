@@ -60,13 +60,13 @@ def verify(trace: dict) -> tuple[bool, str]:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--start", type=int, default=205, help="first tick to show (1-based)")
+    ap.add_argument("--start", type=int, default=216, help="first tick to show (1-based)")
     ap.add_argument("--end", type=int, default=465, help="last tick to show")
     ap.add_argument("--scale", type=int, default=3)
     ap.add_argument("--out", default=str(ROOT / "presentation/out/xgjt-001-segment.mp4"))
-    ap.add_argument("--png-dir")
+    ap.add_argument("--png-dir", help="write one JPG per tick here")
     ap.add_argument("--verify-only", action="store_true")
-    ap.add_argument("--hold-end", type=float, default=1.5, help="seconds to hold the last frame")
+    ap.add_argument("--hold-end", type=float, default=2.0, help="seconds to hold the last frame")
     args = ap.parse_args()
 
     trace = load_trace()
@@ -125,8 +125,8 @@ def main() -> int:
                                          pix_fmt_in="rgb24", pix_fmt_out="yuv420p",
                                          macro_block_size=2, quality=8)
     writer.send(None)
-    if args.jpg_dir:
-        Path(args.jpg_dir).mkdir(parents=True, exist_ok=True)
+    if args.png_dir:
+        Path(args.png_dir).mkdir(parents=True, exist_ok=True)
     last = None
     for tick, (inputs, released) in enumerate(zip(trace["ticks"], trace["releases"]), 1):
         for seat, act in inputs:
@@ -171,8 +171,8 @@ def main() -> int:
         last = frame
         for _ in range(2):                              # 12 ticks/s shown as 24 fps
             writer.send(frame)
-        if args.jpg_dir:
-            pygame.image.save(window, str(Path(args.jpg_dir) / f"t{tick:03d}.jpg"))
+        if args.png_dir:
+            pygame.image.save(window, str(Path(args.png_dir) / f"t{tick:03d}.jpg"))
     for _ in range(int(args.hold_end * 24)):
         writer.send(last)
     writer.close()

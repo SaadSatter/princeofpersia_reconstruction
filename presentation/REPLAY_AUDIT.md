@@ -39,7 +39,7 @@ stale A 1). Reproduce: `uv run --extra play --with imageio-ffmpeg --with numpy p
 | A hearts 2 to 1 | t 441 `hit` | 441 | yes |
 | A hearts 1 to 0, duel end | t 465 `hit`, `duel_end` lost `won:B` | 465 | yes |
 | sword_drop | t 465, cause `thrown` | A's sword `drawn` until 464, `none` at 465; A's own input at tick 463 is `THROW`; no other sword drop in the duel | yes; the drop is the human's own throw |
-| Idle spell | t 240 to 372 (about 11 s) | A sends no input 240 to 372 | yes |
+| Idle spell | t 240 to 372 (about 11 s) | A sends no input strictly between 240 and 372 (inputs exist at both ends) | yes |
 | B hearts 3 to 2 | not logged (AI seat) | tick 456 (after A's LUNGE inputs at 454, 456) | replay only |
 | Guard `pit_hall` downed | no event in the log | engine `downed` becomes true at tick 327; B was in the room and lunged at 325; A sent no input from 240 to 372. Attacker is not recorded | replay only, unattributed |
 | B sweep then lunge | not logged | B SWEEP at 409, 433; LUNGE at 415, 439; A is knocked down (10 frames) from 411 and 435 | replay only |

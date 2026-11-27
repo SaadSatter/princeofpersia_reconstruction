@@ -142,12 +142,14 @@ SCRIPT = {
         "identical, so the real sample is about eight starts. How players experience it, harder to read, more "
         "tense, is untested. Training took 80 minutes on a local CPU, with no API cost.",
     "External playtest: Human vs AI":
-        "One external player, one duel against the trained rival. The clip is reconstructed by replaying the "
-        "logged inputs; the final state matches the recorded hash. My observer notes are on the right, in my "
-        "words. Beside them is what the replay itself shows: three hits on the player, the rival winning two "
-        "hearts to none, and the only dropped sword is the player's own throw. So the replay supports strong "
-        "combat, not every item in my notes. The open question: can players develop counterstrategies, or "
-        "does combat need balancing?",
+        "SAY BEFORE PLAYING (about 9 s): One external player, one duel against the trained rival. The clip is "
+        "replayed from the logged inputs.\n"
+        "[CLICK PLAY NOW. The clip runs 22 s. Say over it, about 20 s:] This is the player's view. Three hits "
+        "land on the player. The rival wins, two hearts to none. The only dropped sword is the player's own "
+        "throw. A guard goes down at frame 327; the log does not say who did it.\n"
+        "[CLIP ENDS. Say after it, about 15 s:] My observer notes, in my own words, are on the right. The replay "
+        "supports strong combat, not every item in them. My open question: can players develop "
+        "counterstrategies, or does combat need balancing?",
     "Production agent team":
         "I'm the Student and Creative Director. An Opus orchestrator routes work to Sonnet agents. Two are the "
         "formal course agents: the Tech Lead builds and the QA agent verifies independently. The others are "
@@ -184,7 +186,7 @@ def notes(s, title, timing, script, extra=""):
 s = new_slide("SHADOW MASQUE", "A competitive two-player stealth platformer")
 picture(s, "rehearsal-guard-down.jpg", 6.35, 1.55, w=6.45)
 text(s, 6.35, 5.62, 6.45, 0.5,
-     "A real game frame: the player has struck down a palace guard. The game's own renderer and art.", 13, DIM)
+     "Rehearsal frame (scripted input, the game's own renderer and art): the player has struck down a palace guard.", 13, DIM)
 text(s, 0.55, 1.6, 5.6, 2.3,
      [("Two rival swordsmen share one palace.", {"size": 26, "font": SERIF}),
       ("Each can disguise himself as a guard, set traps, and try to eliminate the other.",
@@ -267,13 +269,13 @@ labelled(s, 6.75, 2.8, 6.05, 3.15, "NOT OBSERVED (hypotheses, untested)",
          [("H1: players misidentify the disguised learned rival more often than the scripted one.",
            {"size": 16}),
           ("H2: rounds against the learned rival feel more tense.", {"size": 16}),
-          ("No one has yet played the scripted baseline in a comparison, so what a player would lose "
+          ("No recorded comparison with a human yet, so what a player would lose "
            "without the learned rival is an open question.", {"size": 16, "bold": True})], 16, accent=GOLD)
 box(s, 0.55, 6.1, 12.25, 0.95, fill=PANEL, line=STONE)
 text(s, 0.7, 6.13, 12.0, 0.9,
      ["Cost: PPO trained on local CPU in 80 minutes (1.49 M steps), $0 API. Final-project paid LLM calls: none; "
       "the under-$1 smoke budget is unspent.",
-      "Failures: 0 aborted, 0 runner fallbacks in 48 trial rows. The policy's own inference errors were not recorded."],
+      "Failures: 0 aborted duels, 0 runner fallbacks (16 duels, 3 identical trials each). The policy's own inference errors were not recorded."],
      14, DIM)
 notes(s, "The AI rival: learned vs scripted", "1:15 to 1:55 (40 s)",
       "The rival is a small PPO policy that I trained, and it sits on the same interface as a scripted "
@@ -404,31 +406,37 @@ notes(s, "Production agent team", "2:40 to 3:20 (40 s)",
 
 # ---------------------------------------------------------------- slide 6
 s = new_slide("Verification and Scope Lock", "Approved by Saad 2026-11-27 (decision #127)")
-labelled(s, 0.55, 1.5, 4.0, 3.1, "VERIFICATION",
-         [("Dev CI: green", {"size": 18, "bold": True, "color": GREEN}),
-          ("Deterministic checks, run 46065581056, success", {"size": 14}),
-          ("Local suite: " + SUITE_LINE, {"size": 14}),
-          ("Official repo CI: not passed", {"size": 18, "bold": True, "color": CRIMSON}),
-          ("\"Final\" workflow queued on the course runner (run 46058158697) at last check.", {"size": 14})],
+labelled(s, 0.55, 1.45, 3.6, 2.6, "VERIFICATION",
+         [("Dev CI: green", {"size": 16, "bold": True, "color": GREEN}),
+          ("Deterministic checks, run 46065581056, success", {"size": 12}),
+          ("Local suite: " + SUITE_LINE, {"size": 12}),
+          ("Official repo CI: not passed", {"size": 16, "bold": True, "color": CRIMSON}),
+          ("\"Final\" workflow queued on the course runner (run 46058158697) at last check.", {"size": 12})],
          12, accent=GREEN)
-labelled(s, 4.7, 1.5, 4.0, 3.1, "IN SCOPE",
+labelled(s, 4.3, 1.45, 3.9, 2.6, "IN SCOPE",
          ["Duel, disguise, suspicion, scripted guards", "Six-room arena, 5-minute duels",
           "Loose-floor traps (4 each)", "Trained PPO rival + scripted baseline",
-          "Three modes: AI, Baseline, Human vs Human; pygame, hosted page, LAN server"], 15, accent=GOLD)
-labelled(s, 8.85, 1.5, 3.95, 3.1, "OUT OF SCOPE / DEFERRED",
-         [("Out: gate-plate trap, accounts, public server, levels 2-14, original level data, sound, "
-           "LLM rival in game", {"size": 14}),
-          ("Deferred (needs approval, #123): retraining PPO, AI trap rigging, movement changes or side-scroll",
-           {"size": 14, "color": INDIGO})], 14, accent=CRIMSON)
-labelled(s, 0.55, 4.75, 7.2, 2.5, "FALLBACKS (trigger, action)",
-         ["If time runs out, cut in order: 1 rooms 6 to 3; 2 suspicion meter to yes/no; 3 one trap type "
-          "(already so); 4 AI vs AI test-only; 5 public hosting to LAN (already so). Never cut the duel or the disguise.",
-          "AI seat times out: labelled WAIT fallback, counted; over the limit the run is aborted.",
-          "Human drops: pause 15 s, then forfeit."], 14, accent=GOLD)
-labelled(s, 7.9, 4.75, 4.9, 2.5, "LIMITATIONS",
-         ["Rival missed the pre-registered bar (13 of 16, bar 14).",
-          "Online play tested on localhost only; no two-machine or latency test.",
-          "Hosted page runs the engine in the browser (devtools can read hidden state)."], 14, accent=CRIMSON)
+          "Three modes (AI, Baseline, Human vs Human) in pygame, hosted page, LAN server"], 13, accent=GOLD)
+labelled(s, 8.35, 1.45, 4.45, 2.6, "OUT OF SCOPE, THEN DEFERRED",
+         [("Out for G2/G3: gate-plate trap; accounts; matchmaking; public-internet server (not excluded "
+           "forever, #123); levels 2 to 14; original level data; sound; adaptive guards; more than two "
+           "players; LLM rival in the game.", {"size": 12.5}),
+          ("Deferred, needs approval (#123): retraining the PPO rival; the AI rigging traps; movement "
+           "changes or a side-scroll view; other gameplay improvements.",
+           {"size": 12.5, "color": INDIGO})], 12.5, accent=CRIMSON)
+labelled(s, 0.55, 4.2, 7.65, 3.05, "FALLBACKS: trigger, then action",
+         [("Scope lock, cut order. Trigger: time runs out.", {"size": 14, "bold": True, "color": GOLD}),
+          ("1 rooms 6 to 3; 2 suspicion meter to yes/no; 3 one trap type (already so); 4 AI vs AI "
+           "test-only; 5 public hosting to LAN (already so). Never cut the duel or the disguise.", {"size": 14}),
+          ("GDD section 5, runtime. Trigger: the event.", {"size": 14, "bold": True, "color": GOLD}),
+          ("AI seat times out: labelled WAIT, counted. An evaluation run over its limit is aborted; online "
+           "it is logged and never aborts (#49). Human disconnects: pause 15 s, then forfeit.", {"size": 14})],
+         12, accent=GOLD)
+labelled(s, 8.35, 4.2, 4.45, 3.05, "LIMITATIONS",
+         [("Rival missed the pre-registered bar (13 of 16, bar 14).", {"size": 13}),
+          ("Online play tested on localhost only, not on two machines; no latency measurement.", {"size": 13}),
+          ("Hosted page runs the engine in the browser (devtools can read hidden state).", {"size": 13})],
+         13, accent=CRIMSON)
 notes(s, "Verification and scope lock", "3:20 to 4:00 (40 s)",
       "On verification: the deterministic test suite passes, and the development repository's continuous "
       "integration is green. The official repository's CI workflow was still queued on the course runner "
@@ -490,10 +498,16 @@ notes(s, "Road to Gold and approval requested", "4:00 to 4:30 (30 s)",
       "Hold items are facts from the records, listed as candidates; you decide whether any of them is a hold.")
 
 OUT.mkdir(parents=True, exist_ok=True)
-prs.save(str(OUT / os.environ.get("DECK_NAME", "ShadowMasque-G2G3.pptx")))
+target = OUT / os.environ.get("DECK_NAME", "ShadowMasque-G2G3.pptx")
+prs.save(str(target))
+if not os.environ.get("NO_NOTES"):
+    import sys
+    sys.path.insert(0, str(ROOT))
+    import fix_notes_master
+    print("notes master", "fixed" if fix_notes_master.fix(target) else "unchanged")   # Keynote needs notesMasterIdLst
 
 lines = ["# Shadow Masque G2/G3: narration script", "",
-         "Target 4:30 including the video and the live demo. Generated by `presentation/build_deck.py` from the slide notes; the same text is in the speaker notes.", ""]
+         "Target 4:30 including the video and the live demo. Slide 4 marks when to click play on the clip and what to say over it (decision #138). Generated by `presentation/build_deck.py` from the slide notes; the same text is in the speaker notes.", ""]
 for i, (title, timing, script) in enumerate(NARRATION, 1):
     lines += [f"## Slide {i}: {title}  [{timing}]", "", script, ""]
 (ROOT / "NARRATION.md").write_text("\n".join(lines))

@@ -31,8 +31,8 @@ Checked against the engine with a scripted bot (the rival not in the way): the r
 3. **Take the uniform.** Stand next to the downed guard and press T. You are now drawn as a guard.
 4. **Disguise and suspicion.** Walk calmly past the other guard. Hopping (Up) near a guard adds
    suspicion (+6 per frame, 48 per hop); three hops in sight break the disguise.
-5. **The rival.** Go looking for it (the Undercroft and Pit Hall are the way east). In the external playtest the
-   rival was in the Pit Hall from tick 68. When it appears, fight, run, or use a loose floor: say what you
+5. **The rival.** Go looking for it (the Undercroft and Pit Hall are the way east). In the external playtest (replay engine state, tick 68) the
+   rival was in the Pit Hall from tick 68 (read from the replay engine state). When it appears, fight, run, or use a loose floor: say what you
    decided because of what it just did. Do not claim it was scripted; do not claim it was planned.
 
 If the rival has not appeared by about 0:50 of the slot, stop and cut to slide 3 (it is fine to say
