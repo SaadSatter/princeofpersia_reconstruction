@@ -1,6 +1,6 @@
 # Playtest telemetry
 
-Status: built in T20 (decisions #67 and #68). Off unless you ask for it. Nothing here
+Status: built in T20 (decisions #67 and #68). Approved by Saad 2026-11-27 (decision #126); frozen from this date — a change is a new version. Off unless you ask for it. Nothing here
 changes a rule, a number or what a player sees.
 
 ## Turn it on
@@ -138,5 +138,5 @@ read-only and in no observation). It never steps the engine or touches the RNG, 
 
 ## Draft for CONSENT.md
 
-The draft sentence is in `docs/final/playtest/CONSENT.md`, under "Draft addition for
-option (b)". Draft for Saad's approval; the read-aloud text is unchanged.
+The sentence is now in `docs/final/playtest/CONSENT.md`, under "Telemetry sentence for
+option (b)". Approved by Saad 2026-11-27 (decision #126); the rest of the read-aloud text is unchanged.

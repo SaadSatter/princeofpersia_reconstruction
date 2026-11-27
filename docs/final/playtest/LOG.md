@@ -1,7 +1,7 @@
 # Shadow Masque playtest log
 
 > **Proposal for Saad (answers CQ-6, "Playtest log format").** Drafted by the
-> Evaluation Specialist subagent for task T11; not approved. Saad decides the
+> Evaluation Specialist subagent for task T11. Status: Approved by Saad 2026-11-27 (decision #126); frozen from this date — a change is a new version. Saad decides the
 > format, writes or approves the hypotheses, and writes every interpretation.
 > No session has been run: every table below is empty on purpose.
 
@@ -117,4 +117,4 @@ Written by: Saad · Date: 2026-11-27
 
 | Version | Date | Change | Approved by Saad (date) | Sessions run under it |
 |---|---|---|---|---|
-| 0 (draft, T11) | 2026-11-23 | Initial kit | not yet | none |
+| 0 (T11) | 2026-11-23 | Initial kit | 2026-11-27 (decision #126) | none |
