@@ -48,3 +48,28 @@ Saad's choices (AskUserQuestion) after AUDIT-G23, quoted verbatim.
 | # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
 |---|---|---|---|
 | 120 | Which handoff carries the G2/G3 Student decision | "Commit it, use T02 (Recommended)" | Saad wrote his Student decision in `handoff-drafts/2026-11-24-qa-to-tech.md` (T02 → T01, R-V23 re-review; his pick #7). Committed unchanged from his working copy. T03 carries T02 as the graded handoff; the T18 record goes too, its decision empty. Supersedes the handoff choice in #116 |
+
+## Coverage map and role approval (session c612c020, 2026-11-27)
+
+Saad's message, quoted verbatim (his own words; the coverage-map lines go into `agent-team/other-roles.md` on official PR #2 as he wrote them):
+
+> For the coverage map, use the following decisions:
+>
+> - producer: student — I own production priorities, scope, milestones, approvals and resource allocation, supported by the orchestrator.
+> - design: student — I own gameplay mechanics, balancing, controls and the intended player experience.
+> - art: student — I direct the visual style and approve assets, using AI-assisted asset generation where appropriate.
+> - narrative: not needed, because Shadow Masque is a competitive stealth platformer without a substantial narrative or dialogue system.
+> - bi: student — I oversee evaluation and playtest analysis, supported by the Evaluation Specialist and telemetry tools. We can consider establishing a formal BI agent for G4 based on documented production friction.
+> - release: student — I retain authority over merges, deployment, release approval and course submissions, with technical assistance from the production agents.
+>
+> I approve the Tech Lead and QA role definitions. Ensure QA's declared permissions allow it to write tests and handoff notes, but never modify production game code.
+>
+> Show me the current SCOPE_LOCK.md before I approve it.
+>
+> Update the coverage map, regenerate the course team artifacts using `python -m team render`, and run `python -m team validate`. Preserve these as my student decisions on PR #2.
+
+| # | Decision | Effect |
+|---|---|---|
+| 121 | Coverage map (the six lines above) | `agent-team/other-roles.md` on `g23-migration` gets Saad's lines verbatim; render + validate |
+| 122 | Tech Lead and QA course roles approved; QA never modifies production game code | `agent-team/roles/qa.md` `permissions.writes` states the limit explicitly; render + validate |
+| — | SCOPE_LOCK.md | Shown to Saad; not yet approved |
