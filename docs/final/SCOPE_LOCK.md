@@ -24,7 +24,7 @@ Approval line for Saad: `Approved by Saad: ______ (date)`.
 | Optional host-side playtest telemetry, off by default | #67 to #69 |
 | Paid model calls under $1 total, smoke only; the PPO rival needs none | #8 |
 | Fix for the "direction keeps running after landing" bug (T23 / T23-fix1): closed at Gate 3 (`orch/reviewed` 41550f9) and merged to `main` in PR #12 (4e20b83) | #93, #105, #118; REVIEW_LOG (T23 Gate 3, 2026-11-26 and 2026-11-27 merge row) |
-| Deterministic CI green on `main`: the T29 fix landed with PR #12 (merge 4e20b83) and CI run 46038977033 succeeded on `main` 271d1ee | #104; REVIEW_LOG (T29 Gate 3, PR #12 and #13 merge row) |
+| Deterministic CI green on `main`: the T29 fix landed with PR #12 (merge 4e20b83) and the last completed push runs on `main` succeeded (push run 46040129893 on 271d1ee) | #104; REVIEW_LOG (T29 Gate 3, PR #12 and #13 merge row) |
 | Three-mode menu, kneel-takes-uniform and online polish, on `main` | PR #12 (4e20b83), #103, #119 |
 | Hosted page deployed by GitHub Actions (`pages.yml` run 46040177615, success); the custom domain `shadowmasque.com` is still waiting on DNS records at the registrar (Saad) | REVIEW_LOG (Pages row, 2026-11-27) |
 | The official-repository copy (T03); needs Saad's approval of this file first | #117, #123 |

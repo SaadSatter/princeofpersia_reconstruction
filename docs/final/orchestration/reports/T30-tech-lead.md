@@ -64,3 +64,6 @@ Touches the knowledge boundary or AI seat: no (Gate 2 does not apply)
 
 ## Student decision required
 Approval of the refreshed scope lock is Saad's, after QA and Gate 3. Not answered here.
+
+## Update after QA
+QA N1 fixed: `SCOPE_LOCK.md` now cites push run 46040129893 (success on `main` 271d1ee), not 46038977033 (a workflow_dispatch on `orch/pr13-merge`), and says the last completed push runs on `main` succeeded (N2). No other change. The mentions of 46038977033 above are the original, superseded evidence. I did not re-query GitHub; the run id is from QA's note.
