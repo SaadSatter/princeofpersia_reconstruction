@@ -64,7 +64,7 @@ Labels:
 
 ### A0. Current in-game agent, as of 2026-11-26: the PPO rival
 
-This subsection supersedes A1 to A9 below (the G1 LLM rival, kept for the record) wherever they differ. Machine-readable form: [`agent-config.json`](../../agent-config.json) (on `main`, dated 2026-11-24; its `status_note` is stale and says no weights exist; refreshing it is outside T10b's write paths and is reported to the orchestrator).
+This subsection supersedes A1 to A9 below (the G1 LLM rival, kept for the record) wherever they differ. Machine-readable form: [`agent-config.json`](../../agent-config.json) (on `main`; its `status_note` and weights statements were refreshed in T10b-fix1 and cite the run-1 weights SHA-256).
 
 Label key for this subsection (2026-11-26): **main** = on `main` (PR #11); **reviewed** = on `orch/reviewed` (PR #12, open), not yet on `main`; **Planned** = not built.
 

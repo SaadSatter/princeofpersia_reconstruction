@@ -6,7 +6,7 @@ Sources: `orchestration/STATUS.md` and `orchestration/REVIEW_LOG.md` on `main` (
 
 ## Tasks
 
-Test evidence: the last full-suite line recorded by the orchestrator was `2245 passed, 11 skipped, 5 xfailed, 2 warnings` on dfe2d90 (T25 Gate 2). Tests per task are named in each report. Task numbers T01 to T29 are listed once each; T12 was never created.
+Test evidence: the last full-suite lines recorded in `REVIEW_LOG.md` are `2265 passed, 45 skipped, 5 xfailed` (T29, local) and `2360 passed, 11 skipped, 5 xfailed` (T23 QA); the earlier `2245 passed, 11 skipped, 5 xfailed, 2 warnings` on dfe2d90 (T25 Gate 2) is superseded. Tests per task are named in each report. Task numbers T01 to T29 are listed once each; T12 was never created.
 
 | Task | What | State | Gates | Decisions | Evidence |
 | --- | --- | --- | --- | --- | --- |

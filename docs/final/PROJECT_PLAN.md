@@ -58,7 +58,7 @@ The original rows below are kept. These dated notes record what changed in them.
 
 | Risk row | What changed | Source |
 |---|---|---|
-| Technology (AI decisions at about 3 s) | The AI rival is a small PPO policy deciding at 6-frame runner decisions with no model latency, not an LLM. The 3 s latency concern applies only to the legacy LLM player. The new risks are the untrained policy (no weights yet, so no strength claim), over-fitting to two tuning starts and a leak through the features | #3, #24; `agent-config.json` |
+| Technology (AI decisions at about 3 s) | The AI rival is a small PPO policy deciding at 6-frame runner decisions with no model latency, not an LLM. The 3 s latency concern applies only to the legacy LLM player. The new risks are the policy's strength (G1 row: no weights then; now: run-1 weights `ppo-run-1.json` are shipped, with no strength claim beyond the recorded runs), over-fitting to two tuning starts and a leak through the features | #3, #24; `agent-config.json` |
 | Network (online delay) | Online human vs human is deferred, so network delay is not a G2/G3 risk. The hosted page runs the engine in the browser, so devtools could read hidden state: acceptable for human vs AI, not for online human vs human | #1, #12 |
 | Business / Audience (pairs of testers) | Local two-panel human vs human is available on one computer and a human vs AI mode on the hosted page. Whether testers are found is unchanged | #1, #12 |
 | Timeline (combat) | Combat, disguise and loose-floor traps are built on branches but not merged or playtested. The hosted build must be live by Sat 28 Nov (#13). New: the official-repository move is due the same day | #13, #6; `STATUS.md` |
