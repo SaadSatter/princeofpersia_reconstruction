@@ -3,8 +3,8 @@
     uv run --extra play python presentation/shots.py
 
 Writes presentation/shots/:
-  menu.png            the game's own start menu (render/menu.py), the title screen
-  rehearsal-NNN.png   `--mode ai --seed 0` (the demo configuration): seat A is driven by a
+  menu.jpg            the game's own start menu (render/menu.py), the title screen
+  rehearsal-NNN.jpg   `--mode ai --seed 0` (the demo configuration): seat A is driven by a
                       scripted rehearsal bot (it walks to the Barracks, draws, strikes the
                       guard, takes the uniform), seat B is the shipped PPO policy loaded
                       by hash, exactly as `play.py ARENA --mode ai` does. These are rehearsal
@@ -36,7 +36,7 @@ def main() -> int:
     window = pygame.display.set_mode((draw.SCREEN_W * SCALE, draw.SCREEN_H * SCALE))
     surf = pygame.Surface((draw.SCREEN_W, draw.SCREEN_H))
     menu.draw_menu(surf, 0, [(m.id, m.label) for m in modes.MODES])
-    pygame.image.save(pygame.transform.scale(surf, window.get_size()), str(OUT / "menu.png"))
+    pygame.image.save(pygame.transform.scale(surf, window.get_size()), str(OUT / "menu.jpg"))
 
     renderer = draw.Renderer(original=False, art="generated")
     counts = {k: v["n"] for k, v in renderer.dungeon.meta["rival"].items()}
@@ -80,7 +80,7 @@ def main() -> int:
     duel = ep._duel
     guard = duel.guards["barracks"]
     me = duel.rivals["A"]
-    wanted = {1: "rehearsal-001.png"}
+    wanted = {1: "rehearsal-001.jpg"}
     taken = []
     for t in range(1, 420):
         leg = ep.legal_actions("A")
@@ -104,13 +104,13 @@ def main() -> int:
         ep.tick()
         key = None
         if t == 40:
-            key = "rehearsal-guard-room.png"
+            key = "rehearsal-guard-room.jpg"
         elif guard.downed and "downed" not in taken:
             taken.append("downed")
-            key = "rehearsal-guard-down.png"
+            key = "rehearsal-guard-down.jpg"
         elif me.disguised and "disg" not in taken:
             taken.append("disg")
-            key = "rehearsal-disguised.png"
+            key = "rehearsal-disguised.jpg"
         if key:
             shot(ep, t, key)
             print(t, key, ep.observe("A")["room"], me.kid.cell)

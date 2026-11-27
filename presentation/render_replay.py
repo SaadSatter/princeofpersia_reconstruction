@@ -12,7 +12,7 @@ Usage (from the repository root):
     uv run --extra play --with imageio-ffmpeg --with numpy python presentation/render_replay.py \
         --start 205 --end 465 --out presentation/out/xgjt-001-segment.mp4
 
-    --png-dir DIR   also write one PNG per rendered tick (for inspection)
+    --png-dir DIR   also write one JPG (a tracked .png breaks tests/test_frontend.py) per rendered tick (for inspection)
     --verify-only   replay and check the hash, render nothing
 """
 
@@ -125,8 +125,8 @@ def main() -> int:
                                          pix_fmt_in="rgb24", pix_fmt_out="yuv420p",
                                          macro_block_size=2, quality=8)
     writer.send(None)
-    if args.png_dir:
-        Path(args.png_dir).mkdir(parents=True, exist_ok=True)
+    if args.jpg_dir:
+        Path(args.jpg_dir).mkdir(parents=True, exist_ok=True)
     last = None
     for tick, (inputs, released) in enumerate(zip(trace["ticks"], trace["releases"]), 1):
         for seat, act in inputs:
@@ -171,8 +171,8 @@ def main() -> int:
         last = frame
         for _ in range(2):                              # 12 ticks/s shown as 24 fps
             writer.send(frame)
-        if args.png_dir:
-            pygame.image.save(window, str(Path(args.png_dir) / f"t{tick:03d}.png"))
+        if args.jpg_dir:
+            pygame.image.save(window, str(Path(args.jpg_dir) / f"t{tick:03d}.jpg"))
     for _ in range(int(args.hold_end * 24)):
         writer.send(last)
     writer.close()
