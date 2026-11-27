@@ -1,9 +1,7 @@
 # Playtest protocol
 
-**Status:** draft kit (T11). Saad approves this protocol, the hypotheses in
-[`LOG.md`](LOG.md) and the definitions in Section 3 **before** any session.
-After approval, the definitions are frozen: a change after a session is a new
-protocol version, recorded in `LOG.md` with its date and reason.
+**Status:** Approved by Saad 2026-11-27 (decision #126); frozen from this date — a change is a new version (kit drafted in T11). A change is a new protocol version, recorded in
+`LOG.md` with its date and reason.
 
 Files in this kit:
 

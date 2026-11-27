@@ -1,6 +1,6 @@
 # Playtest consent script
 
-**Status:** draft kit (T11). Saad approves this text before the first session.
+**Status:** Approved by Saad 2026-11-27 (decision #126); frozen from this date — a change is a new version (kit drafted in T11).
 Read it aloud, word for word, before any play. The player may ask questions
 at any point. Nothing in this kit is filled in: no session has been run.
 
@@ -33,7 +33,10 @@ at any point. Nothing in this kit is filled in: no session has been run.
 >   written notes and your answers are kept.
 >   **(b)** The game saves a file for each round: the keys you pressed as game
 >   actions, where the characters were, and what happened in the game. It
->   contains no name and no audio or video.
+>   contains no name and no audio or video. The file lists each game action you take,
+>   which room you are in, when you are hurt, when you pause or leave, and how the round
+>   ended, with the time of each. It does not contain your name, any address or anything
+>   about the other player that your own screen did not show you.
 > - I take written notes of what happens on screen and of things you say
 >   while playing, word for word when I can, without your name.
 > - Your answers to the questions.
@@ -54,15 +57,11 @@ at any point. Nothing in this kit is filled in: no session has been run.
 >
 > Do you have any questions? Are you happy to take part?
 
-## Draft addition for option (b) (draft for Saad's approval)
+## Telemetry sentence for option (b)
 
-Not read aloud until Saad approves it. T20 added playtest telemetry
-(`docs/final/playtest/TELEMETRY.md`). Draft sentence for "What is recorded", option (b):
-
-> **(b)** ... The file lists each game action you take, which room you are in, when you
-> are hurt, when you pause or leave, and how the round ended, with the time of each.
-> It does not contain your name, any address or anything about the other player that
-> your own screen did not show you.
+Approved by Saad 2026-11-27 (decision #126). The sentence is in the read-aloud text
+above, at the end of option (b). Source: `docs/final/playtest/TELEMETRY.md`, "Draft for
+CONSENT.md" (drafted in T20), moved in unchanged.
 
 ## Answers to record (on the observation sheet header, not here)
 
