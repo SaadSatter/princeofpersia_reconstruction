@@ -38,3 +38,9 @@ Saad's choices (AskUserQuestion) after AUDIT-G23, quoted verbatim.
 | 112 | Tap size (T26) | Other: "Land T23-fix1 and merge it in before doing anything else" | T23-fix1 goes through its gates and is integrated into `orch/reviewed` first. T28 (scrolling) is dispatched only after that, from the new tip. No tap-size rule change |
 | 113 | T23-fix1: `test_server_match.py` replay test ignores releases | "Use trace.replay (Recommended)" | Approved edit to that existing test: replay through `server.trace.replay(tr)`; listed old → new |
 | 114 | T23-fix1: `test_t22fix2_overlap.py::test_ai_room_logs_only_the_human_seat` ends `duel_end`, `rematch` | "Accept rematch row (Recommended)" | Approved edit to that existing test: accept a `rematch` row after `duel_end`; listed old → new |
+
+## Merges for G2/G3 (session c612c020, 2026-11-27)
+
+| # | Question (short) | Saad's answer (verbatim) | Orchestrator's reading and effect |
+|---|---|---|---|
+| 119 | Merge PR #12 and PR #13 into `main` | "Merge in the the PRs" | PR #12 merged by the orchestrator (4e20b83, CI green). PR #13 merged locally (271d1ee) because GitHub reported a false conflict (two merge bases); CI run 46038977033 on 271d1ee succeeded before `main` was moved to it. PR #6 (superseded by #13) is left open for Saad to close. T03 may start (brief `tasks/T03.md`) |
