@@ -44,3 +44,7 @@ Saad's choices (AskUserQuestion) after AUDIT-G23, quoted verbatim.
 | # | Question (short) | Saad's answer (verbatim) | Orchestrator's reading and effect |
 |---|---|---|---|
 | 119 | Merge PR #12 and PR #13 into `main` | "Merge in the the PRs" | PR #12 merged by the orchestrator (4e20b83, CI green). PR #13 merged locally (271d1ee) because GitHub reported a false conflict (two merge bases); CI run 46038977033 on 271d1ee succeeded before `main` was moved to it. PR #6 (superseded by #13) is left open for Saad to close. T03 may start (brief `tasks/T03.md`) |
+
+| # | Question (short) | Saad's answer (verbatim choice) | Orchestrator's reading and effect |
+|---|---|---|---|
+| 120 | Which handoff carries the G2/G3 Student decision | "Commit it, use T02 (Recommended)" | Saad wrote his Student decision in `handoff-drafts/2026-11-24-qa-to-tech.md` (T02 → T01, R-V23 re-review; his pick #7). Committed unchanged from his working copy. T03 carries T02 as the graded handoff; the T18 record goes too, its decision empty. Supersedes the handoff choice in #116 |
