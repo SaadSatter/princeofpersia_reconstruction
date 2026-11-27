@@ -8,7 +8,7 @@ configured_model: claude-sonnet-5-5
 runtime_model: not visible to the agent (orchestrator records the verified id in REVIEW_LOG.md)
 consumed: docs/final/orchestration/tasks/T33.md@ab395fc; docs/final/orchestration/reports/T33-evaluation-specialist.md@0d73e48; decision #135 (main 43e9ce1)
 source_branch: task/T33
-source_commit: see "Commit to review" (the work commit; this report's own commit follows it)
+source_commit: 1edec5f
 reviewed_commit: n/a
 verdict: n/a
 ---
@@ -74,7 +74,7 @@ None of mine. N4 and N5 of the fact sheet (GDD "No paid run has been made" and t
 ## Requested next action
 QA (`gate/T33-qa`): reproduce the replay hash (`uv run --extra play --with imageio-ffmpeg --with numpy python presentation/render_replay.py --verify-only`), check every claim in `presentation/NARRATION.md` and the slide notes against its source, open the pptx in PowerPoint and play the clip, re-read both CI runs, and time the narration. Auditor (`audit/T33`): map the spec to slides and notes.
 
-Commit to review: WORK_COMMIT on task/T33
+Commit to review: 1edec5f on task/T33
 What changed: new `presentation/` tree only: a replay renderer that verifies the state hash first, the deck builder, screenshots, runbook, narration, audit; no game, server, agent, render or test change.
 How to check it: see "Requested next action"; deck rebuild commands are in `presentation/README.md`.
 What I am unsure about: video playback in PowerPoint; whether the Hold list and the Alpha/Beta checks are what Saad wants (proposed only); the 4:30 total is an estimate from word counts and the slot lengths.
