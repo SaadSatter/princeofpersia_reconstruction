@@ -57,13 +57,13 @@ tallies in section 5 are written; then recorded here with who sealed it.
 
 | Session | Date | Gate | Type (A1/A2/R/B) | Player code(s) | External? | Consent read (time, by role) | Recording | Notes publishable | Completed / stopped at |
 |---|---|---|---|---|---|---|---|---|---|
-| 2026-11-27 XGJT | 2026-11-27 | G2/G3 | Human vs AI (trained PPO rival) | P01 (confirm) | | option (b) read and agreed (decision #130) | | | 1 duel (XGJT-001) |
+| 2026-11-27 XGJT | 2026-11-27 | G2/G3 | A1 (Human vs AI, trained PPO rival) | P01 | yes | yes; option (b) read and agreed (decision #130) | no (telemetry recorded to remake the recording) | yes | 1 duel (XGJT-001) |
 
 **Distinct external players across G2–G4** (course requires at least two):
 
 | Player code | First session | Later sessions | External |
 |---|---|---|---|
-| | | | |
+| P01 | 2026-11-27 XGJT | | yes |
 
 ## 4. Observations (before interpretation)
 
