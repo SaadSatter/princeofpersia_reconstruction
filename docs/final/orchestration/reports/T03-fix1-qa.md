@@ -37,3 +37,12 @@ No blocker, major or minor findings.
 
 ## Not checked
 Full suite on this repository (Tech Lead reported 2299 passed; this change touches no code). Official CI outcome (pending).
+
+## Addendum: refresh to main a650ce3 (decision #132)
+Official `g23-migration` moved 60e4434 -> **9caa5a12c9188d243618fc474ba587e91b2f1765** ("Refresh game/ from shadow_masque main a650ce3"). Checked:
+- `diff -r` of a fresh `git archive a650ce3` against `game/` shows only my own untracked, git-ignored test artefacts (`.venv`, `__pycache__`) from running the subset in my clone; no tracked-file difference. `git status` clean.
+- `git diff 60e4434..9caa5a1` touches 3 files, all under `game/`: `docs/final/orchestration/DECISIONS-2026-11-26.md`, `docs/final/orchestration/tasks/T03-fix1.md`, `docs/final/playtest/LOG.md`. Nothing outside `game/`; `agent-team/` has no diff since d907859.
+- Only `MANIFEST.tsv` under `game/assets/original`; no secret patterns in the added lines; SCOPE_LOCK sha1 still 6d5e0f9e...; handoff file sha1 unchanged (82e48299...); `team validate` same (exit-clean, 2 agents, 0 origin notes); render no drift.
+- The T31 subset was run on 60e4434 only (the 3 new files are docs, no code or test change); not re-run on 9caa5a1.
+- Official CI for the new head not checked beyond run 46056640302 on 60e4434, still `pending` (N1).
+Verdict unchanged: ACCEPT WITH NOTES for both 60e4434 and 9caa5a1.
