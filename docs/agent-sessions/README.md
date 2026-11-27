@@ -3,6 +3,7 @@
 
 - [Session 11 — Free dungeon art download](11-free-dungeon-art-download.md): download and fit review; external assets remain outside Git.
 - [Session 12 — PixelLab art and arena](12-pixellab-art-and-arena.md): generated dungeon art (OQ-8), six-room arena (OQ-4), macOS black-box fix; PR #1.
+- [Session 13 — Flip audit, review and fixes](13-flip-audit-review-fixes.md): `game-rules-audit` and `rules-reviewer` on the flip (R-V22), then fixes and R-V23 "step in and settle"; commits `7b38b65`, `13c7488`.
 - [Session 20 — Orchestrator: gameplay clean-up, room codes, playtest telemetry, telemetry analyst](20-orchestrator-gameplay-telemetry.md): tasks T18–T21 through the gates; decisions #52–#86 (this session's rows); PR #11 refresh.
 
 ## Index of all committed session records (2026-11-26, task T10b)
@@ -32,12 +33,14 @@ Use the task id as the key. Proposed renames are in the T10b report.
 | [`10-level1-stabilization.md`](10-level1-stabilization.md) | Session 10 — Level 1 post-review stabilization (before P5) |
 | [`11-free-dungeon-art-download.md`](11-free-dungeon-art-download.md) | Session 11 — Free dungeon art candidate download |
 | [`12-pixellab-art-and-arena.md`](12-pixellab-art-and-arena.md) | Session 12 — PixelLab dungeon art, six-room arena, macOS black-box fix |
+| [`13-flip-audit-review-fixes.md`](13-flip-audit-review-fixes.md) | Session 13 — Flip audit, review and fixes (Saad's record) |
 | [`13-T04-versus-runner.md`](13-T04-versus-runner.md) | Session 13 (T04) — Seat-controller protocol and versus runner |
 | [`13-t01-engine-fixes.md`](13-t01-engine-fixes.md) | Session 13 — T01 engine fixes: disguise tells, R-V24 hop, 5-minute duel, input counts |
 | [`14-T05-macros-baseline.md`](14-T05-macros-baseline.md) | Session 14 (T05) — Macro layer and scripted versus baseline |
 | [`14-t06b-traps.md`](14-t06b-traps.md) | Session 14 — T06b: rival-rigged traps, loose floor |
 | [`14-t14-web-build.md`](14-t14-web-build.md) | Session 14 — T14 hosted web build (Pyodide + Phaser) |
 | [`15-T05-fix1-macros-baseline.md`](15-T05-fix1-macros-baseline.md) | Session 15: T05-fix1 (macro reachability and baseline fixes) |
+| [`15-native-orchestration.md`](15-native-orchestration.md) | Session 15 — native orchestration (Saad's record) |
 | [`16-t07-ppo-rival.md`](16-t07-ppo-rival.md) | Session 16: T07 (renumbered from 11 in T07-fix1; 11 was taken by the art download record) PPO rival (orchestrated Tech Lead subagent) |
 | [`17-T07-fix1-ppo-corrections.md`](17-T07-fix1-ppo-corrections.md) | Session 17: T07-fix1 PPO stack corrections (orchestrated Tech Lead subagent) |
 | [`18-T16-ppo-pretraining-polish.md`](18-T16-ppo-pretraining-polish.md) | Session 18: T16 PPO pre-training polish (orchestrated Tech Lead subagent) |
