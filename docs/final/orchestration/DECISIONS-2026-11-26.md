@@ -100,3 +100,7 @@ Saad's message, quoted verbatim:
 |---|---|---|
 | 123 | Scope lock refresh rules (above) | Task T30 (tech-lead → qa → Gate 3 → shown to Saad → PR to `main` and copy into official PR #2 only after his approval) |
 | 124 | Coverage-map formatting accepted; course tooling not modified | No change to `team/` |
+
+| # | Question (short) | Saad's answer (verbatim choice) | Effect |
+|---|---|---|---|
+| 125 | Official `final.yml` 10-minute limit vs an 8–9 minute suite | "Run a smaller suite" | Task T31: keep `timeout-minutes: 10`; "Your tests" runs a fast deterministic subset; the full suite stays in `shadow_masque` CI |
