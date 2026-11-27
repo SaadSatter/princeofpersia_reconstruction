@@ -1,0 +1,301 @@
+{"type":"header","schema":2,"build":"319bcc32","commit":"6eaced529faf","versions":{"pyodide":"0.27.7","pyodide_url":"https://cdn.jsdelivr.net/pyodide/v0.27.7/full/","phaser":"3.88.2","phaser_url":"https://cdn.jsdelivr.net/npm/phaser@3.88.2/dist/phaser.min.js","playwright":"1.49.1"},"seed":0,"rival":"human","room":"XUKM","duel":5,"duel_frames":3600,"ticks_per_second":12,"idle_threshold_s":3.0,"seat":"A"}
+{"t":0,"s":0.0,"seat":"A","type":"duel_start","room":"room-8c0174","hearts":3,"armed":false,"traps_left":4}
+{"t":9,"s":0.771,"seat":"A","type":"action","action":"UP","accepted":true,"started":"UP"}
+{"t":9,"s":0.771,"seat":"A","type":"move","move":"UP","effect":"climbed"}
+{"t":10,"s":0.84,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":11,"s":0.933,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":12,"s":1.003,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":13,"s":1.101,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":14,"s":1.186,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":15,"s":1.275,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":16,"s":1.353,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":17,"s":1.426,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":18,"s":1.501,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":19,"s":1.595,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":20,"s":1.686,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":21,"s":1.762,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":"RIGHT"}
+{"t":21,"s":1.762,"seat":"A","type":"move","move":"RIGHT","effect":"moved"}
+{"t":22,"s":1.843,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":23,"s":1.919,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":24,"s":2.015,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":25,"s":2.088,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":"RIGHT"}
+{"t":25,"s":2.088,"seat":"A","type":"move","move":"RIGHT","effect":"moved","repeat":true}
+{"t":26,"s":2.186,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":27,"s":2.255,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":28,"s":2.349,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":29,"s":2.421,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":"RIGHT"}
+{"t":29,"s":2.421,"seat":"A","type":"move","move":"RIGHT","effect":"moved","repeat":true}
+{"t":30,"s":2.521,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":31,"s":2.591,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":32,"s":2.684,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":33,"s":2.754,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":"RIGHT"}
+{"t":33,"s":2.754,"seat":"A","type":"move","move":"RIGHT","effect":"moved","repeat":true}
+{"t":34,"s":2.844,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":35,"s":2.935,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":36,"s":3.005,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":41,"s":3.427,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":"RIGHT"}
+{"t":41,"s":3.427,"seat":"A","type":"move","move":"RIGHT","effect":"moved"}
+{"t":42,"s":3.52,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":43,"s":3.592,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":47,"s":3.936,"seat":"A","type":"action","action":"UP","accepted":true,"started":"UP"}
+{"t":47,"s":3.936,"seat":"A","type":"move","move":"UP","effect":"climbed"}
+{"t":48,"s":4.008,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":49,"s":4.1,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":50,"s":4.17,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":51,"s":4.262,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":52,"s":4.335,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":53,"s":4.429,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":56,"s":4.682,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":57,"s":4.754,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":58,"s":4.847,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":59,"s":4.918,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":"RIGHT"}
+{"t":59,"s":4.918,"seat":"A","type":"move","move":"RIGHT","effect":"moved"}
+{"t":60,"s":5.013,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":61,"s":5.086,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":62,"s":5.177,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":63,"s":5.27,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":"RIGHT"}
+{"t":63,"s":5.27,"seat":"A","type":"move","move":"RIGHT","effect":"moved","repeat":true}
+{"t":63,"s":5.27,"seat":"A","type":"room","room":"room-f65719"}
+{"t":64,"s":5.34,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":65,"s":5.431,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":66,"s":5.504,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":67,"s":5.596,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":"RIGHT"}
+{"t":67,"s":5.596,"seat":"A","type":"move","move":"RIGHT","effect":"moved","repeat":true}
+{"t":70,"s":5.833,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":71,"s":5.933,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":"RIGHT"}
+{"t":71,"s":5.933,"seat":"A","type":"move","move":"RIGHT","effect":"moved"}
+{"t":72,"s":6.009,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":73,"s":6.1,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":74,"s":6.171,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":75,"s":6.265,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":"RIGHT"}
+{"t":75,"s":6.265,"seat":"A","type":"move","move":"RIGHT","effect":"moved","repeat":true}
+{"t":76,"s":6.336,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":77,"s":6.428,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":78,"s":6.521,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":79,"s":6.591,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":"RIGHT"}
+{"t":79,"s":6.591,"seat":"A","type":"move","move":"RIGHT","effect":"moved","repeat":true}
+{"t":80,"s":6.684,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":81,"s":6.757,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":82,"s":6.85,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":83,"s":6.921,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":"RIGHT"}
+{"t":83,"s":6.921,"seat":"A","type":"move","move":"RIGHT","effect":"moved","repeat":true}
+{"t":84,"s":7.015,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":85,"s":7.087,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":86,"s":7.179,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":87,"s":7.268,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":"RIGHT"}
+{"t":87,"s":7.268,"seat":"A","type":"move","move":"RIGHT","effect":"moved","repeat":true}
+{"t":88,"s":7.336,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":89,"s":7.427,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":90,"s":7.537,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":91,"s":7.597,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":"RIGHT"}
+{"t":91,"s":7.597,"seat":"A","type":"move","move":"RIGHT","effect":"moved","repeat":true}
+{"t":92,"s":7.687,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":93,"s":7.755,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":94,"s":7.847,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":95,"s":7.938,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":"RIGHT"}
+{"t":95,"s":7.938,"seat":"A","type":"move","move":"RIGHT","effect":"moved","repeat":true}
+{"t":96,"s":8.009,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":97,"s":8.101,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":98,"s":8.173,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":99,"s":8.253,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":"RIGHT"}
+{"t":99,"s":8.253,"seat":"A","type":"move","move":"RIGHT","effect":"moved","repeat":true}
+{"t":100,"s":8.346,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":101,"s":8.438,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":102,"s":8.511,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":103,"s":8.598,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":"RIGHT"}
+{"t":103,"s":8.598,"seat":"A","type":"move","move":"RIGHT","effect":"moved","repeat":true}
+{"t":103,"s":8.598,"seat":"A","type":"room","room":"room-02e162"}
+{"t":104,"s":8.67,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":105,"s":8.764,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":106,"s":8.837,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":107,"s":8.93,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":108,"s":9.003,"seat":"A","type":"action","action":"RIGHT","accepted":false,"error":"not legal now"}
+{"t":114,"s":9.518,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":"RIGHT"}
+{"t":114,"s":9.518,"seat":"A","type":"move","move":"RIGHT","effect":"moved"}
+{"t":115,"s":9.59,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":116,"s":9.683,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":117,"s":9.759,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":118,"s":9.834,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":"RIGHT"}
+{"t":118,"s":9.834,"seat":"A","type":"move","move":"RIGHT","effect":"moved","repeat":true}
+{"t":119,"s":9.925,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":155,"s":12.931,"seat":"A","type":"idle","phase":"start","since_t":119,"threshold_s":3.0}
+{"t":171,"s":14.271,"seat":"A","type":"action","action":"DRAW","accepted":true,"started":"DRAW"}
+{"t":171,"s":14.271,"seat":"A","type":"move","move":"DRAW","effect":"drew"}
+{"t":171,"s":14.271,"seat":"A","type":"idle","phase":"end","seconds":4.333}
+{"t":187,"s":15.595,"seat":"A","type":"action","action":"STANCE_UP","accepted":true,"started":null}
+{"t":223,"s":18.6,"seat":"A","type":"idle","phase":"start","since_t":187,"threshold_s":3.0}
+{"t":245,"s":20.431,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":246,"s":20.501,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":247,"s":20.594,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":248,"s":20.686,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":249,"s":20.757,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":250,"s":20.849,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":251,"s":20.92,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":252,"s":21.014,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":253,"s":21.104,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":254,"s":21.175,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":255,"s":21.266,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":256,"s":21.337,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":257,"s":21.431,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":258,"s":21.507,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":259,"s":21.598,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":260,"s":21.669,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":261,"s":21.763,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":262,"s":21.835,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":263,"s":21.927,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":264,"s":22.018,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":265,"s":22.089,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":266,"s":22.182,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":267,"s":22.254,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":268,"s":22.347,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":269,"s":22.436,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":270,"s":22.504,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":271,"s":22.603,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":272,"s":22.697,"seat":"A","type":"action","action":"SHEATHE","accepted":true,"started":"SHEATHE"}
+{"t":272,"s":22.697,"seat":"A","type":"move","move":"SHEATHE","effect":"sheathed"}
+{"t":272,"s":22.697,"seat":"A","type":"idle","phase":"end","seconds":7.083}
+{"t":273,"s":22.766,"seat":"A","type":"action","action":"SHEATHE","accepted":true,"started":null}
+{"t":274,"s":22.836,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":275,"s":22.931,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":276,"s":23.0,"seat":"A","type":"action","action":"UP","accepted":true,"started":"UP"}
+{"t":276,"s":23.0,"seat":"A","type":"move","move":"UP","effect":"climbed"}
+{"t":277,"s":23.094,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":278,"s":23.188,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":279,"s":23.259,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":280,"s":23.349,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":281,"s":23.422,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":282,"s":23.515,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":283,"s":23.585,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":291,"s":24.263,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":"LEFT"}
+{"t":291,"s":24.263,"seat":"A","type":"move","move":"LEFT","effect":"turned"}
+{"t":292,"s":24.334,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":null}
+{"t":293,"s":24.426,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":null}
+{"t":300,"s":25.005,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":"LEFT"}
+{"t":300,"s":25.005,"seat":"A","type":"move","move":"LEFT","effect":"moved"}
+{"t":311,"s":25.929,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":"RIGHT"}
+{"t":311,"s":25.929,"seat":"A","type":"move","move":"RIGHT","effect":"turned"}
+{"t":312,"s":26.001,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":322,"s":26.842,"seat":"A","type":"action","action":"DRAW","accepted":true,"started":"DRAW"}
+{"t":322,"s":26.842,"seat":"A","type":"move","move":"DRAW","effect":"drew"}
+{"t":327,"s":27.26,"seat":"A","type":"action","action":"STANCE_UP","accepted":true,"started":null}
+{"t":328,"s":27.351,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":329,"s":27.419,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":330,"s":27.509,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":331,"s":27.598,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":332,"s":27.686,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":333,"s":27.761,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":334,"s":27.838,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":335,"s":27.924,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":336,"s":28.017,"seat":"A","type":"action","action":"THROW","accepted":true,"started":"THROW"}
+{"t":336,"s":28.017,"seat":"A","type":"move","move":"THROW","effect":"throw"}
+{"t":337,"s":28.087,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":338,"s":28.177,"seat":"A","type":"action","action":"STANCE_UP","accepted":false,"error":"not legal now"}
+{"t":338,"s":28.177,"seat":"A","type":"sword_drop","cause":"thrown"}
+{"t":339,"s":28.272,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":340,"s":28.345,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":341,"s":28.418,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":342,"s":28.51,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":343,"s":28.601,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":344,"s":28.67,"seat":"A","type":"action","action":"UP","accepted":true,"started":"UP"}
+{"t":344,"s":28.67,"seat":"A","type":"move","move":"UP","effect":"climbed"}
+{"t":345,"s":28.762,"seat":"A","type":"action","action":"UP","accepted":true,"started":null}
+{"t":359,"s":29.933,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":"RIGHT"}
+{"t":359,"s":29.933,"seat":"A","type":"move","move":"RIGHT","effect":"moved"}
+{"t":360,"s":30.007,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":361,"s":30.087,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":362,"s":30.177,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":363,"s":30.25,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":"RIGHT"}
+{"t":363,"s":30.25,"seat":"A","type":"move","move":"RIGHT","effect":"moved","repeat":true}
+{"t":364,"s":30.344,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":365,"s":30.437,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":366,"s":30.508,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":367,"s":30.6,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":"RIGHT"}
+{"t":367,"s":30.6,"seat":"A","type":"move","move":"RIGHT","effect":"moved","repeat":true}
+{"t":379,"s":31.597,"seat":"A","type":"action","action":"DOWN","accepted":true,"started":"DOWN"}
+{"t":379,"s":31.597,"seat":"A","type":"move","move":"DOWN","effect":"took_sword"}
+{"t":385,"s":32.085,"seat":"A","type":"sword_pickup"}
+{"t":400,"s":33.334,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":"LEFT"}
+{"t":400,"s":33.334,"seat":"A","type":"move","move":"LEFT","effect":"turned"}
+{"t":401,"s":33.427,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":null}
+{"t":402,"s":33.518,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":null}
+{"t":403,"s":33.59,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":null}
+{"t":404,"s":33.682,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":"LEFT"}
+{"t":404,"s":33.682,"seat":"A","type":"move","move":"LEFT","effect":"moved","repeat":true}
+{"t":405,"s":33.756,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":null}
+{"t":406,"s":33.849,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":null}
+{"t":407,"s":33.92,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":null}
+{"t":408,"s":34.014,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":"LEFT"}
+{"t":408,"s":34.014,"seat":"A","type":"move","move":"LEFT","effect":"moved","repeat":true}
+{"t":409,"s":34.085,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":null}
+{"t":410,"s":34.177,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":null}
+{"t":411,"s":34.269,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":null}
+{"t":412,"s":34.339,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":"LEFT"}
+{"t":412,"s":34.339,"seat":"A","type":"move","move":"LEFT","effect":"moved","repeat":true}
+{"t":413,"s":34.432,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":null}
+{"t":414,"s":34.504,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":null}
+{"t":415,"s":34.597,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":null}
+{"t":416,"s":34.67,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":"LEFT"}
+{"t":416,"s":34.67,"seat":"A","type":"move","move":"LEFT","effect":"moved","repeat":true}
+{"t":417,"s":34.763,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":null}
+{"t":418,"s":34.836,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":null}
+{"t":419,"s":34.925,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":null}
+{"t":420,"s":35.017,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":"LEFT"}
+{"t":420,"s":35.017,"seat":"A","type":"move","move":"LEFT","effect":"moved","repeat":true}
+{"t":421,"s":35.087,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":null}
+{"t":427,"s":35.602,"seat":"A","type":"room","room":"room-ff0d63"}
+{"t":440,"s":36.682,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":"RIGHT"}
+{"t":440,"s":36.682,"seat":"A","type":"move","move":"RIGHT","effect":"turned"}
+{"t":441,"s":36.756,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":442,"s":36.847,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":443,"s":36.92,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":444,"s":37.013,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":"RIGHT"}
+{"t":444,"s":37.013,"seat":"A","type":"move","move":"RIGHT","effect":"moved","repeat":true}
+{"t":445,"s":37.086,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":446,"s":37.18,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":447,"s":37.252,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":453,"s":37.757,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":"RIGHT"}
+{"t":453,"s":37.757,"seat":"A","type":"move","move":"RIGHT","effect":"moved"}
+{"t":454,"s":37.85,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":455,"s":37.922,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":491,"s":40.92,"seat":"A","type":"idle","phase":"start","since_t":455,"threshold_s":3.0}
+{"t":529,"s":44.093,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":"LEFT"}
+{"t":529,"s":44.093,"seat":"A","type":"move","move":"LEFT","effect":"turned"}
+{"t":529,"s":44.093,"seat":"A","type":"idle","phase":"end","seconds":6.167}
+{"t":530,"s":44.184,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":null}
+{"t":531,"s":44.255,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":null}
+{"t":532,"s":44.347,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":null}
+{"t":533,"s":44.42,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":"LEFT"}
+{"t":533,"s":44.42,"seat":"A","type":"move","move":"LEFT","effect":"moved","repeat":true}
+{"t":534,"s":44.514,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":null}
+{"t":535,"s":44.587,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":null}
+{"t":536,"s":44.68,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":null}
+{"t":537,"s":44.757,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":"LEFT"}
+{"t":537,"s":44.757,"seat":"A","type":"move","move":"LEFT","effect":"moved","repeat":true}
+{"t":538,"s":44.849,"seat":"A","type":"action","action":"LEFT","accepted":true,"started":null}
+{"t":549,"s":45.753,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":"RIGHT"}
+{"t":549,"s":45.753,"seat":"A","type":"move","move":"RIGHT","effect":"turned"}
+{"t":550,"s":45.847,"seat":"A","type":"action","action":"RIGHT","accepted":true,"started":null}
+{"t":586,"s":48.845,"seat":"A","type":"idle","phase":"start","since_t":550,"threshold_s":3.0}
+{"t":737,"s":61.421,"seat":"A","type":"action","action":"STANCE_UP","accepted":true,"started":null}
+{"t":737,"s":61.421,"seat":"A","type":"idle","phase":"end","seconds":15.583}
+{"t":738,"s":61.515,"seat":"A","type":"action","action":"THROW","accepted":true,"started":"THROW"}
+{"t":738,"s":61.515,"seat":"A","type":"move","move":"THROW","effect":"throw"}
+{"t":740,"s":61.667,"seat":"A","type":"sword_drop","cause":"thrown"}
+{"t":741,"s":61.76,"seat":"A","type":"action","action":"LUNGE","accepted":false,"error":"not legal now"}
+{"t":746,"s":62.175,"seat":"A","type":"hit","hearts":2}
+{"t":746,"s":62.175,"seat":"A","type":"heart_lost","lost":1,"hearts":2,"cause":"strike"}
+{"t":747,"s":62.265,"seat":"A","type":"action","action":"LUNGE","accepted":false,"error":"not legal now"}
+{"t":757,"s":63.091,"seat":"A","type":"action","action":"LUNGE","accepted":false,"error":"not legal now"}
+{"t":759,"s":63.252,"seat":"A","type":"action","action":"LUNGE","accepted":false,"error":"not legal now"}
+{"t":762,"s":63.506,"seat":"A","type":"action","action":"LUNGE","accepted":false,"error":"not legal now"}
+{"t":762,"s":63.506,"seat":"A","type":"hit","hearts":1}
+{"t":762,"s":63.506,"seat":"A","type":"heart_lost","lost":1,"hearts":1,"cause":"strike"}
+{"t":767,"s":63.924,"seat":"A","type":"action","action":"LUNGE","accepted":false,"error":"not legal now"}
+{"t":771,"s":64.267,"seat":"A","type":"action","action":"LUNGE","accepted":false,"error":"not legal now"}
+{"t":774,"s":64.522,"seat":"A","type":"idle","phase":"start","since_t":738,"threshold_s":3.0}
+{"t":776,"s":64.681,"seat":"A","type":"action","action":"LUNGE","accepted":false,"error":"not legal now"}
+{"t":778,"s":64.845,"seat":"A","type":"hit","hearts":0}
+{"t":778,"s":64.845,"seat":"A","type":"heart_lost","lost":1,"hearts":0,"cause":"strike"}
+{"t":778,"s":64.845,"seat":"A","type":"idle","phase":"end","seconds":3.333}
+{"t":778,"s":64.845,"seat":"A","type":"duel_end","result":"lost","reason":"won:B","frames":778}
+{"t":778,"s":66.253,"seat":"A","type":"rematch","pressed":true}

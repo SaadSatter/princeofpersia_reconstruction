@@ -1,0 +1,1413 @@
+{
+ "duels": [
+  {
+   "duel": 1,
+   "room": "XGJT",
+   "seats": {
+    "A": {
+     "duration_s": 38.75,
+     "end_reason": "won:B",
+     "quits": {
+      "disconnects": 1,
+      "duel_abandoned": false,
+      "forfeit": null,
+      "no_duel_end": false,
+      "no_rematch": true,
+      "reconnects": 0,
+      "rematch_pressed": false
+     },
+     "result": "lost"
+    }
+   }
+  },
+  {
+   "duel": 1,
+   "room": "XUKM",
+   "seats": {
+    "A": {
+     "duration_s": 98.417,
+     "end_reason": "won:B",
+     "quits": {
+      "disconnects": 0,
+      "duel_abandoned": false,
+      "forfeit": null,
+      "no_duel_end": false,
+      "no_rematch": false,
+      "reconnects": 0,
+      "rematch_pressed": true
+     },
+     "result": "lost"
+    },
+    "B": {
+     "duration_s": 98.417,
+     "end_reason": "won:B",
+     "quits": {
+      "disconnects": 0,
+      "duel_abandoned": false,
+      "forfeit": null,
+      "no_duel_end": false,
+      "no_rematch": false,
+      "reconnects": 0,
+      "rematch_pressed": true
+     },
+     "result": "won"
+    }
+   }
+  },
+  {
+   "duel": 2,
+   "room": "XUKM",
+   "seats": {
+    "A": {
+     "duration_s": 7.417,
+     "end_reason": "won:A",
+     "quits": {
+      "disconnects": 0,
+      "duel_abandoned": false,
+      "forfeit": null,
+      "no_duel_end": false,
+      "no_rematch": false,
+      "reconnects": 0,
+      "rematch_pressed": true
+     },
+     "result": "won"
+    },
+    "B": {
+     "duration_s": 7.417,
+     "end_reason": "won:A",
+     "quits": {
+      "disconnects": 0,
+      "duel_abandoned": false,
+      "forfeit": null,
+      "no_duel_end": false,
+      "no_rematch": false,
+      "reconnects": 0,
+      "rematch_pressed": true
+     },
+     "result": "lost"
+    }
+   }
+  },
+  {
+   "duel": 3,
+   "room": "XUKM",
+   "seats": {
+    "A": {
+     "duration_s": 5.333,
+     "end_reason": "won:B",
+     "quits": {
+      "disconnects": 0,
+      "duel_abandoned": false,
+      "forfeit": null,
+      "no_duel_end": false,
+      "no_rematch": false,
+      "reconnects": 0,
+      "rematch_pressed": true
+     },
+     "result": "lost"
+    },
+    "B": {
+     "duration_s": 5.333,
+     "end_reason": "won:B",
+     "quits": {
+      "disconnects": 0,
+      "duel_abandoned": false,
+      "forfeit": null,
+      "no_duel_end": false,
+      "no_rematch": false,
+      "reconnects": 0,
+      "rematch_pressed": true
+     },
+     "result": "won"
+    }
+   }
+  },
+  {
+   "duel": 4,
+   "room": "XUKM",
+   "seats": {
+    "A": {
+     "duration_s": 23.167,
+     "end_reason": "won:A",
+     "quits": {
+      "disconnects": 0,
+      "duel_abandoned": false,
+      "forfeit": null,
+      "no_duel_end": false,
+      "no_rematch": false,
+      "reconnects": 0,
+      "rematch_pressed": true
+     },
+     "result": "won"
+    },
+    "B": {
+     "duration_s": 23.167,
+     "end_reason": "won:A",
+     "quits": {
+      "disconnects": 0,
+      "duel_abandoned": false,
+      "forfeit": null,
+      "no_duel_end": false,
+      "no_rematch": false,
+      "reconnects": 0,
+      "rematch_pressed": true
+     },
+     "result": "lost"
+    }
+   }
+  },
+  {
+   "duel": 5,
+   "room": "XUKM",
+   "seats": {
+    "A": {
+     "duration_s": 64.833,
+     "end_reason": "won:B",
+     "quits": {
+      "disconnects": 0,
+      "duel_abandoned": false,
+      "forfeit": null,
+      "no_duel_end": false,
+      "no_rematch": false,
+      "reconnects": 0,
+      "rematch_pressed": true
+     },
+     "result": "lost"
+    },
+    "B": {
+     "duration_s": 64.833,
+     "end_reason": "won:B",
+     "quits": {
+      "disconnects": 0,
+      "duel_abandoned": false,
+      "forfeit": null,
+      "no_duel_end": false,
+      "no_rematch": false,
+      "reconnects": 0,
+      "rematch_pressed": true
+     },
+     "result": "won"
+    }
+   }
+  },
+  {
+   "duel": 6,
+   "room": "XUKM",
+   "seats": {
+    "A": {
+     "duration_s": 124.0,
+     "end_reason": "won:B",
+     "quits": {
+      "disconnects": 1,
+      "duel_abandoned": false,
+      "forfeit": null,
+      "no_duel_end": false,
+      "no_rematch": true,
+      "reconnects": 0,
+      "rematch_pressed": false
+     },
+     "result": "lost"
+    },
+    "B": {
+     "duration_s": 124.0,
+     "end_reason": "won:B",
+     "quits": {
+      "disconnects": 1,
+      "duel_abandoned": false,
+      "forfeit": null,
+      "no_duel_end": false,
+      "no_rematch": true,
+      "reconnects": 0,
+      "rematch_pressed": false
+     },
+     "result": "won"
+    }
+   }
+  }
+ ],
+ "logs": 13,
+ "mechanics": {
+  "never_used": [
+   "RIG",
+   "TAKE"
+  ],
+  "per_seat_log_never": {
+   "2026-11-27-XGJT-001-A.jsonl": [
+    "RIG",
+    "TAKE",
+    "sheathe",
+    "sword_pickup"
+   ],
+   "2026-11-27-XUKM-001-A.jsonl": [
+    "RIG",
+    "TAKE",
+    "block",
+    "flip",
+    "sheathe",
+    "sword_pickup"
+   ],
+   "2026-11-27-XUKM-001-B.jsonl": [
+    "RIG",
+    "TAKE",
+    "sheathe",
+    "sword_pickup"
+   ],
+   "2026-11-27-XUKM-002-A.jsonl": [
+    "RIG",
+    "TAKE",
+    "block",
+    "draw",
+    "flip",
+    "sheathe",
+    "sword_pickup"
+   ],
+   "2026-11-27-XUKM-002-B.jsonl": [
+    "RIG",
+    "TAKE",
+    "block",
+    "draw",
+    "sheathe",
+    "sword_pickup"
+   ],
+   "2026-11-27-XUKM-003-A.jsonl": [
+    "RIG",
+    "TAKE",
+    "block",
+    "draw",
+    "flip",
+    "sheathe",
+    "sword_pickup"
+   ],
+   "2026-11-27-XUKM-003-B.jsonl": [
+    "RIG",
+    "TAKE",
+    "block",
+    "draw",
+    "flip",
+    "sheathe",
+    "sword_pickup"
+   ],
+   "2026-11-27-XUKM-004-A.jsonl": [
+    "RIG",
+    "TAKE",
+    "block",
+    "draw",
+    "flip",
+    "sheathe",
+    "sword_pickup"
+   ],
+   "2026-11-27-XUKM-004-B.jsonl": [
+    "RIG",
+    "TAKE",
+    "block",
+    "draw",
+    "sheathe",
+    "sword_pickup"
+   ],
+   "2026-11-27-XUKM-005-A.jsonl": [
+    "RIG",
+    "TAKE",
+    "flip"
+   ],
+   "2026-11-27-XUKM-005-B.jsonl": [
+    "RIG",
+    "TAKE",
+    "block",
+    "draw",
+    "flip",
+    "sheathe",
+    "sword_pickup"
+   ],
+   "2026-11-27-XUKM-006-A.jsonl": [
+    "RIG",
+    "TAKE",
+    "block",
+    "draw",
+    "sheathe",
+    "sword_pickup"
+   ],
+   "2026-11-27-XUKM-006-B.jsonl": [
+    "RIG",
+    "TAKE"
+   ]
+  },
+  "per_seat_log_once": {
+   "2026-11-27-XGJT-001-A.jsonl": [
+    "block",
+    "draw"
+   ],
+   "2026-11-27-XUKM-001-A.jsonl": [
+    "draw"
+   ],
+   "2026-11-27-XUKM-001-B.jsonl": [
+    "draw"
+   ],
+   "2026-11-27-XUKM-002-A.jsonl": [],
+   "2026-11-27-XUKM-002-B.jsonl": [
+    "flip"
+   ],
+   "2026-11-27-XUKM-003-A.jsonl": [],
+   "2026-11-27-XUKM-003-B.jsonl": [],
+   "2026-11-27-XUKM-004-A.jsonl": [],
+   "2026-11-27-XUKM-004-B.jsonl": [
+    "flip"
+   ],
+   "2026-11-27-XUKM-005-A.jsonl": [
+    "sheathe",
+    "sword_pickup"
+   ],
+   "2026-11-27-XUKM-005-B.jsonl": [],
+   "2026-11-27-XUKM-006-A.jsonl": [
+    "flip"
+   ],
+   "2026-11-27-XUKM-006-B.jsonl": [
+    "sheathe"
+   ]
+  },
+  "required": [
+   "RIG",
+   "TAKE",
+   "block",
+   "draw",
+   "flip",
+   "sheathe",
+   "sword_pickup"
+  ],
+  "seat_logs_using": {
+   "RIG": 0,
+   "TAKE": 0,
+   "block": 4,
+   "disguise": 1,
+   "draw": 5,
+   "flip": 6,
+   "kick": 0,
+   "lunge": 4,
+   "sheathe": 2,
+   "sweep": 1,
+   "sword_pickup": 2,
+   "throw": 3
+  },
+  "totals": {
+   "RIG": 0,
+   "TAKE": 0,
+   "block": 25,
+   "disguise": 1,
+   "draw": 7,
+   "flip": 12,
+   "kick": 0,
+   "lunge": 19,
+   "sheathe": 2,
+   "sweep": 15,
+   "sword_pickup": 3,
+   "throw": 6
+  },
+  "used_once": []
+ },
+ "seats": [
+  {
+   "build": "319bcc32",
+   "duel": 1,
+   "duration_s": 38.75,
+   "end_reason": "won:B",
+   "events": {
+    "action": 123,
+    "disconnect": 1,
+    "duel_end": 1,
+    "duel_start": 1,
+    "heart_lost": 3,
+    "hit": 3,
+    "idle": 4,
+    "move": 33,
+    "rematch": 1,
+    "room": 3,
+    "sword_drop": 1
+   },
+   "file": "2026-11-27-XGJT-001-A.jsonl",
+   "mechanics": {
+    "RIG": 0,
+    "TAKE": 0,
+    "block": 1,
+    "disguise": 0,
+    "draw": 1,
+    "flip": 2,
+    "kick": 0,
+    "lunge": 3,
+    "sheathe": 0,
+    "sweep": 0,
+    "sword_pickup": 0,
+    "throw": 1
+   },
+   "moves": {
+    "DRAW": 1,
+    "LEFT": 7,
+    "LUNGE": 3,
+    "RIGHT": 16,
+    "RUN_JUMP_RIGHT": 1,
+    "THROW": 1,
+    "UP": 3,
+    "_HOP_FLIP_RIGHT": 1
+   },
+   "quits": {
+    "disconnects": 1,
+    "duel_abandoned": false,
+    "forfeit": null,
+    "no_duel_end": false,
+    "no_rematch": true,
+    "reconnects": 0,
+    "rematch_pressed": false
+   },
+   "repeats": 15,
+   "repeats_by_move": {
+    "LEFT": 4,
+    "RIGHT": 11
+   },
+   "result": "lost",
+   "rival": "ai",
+   "room": "XGJT",
+   "seat": "A",
+   "stalls": {
+    "idle": [
+     {
+      "end_t": 372,
+      "seconds": 11.0
+     },
+     {
+      "end_t": 429,
+      "seconds": 3.917
+     }
+    ],
+    "idle_spells": 2,
+    "idle_total_s": 14.917,
+    "idle_unfinished": 0,
+    "longest_room_s": 18.25,
+    "refused_runs": [],
+    "rooms_s": {
+     "room-02e162": 7.75,
+     "room-8c0174": 5.583,
+     "room-f65719": 7.167,
+     "room-ff0d63": 18.25
+    },
+    "stuck_rooms": []
+   }
+  },
+  {
+   "build": "319bcc32",
+   "duel": 1,
+   "duration_s": 98.417,
+   "end_reason": "won:B",
+   "events": {
+    "action": 17,
+    "duel_end": 1,
+    "duel_start": 1,
+    "heart_lost": 3,
+    "hit": 3,
+    "idle": 4,
+    "move": 11,
+    "rematch": 1
+   },
+   "file": "2026-11-27-XUKM-001-A.jsonl",
+   "mechanics": {
+    "RIG": 0,
+    "TAKE": 0,
+    "block": 0,
+    "disguise": 0,
+    "draw": 1,
+    "flip": 0,
+    "kick": 0,
+    "lunge": 4,
+    "sheathe": 0,
+    "sweep": 0,
+    "sword_pickup": 0,
+    "throw": 0
+   },
+   "moves": {
+    "DRAW": 1,
+    "LUNGE": 4,
+    "RIGHT": 6
+   },
+   "quits": {
+    "disconnects": 0,
+    "duel_abandoned": false,
+    "forfeit": null,
+    "no_duel_end": false,
+    "no_rematch": false,
+    "reconnects": 0,
+    "rematch_pressed": true
+   },
+   "repeats": 0,
+   "repeats_by_move": {},
+   "result": "lost",
+   "rival": "human",
+   "room": "XUKM",
+   "seat": "A",
+   "stalls": {
+    "idle": [
+     {
+      "end_t": 856,
+      "seconds": 71.333
+     },
+     {
+      "end_t": 1181,
+      "seconds": 15.0
+     }
+    ],
+    "idle_spells": 2,
+    "idle_total_s": 86.333,
+    "idle_unfinished": 0,
+    "longest_room_s": 98.417,
+    "refused_runs": [],
+    "rooms_s": {
+     "room-8c0174": 98.417
+    },
+    "stuck_rooms": [
+     "room-8c0174"
+    ]
+   }
+  },
+  {
+   "build": "319bcc32",
+   "duel": 1,
+   "duration_s": 98.417,
+   "end_reason": "won:B",
+   "events": {
+    "action": 142,
+    "duel_end": 1,
+    "duel_start": 1,
+    "idle": 8,
+    "move": 48,
+    "rematch": 1,
+    "room": 4
+   },
+   "file": "2026-11-27-XUKM-001-B.jsonl",
+   "mechanics": {
+    "RIG": 0,
+    "TAKE": 0,
+    "block": 12,
+    "disguise": 0,
+    "draw": 1,
+    "flip": 4,
+    "kick": 0,
+    "lunge": 11,
+    "sheathe": 0,
+    "sweep": 0,
+    "sword_pickup": 0,
+    "throw": 0
+   },
+   "moves": {
+    "DRAW": 1,
+    "JUMP_RIGHT": 1,
+    "LEFT": 22,
+    "LUNGE": 11,
+    "RIGHT": 5,
+    "RUN_JUMP_LEFT": 1,
+    "UP": 4,
+    "_HOP_FLIP_LEFT": 2
+   },
+   "quits": {
+    "disconnects": 0,
+    "duel_abandoned": false,
+    "forfeit": null,
+    "no_duel_end": false,
+    "no_rematch": false,
+    "reconnects": 0,
+    "rematch_pressed": true
+   },
+   "repeats": 7,
+   "repeats_by_move": {
+    "LEFT": 7
+   },
+   "result": "won",
+   "rival": "human",
+   "room": "XUKM",
+   "seat": "B",
+   "stalls": {
+    "idle": [
+     {
+      "end_t": 155,
+      "seconds": 3.417
+     },
+     {
+      "end_t": 544,
+      "seconds": 21.583
+     },
+     {
+      "end_t": 816,
+      "seconds": 6.083
+     },
+     {
+      "end_t": 1041,
+      "seconds": 18.75
+     }
+    ],
+    "idle_spells": 4,
+    "idle_total_s": 49.833,
+    "idle_unfinished": 0,
+    "longest_room_s": 82.667,
+    "refused_runs": [],
+    "rooms_s": {
+     "room-02e162": 6.25,
+     "room-8c0174": 82.667,
+     "room-f65719": 9.5
+    },
+    "stuck_rooms": [
+     "room-8c0174"
+    ]
+   }
+  },
+  {
+   "build": "319bcc32",
+   "duel": 2,
+   "duration_s": 7.417,
+   "end_reason": "won:A",
+   "events": {
+    "duel_end": 1,
+    "duel_start": 1,
+    "idle": 2,
+    "rematch": 1
+   },
+   "file": "2026-11-27-XUKM-002-A.jsonl",
+   "mechanics": {
+    "RIG": 0,
+    "TAKE": 0,
+    "block": 0,
+    "disguise": 0,
+    "draw": 0,
+    "flip": 0,
+    "kick": 0,
+    "lunge": 0,
+    "sheathe": 0,
+    "sweep": 0,
+    "sword_pickup": 0,
+    "throw": 0
+   },
+   "moves": {},
+   "quits": {
+    "disconnects": 0,
+    "duel_abandoned": false,
+    "forfeit": null,
+    "no_duel_end": false,
+    "no_rematch": false,
+    "reconnects": 0,
+    "rematch_pressed": true
+   },
+   "repeats": 0,
+   "repeats_by_move": {},
+   "result": "won",
+   "rival": "human",
+   "room": "XUKM",
+   "seat": "A",
+   "stalls": {
+    "idle": [
+     {
+      "end_t": 89,
+      "seconds": 7.417
+     }
+    ],
+    "idle_spells": 1,
+    "idle_total_s": 7.417,
+    "idle_unfinished": 0,
+    "longest_room_s": 7.417,
+    "refused_runs": [],
+    "rooms_s": {
+     "room-8c0174": 7.417
+    },
+    "stuck_rooms": []
+   }
+  },
+  {
+   "build": "319bcc32",
+   "duel": 2,
+   "duration_s": 7.417,
+   "end_reason": "won:A",
+   "events": {
+    "action": 39,
+    "duel_end": 1,
+    "duel_start": 1,
+    "heart_lost": 1,
+    "move": 9,
+    "rematch": 1,
+    "room": 1
+   },
+   "file": "2026-11-27-XUKM-002-B.jsonl",
+   "mechanics": {
+    "RIG": 0,
+    "TAKE": 0,
+    "block": 0,
+    "disguise": 0,
+    "draw": 0,
+    "flip": 1,
+    "kick": 0,
+    "lunge": 0,
+    "sheathe": 0,
+    "sweep": 0,
+    "sword_pickup": 0,
+    "throw": 0
+   },
+   "moves": {
+    "JUMP_LEFT": 1,
+    "LEFT": 6,
+    "UP": 1
+   },
+   "quits": {
+    "disconnects": 0,
+    "duel_abandoned": false,
+    "forfeit": null,
+    "no_duel_end": false,
+    "no_rematch": false,
+    "reconnects": 0,
+    "rematch_pressed": true
+   },
+   "repeats": 4,
+   "repeats_by_move": {
+    "LEFT": 4
+   },
+   "result": "lost",
+   "rival": "human",
+   "room": "XUKM",
+   "seat": "B",
+   "stalls": {
+    "idle": [],
+    "idle_spells": 0,
+    "idle_total_s": 0,
+    "idle_unfinished": 0,
+    "longest_room_s": 6.75,
+    "refused_runs": [],
+    "rooms_s": {
+     "room-02e162": 6.75,
+     "room-f65719": 0.667
+    },
+    "stuck_rooms": []
+   }
+  },
+  {
+   "build": "319bcc32",
+   "duel": 3,
+   "duration_s": 5.333,
+   "end_reason": "won:B",
+   "events": {
+    "action": 48,
+    "duel_end": 1,
+    "duel_start": 1,
+    "heart_lost": 1,
+    "move": 10,
+    "rematch": 1,
+    "room": 1
+   },
+   "file": "2026-11-27-XUKM-003-A.jsonl",
+   "mechanics": {
+    "RIG": 0,
+    "TAKE": 0,
+    "block": 0,
+    "disguise": 0,
+    "draw": 0,
+    "flip": 0,
+    "kick": 0,
+    "lunge": 0,
+    "sheathe": 0,
+    "sweep": 0,
+    "sword_pickup": 0,
+    "throw": 0
+   },
+   "moves": {
+    "RIGHT": 9,
+    "UP": 1
+   },
+   "quits": {
+    "disconnects": 0,
+    "duel_abandoned": false,
+    "forfeit": null,
+    "no_duel_end": false,
+    "no_rematch": false,
+    "reconnects": 0,
+    "rematch_pressed": true
+   },
+   "repeats": 8,
+   "repeats_by_move": {
+    "RIGHT": 8
+   },
+   "result": "lost",
+   "rival": "human",
+   "room": "XUKM",
+   "seat": "A",
+   "stalls": {
+    "idle": [],
+    "idle_spells": 0,
+    "idle_total_s": 0,
+    "idle_unfinished": 0,
+    "longest_room_s": 4.333,
+    "refused_runs": [],
+    "rooms_s": {
+     "room-8c0174": 4.333,
+     "room-f65719": 1.0
+    },
+    "stuck_rooms": []
+   }
+  },
+  {
+   "build": "319bcc32",
+   "duel": 3,
+   "duration_s": 5.333,
+   "end_reason": "won:B",
+   "events": {
+    "duel_end": 1,
+    "duel_start": 1,
+    "idle": 2,
+    "rematch": 1
+   },
+   "file": "2026-11-27-XUKM-003-B.jsonl",
+   "mechanics": {
+    "RIG": 0,
+    "TAKE": 0,
+    "block": 0,
+    "disguise": 0,
+    "draw": 0,
+    "flip": 0,
+    "kick": 0,
+    "lunge": 0,
+    "sheathe": 0,
+    "sweep": 0,
+    "sword_pickup": 0,
+    "throw": 0
+   },
+   "moves": {},
+   "quits": {
+    "disconnects": 0,
+    "duel_abandoned": false,
+    "forfeit": null,
+    "no_duel_end": false,
+    "no_rematch": false,
+    "reconnects": 0,
+    "rematch_pressed": true
+   },
+   "repeats": 0,
+   "repeats_by_move": {},
+   "result": "won",
+   "rival": "human",
+   "room": "XUKM",
+   "seat": "B",
+   "stalls": {
+    "idle": [
+     {
+      "end_t": 64,
+      "seconds": 5.333
+     }
+    ],
+    "idle_spells": 1,
+    "idle_total_s": 5.333,
+    "idle_unfinished": 0,
+    "longest_room_s": 5.333,
+    "refused_runs": [],
+    "rooms_s": {
+     "room-02e162": 5.333
+    },
+    "stuck_rooms": []
+   }
+  },
+  {
+   "build": "319bcc32",
+   "duel": 4,
+   "duration_s": 23.167,
+   "end_reason": "won:A",
+   "events": {
+    "duel_end": 1,
+    "duel_start": 1,
+    "idle": 2,
+    "rematch": 1
+   },
+   "file": "2026-11-27-XUKM-004-A.jsonl",
+   "mechanics": {
+    "RIG": 0,
+    "TAKE": 0,
+    "block": 0,
+    "disguise": 0,
+    "draw": 0,
+    "flip": 0,
+    "kick": 0,
+    "lunge": 0,
+    "sheathe": 0,
+    "sweep": 0,
+    "sword_pickup": 0,
+    "throw": 0
+   },
+   "moves": {},
+   "quits": {
+    "disconnects": 0,
+    "duel_abandoned": false,
+    "forfeit": null,
+    "no_duel_end": false,
+    "no_rematch": false,
+    "reconnects": 0,
+    "rematch_pressed": true
+   },
+   "repeats": 0,
+   "repeats_by_move": {},
+   "result": "won",
+   "rival": "human",
+   "room": "XUKM",
+   "seat": "A",
+   "stalls": {
+    "idle": [
+     {
+      "end_t": 278,
+      "seconds": 23.167
+     }
+    ],
+    "idle_spells": 1,
+    "idle_total_s": 23.167,
+    "idle_unfinished": 0,
+    "longest_room_s": 23.167,
+    "refused_runs": [],
+    "rooms_s": {
+     "room-8c0174": 23.167
+    },
+    "stuck_rooms": []
+   }
+  },
+  {
+   "build": "319bcc32",
+   "duel": 4,
+   "duration_s": 23.167,
+   "end_reason": "won:A",
+   "events": {
+    "action": 47,
+    "duel_end": 1,
+    "duel_start": 1,
+    "heart_lost": 1,
+    "idle": 4,
+    "move": 18,
+    "rematch": 1,
+    "room": 1
+   },
+   "file": "2026-11-27-XUKM-004-B.jsonl",
+   "mechanics": {
+    "RIG": 0,
+    "TAKE": 0,
+    "block": 0,
+    "disguise": 0,
+    "draw": 0,
+    "flip": 1,
+    "kick": 0,
+    "lunge": 0,
+    "sheathe": 0,
+    "sweep": 0,
+    "sword_pickup": 0,
+    "throw": 0
+   },
+   "moves": {
+    "JUMP_LEFT": 1,
+    "LEFT": 10,
+    "RIGHT": 5,
+    "UP": 2
+   },
+   "quits": {
+    "disconnects": 0,
+    "duel_abandoned": false,
+    "forfeit": null,
+    "no_duel_end": false,
+    "no_rematch": false,
+    "reconnects": 0,
+    "rematch_pressed": true
+   },
+   "repeats": 3,
+   "repeats_by_move": {
+    "LEFT": 3
+   },
+   "result": "lost",
+   "rival": "human",
+   "room": "XUKM",
+   "seat": "B",
+   "stalls": {
+    "idle": [
+     {
+      "end_t": 124,
+      "seconds": 3.333
+     },
+     {
+      "end_t": 199,
+      "seconds": 3.5
+     }
+    ],
+    "idle_spells": 2,
+    "idle_total_s": 6.833,
+    "idle_unfinished": 0,
+    "longest_room_s": 18.5,
+    "refused_runs": [],
+    "rooms_s": {
+     "room-02e162": 4.667,
+     "room-f65719": 18.5
+    },
+    "stuck_rooms": []
+   }
+  },
+  {
+   "build": "319bcc32",
+   "duel": 5,
+   "duration_s": 64.833,
+   "end_reason": "won:B",
+   "events": {
+    "action": 227,
+    "duel_end": 1,
+    "duel_start": 1,
+    "heart_lost": 3,
+    "hit": 3,
+    "idle": 10,
+    "move": 48,
+    "rematch": 1,
+    "room": 3,
+    "sword_drop": 2,
+    "sword_pickup": 1
+   },
+   "file": "2026-11-27-XUKM-005-A.jsonl",
+   "mechanics": {
+    "RIG": 0,
+    "TAKE": 0,
+    "block": 3,
+    "disguise": 0,
+    "draw": 2,
+    "flip": 0,
+    "kick": 0,
+    "lunge": 0,
+    "sheathe": 1,
+    "sweep": 0,
+    "sword_pickup": 1,
+    "throw": 2
+   },
+   "moves": {
+    "DOWN": 1,
+    "DRAW": 2,
+    "LEFT": 11,
+    "RIGHT": 27,
+    "SHEATHE": 1,
+    "THROW": 2,
+    "UP": 4
+   },
+   "quits": {
+    "disconnects": 0,
+    "duel_abandoned": false,
+    "forfeit": null,
+    "no_duel_end": false,
+    "no_rematch": false,
+    "reconnects": 0,
+    "rematch_pressed": true
+   },
+   "repeats": 24,
+   "repeats_by_move": {
+    "LEFT": 7,
+    "RIGHT": 17
+   },
+   "result": "lost",
+   "rival": "human",
+   "room": "XUKM",
+   "seat": "A",
+   "stalls": {
+    "idle": [
+     {
+      "end_t": 171,
+      "seconds": 4.333
+     },
+     {
+      "end_t": 272,
+      "seconds": 7.083
+     },
+     {
+      "end_t": 529,
+      "seconds": 6.167
+     },
+     {
+      "end_t": 737,
+      "seconds": 15.583
+     },
+     {
+      "end_t": 778,
+      "seconds": 3.333
+     }
+    ],
+    "idle_spells": 5,
+    "idle_total_s": 36.499,
+    "idle_unfinished": 0,
+    "longest_room_s": 29.25,
+    "refused_runs": [
+     {
+      "action": "STANCE_UP",
+      "end_t": 271,
+      "length": 27,
+      "start_t": 245
+     }
+    ],
+    "rooms_s": {
+     "room-02e162": 27.0,
+     "room-8c0174": 5.25,
+     "room-f65719": 3.333,
+     "room-ff0d63": 29.25
+    },
+    "stuck_rooms": []
+   }
+  },
+  {
+   "build": "319bcc32",
+   "duel": 5,
+   "duration_s": 64.833,
+   "end_reason": "won:B",
+   "events": {
+    "duel_end": 1,
+    "duel_start": 1,
+    "heart_lost": 1,
+    "hit": 1,
+    "idle": 2,
+    "rematch": 1
+   },
+   "file": "2026-11-27-XUKM-005-B.jsonl",
+   "mechanics": {
+    "RIG": 0,
+    "TAKE": 0,
+    "block": 0,
+    "disguise": 0,
+    "draw": 0,
+    "flip": 0,
+    "kick": 0,
+    "lunge": 0,
+    "sheathe": 0,
+    "sweep": 0,
+    "sword_pickup": 0,
+    "throw": 0
+   },
+   "moves": {},
+   "quits": {
+    "disconnects": 0,
+    "duel_abandoned": false,
+    "forfeit": null,
+    "no_duel_end": false,
+    "no_rematch": false,
+    "reconnects": 0,
+    "rematch_pressed": true
+   },
+   "repeats": 0,
+   "repeats_by_move": {},
+   "result": "won",
+   "rival": "human",
+   "room": "XUKM",
+   "seat": "B",
+   "stalls": {
+    "idle": [
+     {
+      "end_t": 778,
+      "seconds": 64.833
+     }
+    ],
+    "idle_spells": 1,
+    "idle_total_s": 64.833,
+    "idle_unfinished": 0,
+    "longest_room_s": 64.833,
+    "refused_runs": [],
+    "rooms_s": {
+     "room-02e162": 64.833
+    },
+    "stuck_rooms": [
+     "room-02e162"
+    ]
+   }
+  },
+  {
+   "build": "319bcc32",
+   "duel": 6,
+   "duration_s": 124.0,
+   "end_reason": "won:B",
+   "events": {
+    "action": 3,
+    "disconnect": 1,
+    "duel_end": 1,
+    "duel_start": 1,
+    "heart_lost": 3,
+    "hit": 3,
+    "idle": 4,
+    "move": 2,
+    "rematch": 1
+   },
+   "file": "2026-11-27-XUKM-006-A.jsonl",
+   "mechanics": {
+    "RIG": 0,
+    "TAKE": 0,
+    "block": 0,
+    "disguise": 0,
+    "draw": 0,
+    "flip": 1,
+    "kick": 0,
+    "lunge": 0,
+    "sheathe": 0,
+    "sweep": 0,
+    "sword_pickup": 0,
+    "throw": 0
+   },
+   "moves": {
+    "UP": 1,
+    "_HOP_FLIP_RIGHT": 1
+   },
+   "quits": {
+    "disconnects": 1,
+    "duel_abandoned": false,
+    "forfeit": null,
+    "no_duel_end": false,
+    "no_rematch": true,
+    "reconnects": 0,
+    "rematch_pressed": false
+   },
+   "repeats": 0,
+   "repeats_by_move": {},
+   "result": "lost",
+   "rival": "human",
+   "room": "XUKM",
+   "seat": "A",
+   "stalls": {
+    "idle": [
+     {
+      "end_t": 1417,
+      "seconds": 118.083
+     },
+     {
+      "end_t": 1488,
+      "seconds": 5.75
+     }
+    ],
+    "idle_spells": 2,
+    "idle_total_s": 123.833,
+    "idle_unfinished": 0,
+    "longest_room_s": 124.0,
+    "refused_runs": [],
+    "rooms_s": {
+     "room-8c0174": 124.0
+    },
+    "stuck_rooms": [
+     "room-8c0174"
+    ]
+   }
+  },
+  {
+   "build": "319bcc32",
+   "duel": 6,
+   "duration_s": 124.0,
+   "end_reason": "won:B",
+   "events": {
+    "action": 394,
+    "disconnect": 1,
+    "disguise_broken": 1,
+    "disguise_on": 1,
+    "duel_end": 1,
+    "duel_start": 1,
+    "idle": 16,
+    "move": 101,
+    "rematch": 1,
+    "room": 4,
+    "sword_drop": 3,
+    "sword_pickup": 2
+   },
+   "file": "2026-11-27-XUKM-006-B.jsonl",
+   "mechanics": {
+    "RIG": 0,
+    "TAKE": 0,
+    "block": 9,
+    "disguise": 1,
+    "draw": 2,
+    "flip": 3,
+    "kick": 0,
+    "lunge": 1,
+    "sheathe": 1,
+    "sweep": 15,
+    "sword_pickup": 2,
+    "throw": 3
+   },
+   "moves": {
+    "DOWN": 5,
+    "DRAW": 2,
+    "JUMP_LEFT": 3,
+    "LEFT": 42,
+    "LUNGE": 1,
+    "RIGHT": 15,
+    "RUN_JUMP_LEFT": 1,
+    "SHEATHE": 1,
+    "SWEEP": 15,
+    "THROW": 3,
+    "UP": 10,
+    "_HOP_FLIP_LEFT": 2
+   },
+   "quits": {
+    "disconnects": 1,
+    "duel_abandoned": false,
+    "forfeit": null,
+    "no_duel_end": false,
+    "no_rematch": true,
+    "reconnects": 0,
+    "rematch_pressed": false
+   },
+   "repeats": 17,
+   "repeats_by_move": {
+    "LEFT": 16,
+    "RIGHT": 1
+   },
+   "result": "won",
+   "rival": "human",
+   "room": "XUKM",
+   "seat": "B",
+   "stalls": {
+    "idle": [
+     {
+      "end_t": 244,
+      "seconds": 7.25
+     },
+     {
+      "end_t": 477,
+      "seconds": 11.167
+     },
+     {
+      "end_t": 582,
+      "seconds": 3.833
+     },
+     {
+      "end_t": 805,
+      "seconds": 4.0
+     },
+     {
+      "end_t": 855,
+      "seconds": 3.75
+     },
+     {
+      "end_t": 1150,
+      "seconds": 3.5
+     },
+     {
+      "end_t": 1238,
+      "seconds": 4.083
+     },
+     {
+      "end_t": 1452,
+      "seconds": 5.5
+     }
+    ],
+    "idle_spells": 8,
+    "idle_total_s": 43.083,
+    "idle_unfinished": 0,
+    "longest_room_s": 60.417,
+    "refused_runs": [
+     {
+      "action": "STANCE_DOWN",
+      "end_t": 570,
+      "length": 13,
+      "start_t": 545
+     }
+    ],
+    "rooms_s": {
+     "room-02e162": 7.333,
+     "room-8c0174": 41.917,
+     "room-f65719": 14.333,
+     "room-ff0d63": 60.417
+    },
+    "stuck_rooms": [
+     "room-ff0d63"
+    ]
+   }
+  }
+ ],
+ "thresholds": {
+  "refused_run_min": 12,
+  "stuck_room_s": 60.0
+ }
+}

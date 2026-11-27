@@ -1,0 +1,26 @@
+{
+ "duel": 4,
+ "ended_by": "outcome",
+ "engine_reason": "won:A",
+ "events": {
+  "A": {
+   "duel_end": 1,
+   "duel_start": 1,
+   "idle": 2
+  },
+  "B": {
+   "action": 47,
+   "duel_end": 1,
+   "duel_start": 1,
+   "heart_lost": 1,
+   "idle": 4,
+   "move": 18,
+   "room": 1
+  }
+ },
+ "forfeit_seat": null,
+ "frames": 278,
+ "room": "XUKM",
+ "schema": 2,
+ "seed": 0
+}

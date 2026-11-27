@@ -1,0 +1,37 @@
+{
+ "duel": 6,
+ "ended_by": "outcome",
+ "engine_reason": "won:B",
+ "events": {
+  "A": {
+   "action": 3,
+   "disconnect": 1,
+   "duel_end": 1,
+   "duel_start": 1,
+   "heart_lost": 3,
+   "hit": 3,
+   "idle": 4,
+   "move": 2,
+   "rematch": 1
+  },
+  "B": {
+   "action": 394,
+   "disconnect": 1,
+   "disguise_broken": 1,
+   "disguise_on": 1,
+   "duel_end": 1,
+   "duel_start": 1,
+   "idle": 16,
+   "move": 101,
+   "rematch": 1,
+   "room": 4,
+   "sword_drop": 3,
+   "sword_pickup": 2
+  }
+ },
+ "forfeit_seat": null,
+ "frames": 1488,
+ "room": "XUKM",
+ "schema": 2,
+ "seed": 0
+}

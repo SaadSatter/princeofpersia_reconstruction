@@ -1,0 +1,6 @@
+{"type":"header","schema":2,"build":"319bcc32","commit":"6eaced529faf","versions":{"pyodide":"0.27.7","pyodide_url":"https://cdn.jsdelivr.net/pyodide/v0.27.7/full/","phaser":"3.88.2","phaser_url":"https://cdn.jsdelivr.net/npm/phaser@3.88.2/dist/phaser.min.js","playwright":"1.49.1"},"seed":0,"rival":"human","room":"XUKM","duel":4,"duel_frames":3600,"ticks_per_second":12,"idle_threshold_s":3.0,"seat":"A"}
+{"t":0,"s":0.0,"seat":"A","type":"duel_start","room":"room-8c0174","hearts":3,"armed":false,"traps_left":4}
+{"t":36,"s":3.008,"seat":"A","type":"idle","phase":"start","since_t":0,"threshold_s":3.0}
+{"t":278,"s":23.173,"seat":"A","type":"idle","phase":"end","seconds":23.167}
+{"t":278,"s":23.173,"seat":"A","type":"duel_end","result":"won","reason":"won:A","frames":278}
+{"t":278,"s":28.285,"seat":"A","type":"rematch","pressed":true}
