@@ -59,3 +59,6 @@ Touches the knowledge boundary or AI seat: no (Gate 2 does not apply).
 
 ## Student decision required
 none
+
+## Update after decision #127 (main 31b2262)
+Copied `docs/final/SCOPE_LOCK.md` from `task/T30` at 5c80341 byte for byte to `game/docs/final/SCOPE_LOCK.md` on official `g23-migration` (`cmp` identical). New official head **d9078593f989da3b55074803175e7e5da2731432**, one file changed, pushed. Nothing else touched. Official CI for this head not checked yet (earlier run on 92705af was queued).
