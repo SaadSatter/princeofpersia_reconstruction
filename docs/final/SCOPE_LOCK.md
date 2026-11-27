@@ -70,4 +70,4 @@ From GDD Section 8, unchanged: 1. rooms 6 to 3; 2. suspicion meter to a yes/no r
 
 ## Freeze
 
-The G2/G3 graded build is frozen (#118). T23-fix1 landed before the freeze (PR #12). T26, T27 and the scrolling line (T28) wait until after Sat 2026-11-28 and are deferred items above. Documentation, CI and the official-repository copy may still change.
+The G2/G3 graded build is frozen (#118). T23-fix1 landed before the freeze (PR #12). The T26 and T27 studies are closed; the scrolling build (T28, line `experiment/scroll`) is held until after Sat 2026-11-28 and is a deferred item above. Documentation, CI and the official-repository copy may still change.
