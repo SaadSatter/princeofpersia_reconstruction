@@ -1,7 +1,7 @@
 {
   "schema_version": "course-1",
   "updated": "2026-11-24",
-  "status_note": "Manifest for Shadow Masque's in-game AI rival and its production agent team. As of 2026-11-24 the PPO rival code (agents/rl, tools/rl), the macro layer and the versus runner are on branch orch/preview, and the evaluation suite (evaluation/, tools/eval) is on orch/wip-T08 (untested, unreviewed). None of them is on main yet. No trained weights exist yet. Entries say where each artifact lives.",
+  "status_note": "Manifest for Shadow Masque's in-game AI rival and its production agent team. As of 2026-11-24 the PPO rival code (agents/rl, tools/rl), the macro layer and the versus runner are on branch orch/preview, and the evaluation suite (evaluation/, tools/eval) is on orch/wip-T08 (untested, unreviewed). None of them is on main yet. The run-1 weights are shipped (SHA-256 80e4a110...ba4c). Entries say where each artifact lives.",
   "purpose": "Drive one rival seat in a two-rival stealth duel: choose bounded macro-actions from that seat's own partial observation, compared against a scripted pathfinding baseline on the same interface.",
   "tools_available": [
     "macro-actions only: BLEND, DISGUISE, WAIT, FOLLOW, STRIKE, FLEE, CLIMB, SEARCH, RIG_TRAP (decision #23; RIG_TRAP masked until traps are integrated)",
@@ -23,7 +23,7 @@
   "model_choice": {
     "default_mode": "scripted baseline until a trained policy passes Gate 2 (agents/versus_baseline.py, orch/preview)",
     "in_game_model": "Small PPO policy we train ourselves (decision #3, 2026-11-23): actor-critic MLP 2x64 tanh, masked softmax; pure-Python stdlib inference, argmax over allowed macros",
-    "weights": "plain JSON 'sm-ppo-mlp-1', loaded only with its recorded SHA-256 (agents/rl/policy.py:load_net). None yet: full training not started",
+    "weights": "plain JSON 'sm-ppo-mlp-1', loaded only with its recorded SHA-256 (agents/rl/policy.py:load_net). Run-1 weights shipped, SHA-256 80e4a110...ba4c",
     "training": "tools/rl/train.py, numpy, fixed seeds; full run needs Saad's approval",
     "legacy_llm_player": "agents/model_player.py with Claude Haiku 4.5 via POP_MODEL (midterm rival; not the G2/G3 rival). Paid calls capped under $1 total, smoke only (decision #8)",
     "development_assistants": "Claude Code: Production Orchestrator on claude-opus-5-5 (main session) and named workers on claude-sonnet-5-5; see agent_team"
@@ -60,7 +60,7 @@
   },
   "fallback": "Inference error or runner failure gives a labelled WAIT ('source': 'fallback'), counted per seat; a run over its fallback limit is reported as aborted, never dropped.",
   "limitations": [
-    "Untrained: no weights yet, so no strength claim is possible.",
+    "Run-1 weights shipped (SHA-256 80e4a110...ba4c); T09 did not show the improvement over the baseline at the pre-registered bar.",
     "Policy chooses when to act; the target is fixed to the nearest figure that is not downed.",
     "Only two tuning starts: expect over-fitting.",
     "In the static web build the full state lives in the browser, so devtools can read hidden state; acceptable for human vs AI, not for online human vs human.",

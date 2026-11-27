@@ -9,6 +9,26 @@ See [scope](docs/GAME_SPEC.md), [rule/source map](docs/RULE_SOURCE_MAP.md),
 and [agent team](AGENT-TEAM.md). Original artwork is not licensed by the source
 code license; see the provenance document for the stated terms and attribution.
 
+## Final project: Shadow Masque (G2/G3)
+
+The rest of this file is the midterm's audit quickstart. The final project, a
+two-rival versus game built on this engine, is documented in
+[`docs/final/`](docs/final/README.md): [GDD](docs/final/GDD.md),
+[Configuration](docs/final/CONFIGURATION.md), [scope lock (draft)](docs/final/SCOPE_LOCK.md),
+[tracker](docs/final/TRACKER.md), [playtest log](docs/final/playtest/LOG.md),
+and the agent team in [`docs/final/orchestration/`](docs/final/orchestration/README.md).
+Launch and replay (details in [`GAME_MODES.md`](docs/final/GAME_MODES.md),
+[`ONLINE_PLAY.md`](docs/final/ONLINE_PLAY.md), [`VERSUS_RUNNER.md`](docs/final/VERSUS_RUNNER.md)):
+
+```sh
+uv run --extra play python play.py                  # start menu: AI Model, Baseline, Human vs Human
+uv run --extra online python -m server               # online play on your LAN; prints the URL to share
+```
+
+Art and rights: [`docs/ASSET_PROVENANCE.md`](docs/ASSET_PROVENANCE.md) and
+[`docs/final/ART_PROVENANCE.md`](docs/final/ART_PROVENANCE.md). *Prince of
+Persia* is Ubisoft's franchise; the reference source's README grants no rights in it.
+
 ## Week 7 Pair Audit — 8-Minute Quickstart
 
 **Owner remains silent. Auditor copies the blocks in order.** Use macOS/Linux

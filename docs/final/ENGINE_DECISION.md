@@ -30,7 +30,7 @@ Godot is not installed on this machine.
 
 ## Why stay
 
-1. **Schedule.** G2+G3 is Mon 30 Nov, two weeks away, and the checkpoint is
+1. **Schedule.** G2+G3 is Mon 30 Nov *[Superseded 2026-11-26: Sat 2026-11-28, 11:59 p.m.]*, two weeks away, and the checkpoint is
    Mon 23 Nov. A port would spend most of that time rebuilding what works,
    before any new mechanic (sword, disguise, traps) exists. The Timeline and
    Genre/Mechanics risks in `PROJECT_PLAN.md` are already High/Medium.
