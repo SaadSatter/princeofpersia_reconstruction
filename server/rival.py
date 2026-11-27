@@ -81,4 +81,4 @@ class TimeLimitedRival:
         if done.wait(self.budget_s):
             return box[0] if box else None
         self.slow += 1
-        return None                                # WAIT; the late answer is dropped
+        return None        # no input this tick (counted in `slow`, labelled fallback); the late answer is dropped

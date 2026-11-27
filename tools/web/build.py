@@ -42,6 +42,7 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from agents import modes  # noqa: E402
 from render import webart  # noqa: E402
 
 WEB = ROOT / "web"
@@ -53,7 +54,10 @@ RENDER_MODULES = ("__init__.py", "anim.py", "genart.py", "versus_view.py", "draw
                   "webart.py")
 WEB_MODULES = ("__init__.py", "bridge.py")
 # The scripted rival the page plays against; stdlib only (tests/test_web_rival.py).
-AGENT_MODULES = ("__init__.py", "baseline.py", "macros.py", "versus_baseline.py")
+AGENT_MODULES = ("__init__.py", "baseline.py", "macros.py", "versus_baseline.py", "modes.py")
+# T22: the trained rival, stdlib inference and the shipped weights. The page loads them through
+# agents.modes / make_rl_rival, which refuses a file whose SHA-256 is not the shipped one.
+RL_FILES = ("__init__.py", "encoder.py", "policy.py", "weights/ppo-run-1.json")
 PAGE_FILES = ("main.js", "keys.js", "draw.js", "ui.js", "online.js")
 ZIP_TIME = (1980, 1, 1, 0, 0, 0)
 
@@ -70,6 +74,7 @@ def python_files() -> list[tuple[str, bytes]]:
     files += [(f"render/{n}", (ROOT / "render" / n).read_bytes()) for n in RENDER_MODULES]
     files += [(f"web/{n}", (WEB / n).read_bytes()) for n in WEB_MODULES]
     files += [(f"agents/{n}", (ROOT / "agents" / n).read_bytes()) for n in AGENT_MODULES]
+    files += [(f"agents/rl/{n}", (ROOT / "agents" / "rl" / n).read_bytes()) for n in RL_FILES]
     art = json.dumps(webart.art_meta(PACK), sort_keys=True, separators=(",", ":"))
     files.append(("web/art.json", art.encode()))
     return sorted(files)
@@ -132,6 +137,7 @@ def build(out: Path = DEFAULT_OUT) -> dict:
         p = out / name
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_bytes(data)
+    weights_sha = modes.verify_shipped()           # refuses to build around a wrong file
     sheets = sorted(n[len("art/"):-len(".png")] for n, _ in files if n.startswith("art/"))
     hashes = {n: hashlib.sha256(d).hexdigest() for n, d in sorted(files)}
     manifest = {
@@ -139,6 +145,8 @@ def build(out: Path = DEFAULT_OUT) -> dict:
         "files": hashes,
         "versions": v,
         "sheets": sheets,
+        "modes": modes.manifest_modes(),           # the one mode list both pages read (T22)
+        "weights_sha256": weights_sha,
     }
     (out / "manifest.json").write_text(json.dumps(manifest, indent=1, sort_keys=True) + "\n")
     return manifest

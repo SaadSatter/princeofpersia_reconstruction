@@ -184,23 +184,31 @@ class SeatControllerRival:
 
 
 NEUTRAL_LABEL = "Rival"
-RIVALS = ("baseline", "idle", "random")
+RIVALS = ("baseline", "idle", "random", "ai")
 
 
 def make_game(mode: str = "human_vs_ai", seat: str = "A", seed: int = 0,
-              rival: str = "baseline", neutral: bool = False) -> "WebGame":
-    """What the page calls (web/main.js). `rival` is baseline (default), idle or
-    random; anything else is the baseline. neutral shows the label "Rival"
-    for every kind (blind playtest sessions); it changes no play."""
+              rival: str = "baseline", neutral: bool = False, honest: bool = False) -> "WebGame":
+    """What the page calls (web/main.js). `rival` is ai (the shipped PPO rival, by hash; a
+    wrong hash raises), baseline (default), idle or random; anything else is the baseline.
+    neutral shows the label "Rival" for every kind (blind playtest sessions); it changes
+    no play. honest (T22, decision #88) labels the AI kinds "AI Model (trained)" and
+    "Baseline (scripted)" (agents/modes.py); "ai" is always labelled so."""
+    label = None
     if rival == "random":
         r = RandomRival(seed)
     elif rival == "idle":
         r = IdleRival()
+    elif rival == "ai" or (honest and rival == "baseline"):
+        from agents import modes                            # shipped in game.zip
+        r = modes.make_seat_rival("ai" if rival == "ai" else "baseline")
+        label = r.mode_label
     else:
         from agents.versus_baseline import make_baseline    # shipped in game.zip
         r = SeatControllerRival(make_baseline())
     g = WebGame(mode=mode, seed=seed, human_seat=seat, rival=r)
     g.neutral = bool(neutral)
+    g.rival_label = label
     return g
 
 
@@ -239,10 +247,12 @@ class WebGame:
         self.art = art if art is not None else load_art()
         self.episode = episode if episode is not None else arena_episode(seed)
         self.humans = SEATS if mode == "local_two_players" else (human_seat,)
+        self.released: list[str] = []
         self._keys: dict[str, bool] = {}
         self._caches = {seat: {} for seat in SEATS}
         self.display_tick = 0
         self.neutral = False                   # make_game: label the rival just "Rival"
+        self.rival_label: str | None = None    # make_game (T22): the honest mode label, if any
 
     # --- input --------------------------------------------------------------
     def press(self, keys: dict) -> dict:
@@ -270,6 +280,7 @@ class WebGame:
     # --- one frame ----------------------------------------------------------
     def tick(self) -> dict:
         ep = self.episode
+        self.released = []                           # T23-fix1: human seats released this tick (server trace)
         for seat in SEATS:                           # A then B, as play.py
             if seat in self.humans:
                 k = self._held(seat)
@@ -281,6 +292,9 @@ class WebGame:
                     act = "KICK"                     # attack in the air: dive kick
                 if act and act in legal:
                     ep.step(seat, act)
+                else:
+                    ep.release(seat)                 # T23 (#93): no key held, nothing queued
+                    self.released.append(seat)
             else:
                 act = self.rival(ep.observe(seat), ep.legal_actions(seat))
                 if act is not None:
@@ -316,5 +330,6 @@ class WebGame:
             return {"mode": self.mode, "label": LOCAL_LABEL, "seats": seats,
                     "outcome": {k: v for k, v in seats["A"]["outcome"].items() if k != "result"}}
         p = self._seat_payload(self.human_seat)
-        label = NEUTRAL_LABEL if self.neutral else getattr(self.rival, "label", "AI rival")
+        label = NEUTRAL_LABEL if self.neutral else (
+            self.rival_label or getattr(self.rival, "label", "AI rival"))
         return {"mode": self.mode, "seat": self.human_seat, "rival": label, **p}

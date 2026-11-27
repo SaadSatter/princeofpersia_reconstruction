@@ -13,6 +13,10 @@
   #outcome { font-size: 18px; color: #f0c040; min-height: 1.4em; }
   #label { color: #e08040; }
   .keys { color: #9a968c; font-size: 13px; }
+  #modes { margin: 8px 0; }
+  #modes a.mode { display: inline-block; margin-right: 12px; padding: 6px 12px; color: #d8d4c8;
+    background: #3a4256; text-decoration: none; box-shadow: inset 2px 2px 0 #8a93a8, inset -2px -2px 0 #1a1d28; }
+  #modes a.mode.current { color: #f0c040; outline: 2px solid #f0c040; }
   a { color: #a0b0ff; }
 </style>
 <!-- Versions are pinned in web/versions.json; tools/web/build.py fills these in. -->
@@ -25,6 +29,7 @@
 <body>
 <h1>Shadow Masque</h1>
 <div id="status" data-state="loading">loading</div>
+<div id="modes"></div>
 <div id="label"></div>
 <div id="rival"></div>
 <div id="game"></div>
@@ -33,10 +38,9 @@
 <div>frames: <span id="frames">0</span> · build <span id="build">?</span></div>
 <p class="keys" id="keys"></p>
 <p class="keys">
-  <a href="?mode=ai">Human vs AI (seat A)</a> ·
-  <a href="?mode=ai&amp;rival=idle">vs idle placeholder</a> ·
-  <a href="?mode=ai&amp;rival=random">vs random placeholder</a> ·
-  <a href="?mode=local">Local two-player test</a>
+  Test rivals: <a href="?mode=ai&amp;rival=idle">idle placeholder</a> ·
+  <a href="?mode=ai&amp;rival=random">random placeholder</a> ·
+  Two players on separate machines: <a href="online.html">online play</a>
 </p>
 <script src="main.js"></script>
 </body>

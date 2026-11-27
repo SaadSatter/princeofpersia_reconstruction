@@ -47,7 +47,8 @@ main.js   12 ticks per second              ->   WebGame.tick_json()
 
 | URL | Mode | Notes |
 | --- | --- | --- |
-| `index.html` or `?mode=ai` | Human vs AI, human on seat A (`&seat=B` for B) | The AI seat is the **scripted baseline** (`agents/versus_baseline.py`, `?rival=baseline`, the default), labelled "AI rival: versus-baseline (scripted)". `&rival=idle` (stands still) and `&rival=random` (random legal inputs) stay as labelled placeholders. The trained rival (T07) plugs into the same adapter |
+| `index.html`, `?play=ai`, `?play=baseline`, `?play=human` | The three modes (T22, #87, #88): buttons from the mode list in `manifest.json` (`modes`, written by the build from `agents/modes.py`). `?play=ai` is **AI Model (trained)**: the shipped PPO policy, loaded from `agents/rl/weights/ppo-run-1.json` inside `game.zip` through the same SHA-256 check as everywhere else (`manifest.json` `weights_sha256`). `?play=baseline` is **Baseline (scripted)**. The bare page opens on the mode chooser and starts nothing until a mode is picked (T22-fix1, #92). `?play=human` is the local two-player page below. A link to `online.html` is for two people on separate machines | 
+| `?mode=ai` | Human vs AI, human on seat A (`&seat=B` for B) | The AI seat is the **scripted baseline** (`agents/versus_baseline.py`, `?rival=baseline`, the default), labelled "Baseline (scripted)" (the page passes honest names, #88). `&rival=idle` (stands still) and `&rival=random` (random legal inputs) stay as labelled placeholders. The trained rival (T07) plugs into the same adapter |
 | `&label=neutral` | Neutral rival label | The page says only "Rival" for every kind of rival. Use it for blind playtest sessions. It changes no play |
 | `?mode=local` | Local two-player test | Both seats on one keyboard, two panels, like `play.py ARENA --versus`. **Both players see both panels**; the page says so. A test mode, not the online game |
 | `&seed=N` | Seed | Default 0 |
@@ -59,6 +60,11 @@ file's SHA-256) so a playtest log can name the exact build.
 Keys are `play.py --versus`'s: seat A WASD, F attack, G draw/sheathe,
 T take, left Shift; seat B arrows, `.`, `/`, `'`, right Shift
 (VERSUS_SPEC 2.3, OQ-7).
+
+Labels on the page, the HUD line and the end screen are the honest names, "AI Model
+(trained)" and "Baseline (scripted)" (#88); `&label=neutral` still shows only "Rival". A
+wrong or missing weights file stops the page's AI mode with an error, not a silent baseline.
+The bundle grows by the weights file (about 430 KB, before compression).
 
 ## Build and run locally
 

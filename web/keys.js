@@ -68,16 +68,33 @@
   // Page options from the query string:
   //   ?mode=local|ai&seat=A|B&seed=N&rival=baseline|idle|random&label=neutral
   // rival defaults to the scripted baseline; label=neutral shows the rival as
-  // just "Rival" (blind playtest sessions).
+  // just "Rival" (blind playtest sessions). T22: play=ai|baseline|human picks one of the three
+  // modes of the shared list (in manifest.json): ai = the trained rival,
+  // human = the local two-player page. The names shown are honest (decision #88).
   function parseOptions(search) {
     const q = new URLSearchParams(search || "");
-    const mode = q.get("mode") === "local" ? "local_two_players" : "human_vs_ai";
+    const play = q.get("play");
+    const mode = (q.get("mode") === "local" || play === "human") ? "local_two_players" : "human_vs_ai";
     const seat = q.get("seat") === "B" ? "B" : "A";
     const n = parseInt(q.get("seed") || "0", 10);
     const seed = Number.isFinite(n) && n >= 0 ? n : 0;
     const r = q.get("rival");
-    const rival = r === "random" || r === "idle" ? r : "baseline";
+    const rival = play === "ai" ? "ai" : (r === "random" || r === "idle" ? r : "baseline");
     return { mode: mode, seat: seat, seed: seed, rival: rival, neutral: q.get("label") === "neutral" };
+  }
+
+  // Decision #92: the page opens on the mode chooser unless the address already names a game
+  // (play=, mode=, rival=). Seed and seat alone do not choose a mode.
+  function needsChooser(search) {
+    const q = new URLSearchParams(search || "");
+    return !(q.has("play") || q.has("mode") || q.has("rival"));
+  }
+
+  // Which of the three modes (ids of manifest.modes) the page is playing, or null for a
+  // test placeholder rival. Used only to mark the current mode button.
+  function currentPlay(opts) {
+    if (opts.mode === "local_two_players") { return "human"; }
+    return opts.rival === "ai" || opts.rival === "baseline" ? opts.rival : null;
   }
 
   // The key hints for the seat actually played (text only; the keys themselves
@@ -89,16 +106,37 @@
   const HINT_B = "Arrow keys move (right Shift: careful step; up: jump), . attack " +
     "(with up: throw, with down: sweep; in the air: dive kick), / draw or sheathe, ' take a uniform.";
 
+  // Decision #98: with a drawn sword the stance key (down) does not kneel, so the hint says
+  // to sheathe first (G or /), or press T to take the uniform.
+  const KNEEL_TEXT = "kneel: sword or uniform (sheathe first if your sword is drawn).";
+  const KNEEL_A = " S " + KNEEL_TEXT;
+  const KNEEL_B = " Down " + KNEEL_TEXT;
+
   function keyHints(mode, seat) {
     if (mode === "local_two_players") {
-      return "Seat A: " + HINT_A + " Seat B: " + HINT_B + " R or Enter: rematch when the duel ends.";
+      return "Seat A: " + HINT_A + KNEEL_A + " Seat B: " + HINT_B + KNEEL_B +
+        " R or Enter: rematch when the duel ends.";
     }
-    return "You are seat " + seat + ". " + (seat === "B" ? HINT_B + EITHER_B : HINT_A + EITHER_A) +
+    return "You are seat " + seat + ". " +
+      (seat === "B" ? HINT_B + KNEEL_B + EITHER_B : HINT_A + KNEEL_A + EITHER_A) +
       " R or Enter: rematch when the duel ends.";
   }
 
+  // Decision #95: what the online lobby shows for a chosen mode (an id of manifest.modes, or
+  // null before a choice). AI Model and Baseline start a private match at once, with no Create
+  // or Join step and no room code on the page; Create / Join and the code belong to Human vs
+  // Human only.
+  function lobbyView(modeId) {
+    const human = modeId === "human";
+    return { startsAtOnce: modeId === "ai" || modeId === "baseline",
+             showCreateJoin: human, showCode: human };
+  }
+
   return Object.freeze({
+    lobbyView: lobbyView,
     keyHints: keyHints,
+    currentPlay: currentPlay,
+    needsChooser: needsChooser,
     CODE_TO_KEY: CODE_TO_KEY,
     gameKeys: gameKeys,
     keyName: keyName,

@@ -50,6 +50,7 @@ async def serve_forever(args) -> None:
     from tools.web import build
     from .app import OnlineServer
     from .match import Match
+    from . import modes as room_modes
     from .telemetry import Telemetry, _today
 
     trace_dir = Path(args.trace_dir) if args.trace_dir else None
@@ -57,8 +58,9 @@ async def serve_forever(args) -> None:
     build_info: dict = {}
     today = getattr(args, "today", None) or _today
 
-    def make_match(code: str) -> Match:
-        """One fresh `Match` per room; its trace file name carries the room's code."""
+    def make_match(code: str, mode: str | None = None) -> Match:
+        """One fresh `Match` per room; its trace file name carries the room's code. `mode`
+        (ai, baseline, human) is the creator's choice (T22); None is the server's `--rival`."""
         def write_trace(trace: dict) -> None:
             if trace["fallbacks"]:
                 print(f"Room {code}, AI seat B: {len(trace['fallbacks'])} fallback(s) this duel "
@@ -72,8 +74,9 @@ async def serve_forever(args) -> None:
 
         tele = (Telemetry(args.telemetry_dir, code, info=build_info, today=today)
                 if args.playtest else None)
-        return Match(seed=args.seed, rival=None if args.rival == "none" else args.rival,
-                     on_finish=write_trace, neutral=args.neutral, telemetry=tele)
+        rival = {"none": "human"}.get(args.rival, args.rival) if mode is None else mode
+        return room_modes.make_match(rival, seed=args.seed, on_finish=write_trace,
+                                     neutral=args.neutral, telemetry=tele)
 
     with tempfile.TemporaryDirectory() as site:
         manifest = build.build(Path(site))
@@ -98,10 +101,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--host", default="0.0.0.0")
     ap.add_argument("--port", type=int, default=8765)
     ap.add_argument("--seed", type=int, default=0)
-    ap.add_argument("--rival", choices=("none", "baseline"), default="none",
-                    help="baseline: the server plays seat B (one human can test alone)")
+    ap.add_argument("--rival", choices=("none", "baseline", "ai"), default="none",
+                    help="the default room: baseline or ai: the server plays seat B (one human "
+                         "can test alone). The room creator can pick any mode on the page.")
     ap.add_argument("--neutral", action="store_true",
-                    help="with --rival baseline, label the AI seat just \"Rival\" (blind playtests)")
+                    help="label the AI seat just \"Rival\" (blind playtests)")
     ap.add_argument("--trace-dir", default="traces/online",
                     help="where each finished duel's input trace is written (server only)")
     ap.add_argument("--playtest", action="store_true",
@@ -109,6 +113,13 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--telemetry-dir", default="traces/playtest",
                     help="where --playtest logs go (host only, git-ignored)")
     args = ap.parse_args(argv)
+    from agents import modes
+    from agents.rl.policy import WeightsError
+    try:
+        modes.verify_shipped()                  # the AI rooms need the weights: fail now, clearly
+    except WeightsError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        raise SystemExit(2)
     try:
         asyncio.run(serve_forever(args))
     except KeyboardInterrupt:

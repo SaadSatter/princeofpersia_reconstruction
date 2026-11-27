@@ -11,6 +11,11 @@
   #game canvas { image-rendering: pixelated; }
   #status, #hud, #outcome, #rival { margin: 4px 0; }
   #status[data-state="paused"], #status[data-state="error"] { color: #e08040; }
+  /* Decision #96: the loading / connecting screen fills the window and centres its text, so a
+     resize keeps it centred (viewport-relative, no script). */
+  #status[data-state="loading"] { position: fixed; top: 0; left: 0; right: 0; bottom: 0; inset: 0;
+    z-index: 10; display: flex; align-items: center; justify-content: center; text-align: center;
+    margin: 0; background: #0d0e12; color: #f0c040; font: bold 20px monospace; letter-spacing: 2px; }
   #outcome { font-size: 18px; color: #f0c040; min-height: 1.4em; }
   .keys { color: #9a968c; font-size: 13px; }
   /* The landing state reuses the game's stone button look from ui.js (.sm-rematch-btn). */
@@ -23,6 +28,7 @@
     box-shadow: 4px 0 0 #0d0e12, -4px 0 0 #0d0e12, 0 4px 0 #0d0e12, 0 -4px 0 #0d0e12,
       inset 4px 4px 0 #0d0e12, inset -4px -4px 0 #3a4256; }
   #code-input:focus { outline: 4px solid #f0c040; outline-offset: 4px; }
+  #mode-pick .sm-rematch-btn[aria-pressed="true"] { color: #fff; outline: 4px solid #f0c040; outline-offset: 4px; }
   #lobby-msg { color: #e08040; min-height: 1.4em; text-align: center; }
   #room { display: none; margin: 4px 0; }
   #room-code { font: bold 28px monospace; letter-spacing: 8px; color: #f0c040; }
@@ -37,11 +43,14 @@
 <h1>Shadow Masque</h1>
 <div id="status" data-state="loading">loading</div>
 <div id="lobby">
-  <button type="button" id="create-room" class="sm-rematch-btn">Create room</button>
-  <div class="or">or</div>
-  <input id="code-input" maxlength="4" autocomplete="off" autocapitalize="characters"
-         spellcheck="false" placeholder="CODE" aria-label="4-letter room code">
-  <button type="button" id="join-room" class="sm-rematch-btn">Join room</button>
+  <div id="mode-pick" role="group" aria-label="Game mode"></div>
+  <div id="human-lobby" style="display: none">
+    <button type="button" id="create-room" class="sm-rematch-btn">Create room</button>
+    <div class="or">or</div>
+    <input id="code-input" maxlength="4" autocomplete="off" autocapitalize="characters"
+           spellcheck="false" placeholder="CODE" aria-label="4-letter room code">
+    <button type="button" id="join-room" class="sm-rematch-btn">Join room</button>
+  </div>
   <div id="lobby-msg"></div>
 </div>
 <div id="room">Room code <span id="room-code"></span> (read it out to your rival)</div>

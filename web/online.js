@@ -13,6 +13,7 @@
   const RETRY_MS = 1000;
   const TOKEN_KEY = "sm-seat-token"; // sessionStorage: one seat per tab
   const CODE_KEY = "sm-room-code";   // sessionStorage: the room that seat belongs to
+  const MODE_KEY = "sm-room-mode";   // sessionStorage: the mode of that room (a refresh keeps the code hidden in AI rooms)
 
   // Decision #55: either control set steers the player's own seat; the server accepts
   // the same 16 names (web/bridge.py ALL_KEY_NAMES) and renames them into the seat's set.
@@ -40,6 +41,10 @@
   let latest = null;
   let stopped = false;
   let everJoined = false;
+  let chosenMode = null; // one of manifest.modes: picked on the landing state
+  let roomMode = null; // the mode of the room this tab is in (decides whether its code is shown)
+  let starting = false; // a one-click AI or Baseline start is on its way: ignore a second click
+  const humanLobbyEl = document.getElementById("human-lobby");
   let firstMsg = null; // what to send when a socket opens: create, or join with a typed code
 
   const rematchButton = SMUi.createRematch(document, document.body, function () {
@@ -62,12 +67,21 @@
     try { return sessionStorage.getItem(key); } catch (e) { return null; }
   }
 
-  // The landing state: Create room, or Join room with a 4-letter code.
+  // Decision #95: Create room / Join room (and the code) are for the human mode only; the
+  // AI modes start a private match with one click on their button.
+  function applyLobbyView() {
+    humanLobbyEl.style.display = SMKeys.lobbyView(chosenMode).showCreateJoin ? "block" : "none";
+  }
+
+  // The landing state: pick a mode (the AI modes start at once; the human mode then offers
+  // Create room, or Join room with a 4-letter code).
   function showLobby(message) {
+    starting = false;
     lobbyEl.style.display = "block";
     roomEl.style.display = "none";
+    applyLobbyView();
     lobbyMsgEl.textContent = message || "";
-    setStatus(message ? "" : "Create a room or join one", "ready");
+    setStatus(message ? "" : "Pick a game mode", "ready");
     outcomeEl.textContent = "";
     hudEl.textContent = "";
     rematchButton.update(SMUi.rematchView(null, "none"));
@@ -75,13 +89,21 @@
 
   function enterRoom(code) {
     lobbyEl.style.display = "none";
-    roomEl.style.display = "block";
-    roomCodeEl.textContent = code;
+    starting = false;
+    if (SMKeys.lobbyView(roomMode).showCode) {
+      roomEl.style.display = "block";
+      roomCodeEl.textContent = code;
+    } else {
+      roomEl.style.display = "none";           // a private AI match: no code on the page
+      roomCodeEl.textContent = "";
+    }
   }
 
   function leaveRoom(message) {
     store(TOKEN_KEY, null);
     store(CODE_KEY, null);
+    store(MODE_KEY, null);
+    roomMode = null;
     everJoined = false;
     seat = null;
     latest = null;
@@ -137,7 +159,8 @@
     rivalEl.textContent = p.rival || "Rival";
     if (p.outcome.status === "terminal") {
       const why = END_REASONS[p.outcome.reason] || p.outcome.reason;
-      outcomeEl.textContent = (END_WORDS[p.outcome.result] || p.outcome.result) + " (" + why + ")";
+      const vs = p.rival ? " vs " + p.rival : "";     // the honest mode name (#88)
+      outcomeEl.textContent = (END_WORDS[p.outcome.result] || p.outcome.result) + vs + " (" + why + ")";
     } else {
       outcomeEl.textContent = "";
     }
@@ -161,6 +184,7 @@
       store(TOKEN_KEY, msg.token);
       if (msg.code) {
         store(CODE_KEY, msg.code);
+        store(MODE_KEY, roomMode);
         enterRoom(msg.code);
       }
       keysEl.textContent = SMKeys.keyHints("human_vs_ai", seat);
@@ -226,6 +250,7 @@
   // Ask for a room. An open socket is reused (the server allows a few tries a minute).
   function begin(msg) {
     firstMsg = msg;
+    roomMode = msg.create === true ? chosenMode : "human";   // a typed code is always a human room
     lobbyMsgEl.textContent = "";
     if (ws !== null && ws.readyState === WebSocket.OPEN) {
       send(msg);
@@ -235,12 +260,46 @@
     }
   }
 
+  // The mode list from manifest.json (the shared mode list). Decision #95: a click on an AI
+  // mode starts a private match at once (the server makes a room for this client only); the
+  // human mode shows Create room / Join room and waits for a second player.
+  function showModePicker(list) {
+    const box = document.getElementById("mode-pick");
+    function mark() {
+      Array.prototype.forEach.call(box.children, function (b) {
+        b.setAttribute("aria-pressed", String(b.dataset.mode === chosenMode));
+      });
+    }
+    list.forEach(function (m) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "sm-rematch-btn";
+      b.dataset.mode = m.id;
+      b.textContent = m.label;
+      b.addEventListener("click", function () {
+        if (starting || seat !== null) { return; }
+        chosenMode = m.id;
+        mark();
+        applyLobbyView();
+        lobbyMsgEl.textContent = "";
+        if (SMKeys.lobbyView(chosenMode).startsAtOnce) {
+          starting = true;
+          begin({ type: "join", create: true, mode: chosenMode });
+        }
+      });
+      box.appendChild(b);
+    });
+    mark();
+  }
+
   async function main() {
     const manifest = await (await fetch("manifest.json")).json();
     buildEl.textContent = manifest.build;
     keysEl.textContent = SMKeys.keyHints("human_vs_ai", "A");
+    showModePicker(manifest.modes);
     createBtn.addEventListener("click", function () {
-      begin({ type: "join", create: true });
+      if (chosenMode !== "human") { return; }
+      begin({ type: "join", create: true, mode: chosenMode });
     });
     joinBtn.addEventListener("click", function () {
       const code = codeInput.value.trim();
@@ -272,6 +331,7 @@
             show(latest);
           }
           if (load(TOKEN_KEY) && load(CODE_KEY)) {
+            roomMode = load(MODE_KEY);
             setStatus("Connecting", "loading");
             connect(); // a refreshed tab rejoins its room and seat
           }

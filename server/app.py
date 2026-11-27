@@ -28,7 +28,10 @@ from urllib.parse import urlsplit
 
 from websockets.asyncio.server import serve
 from websockets.datastructures import Headers
+from websockets.exceptions import InvalidMessage
 from websockets.http11 import Response
+
+from agents.modes import MODE_IDS
 
 from .match import TICK_S, Match
 from .rooms import (MAX_FAILED_JOINS, MAX_ROOMS, FailedJoins, Room, RoomFactory,
@@ -46,9 +49,32 @@ LOBBY_IDLE_S = 60.0          # a client choosing Create or Join may think this l
 ERROR_TEXT = {"full": "That room is full", "bad_token": "That seat token is not valid.",
               "no_room": "No room with that code", "expired": "That room has expired",
               "rate_limited": "Too many tries. Wait a minute.", "busy": "The server is full. Try later.",
-              "no_rooms": "This server has no rooms."}
+              "no_rooms": "This server has no rooms.", "bad_mode": "That game mode is not offered."}
 INDEX = "online.html"
 ONLINE_FILES = frozenset({"online.html", "online.js", "keys.js", "draw.js", "ui.js"})
+
+
+class QuietUnusedConnections(logging.Filter):
+    """Decision #97: browsers open spare sockets and close them without a request, and the
+    library logs each as an ERROR "opening handshake failed" with a traceback. Rewrite only
+    those (a closed or empty connection) to one short INFO line. Any other handshake failure,
+    such as a bug in `_http`, keeps its level and traceback."""
+
+    BENIGN = (EOFError, ConnectionError, asyncio.TimeoutError, InvalidMessage)
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        if record.getMessage() == "opening handshake failed" and record.exc_info:
+            exc = record.exc_info[1]
+            cause = exc.__cause__ if exc is not None else None
+            if isinstance(exc, self.BENIGN) and (cause is None or isinstance(cause, self.BENIGN)):
+                record.levelno, record.levelname = logging.INFO, "INFO"
+                record.msg, record.args = "unused browser connection closed before a request", None
+                record.exc_info = record.exc_text = None
+        return True
+
+
+_ws_logger = logging.getLogger("server.ws")
+_ws_logger.addFilter(QuietUnusedConnections())
 
 
 def hello_message(seat: str, token: str, rival: str | None, code: str | None = None) -> dict:
@@ -163,7 +189,7 @@ class OnlineServer:
     async def start(self, host: str, port: int):
         return await serve(self.handler, host, port, process_request=self._http,
                            ping_interval=self.ping_interval, ping_timeout=self.ping_timeout,
-                           close_timeout=self.close_timeout)
+                           close_timeout=self.close_timeout, logger=_ws_logger)
 
     def _http(self, connection, request):
         if request.headers.get("Upgrade", "").lower() == "websocket":
@@ -268,7 +294,7 @@ class OnlineServer:
                 if fails.blocked(now):
                     await self._refuse(ws, "rate_limited")
                     return None
-                room, res = (self._create(now) if kind == "create"
+                room, res = (self._create(now, msg.get("mode")) if kind == "create"
                              else self._join_code(msg, now))
                 if not res["ok"]:
                     if kind == "join":
@@ -278,16 +304,20 @@ class OnlineServer:
                     continue
             return await self._seat_up(room, ws, res)
 
-    def _create(self, now: float) -> tuple[Room | None, dict]:
+    def _create(self, now: float, mode: object = None) -> tuple[Room | None, dict]:
+        """`mode` (T22): ai, baseline or human, chosen by the creator; absent keeps the
+        server's own default. The factory is asked for it only when one was sent."""
         if self.match_factory is None:
             return None, {"ok": False, "code": "no_rooms"}
+        if mode is not None and mode not in MODE_IDS:
+            return None, {"ok": False, "code": "bad_mode"}
         self._reap(now)
         if len(self.rooms) >= self.max_rooms:
             return None, {"ok": False, "code": "busy"}
         code = self.code_factory()
         while code in self.rooms:                    # a code is reused only after its room expired
             code = self.code_factory()
-        match = self.match_factory(code)
+        match = self.match_factory(code) if mode is None else self.match_factory(code, mode)
         room = self.rooms[code] = Room(code, match, created=now, second_joined=match.rival is not None)
         return room, match.join(None, now)           # the creator takes seat A
 
