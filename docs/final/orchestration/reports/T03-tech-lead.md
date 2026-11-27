@@ -77,3 +77,12 @@ Next: QA Gate 1 (snapshot contents, asset rule, template preserved, links), then
 
 ## Student decision required
 Saad: (1) the six `other-roles.md` lines, then `render`; (2) approve or edit `agent-team/roles/tech.md` and `qa.md`; (3) write the Student decision in `agent-team/handoffs/2026-11-24-qa-eval-to-tech-T18.md`; (4) merge PR #2 or not.
+
+## Update after decision #120 (main 7c4fc1d)
+Saad wrote his Student decision in `handoff-drafts/2026-11-24-qa-to-tech.md` at 7c4fc1d. On official `g23-migration`, new head **a417057ea176860ad4f5c6ce26fb13b193d57e33**:
+- Copied that file byte for byte (`cmp` identical, no "Draft" paragraph) to `agent-team/handoffs/2026-11-24-qa-to-tech.md`, the graded handoff.
+- Refreshed the `game/` copies of that draft and of `DECISIONS-2026-11-26.md` from 7c4fc1d.
+- The T18 handoff stays as copied, Student decision empty.
+- `python3 -m team validate`: only the G4 floor warning (`agents=2 origin_notes=0`). `render --today from-team-json` regenerated `board.html` and `team.json`, committed; a second render shows no drift.
+- `other-roles.md` unchanged: placeholders for Saad.
+- The repository is now `SaadSatter/shadow_masque`; the snapshot content is otherwise still fe21de1 (not re-archived). Official CI on PR #2 still had no result when last checked (run queued).
