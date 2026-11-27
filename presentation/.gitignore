@@ -1,0 +1,2 @@
+# Track the one reconstructed clip (the repository ignores *.mp4 elsewhere).
+!out/xgjt-001-segment.mp4
