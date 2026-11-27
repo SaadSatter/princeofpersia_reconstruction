@@ -73,3 +73,30 @@ Saad's message, quoted verbatim (his own words; the coverage-map lines go into `
 | 121 | Coverage map (the six lines above) | `agent-team/other-roles.md` on `g23-migration` gets Saad's lines verbatim; render + validate |
 | 122 | Tech Lead and QA course roles approved; QA never modifies production game code | `agent-team/roles/qa.md` `permissions.writes` states the limit explicitly; render + validate |
 | — | SCOPE_LOCK.md | Shown to Saad; not yet approved |
+
+## Scope lock refresh (session c612c020, 2026-11-27)
+
+Saad's message, quoted verbatim:
+
+> Yes, proceed with the documentation refresh and have QA independently review it.
+>
+> For the scope lock:
+>
+> - Update the stale CI, three-mode menu, hosted page and T23-fix1 references to reflect their current status.
+> - Keep the external playtest marked as pending until I conduct it.
+> - LAN-based online multiplayer is sufficient for the current gate. A public multiplayer server is not required.
+> - Do not categorically exclude PPO retraining, AI trap usage, movement adjustments or other gameplay improvements. Defer them for now, but allow reconsideration based on external playtest findings and evaluation evidence, subject to my approval.
+> - Do not exclude a formal telemetry analyst or BI agent. This remains a potential third production role for G4.
+> - Preserve the actual PPO evaluation result and its NOT SUPPORTED conclusion. Do not change the success threshold retrospectively.
+> - Preserve the distinction between the hosted frontend and the LAN multiplayer server.
+>
+> The current playable build should be our scope baseline, but I want to retain the ability to make evidence-driven improvements before Gold.
+>
+> Once QA has reviewed the refreshed document, show it to me for final approval before copying it into PR #2.
+>
+> The coverage map formatting is acceptable. Do not modify the course's tooling just to display my explanations in the generated map.
+
+| # | Decision | Effect |
+|---|---|---|
+| 123 | Scope lock refresh rules (above) | Task T30 (tech-lead → qa → Gate 3 → shown to Saad → PR to `main` and copy into official PR #2 only after his approval) |
+| 124 | Coverage-map formatting accepted; course tooling not modified | No change to `team/` |
